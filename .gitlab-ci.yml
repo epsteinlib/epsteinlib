@@ -1,0 +1,96 @@
+# SPDX-FileCopyrightText: 2024 Jan Schmitz <schmitz@num.uni-sb.de>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+build:
+  stage: build
+  script:
+    - nix build
+  tags:
+    - nix
+  dependencies: []
+
+build-dbg:
+  stage: build
+  script:
+    - nix build .#epsteinlib_dbg
+  tags:
+    - nix
+  dependencies: []
+
+build-manually:
+  stage: build
+  image:
+    name: alpine:latest
+    pull_policy: [always, if-not-present]
+  before_script:
+    - apk update
+    - apk add build-base pkgconf meson lapack-dev
+  script:
+    - meson setup build -Dbuildtype=release
+    - meson compile -C build
+  artifacts:
+    name: 'build_files'
+    expose_as: 'build_files'
+    paths:
+      - build/
+  dependencies: []
+
+build-docs:
+  stage: build
+  script:
+    - nix develop -c doxygen
+  tags:
+    - nix
+  artifacts:
+    name: 'docs'
+    expose_as: 'Documentation'
+    paths:
+      - html/
+  dependencies: []
+
+flake-check:
+  stage: test
+  script:
+    - nix flake check
+  tags:
+    - nix
+  dependencies: []
+
+run:
+  stage: test
+  script:
+    - nix run
+  timeout: 2m
+  tags:
+    - nix
+  dependencies: []
+
+run-dbg:
+  stage: test
+  script:
+    - nix run .#epsteinlib_dbg
+  timeout: 2m
+  tags:
+    - nix
+  dependencies: []
+
+pre-commit:
+  stage: test
+  script:
+    - nix develop -c pre-commit run -a
+  needs: []
+  tags:
+    - nix
+  dependencies: []
+
+meson-test:
+  stage: test
+  before_script:
+    - apk update
+    - apk add build-base meson lapack-dev
+  script:
+    - meson test -C build
+  needs:
+    - job: build-manually
+      artifacts: true
