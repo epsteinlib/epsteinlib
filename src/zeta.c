@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2024 Andreas Buchheit <buchheit@num.uni-sb.de>
 // SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan.busse@dlr.de>
-// SPDX-FileCopyrightText: 2024 Ruben Gutendorf <ruben.gutendorf@uni-saarland.de>
+// SPDX-FileCopyrightText: 2024 Ruben Gutendorf
+// <ruben.gutendorf@uni-saarland.de>
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
@@ -283,6 +284,7 @@ double complex __epsteinZeta(double nu, int dim, double *m, double *x, double *y
             rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
             s2 = sum_fourier(nu, dim, lambda, m_fourier, x_t1, y_t2, cutoffsFourier,
                              zArgBound);
+            // correct wrong zero summand in regularized fourier sum.
             if (!equals(dim, y_t1, y_t2)) {
                 s2 += crandall_g(dim, dim - nu, y_t2, lambda, zArgBound) *
                           cexp(-2 * M_PI * I * dot(dim, x_t1, y_t2)) -

@@ -31,6 +31,25 @@ double complex epsteinZeta(double nu, int dim, double *A, double *x, double *y);
 ```
 and evalutates to full precision over the whole parameter range for $\nu \in (-10,10)$.
 
+In addition, this library includes the regularized Epstein zeta function, which is analytic around $y=0$, and is defined via 
+$$
+Z_{\Lambda,\nu}^{\mathrm{reg}}\begin{vmatrix} x \\ y \end{vmatrix} =
+e^{2\pi i x\cdot y}
+Z_{\Lambda,\nu}\left|\begin{aligned} x \\ y \end{aligned}\right| 
+-\frac{\hat{s}(y)}{V_{\Lambda}},
+$$
+where $V_{\Lambda}=|\det A|$ is the volume of the elementary lattice cell, 
+$$
+\hat{s}(y)=-\pi^{\nu-\frac{d}{2}}
+	\frac{\Gamma((d-\nu)/2)}{\Gamma(\nu/2)}|y|^{\nu-d}
+$$
+is the distributional Fourier transform of $\vert z \vert^{-\nu}$, where $\Gamma$ denotes the gamma function.
+
+In this library, the regularized Epstein zeta function is included as
+```c
+double complex epsteinZetaReg(double nu, int dim, double *A, double *x, double *y);
+```
+
 ## Installation with meson
 
 
@@ -42,7 +61,7 @@ pacman -S meson ninja pkgconf lapacke
 # MacOS
 brew install meson ninja pkg-config lapack
 ```
-2. `cd <path/to/repo>;
+2. `cd <path/to/repo>`
 3. `meson setup build`
 4. `meson compile -C build`
 5. To test the library, run `meson test -C build`
@@ -71,13 +90,11 @@ mv build/src/libepsteinZeta.so /your/path/to/library
 7. To test your library, try to compile `test/lattice_sum.c` with the command `gcc -o lattice_sum lattice_sum.c -lm -L/your/path/to/library -lepsteinZeta -I/your/path/to/include`.
 
 ## View api documentation
-```bash
-# Generate documentation
-doxygen
 
-# Open in browser
-xdg-open html/index.html
-```
+1. install [doxygen](https://www.doxygen.nl/manual/install.html)
+2. `cd <path/to/repo>`
+3. `doxygen`
+4. open `html/index.html` in browser
 
 ## Usage
 

@@ -1,6 +1,5 @@
-// SPDX-FileCopyrightText: 2024 Andreas Buchheit <buchheit@num.uni-sb.de>
-// SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan.busse@dlr.de>
-// SPDX-FileCopyrightText: 2024 Ruben Gutendorf <ruben.gutendorf@uni-saarland.de>
+// SPDX-FileCopyrightText: 2024 Ruben Gutendorf
+// <ruben.gutendorf@uni-saarland.de>
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
@@ -13,7 +12,8 @@ regularized lower incomplete gamma function for evaluations of Crandall's
 formula.
  * @see Walter Gautschi. “A Computational Procedure for
 Incomplete Gamma Func-257 tions”. In: ACM Trans. Math. Softw. 5 (1979), pp.
-466–481
+466–481 for basic principles
+ * some improvements were made to increase accuracy
  */
 
 #include "gamma.h"
@@ -60,6 +60,29 @@ enum dom egf_domain(double a, double x) {
     return pt;
 }
 
+enum dom egf_ldomain(double a, double x) {
+    double alpha;
+    if (x >= 0.5)
+        alpha = x;
+    else
+        alpha = log(0.5) / log(0.5 * x);
+    if (a <= alpha) {
+        if (x <= 1.5 && (a >= -0.5 || (a >= -0.75 && x <= ldexp(2, -15))))
+            return pt;
+        else if (x <= 1.5)
+            return rek;
+        else if (a >= 12 && a >= x / 2.35)
+            return ua;
+        else
+            return cf;
+    } else {
+        if (a >= 12 && x >= 0.3 * a)
+            return ua;
+        else
+            return pt;
+    }
+}
+
 /**
  * @brief calculate upper gamma function with the recursion formula.
  * @param a: exponent of the upper incomplete gamma function.
@@ -87,7 +110,7 @@ double egf_pt(double a, double x) {
 double egf_pt_reg(double a, double x) {
     double s = 1. / tgamma(a + 1);
     double r = s;
-    for (int n = 1; n <= 1000 && s / r >= EGF_EPS; n++) {
+    for (int n = 1; n <= 40 /*&& s / r >= EGF_EPS*/; n++) {
         s *= x / (a + n);
         r += s;
     }
@@ -283,9 +306,12 @@ double egf_ugamma(double a, double x) {
 double egf_gammaStar(double a, double x) {
     double r = NAN;
     if (fabs(x) < EGF_EPS) {
-        return 0;
+        if (a <= 0.1 && fabs(a - nearbyint(a)) < EGF_EPS)
+            return 0;
+        else
+            return 1. / tgamma(a + 1);
     }
-    enum dom g = egf_domain(a, x);
+    enum dom g = egf_ldomain(a, x);
     switch (g) {
     case pt:
         r = egf_pt_reg(a, x);
@@ -300,8 +326,6 @@ double egf_gammaStar(double a, double x) {
             r = (1 - egf_cf(a, x) / tgamma(a)) * pow(x, -a);
         }
         break;
-
-        break;
     case ua:
         r = (1 - egf_ua(a, x)) * pow(x, -a);
         break;
@@ -309,7 +333,7 @@ double egf_gammaStar(double a, double x) {
         if (a <= 0.1 && fabs(a - nearbyint(a)) < EGF_EPS) {
             r = pow(x, -a);
         } else {
-            r = pow(x, -a) - exp(-x) * egf_rek(a, x) / tgamma(a);
+            r = (1. - exp(-x) * pow(x, a) * egf_rek(a, x) / tgamma(a)) * pow(x, -a);
         }
         break;
     }
