@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2024 Andreas Buchheit <buchheit@num.uni-sb.de>
 // SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan.busse@dlr.de>
-// SPDX-FileCopyrightText: 2024 Ruben Gutendorf <ruben.gutendorf@uni-saarland.de>
+// SPDX-FileCopyrightText: 2024 Ruben Gutendorf
+// <ruben.gutendorf@uni-saarland.de>
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
@@ -86,6 +87,7 @@ double complex crandall_g(int dim, double nu, double *z, double prefactor,
                           double zArgBound) {
     double zArgument = dot(dim, z, z);
     zArgument *= M_PI * prefactor * prefactor;
+
     if (zArgument < ldexp(1, -62)) {
         return -2. / nu;
     }
