@@ -32,7 +32,7 @@
 /*!
  * @brief epsilon for the cutoff around nu = dimension.
  */
-#define EPS ldexp(1,-30)
+#define EPS ldexp(1, -30)
 
 /**
  * @brief calculates the first sum in Crandall's formula.
@@ -49,8 +49,8 @@
  * x, y are in the elementary lattice cells. Multiply with exp(2 * Pi * I * x *
  * y) otherwise.
  */
-double complex sum_real(double nu, short dim, double lambda, double *m,
-                        double *x, double *y, int cutoffs[], double zArgBound) {
+double complex sum_real(double nu, short dim, double lambda, double *m, double *x,
+                        double *y, int cutoffs[], double zArgBound) {
     // 1. Transform: Compute determinant and fourier transformed matrix,
     // scale both of them
     int *zv = malloc(dim * sizeof(int));       // counting vector in Z^dim
@@ -95,9 +95,8 @@ double complex sum_real(double nu, short dim, double lambda, double *m,
  * x, y are in the elementary lattice cells. Multiply with exp(2 * Pi * I * x *
  * y) otherwise. Add the zero summand in the regularization case.
  */
-double complex sum_fourier(double nu, short dim, double lambda, double *m,
-                           double *x, double *y, int cutoffs[],
-                           double zArgBound) {
+double complex sum_fourier(double nu, short dim, double lambda, double *m, double *x,
+                           double *y, int cutoffs[], double zArgBound) {
     int *zv = malloc(dim * sizeof(int));       // counting vector in Z^dim
     double *lv = malloc(dim * sizeof(double)); // lattice vector
     double complex s2 = 0;
@@ -185,8 +184,8 @@ double *vectorProj(short dim, double *m, double *m_invt, double *v) {
  * @param regBool: 0 for no regularization, > 0 for the regularization.
  * @return function value of the regularized Epstein zeta.
  */
-double complex __epsteinZeta(double nu, int dim, double *m, double *x,
-                             double *y, double lambda, int reg) {
+double complex __epsteinZeta(double nu, int dim, double *m, double *x, double *y,
+                             double lambda, int reg) {
     // 1. Transform: Compute determinant and fourier transformed matrix, scale
     // both of them
     double *m_fourier = malloc(dim * dim * sizeof(double));
@@ -246,10 +245,8 @@ double complex __epsteinZeta(double nu, int dim, double *m, double *x,
         double ev_abs_min = fabs(m_ev[0]);
         double ev_abs_max = fabs(m_ev[0]);
         for (int k = 1; k < dim; k++) {
-            ev_abs_min =
-                (fabs(m_ev[k]) < ev_abs_min) ? fabs(m_ev[k]) : ev_abs_min;
-            ev_abs_max =
-                (fabs(m_ev[k]) > ev_abs_max) ? fabs(m_ev[k]) : ev_abs_max;
+            ev_abs_min = (fabs(m_ev[k]) < ev_abs_min) ? fabs(m_ev[k]) : ev_abs_min;
+            ev_abs_max = (fabs(m_ev[k]) > ev_abs_max) ? fabs(m_ev[k]) : ev_abs_max;
         }
         for (int k = 0; k < dim; k++) {
             cutoffsReal[k] = floor(cutoff_id / ev_abs_min);
@@ -284,8 +281,8 @@ double complex __epsteinZeta(double nu, int dim, double *m, double *x,
             // calculate regularized Epstein Zeta function values.
             nc = crandall_gReg(dim, dim - nu, y_t1, lambda);
             rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
-            s2 = sum_fourier(nu, dim, lambda, m_fourier, x_t1, y_t2,
-                             cutoffsFourier, zArgBound);
+            s2 = sum_fourier(nu, dim, lambda, m_fourier, x_t1, y_t2, cutoffsFourier,
+                             zArgBound);
             if (!equals(dim, y_t1, y_t2)) {
                 s2 += crandall_g(dim, dim - nu, y_t2, lambda, zArgBound) *
                           cexp(-2 * M_PI * I * dot(dim, x_t1, y_t2)) -
@@ -303,12 +300,12 @@ double complex __epsteinZeta(double nu, int dim, double *m, double *x,
                  cexp(-2 * M_PI * I * dot(dim, x_t2, y_t2));
             s1 = sum_real(nu, dim, lambda, m_real, x_t2, y_t2, cutoffsReal,
                           zArgBound);
-            s2 = sum_fourier(nu, dim, lambda, m_fourier, x_t2, y_t2,
-                             cutoffsFourier, zArgBound) +
+            s2 = sum_fourier(nu, dim, lambda, m_fourier, x_t2, y_t2, cutoffsFourier,
+                             zArgBound) +
                  nc;
         }
-        res = xfactor * pow(lambda * lambda / M_PI, -nu / 2.) /
-              tgamma(nu / 2.) * (s1 + pow(lambda, dim) * s2);
+        res = xfactor * pow(lambda * lambda / M_PI, -nu / 2.) / tgamma(nu / 2.) *
+              (s1 + pow(lambda, dim) * s2);
     }
     free(x_t1);
     free(y_t1);

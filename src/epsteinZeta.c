@@ -29,7 +29,6 @@
  * @param y: y vector of the Epstein Zeta function.
  * @return function value of the Epstein zeta.
  */
-double complex epsteinZeta(double nu, int dim, double *a, double *x,
-                           double *y) {
+double complex epsteinZeta(double nu, int dim, double *a, double *x, double *y) {
     return __epsteinZeta(nu, dim, a, x, y, 1, false);
 }

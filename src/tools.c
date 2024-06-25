@@ -24,10 +24,11 @@
  * @param v2: second vector.
  * @return dot product of v1 and v2.
  */
-double dot(int dim, double *v1, double *v2) {
+double dot(int dim, const double *v1, const double *v2) {
     double r = 0;
-    for (int i = 0; i < dim; i++)
+    for (int i = 0; i < dim; i++) {
         r += v1[i] * v2[i];
+    }
     return r;
 }
 
@@ -38,13 +39,13 @@ double dot(int dim, double *v1, double *v2) {
  * @param v: integer vector.
  * @param res: solution vector of the vector matrix multiplication.
  */
-void matrix_intVector(int dim, double *m, int *v, double *res) {
+void matrix_intVector(int dim, const double *m, const int *v, double *res) {
     for (int i = 0; i < dim; i++) {
         res[i] = 0;
-        for (int j = 0; j < dim; j++)
+        for (int j = 0; j < dim; j++) {
             res[i] += m[i * dim + j] * v[j];
+        }
     }
-    return;
 }
 
 /**
@@ -72,8 +73,9 @@ void transpose(int dim, double *m) {
  */
 bool equals(int dim, double *v1, double *v2) {
     bool eq = true;
-    for (int i = 0; i < dim && eq; i++)
+    for (int i = 0; i < dim && eq; i++) {
         eq = eq && fabs(v1[i] - v2[i]) < EPS;
+    }
     return eq;
 }
 
@@ -85,8 +87,9 @@ bool equals(int dim, double *v1, double *v2) {
  */
 bool equalsZero(int dim, double *v) {
     bool eq = true;
-    for (int i = 0; i < dim && eq; i++)
+    for (int i = 0; i < dim && eq; i++) {
         eq = eq && fabs(v[i]) < EPS;
+    }
     return eq;
 }
 #undef EPS
