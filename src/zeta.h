@@ -24,6 +24,6 @@
  * @param regBool: 0 for no regularization, > 0 for the regularization.
  * @return function value of the regularized Epstein zeta.
  */
-double complex __epsteinZeta(double nu, int dim, double *m, double *x,
-                             double *y, double lambda, int regBool);
+double complex __epsteinZeta(double nu, int dim, double *m, double *x, double *y,
+                             double lambda, int regBool);
 #endif

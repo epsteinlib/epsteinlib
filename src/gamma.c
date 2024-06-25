@@ -18,7 +18,6 @@ Incomplete Gamma Func-257 tions”. In: ACM Trans. Math. Softw. 5 (1979), pp.
 
 #include "gamma.h"
 #include <math.h>
-#include <stdlib.h>
 
 /*!
  * @brief epsilon for cutoff around integers.
@@ -38,25 +37,27 @@ enum dom { pt, qt, cf, ua, rek };
  */
 enum dom egf_domain(double a, double x) {
     double alpha;
-    if (x >= 0.5)
+    if (x >= 0.5) {
         alpha = x;
-    else
-        alpha = log(0.5) / log(0.5 * x);
-    if (a <= alpha) {
-        if (x <= 1.5 && a >= -0.5)
-            return qt;
-        else if (x <= 1.5)
-            return rek;
-        else if (a >= 12 && a >= x / 2.35)
-            return ua;
-        else
-            return cf;
     } else {
-        if (a >= 12 && x >= 0.3 * a)
-            return ua;
-        else
-            return pt;
+        alpha = log(0.5) / log(0.5 * x);
     }
+    if (a <= alpha) {
+        if (x <= 1.5 && a >= -0.5) {
+            return qt;
+        }
+        if (x <= 1.5) {
+            return rek;
+        }
+        if (a >= 12 && a >= x / 2.35) {
+            return ua;
+        }
+        return cf;
+    }
+    if (a >= 12 && x >= 0.3 * a) {
+        return ua;
+    }
+    return pt;
 }
 
 /**
@@ -100,18 +101,17 @@ double egf_pt_reg(double a, double x) {
  * @return function value of the upper incomplete gamma function.
  */
 double egf_qt(double a, double x) {
-    double taylor[21] = {
-        -0.57721566490153286061,    0.078662406618721020471,
-        0.120665041652816256,       -0.045873569729475233502,
-        -0.003675835173930896754,   0.0059461363539460768081,
-        -0.0012728068927170227343,  -0.00010763930085795762215,
-        0.00010760237325699335067,  -0.000020447909131122835485,
-        -3.1305435033459682903e-7,  9.3743913180807382831e-7,
-        -1.9558810017362205406e-7,  1.0045741524138656286e-8,
-        3.9296464196572404677e-9,   -1.0723612248119824624e-9,
-        1.0891334567503768218e-10,  4.5706745059276311356e-12,
-        -3.2115889339774401184e-12, 4.8521668466476558978e-13,
-        -2.4820344080682008122e-14};
+    double taylor[21] = {-0.57721566490153286061,    0.078662406618721020471,
+                         0.120665041652816256,       -0.045873569729475233502,
+                         -0.003675835173930896754,   0.0059461363539460768081,
+                         -0.0012728068927170227343,  -0.00010763930085795762215,
+                         0.00010760237325699335067,  -0.000020447909131122835485,
+                         -3.1305435033459682903e-7,  9.3743913180807382831e-7,
+                         -1.9558810017362205406e-7,  1.0045741524138656286e-8,
+                         3.9296464196572404677e-9,   -1.0723612248119824624e-9,
+                         1.0891334567503768218e-10,  4.5706745059276311356e-12,
+                         -3.2115889339774401184e-12, 4.8521668466476558978e-13,
+                         -2.4820344080682008122e-14};
     double u;
     if (fabs(a) < 0.5) {
         double u1 = taylor[0];
@@ -216,8 +216,9 @@ double egf_ua_r(double a, double eta) {
     double beta[26];
     beta[25] = d[26];
     beta[24] = d[25];
-    for (int n = 23; n >= 0; n--)
+    for (int n = 23; n >= 0; n--) {
         beta[n] = (double)(n + 2) * beta[n + 2] / a + d[n + 1];
+    }
     double s = 0;
     double f = 1.;
     for (int i = 0; i <= 25; i++) {
@@ -237,8 +238,9 @@ double egf_ua_r(double a, double eta) {
 double egf_ua(double a, double x) {
     double lambda = x / a;
     double eta = sqrt(2 * (lambda - 1 - log(lambda)));
-    if (lambda - 1 < 0)
+    if (lambda - 1 < 0) {
         eta = -eta;
+    }
     double ra = egf_ua_r(a, eta);
     return 0.5 * erfc(eta * sqrt(a / 2.)) + ra;
 }
@@ -280,8 +282,9 @@ double egf_ugamma(double a, double x) {
  */
 double egf_gammaStar(double a, double x) {
     double r = NAN;
-    if (fabs(x) < EGF_EPS)
+    if (fabs(x) < EGF_EPS) {
         return 0;
+    }
     enum dom g = egf_domain(a, x);
     switch (g) {
     case pt:
@@ -291,10 +294,11 @@ double egf_gammaStar(double a, double x) {
         r = egf_pt_reg(a, x);
         break;
     case cf:
-        if (a <= 0.1 && fabs(a - nearbyint(a)) < EGF_EPS)
+        if (a <= 0.1 && fabs(a - nearbyint(a)) < EGF_EPS) {
             r = pow(x, -a);
-        else
+        } else {
             r = (1 - egf_cf(a, x) / tgamma(a)) * pow(x, -a);
+        }
         break;
 
         break;
@@ -302,10 +306,11 @@ double egf_gammaStar(double a, double x) {
         r = (1 - egf_ua(a, x)) * pow(x, -a);
         break;
     case rek:
-        if (a <= 0.1 && fabs(a - nearbyint(a)) < EGF_EPS)
+        if (a <= 0.1 && fabs(a - nearbyint(a)) < EGF_EPS) {
             r = pow(x, -a);
-        else
+        } else {
             r = pow(x, -a) - exp(-x) * egf_rek(a, x) / tgamma(a);
+        }
         break;
     }
     return r;

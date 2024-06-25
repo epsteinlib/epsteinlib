@@ -14,12 +14,11 @@
 #include "tools.h"
 #include <complex.h>
 #include <math.h>
-#include <stdbool.h>
 
 /*!
  * @brief epsilon for the cutoff around nu = dimension.
  */
-#define EPS ldexp(1,-30)
+#define EPS ldexp(1, -30)
 
 /*!
  * @brief z such that G(nu, z) is negligible for nu < 10.
@@ -38,10 +37,9 @@
  * gammaStar is the twice regularized lower incomplete gamma function
  * gamma(s,x) / (gamma(s) * x ** s)
  */
-double complex
-crandall_gReg(int dim, double nu, double *z,
-              double prefactor) { // stabil ohne Fallunterscheidung? Wertet
-                                  // nicht für null aus!
+double complex crandall_gReg(int dim, double nu, double *z,
+                             double prefactor) { // stabil ohne Fallunterscheidung?
+                                                 // Wertet nicht für null aus!
     double complex zArgument = dot(dim, z, z);
     zArgument *= M_PI * prefactor * prefactor;
     return -tgamma(nu / 2) * egf_gammaStar(nu / 2, zArgument);
@@ -55,16 +53,21 @@ crandall_gReg(int dim, double nu, double *z,
  * calculation of the incomplete upper gamma function upperGamma(nu, z).
  */
 double assignzArgBound(double nu) {
-    if ((nu > 2 - EPS && nu < 2 + EPS) || (nu > 4 - EPS && nu < 4 + EPS))
+    if ((nu > 2 - EPS && nu < 2 + EPS) || (nu > 4 - EPS && nu < 4 + EPS)) {
         return M_PI * 2.6 * 2.6;
-    if (nu > 1.6 && nu < 4.4)
+    }
+    if (nu > 1.6 && nu < 4.4) {
         return M_PI * 2.99 * 2.99;
-    if (nu > -3 && nu < 8)
+    }
+    if (nu > -3 && nu < 8) {
         return M_PI * 3.15 * 3.15;
-    if (nu > -70 && nu < 40)
+    }
+    if (nu > -70 && nu < 40) {
         return M_PI * 3.35 * 3.35;
-    if (nu > -600 && nu < 80)
+    }
+    if (nu > -600 && nu < 80) {
         return M_PI * 3.5 * 3.5;
+    }
     return pow(10, 16); // do not use expansion if nu is to big
 }
 
@@ -83,13 +86,16 @@ double complex crandall_g(int dim, double nu, double *z, double prefactor,
                           double zArgBound) {
     double zArgument = dot(dim, z, z);
     zArgument *= M_PI * prefactor * prefactor;
-    if (zArgument < ldexp(1,-62))
+    if (zArgument < ldexp(1, -62)) {
         return -2. / nu;
-    if (zArgument > M_PI * G_CUTOFF * G_CUTOFF)
+    }
+    if (zArgument > M_PI * G_CUTOFF * G_CUTOFF) {
         return 0;
-    if (zArgument > zArgBound)
+    }
+    if (zArgument > zArgBound) {
         return exp(-zArgument) * (-2 + 2 * zArgument + nu) /
                (2 * zArgument * zArgument);
+    }
     return egf_ugamma(nu / 2, zArgument) / pow(zArgument, nu / 2);
 }
 #undef EPS

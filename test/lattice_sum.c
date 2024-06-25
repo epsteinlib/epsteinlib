@@ -36,10 +36,9 @@ int main() {
     // Madelung constant found in literature
     double madelungRef = -1.7475645946331821906362120355443974;
     int dim = 3;
-    double m[] = {1, 0, 0, 0, 1,
-                  0, 0, 0, 1};    // identity matrix for whole numbers
-    double x[] = {0, 0, 0};       // no shift
-    double y[] = {0.5, 0.5, 0.5}; // alternating sum
+    double m[] = {1, 0, 0, 0, 1, 0, 0, 0, 1}; // identity matrix for whole numbers
+    double x[] = {0, 0, 0};                   // no shift
+    double y[] = {0.5, 0.5, 0.5};             // alternating sum
     double nu = 1.0;
     double madelung = creal(epsteinZeta(nu, dim, m, x, y));
     printf("Madelung sum in 3 dimensions:\t %.16lf\n", creal(madelung));

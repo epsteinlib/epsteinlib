@@ -45,8 +45,7 @@ double complex epsteinZeta(double nu, int dim, double *a, double *x, double *y);
  * @return upperGamma(nu/2,pi prefactor * z**2)
  *      / (pi * prefactor z**2)^(nu / 2) in
  */
-double crandall_g(int dim, double nu, double *z, double prefactor,
-                  double zArgBound);
+double crandall_g(int dim, double nu, double *z, double prefactor, double zArgBound);
 
 /**
  * @brief Calculates the regularization of the zero summand in the second
