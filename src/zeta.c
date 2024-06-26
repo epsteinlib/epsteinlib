@@ -19,7 +19,6 @@
 #include <time.h>
 
 #include "crandall.h"
-#include "gamma.h"
 #include "tools.h"
 
 #include "zeta.h"
@@ -37,25 +36,27 @@
 
 /**
  * @brief calculates the first sum in Crandall's formula.
- * @param nu: exponent for the Epstein zeta function.
- * @param dim: dimension of the input vectors.
- * @param lambda: parameters that decides the weight of each sum.
- * @param m: matrix that transforms the lattice in the Epstein Zeta function.
- * @param x: projection of x vector to elementary lattice cell.
- * @param y: projection of y vector to elementary lattice cell.
- * @param cutoffs: how many summands in each direction are considered.
- * @param zArgBound: global bound on when to use the asymptotic expansion in the
- * incomplete gamma evaluation.
+ * @param[in] nu: exponent for the Epstein zeta function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] lambda: parameters that decides the weight of each sum.
+ * @param[in] m: matrix that transforms the lattice in the Epstein Zeta
+ * function.
+ * @param[in] x: projection of x vector to elementary lattice cell.
+ * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] cutoffs: how many summands in each direction are considered.
+ * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
+ * the incomplete gamma evaluation.
  * @return the first sum in crandalls formula, if
  * x, y are in the elementary lattice cells. Multiply with exp(2 * Pi * I * x *
  * y) otherwise.
  */
-double complex sum_real(double nu, short dim, double lambda, double *m, double *x,
-                        double *y, int cutoffs[], double zArgBound) {
+double complex sum_real(double nu, short dim, double lambda, const double *m,
+                        const double *x, const double *y, const int cutoffs[],
+                        double zArgBound) {
     // 1. Transform: Compute determinant and fourier transformed matrix,
     // scale both of them
-    int *zv = malloc(dim * sizeof(int));       // counting vector in Z^dim
-    double *lv = malloc(dim * sizeof(double)); // lattice vector
+    int zv[dim];    // counting vector in Z^dim
+    double lv[dim]; // lattice vector
     double complex s1 = 0;
     // cuboid cutoffs
     long totalSummands = 1;
@@ -71,35 +72,36 @@ double complex sum_real(double nu, short dim, double lambda, double *m, double *
         }
         matrix_intVector(dim, m, zv, lv);
         double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
-        for (int i = 0; i < dim; i++)
+        for (int i = 0; i < dim; i++) {
             lv[i] = (lv[i] - x[i]) / lambda;
+        }
         s1 += rot * crandall_g(dim, nu, lv, 1, zArgBound);
         // s1 += rot * crandall_g(dim, nu, lv, 1);
     }
-    free(zv);
-    free(lv);
     return s1;
 }
 
 /**
  * @brief calculates the second sum in Crandall's formula.
- * @param nu: exponent for the Epstein zeta function.
- * @param dim: dimension of the input vectors.
- * @param lambda: parameters that decides the weight of each sum.
- * @param m: matrix that transforms the lattice in the Epstein Zeta function.
- * @param x: projection of x vector to elementary lattice cell.
- * @param y: projection of y vector to elementary lattice cell.
- * @param cutoffs: how many summands in each direction are considered.
- * @param zArgBound: global bound on when to use the asymptotic expansion in the
- * incomplete gamma evaluation.
+ * @param[in] nu: exponent for the Epstein zeta function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] lambda: parameters that decides the weight of each sum.
+ * @param[in] m: matrix that transforms the lattice in the Epstein Zeta
+ * function.
+ * @param[in] x: projection of x vector to elementary lattice cell.
+ * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] cutoffs: how many summands in each direction are considered.
+ * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
+ * the incomplete gamma evaluation.
  * @return the second sum in crandalls formula, if
  * x, y are in the elementary lattice cells. Multiply with exp(2 * Pi * I * x *
  * y) otherwise. Add the zero summand in the regularization case.
  */
-double complex sum_fourier(double nu, short dim, double lambda, double *m, double *x,
-                           double *y, int cutoffs[], double zArgBound) {
-    int *zv = malloc(dim * sizeof(int));       // counting vector in Z^dim
-    double *lv = malloc(dim * sizeof(double)); // lattice vector
+double complex sum_fourier(double nu, short dim, double lambda, const double *m,
+                           const double *x, const double *y, const int cutoffs[],
+                           double zArgBound) {
+    int zv[dim];    // counting vector in Z^dim
+    double lv[dim]; // lattice vector
     double complex s2 = 0;
     // cuboid cutoffs
     long totalSummands = 1;
@@ -115,8 +117,9 @@ double complex sum_fourier(double nu, short dim, double lambda, double *m, doubl
             zv[k] = ((n / totalCutoffs[k]) % (2 * cutoffs[k] + 1)) - cutoffs[k];
         }
         matrix_intVector(dim, m, zv, lv);
-        for (int i = 0; i < dim; i++)
+        for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] + y[i];
+        }
         double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
         s2 += rot * crandall_g(dim, dim - nu, lv, lambda, zArgBound);
     }
@@ -126,26 +129,26 @@ double complex sum_fourier(double nu, short dim, double lambda, double *m, doubl
             zv[k] = ((n / totalCutoffs[k]) % (2 * cutoffs[k] + 1)) - cutoffs[k];
         }
         matrix_intVector(dim, m, zv, lv);
-        for (int i = 0; i < dim; i++)
+        for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] + y[i];
+        }
         double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
         s2 += rot * crandall_g(dim, dim - nu, lv, lambda, zArgBound);
     }
-    free(zv);
-    free(lv);
     return s2;
 }
 
 /**
  * @brief calculate projection of vector to elementary lattice cell.
- * @param dim: dimension of the input vectors
- * @param m: matrix that transforms the lattice in the function.
- * @param m_invt: inverse of m.
- * @param v: vector for which the projection to the elementary lattice cell is
- * needet.
+ * @param[in] dim: dimension of the input vectors
+ * @param[in] m: matrix that transforms the lattice in the function.
+ * @param[in] m_invt: inverse of m.
+ * @param[in] v: vector for which the projection to the elementary lattice cell
+ * is needet.
  * @return projection of v to the elementary lattice cell.
  */
-double *vectorProj(short dim, double *m, double *m_invt, double *v) {
+double *vectorProj(short dim, const double *m, const double *m_invt,
+                   const double *v) {
     bool todo = false;
     double *vt = malloc(dim * sizeof(double));
     for (int i = 0; i < dim; i++) {
@@ -154,47 +157,53 @@ double *vectorProj(short dim, double *m, double *m_invt, double *v) {
             vt[i] += m_invt[dim * j + i] * v[j];
         }
     }
-    for (int i = 0; i < dim && !todo; i++)
-        todo = todo || !(vt[i] >= -0.5 && vt[i] <= 0.5);
+    // check if projection is needed, else copy
+    for (int i = 0; i < dim && !todo; i++) {
+        todo = todo || (vt[i] <= -0.5 || vt[i] >= 0.5);
+    }
     if (todo) {
-        for (int i = 0; i < dim; i++)
+        for (int i = 0; i < dim; i++) {
             vt[i] = remainder(vt[i], 1);
+        }
         double *vres = malloc(dim * sizeof(double));
         for (int i = 0; i < dim; i++) {
             vres[i] = 0;
-            for (int j = 0; j < dim; j++)
+            for (int j = 0; j < dim; j++) {
                 vres[i] += m[dim * i + j] * vt[j];
+            }
         }
         free(vt);
         return vres;
-    } else {
-        for (int i = 0; i < dim; i++)
-            vt[i] = v[i];
-        return vt;
     }
+    for (int i = 0; i < dim; i++) {
+        vt[i] = v[i];
+    }
+    return vt;
 }
 
 /**
  * @brief calculates the (regularized) Epstein Zeta function.
- * @param nu: exponent for the Epstein zeta function.
- * @param dim: dimension of the input vectors.
- * @param m: matrix that transforms the lattice in the Epstein Zeta function.
- * @param x: x vector of the Epstein Zeta function.
- * @param y: y vector of the Epstein Zeta function.
- * @param lambda: relative weight of the sums in Crandall's formula.
- * @param regBool: 0 for no regularization, > 0 for the regularization.
+ * @param[in] nu: exponent for the Epstein zeta function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] m: matrix that transforms the lattice in the Epstein Zeta
+ * function.
+ * @param[in] x: x vector of the Epstein Zeta function.
+ * @param[in] y: y vector of the Epstein Zeta function.
+ * @param[in] lambda: relative weight of the sums in Crandall's formula.
+ * @param[in] regBool: 0 for no regularization, > 0 for the regularization.
  * @return function value of the regularized Epstein zeta.
  */
-double complex __epsteinZeta(double nu, int dim, double *m, double *x, double *y,
-                             double lambda, int reg) {
+double complex epsteinZetaInternal(double nu, int dim, const double *m,
+                                   const double *x, const double *y, double lambda,
+                                   int reg) {
     // 1. Transform: Compute determinant and fourier transformed matrix, scale
     // both of them
-    double *m_fourier = malloc(dim * dim * sizeof(double));
-    double *m_copy = malloc(dim * dim * sizeof(double));
-    double *m_real = malloc(dim * dim * sizeof(double));
-    double *x_t1 = malloc(dim * sizeof(double));
-    double *y_t1 = malloc(dim * sizeof(double));
-    int *p = malloc(dim * sizeof(int));
+    double m_fourier[dim * dim];
+    double m_copy[dim * dim];
+    double m_real[dim * dim];
+    double x_t1[dim];
+    double y_t1[dim];
+    int p[dim];
     bool isDiagonal = 1;
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
@@ -206,10 +215,10 @@ double complex __epsteinZeta(double nu, int dim, double *m, double *x, double *y
     }
     LAPACKE_dgesv(LAPACK_ROW_MAJOR, dim, dim, m_copy, dim, p, m_fourier, dim);
     double vol = 1;
-    for (int k = 0; k < dim; k++)
+    for (int k = 0; k < dim; k++) {
         vol *= m_copy[dim * k + k];
+    }
     transpose(dim, m_fourier);
-    free(p);
     vol = fabs(vol);
     double ms = pow(vol, -1. / dim);
     for (int i = 0; i < dim * dim; i++) {
@@ -235,11 +244,12 @@ double complex __epsteinZeta(double nu, int dim, double *m, double *x, double *y
         }
     } else {
         // choose cutoff depending on smallest and biggest abs eigenvalue
-        double *m_ev = malloc(dim * sizeof(double));
-        double *m_aux = malloc(dim * sizeof(double));
+        double m_ev[dim];
+        double m_aux[dim];
         for (int i = 0; i < dim; i++) {
-            for (int j = 0; j < dim; j++)
+            for (int j = 0; j < dim; j++) {
                 m_copy[dim * i + j] = m_real[dim * i + j];
+            }
         }
         LAPACKE_dgeev(LAPACK_ROW_MAJOR, 'N', 'N', dim, m_copy, dim, m_ev, m_aux,
                       NULL, dim, NULL, dim);
@@ -253,10 +263,7 @@ double complex __epsteinZeta(double nu, int dim, double *m, double *x, double *y
             cutoffsReal[k] = floor(cutoff_id / ev_abs_min);
             cutoffsFourier[k] = floor(cutoff_id * ev_abs_max);
         }
-        free(m_ev);
-        free(m_aux);
     }
-    free(m_copy);
     // handle special case of non-positive integer values nu.
     double complex res;
     if (nu < 1 && fabs(nu / 2. - nearbyint(nu / 2.)) < EPS) {
@@ -270,14 +277,16 @@ double complex __epsteinZeta(double nu, int dim, double *m, double *x, double *y
 
     } else {
         double zArgBound = assignzArgBound(nu);
-        double complex s1, s2, nc;
+        double complex s1;
+        double complex s2;
+        double complex nc;
         double complex rot = 1;
         double complex xfactor = 1;
-        double *vx = malloc(dim * sizeof(double));
-        for (int i = 0; i < dim; i++)
+        double vx[dim];
+        for (int i = 0; i < dim; i++) {
             vx[i] = x_t1[i] - x_t2[i];
+        }
         xfactor = cexp(-2 * M_PI * I * dot(dim, vx, y_t1));
-        free(vx);
         if (reg) {
             // calculate regularized Epstein Zeta function values.
             nc = crandall_gReg(dim, dim - nu, y_t1, lambda);
@@ -306,15 +315,11 @@ double complex __epsteinZeta(double nu, int dim, double *m, double *x, double *y
                              zArgBound) +
                  nc;
         }
+        free(x_t2);
+        free(y_t2);
         res = xfactor * pow(lambda * lambda / M_PI, -nu / 2.) / tgamma(nu / 2.) *
               (s1 + pow(lambda, dim) * s2);
     }
-    free(x_t1);
-    free(y_t1);
-    free(x_t2);
-    free(y_t2);
-    free(m_real);
-    free(m_fourier);
     return pow(ms, nu) * res;
 }
 #undef G_BOUND

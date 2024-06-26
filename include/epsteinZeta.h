@@ -24,52 +24,55 @@
 
 /**
  * @brief calculates the Epstein zeta function.
- * @param nu: exponent for the Epstein zeta function.
- * @param dim: dimension of the input vectors.
- * @param a: matrix that transforms the lattice in the Epstein Zeta function.
- * @param x: x vector of the Epstein Zeta function.
- * @param y: y vector of the Epstein Zeta function.
+ * @param[in] nu: exponent for the Epstein zeta function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] a: matrix that transforms the lattice in the Epstein Zeta function.
+ * @param[in] x: x vector of the Epstein Zeta function.
+ * @param[in] y: y vector of the Epstein Zeta function.
  * @return function value of the regularized Epstein zeta.
  */
-double complex epsteinZeta(double nu, int dim, double *a, double *x, double *y);
+double complex epsteinZeta(double nu, int dim, const double *a, const double *x,
+                           const double *y);
 
 /**
  * @brief calculates the regularized Epstein zeta function.
- * @param nu: exponent for the Epstein zeta function.
- * @param dim: dimension of the input vectors.
- * @param a: matrix that transforms the lattice in the Epstein Zeta function.
- * @param x: x vector of the Epstein Zeta function.
- * @param y: y vector of the Epstein Zeta function.
+ * @param[in] nu: exponent for the Epstein zeta function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] a: matrix that transforms the lattice in the Epstein Zeta function.
+ * @param[in] x: x vector of the Epstein Zeta function.
+ * @param[in] y: y vector of the Epstein Zeta function.
  * @return function value of the regularized Epstein zeta.
  */
-double complex epsteinZetaReg(double nu, int dim, double *a, double *x, double *y);
+double complex epsteinZetaReg(double nu, int dim, const double *a, const double *x,
+                              const double *y);
 
 #ifndef EPSTEIN_CRANDALL
 
 /**
  * @brief Assumes x and y to be in the respective elementary lattice cell.
  * Multiply with exp(2 * PI * i * x * y) to get the second sum in Crandall's
- * @param dim: dimension of the input vectors.
- * @param nu: exponent of the regularized Epstein zeta function.
- * @param z: input vector of the function
- * @param prefactor: prefactor of the vector, e. g. lambda or 1/lambda in
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] nu: exponent of the regularized Epstein zeta function.
+ * @param[in] z: input vector of the function
+ * @param[in] prefactor: prefactor of the vector, e. g. lambda or 1/lambda in
  *      Crandall's formula
  * @return upperGamma(nu/2,pi prefactor * z**2)
  *      / (pi * prefactor z**2)^(nu / 2) in
  */
-double crandall_g(int dim, double nu, double *z, double prefactor, double zArgBound);
+double crandall_g(int dim, double nu, const double *z, double prefactor,
+                  double zArgBound);
 
 /**
  * @brief Calculates the regularization of the zero summand in the second
  * sum in Crandall's formula. That is, the summand for k = 0.
- * @param dim: dimension of the input vectors
- * @param nu: exponent of the regularized Epstein zeta function.
- * @param z: input vector of the function
- * @param prefactor: prefactor of the vector, e. g. lambda
+ * @param[in] dim: dimension of the input vectors
+ * @param[in] nu: exponent of the regularized Epstein zeta function.
+ * @param[in] z: input vector of the function
+ * @param[in] prefactor: prefactor of the vector, e. g. lambda
  * @return gamma(nu/2) * gammaStar(nu/2, pi * prefactor * z**2), where
  * gammaStar is the twice regularized lower incomplete gamma function
  * gamma(s,x) / (gamma(s) * x ** s)
  */
-double crandall_gReg(int dim, double nu, double *z, double prefactor);
+double crandall_gReg(int dim, double nu, const double *z, double prefactor);
 #endif
 #endif
