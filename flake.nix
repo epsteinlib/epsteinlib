@@ -47,49 +47,52 @@
         pkgs,
         system,
         ...
-      }: {
+      }: rec {
         _module.args.pkgs = import nixpkgs {
           inherit system;
           config = nixpkgsConfig;
         };
-        pre-commit.settings = {
-          hooks = {
-            # C
-            clang-format.enable = true;
-            clang-tidy = {
-              enable = true;
-              entry = "clang-tidy --fix -checks=bugprone-*,clang-analyzer-*,cert-*,concurrency-*,misc-*,modernize-*,performance-*,portability-*,readability-*,-readability-identifier-length";
-            };
-
-            # Nix
-            alejandra.enable = true;
-            deadnix = {
-              enable = true;
-              settings = {
-                noUnderscore = true;
-                noLambdaPatternNames = true;
+        pre-commit = {
+          check.enable = false; # Do not run in nix flake check because our dependencies are not available in this environment.
+          settings = {
+            hooks = {
+              # C
+              clang-format.enable = true;
+              clang-tidy = {
+                enable = true;
+                entry = "${_module.args.pkgs.clang-tools}/bin/clang-tidy --fix -checks=bugprone-*,clang-analyzer-*,cert-*,concurrency-*,misc-*,modernize-*,performance-*,portability-*,readability-*,-readability-identifier-length,-readability-magic-numbers,-bugprone-easily-swappable-parameters";
               };
-            };
-            statix.enable = true;
-            typos = {
-              enable = true;
-              settings = {
-                configuration = ''
-                  [default]
-                  check-filename = false
-                  extend-ignore-re = [
-                    "PNGs",
-                    "ba"
-                  ]
 
-                  [type.nb]
-                  extend-glob = ["*.nb"]
-                  check-file = false
-                  [type.md]
-                  extend-glob = ["*.md"]
-                  check-file = false
-                '';
-                locale = "en-us";
+              # Nix
+              alejandra.enable = true;
+              deadnix = {
+                enable = true;
+                settings = {
+                  noUnderscore = true;
+                  noLambdaPatternNames = true;
+                };
+              };
+              statix.enable = true;
+              typos = {
+                enable = true;
+                settings = {
+                  configuration = ''
+                    [default]
+                    check-filename = false
+                    extend-ignore-re = [
+                      "PNGs",
+                      "ba"
+                    ]
+
+                    [type.nb]
+                    extend-glob = ["*.nb"]
+                    check-file = false
+                    [type.md]
+                    extend-glob = ["*.md"]
+                    check-file = false
+                  '';
+                  locale = "en-us";
+                };
               };
             };
           };

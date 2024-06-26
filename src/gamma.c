@@ -31,8 +31,8 @@ enum dom { pt, qt, cf, ua, rek };
 
 /**
  * @brief set type of algorithm to use depending on the parameters.
- * @param a: exponent of the upper incomplete gamma function.
- * @param x: lower integral boundary of the upper incomplete gamma function.
+ * @param[in] a: exponent of the upper incomplete gamma function.
+ * @param[in] x: lower integral boundary of the upper incomplete gamma function.
  * @return enum for the type of algorithm to use.
  */
 enum dom egf_domain(double a, double x) {
@@ -62,31 +62,33 @@ enum dom egf_domain(double a, double x) {
 
 enum dom egf_ldomain(double a, double x) {
     double alpha;
-    if (x >= 0.5)
+    if (x >= 0.5) {
         alpha = x;
-    else
-        alpha = log(0.5) / log(0.5 * x);
-    if (a <= alpha) {
-        if (x <= 1.5 && (a >= -0.5 || (a >= -0.75 && x <= ldexp(2, -15))))
-            return pt;
-        else if (x <= 1.5)
-            return rek;
-        else if (a >= 12 && a >= x / 2.35)
-            return ua;
-        else
-            return cf;
     } else {
-        if (a >= 12 && x >= 0.3 * a)
-            return ua;
-        else
-            return pt;
+        alpha = log(0.5) / log(0.5 * x);
     }
+    if (a <= alpha) {
+        if (x <= 1.5 && (a >= -0.5 || (a >= -0.75 && x <= ldexp(2, -15)))) {
+            return pt;
+        }
+        if (x <= 1.5) {
+            return rek;
+        }
+        if (a >= 12 && a >= x / 2.35) {
+            return ua;
+        }
+        return cf;
+    }
+    if (a >= 12 && x >= 0.3 * a) {
+        return ua;
+    }
+    return pt;
 }
 
 /**
  * @brief calculate upper gamma function with the recursion formula.
- * @param a: exponent of the upper incomplete gamma function.
- * @param x: lower integral boundary of the upper incomplete gamma function.
+ * @param[in] a: exponent of the upper incomplete gamma function.
+ * @param[in] x: lower integral boundary of the upper incomplete gamma function.
  * @return function value of the upper incomplete gamma function.
  */
 double egf_pt(double a, double x) {
@@ -103,8 +105,8 @@ double egf_pt(double a, double x) {
 /**
  * @brief calculate twice regularized lower incomplete gamma function gamma(a,x)
  * / (x^a * Gamma(a)) with the recursion formula.
- * @param a: exponent of the lower incomplete upper gamma function.
- * @param x: lower integral boundary of the lower incomplete gamma function.
+ * @param[in] a: exponent of the lower incomplete upper gamma function.
+ * @param[in] x: lower integral boundary of the lower incomplete gamma function.
  * @return function value of the lower incomplete gamma function.
  */
 double egf_pt_reg(double a, double x) {
@@ -119,22 +121,23 @@ double egf_pt_reg(double a, double x) {
 
 /**
  * @brief calculate the upper incomplete gamma function as in Gautschi.
- * @param a: exponent of the upper incomplete gamma function.
- * @param x: lower integral boundary of the upper incomplete gamma function.
+ * @param[in] a: exponent of the upper incomplete gamma function.
+ * @param[in] x: lower integral boundary of the upper incomplete gamma function.
  * @return function value of the upper incomplete gamma function.
  */
 double egf_qt(double a, double x) {
-    double taylor[21] = {-0.57721566490153286061,    0.078662406618721020471,
-                         0.120665041652816256,       -0.045873569729475233502,
-                         -0.003675835173930896754,   0.0059461363539460768081,
-                         -0.0012728068927170227343,  -0.00010763930085795762215,
-                         0.00010760237325699335067,  -0.000020447909131122835485,
-                         -3.1305435033459682903e-7,  9.3743913180807382831e-7,
-                         -1.9558810017362205406e-7,  1.0045741524138656286e-8,
-                         3.9296464196572404677e-9,   -1.0723612248119824624e-9,
-                         1.0891334567503768218e-10,  4.5706745059276311356e-12,
-                         -3.2115889339774401184e-12, 4.8521668466476558978e-13,
-                         -2.4820344080682008122e-14};
+    static double taylor[21] = {
+        -0.57721566490153286061,    0.078662406618721020471,
+        0.120665041652816256,       -0.045873569729475233502,
+        -0.003675835173930896754,   0.0059461363539460768081,
+        -0.0012728068927170227343,  -0.00010763930085795762215,
+        0.00010760237325699335067,  -0.000020447909131122835485,
+        -3.1305435033459682903e-7,  9.3743913180807382831e-7,
+        -1.9558810017362205406e-7,  1.0045741524138656286e-8,
+        3.9296464196572404677e-9,   -1.0723612248119824624e-9,
+        1.0891334567503768218e-10,  4.5706745059276311356e-12,
+        -3.2115889339774401184e-12, 4.8521668466476558978e-13,
+        -2.4820344080682008122e-14};
     double u;
     if (fabs(a) < 0.5) {
         double u1 = taylor[0];
@@ -167,8 +170,8 @@ double egf_qt(double a, double x) {
 
 /**
  * @brief calculate the upper incomplete gamma function as in Gautschi.
- * @param a: exponent of the upper incomplete gamma function.
- * @param x: lower integral boundary of the upper incomplete gamma function.
+ * @param[in] a: exponent of the upper incomplete gamma function.
+ * @param[in] x: lower integral boundary of the upper incomplete gamma function.
  * @return function value of the upper incomplete gamma function.
  */
 double egf_rek(double a, double x) {
@@ -183,8 +186,8 @@ double egf_rek(double a, double x) {
 
 /**
  * @brief calculate the upper incomplete gamma function as in Gautschi.
- * @param a: exponent of the upper incomplete gamma function.
- * @param x: lower integral boundary of the upper incomplete gamma function.
+ * @param[in] a: exponent of the upper incomplete gamma function.
+ * @param[in] x: lower integral boundary of the upper incomplete gamma function.
  * @return function value of the upper incomplete gamma function.
  */
 double egf_cf(double a, double x) {
@@ -204,38 +207,38 @@ double egf_cf(double a, double x) {
 
 /**
  * @brief calculate the upper incomplete gamma function as in Gautschi.
- * @param a: exponent of the upper incomplete gamma function.
- * @param x: lower integral boundary of the upper incomplete gamma function.
+ * @param[in] a: exponent of the upper incomplete gamma function.
+ * @param[in] x: lower integral boundary of the upper incomplete gamma function.
  * @return function value of the upper incomplete gamma function.
  */
 double egf_ua_r(double a, double eta) {
-    double d[27] = {1.0,
-                    -1.0 / 3.0,
-                    1.0 / 12.0,
-                    -2.0 / 135.0,
-                    1.0 / 864.0,
-                    1.0 / 2835.0,
-                    -139.0 / 777600.0,
-                    1.0 / 25515.0,
-                    -571.0 / 261273600.0,
-                    -281.0 / 151559100.0,
-                    8.29671134095308601e-7,
-                    -1.76659527368260793e-7,
-                    6.70785354340149857e-9,
-                    1.02618097842403080e-8,
-                    -4.38203601845335319e-9,
-                    9.14769958223679023e-10,
-                    -2.55141939949462497e-11,
-                    -5.83077213255042507e-11,
-                    2.43619480206674162e-11,
-                    -5.02766928011417559e-12,
-                    1.10043920319561347e-13,
-                    3.37176326240098538e-13,
-                    -1.39238872241816207e-13,
-                    2.85348938070474432e-14,
-                    -5.13911183424257258e-16,
-                    -1.97522882943494428e-15,
-                    8.09952115670456133e-16};
+    static double d[27] = {1.0,
+                           -1.0 / 3.0,
+                           1.0 / 12.0,
+                           -2.0 / 135.0,
+                           1.0 / 864.0,
+                           1.0 / 2835.0,
+                           -139.0 / 777600.0,
+                           1.0 / 25515.0,
+                           -571.0 / 261273600.0,
+                           -281.0 / 151559100.0,
+                           8.29671134095308601e-7,
+                           -1.76659527368260793e-7,
+                           6.70785354340149857e-9,
+                           1.02618097842403080e-8,
+                           -4.38203601845335319e-9,
+                           9.14769958223679023e-10,
+                           -2.55141939949462497e-11,
+                           -5.83077213255042507e-11,
+                           2.43619480206674162e-11,
+                           -5.02766928011417559e-12,
+                           1.10043920319561347e-13,
+                           3.37176326240098538e-13,
+                           -1.39238872241816207e-13,
+                           2.85348938070474432e-14,
+                           -5.13911183424257258e-16,
+                           -1.97522882943494428e-15,
+                           8.09952115670456133e-16};
     double beta[26];
     beta[25] = d[26];
     beta[24] = d[25];
@@ -254,8 +257,8 @@ double egf_ua_r(double a, double eta) {
 
 /**
  * @brief calculate the upper incomplete gamma function as in Gautschi.
- * @param a: exponent of the upper incomplete gamma function.
- * @param x: lower integral boundary of the upper incomplete gamma function.
+ * @param[in] a: exponent of the upper incomplete gamma function.
+ * @param[in] x: lower integral boundary of the upper incomplete gamma function.
  * @return function value of the upper incomplete gamma function.
  */
 double egf_ua(double a, double x) {
@@ -270,8 +273,8 @@ double egf_ua(double a, double x) {
 
 /**
  * @brief calculate the upper incomplete gamma function as in Gautschi.
- * @param a: exponent of the upper incomplete gamma function.
- * @param x: lower integral boundary of the upper incomplete gamma function.
+ * @param[in] a: exponent of the upper incomplete gamma function.
+ * @param[in] x: lower integral boundary of the upper incomplete gamma function.
  * @return function value of the upper incomplete gamma function.
  */
 double egf_ugamma(double a, double x) {
@@ -299,23 +302,21 @@ double egf_ugamma(double a, double x) {
 
 /**
  * @brief calculate the upper incomplete gamma function as in Gautschi.
- * @param a: exponent of the upper incomplete gamma function.
- * @param x: lower integral boundary of the upper incomplete gamma function.
+ * @param[in] a: exponent of the upper incomplete gamma function.
+ * @param[in] x: lower integral boundary of the upper incomplete gamma function.
  * @return function value of the upper incomplete gamma function.
  */
 double egf_gammaStar(double a, double x) {
     double r = NAN;
     if (fabs(x) < EGF_EPS) {
-        if (a <= 0.1 && fabs(a - nearbyint(a)) < EGF_EPS)
+        if (a <= 0.1 && fabs(a - nearbyint(a)) < EGF_EPS) {
             return 0;
-        else
-            return 1. / tgamma(a + 1);
+        }
+        return 1. / tgamma(a + 1);
     }
     enum dom g = egf_ldomain(a, x);
     switch (g) {
     case pt:
-        r = egf_pt_reg(a, x);
-        break;
     case qt:
         r = egf_pt_reg(a, x);
         break;
