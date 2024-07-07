@@ -24,8 +24,19 @@ build-manually:
     name: alpine:latest
     pull_policy: [always, if-not-present]
   before_script:
-    - apk update
-    - apk add build-base pkgconf meson lapack-dev
+    - |
+      if [ $PLATFORM == "linux" ]; then
+        apk update
+        apk add build-base pkgconf meson lapack-dev
+      fi
+      if [ $PLATFORM == "macos" ]; then
+        brew install meson ninja pkg-config lapack
+        export PKG_CONFIG_PATH='/usr/local/opt/lapack/lib/pkgconfig'
+        export LDFLAGS='-L/usr/local/opt/lapack/lib'
+        export CPPFLAGS='-I/usr/local/opt/lapack/include'
+      else
+        echo "Platform '$PLATFORM' not handled yet."
+      fi
   script:
     - meson setup build -Dbuildtype=release
     - meson compile -C build
@@ -34,7 +45,13 @@ build-manually:
     expose_as: 'build_files'
     paths:
       - build/
+  parallel:
+    matrix:
+    - PLATFORM: [linux, macos]
+  tags:
+  - ${PLATFORM}
   dependencies: []
+
 
 build-docs:
   stage: build
