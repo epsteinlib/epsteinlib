@@ -46,15 +46,13 @@
  * @param[in] cutoffs: how many summands in each direction are considered.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
- * @return the first sum in crandalls formula, if
- * x, y are in the elementary lattice cells. Multiply with exp(2 * Pi * I * x *
- * y) otherwise.
+ * @return helper function for the first sum in crandalls formula. Calculates
+ * sum_{z in m whole_numbers ** dim} G_{nu}((z - x) / lambda))
+ * X exp(2 * PI * I * z * y)
  */
 double complex sum_real(double nu, short dim, double lambda, const double *m,
                         const double *x, const double *y, const int cutoffs[],
                         double zArgBound) {
-    // 1. Transform: Compute determinant and fourier transformed matrix,
-    // scale both of them
     int zv[dim];    // counting vector in Z^dim
     double lv[dim]; // lattice vector
     double complex s1 = 0;
@@ -76,7 +74,6 @@ double complex sum_real(double nu, short dim, double lambda, const double *m,
             lv[i] = (lv[i] - x[i]) / lambda;
         }
         s1 += rot * crandall_g(dim, nu, lv, 1, zArgBound);
-        // s1 += rot * crandall_g(dim, nu, lv, 1);
     }
     return s1;
 }
@@ -93,11 +90,11 @@ double complex sum_real(double nu, short dim, double lambda, const double *m,
  * @param[in] cutoffs: how many summands in each direction are considered.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
- * @return the second sum in crandalls formula, if
- * x, y are in the elementary lattice cells. Multiply with exp(2 * Pi * I * x *
- * y) otherwise. Add the zero summand in the regularization case.
+ * @return helper function for the second sum in crandalls formula. Calculates
+ * sum_{k in m_invt whole_numbers ** dim without zero} G_{dim - nu}(lambda * (k + y))
+ * X exp(2 * PI * I * x * k)
  */
-double complex sum_fourier(double nu, short dim, double lambda, const double *m,
+double complex sum_fourier(double nu, short dim, double lambda, const double *m_invt,
                            const double *x, const double *y, const int cutoffs[],
                            double zArgBound) {
     int zv[dim];    // counting vector in Z^dim
@@ -111,12 +108,12 @@ double complex sum_fourier(double nu, short dim, double lambda, const double *m,
         totalSummands *= 2 * cutoffs[k] + 1;
     };
     long zeroIndex = (totalSummands - 1) / 2;
-    // First Sum (in fourier space)
+    // second sum (in fourier space)
     for (long n = 0; n < zeroIndex; n++) {
         for (int k = 0; k < dim; k++) {
             zv[k] = ((n / totalCutoffs[k]) % (2 * cutoffs[k] + 1)) - cutoffs[k];
         }
-        matrix_intVector(dim, m, zv, lv);
+        matrix_intVector(dim, m_invt, zv, lv);
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] + y[i];
         }
@@ -128,7 +125,7 @@ double complex sum_fourier(double nu, short dim, double lambda, const double *m,
         for (int k = 0; k < dim; k++) {
             zv[k] = ((n / totalCutoffs[k]) % (2 * cutoffs[k] + 1)) - cutoffs[k];
         }
-        matrix_intVector(dim, m, zv, lv);
+        matrix_intVector(dim, m_invt, zv, lv);
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] + y[i];
         }
