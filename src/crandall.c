@@ -21,12 +21,6 @@
  */
 #define EPS ldexp(1, -30)
 
-/*!
- * @brief z such that G(nu, z) is negligible for nu < 10.
- * Can be adapted for larger nu.
- */
-#define G_CUTOFF 3.2
-
 /**
  * @brief Calculates the regularization of the zero summand in the second
  * sum in Crandall's formula. That is, the summand for k = 0.
@@ -88,9 +82,6 @@ double complex crandall_g(int dim, double nu, const double *z, double prefactor,
 
     if (zArgument < ldexp(1, -62)) {
         return -2. / nu;
-    }
-    if (zArgument > M_PI * G_CUTOFF * G_CUTOFF) {
-        return 0;
     }
     if (zArgument > zArgBound) {
         return exp(-zArgument) * (-2 + 2 * zArgument + nu) /
