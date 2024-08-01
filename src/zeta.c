@@ -35,6 +35,26 @@
 #define EPS ldexp(1, -30)
 
 /**
+ * @brief calculates the kahan sum of input array.
+ * @param[in] s: array containing the summands.
+ * @param[in] totalSummands: length of array of summands.
+ * @return total of array s.
+ */
+double complex kahanSum(const double complex *s, long totalSummands) {
+    double complex sum = 0.0;
+    double complex epsilon = 0.0;
+    double complex auxt;
+    double complex auxy;
+    for (int n = 0; n < totalSummands; n++) {
+        auxy = s[n] - epsilon;
+        auxt = sum + auxy;
+        epsilon = (auxt - sum) - auxy;
+        sum = auxt;
+    }
+    return sum;
+}
+
+/**
  * @brief calculates the first sum in Crandall's formula.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
@@ -55,7 +75,6 @@ double complex sum_real(double nu, short dim, double lambda, const double *m,
                         double zArgBound) {
     int zv[dim];    // counting vector in Z^dim
     double lv[dim]; // lattice vector
-    double complex s1 = 0;
     // cuboid cutoffs
     long totalSummands = 1;
     long totalCutoffs[dim + 1];
@@ -63,6 +82,7 @@ double complex sum_real(double nu, short dim, double lambda, const double *m,
         totalCutoffs[k] = totalSummands;
         totalSummands *= 2 * cutoffs[k] + 1;
     };
+    double complex s1[totalSummands];
     // First Sum (in real space)
     for (long n = 0; n < totalSummands; n++) {
         for (int k = 0; k < dim; k++) {
@@ -73,9 +93,9 @@ double complex sum_real(double nu, short dim, double lambda, const double *m,
         for (int i = 0; i < dim; i++) {
             lv[i] = (lv[i] - x[i]) / lambda;
         }
-        s1 += rot * crandall_g(dim, nu, lv, 1, zArgBound);
+        s1[n] = rot * crandall_g(dim, nu, lv, 1, zArgBound);
     }
-    return s1;
+    return kahanSum(s1, totalSummands);
 }
 
 /**
@@ -99,7 +119,6 @@ double complex sum_fourier(double nu, short dim, double lambda, const double *m_
                            double zArgBound) {
     int zv[dim];    // counting vector in Z^dim
     double lv[dim]; // lattice vector
-    double complex s2 = 0;
     // cuboid cutoffs
     long totalSummands = 1;
     long totalCutoffs[dim + 1];
@@ -108,6 +127,7 @@ double complex sum_fourier(double nu, short dim, double lambda, const double *m_
         totalSummands *= 2 * cutoffs[k] + 1;
     };
     long zeroIndex = (totalSummands - 1) / 2;
+    double complex s2[totalSummands];
     // second sum (in fourier space)
     for (long n = 0; n < zeroIndex; n++) {
         for (int k = 0; k < dim; k++) {
@@ -118,9 +138,10 @@ double complex sum_fourier(double nu, short dim, double lambda, const double *m_
             lv[i] = lv[i] + y[i];
         }
         double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
-        s2 += rot * crandall_g(dim, dim - nu, lv, lambda, zArgBound);
+        s2[n] = rot * crandall_g(dim, dim - nu, lv, lambda, zArgBound);
     }
     // skips zero
+    s2[zeroIndex] = 0;
     for (long n = zeroIndex + 1; n < totalSummands; n++) {
         for (int k = 0; k < dim; k++) {
             zv[k] = ((n / totalCutoffs[k]) % (2 * cutoffs[k] + 1)) - cutoffs[k];
@@ -130,9 +151,9 @@ double complex sum_fourier(double nu, short dim, double lambda, const double *m_
             lv[i] = lv[i] + y[i];
         }
         double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
-        s2 += rot * crandall_g(dim, dim - nu, lv, lambda, zArgBound);
+        s2[n] = rot * crandall_g(dim, dim - nu, lv, lambda, zArgBound);
     }
-    return s2;
+    return kahanSum(s2, totalSummands);
 }
 
 /**
