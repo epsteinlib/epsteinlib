@@ -26,7 +26,7 @@
  * gammaStar is the twice regularized lower incomplete gamma function
  * gamma(s,x) / (gamma(s) * x ** s)
  */
-double complex crandall_gReg(int dim, double nu, const double *z, double prefactor);
+double complex crandall_gReg(unsigned int dim, double nu, const double *z, double prefactor);
 
 /**
  * @brief calculates bounds on when to use asymptotic expansion of the
@@ -48,6 +48,6 @@ double assignzArgBound(double nu);
  * @return upperGamma(nu/2,pi prefactor * z**2)
  *      / (pi * prefactor z**2)^(nu / 2) in
  */
-double complex crandall_g(int dim, double nu, const double *z, double prefactor,
+double complex crandall_g(unsigned int dim, double nu, const double *z, double prefactor,
                           double zArgBound);
 #endif

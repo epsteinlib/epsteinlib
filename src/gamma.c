@@ -149,10 +149,14 @@ double egf_qt(double a, double x) {
         double u2 = 0;
         double y = a * log(x);
         f = 1;
-        for (int n = 1; n <= 30; n++) {
-            f /= (double)n;
-            u2 += f;
-            f *= y;
+        if(fabs(y) < 1) {
+            for (int n = 1; n <= 30; n++) {
+                f /= (double)n;
+                u2 += f;
+                f *= y;
+            }
+        } else {
+            u2 = (exp(y) - 1) / y;
         }
         u = tgamma(1 + a) * (1 - a) * u1 - u2 * log(x);
     } else {

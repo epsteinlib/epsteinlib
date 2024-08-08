@@ -25,7 +25,7 @@
  * @param[in] v2: second vector.
  * @return dot product of v1 and v2.
  */
-double dot(int dim, const double *v1, const double *v2) {
+double dot(unsigned int dim, const double *v1, const double *v2) {
     double r = 0;
     for (int i = 0; i < dim; i++) {
         r += v1[i] * v2[i];
@@ -40,7 +40,7 @@ double dot(int dim, const double *v1, const double *v2) {
  * @param[in] v: integer vector.
  * @param[in,out] res: solution vector of the vector matrix multiplication.
  */
-void matrix_intVector(int dim, const double *m, const int *v, double *res) {
+void matrix_intVector(unsigned int dim, const double *m, const int *v, double *res) {
     for (int i = 0; i < dim; i++) {
         res[i] = 0;
         for (int j = 0; j < dim; j++) {
@@ -54,7 +54,7 @@ void matrix_intVector(int dim, const double *m, const int *v, double *res) {
  * @param[in] dim: dimension of the square matrix.
  * @param[in,out] m: square matrix.
  */
-void transpose(int dim, double *m) {
+void transpose(unsigned int dim, double *m) {
     double swap;
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < i; j++) {
@@ -72,7 +72,7 @@ void transpose(int dim, double *m) {
  * @param[in] v2: second vector.
  * @return true if the vectors are equal, false if the vectors are not equal.
  */
-bool equals(int dim, const double *v1, const double *v2) {
+bool equals(unsigned int dim, const double *v1, const double *v2) {
     bool eq = true;
     for (int i = 0; i < dim && eq; i++) {
         eq = eq && fabs(v1[i] - v2[i]) < EPS;
@@ -86,7 +86,7 @@ bool equals(int dim, const double *v1, const double *v2) {
  * @param[in] v: vector.
  * @return true if the vector is zero.
  */
-bool equalsZero(int dim, const double *v) {
+bool equalsZero(unsigned int dim, const double *v) {
     bool eq = true;
     for (int i = 0; i < dim && eq; i++) {
         eq = eq && fabs(v[i]) < EPS;
