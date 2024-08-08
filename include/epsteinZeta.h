@@ -31,7 +31,7 @@
  * @param[in] y: y vector of the Epstein Zeta function.
  * @return function value of the regularized Epstein zeta.
  */
-double complex epsteinZeta(double nu, int dim, const double *a, const double *x,
+double complex epsteinZeta(double nu, unsigned int dim, const double *a, const double *x,
                            const double *y);
 
 /**
@@ -43,7 +43,7 @@ double complex epsteinZeta(double nu, int dim, const double *a, const double *x,
  * @param[in] y: y vector of the Epstein Zeta function.
  * @return function value of the regularized Epstein zeta.
  */
-double complex epsteinZetaReg(double nu, int dim, const double *a, const double *x,
+double complex epsteinZetaReg(double nu, unsigned int dim, const double *a, const double *x,
                               const double *y);
 
 #ifndef EPSTEIN_CRANDALL
@@ -59,7 +59,7 @@ double complex epsteinZetaReg(double nu, int dim, const double *a, const double 
  * @return upperGamma(nu/2,pi prefactor * z**2)
  *      / (pi * prefactor z**2)^(nu / 2) in
  */
-double crandall_g(int dim, double nu, const double *z, double prefactor,
+double crandall_g(unsigned int dim, double nu, const double *z, double prefactor,
                   double zArgBound);
 
 /**
@@ -73,6 +73,6 @@ double crandall_g(int dim, double nu, const double *z, double prefactor,
  * gammaStar is the twice regularized lower incomplete gamma function
  * gamma(s,x) / (gamma(s) * x ** s)
  */
-double crandall_gReg(int dim, double nu, const double *z, double prefactor);
+double crandall_gReg(unsigned int dim, double nu, const double *z, double prefactor);
 #endif
 #endif

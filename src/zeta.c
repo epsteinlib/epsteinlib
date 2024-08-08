@@ -35,26 +35,6 @@
 #define EPS ldexp(1, -30)
 
 /**
- * @brief calculates the kahan sum of input array.
- * @param[in] s: array containing the summands.
- * @param[in] totalSummands: length of array of summands.
- * @return total of array s.
- */
-double complex kahanSum(const double complex *s, long totalSummands) {
-    double complex sum = 0.0;
-    double complex epsilon = 0.0;
-    double complex auxt;
-    double complex auxy;
-    for (int n = 0; n < totalSummands; n++) {
-        auxy = s[n] - epsilon;
-        auxt = sum + auxy;
-        epsilon = (auxt - sum) - auxy;
-        sum = auxt;
-    }
-    return sum;
-}
-
-/**
  * @brief calculates the first sum in Crandall's formula.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
@@ -70,7 +50,7 @@ double complex kahanSum(const double complex *s, long totalSummands) {
  * sum_{z in m whole_numbers ** dim} G_{nu}((z - x) / lambda))
  * X exp(2 * PI * I * z * y)
  */
-double complex sum_real(double nu, short dim, double lambda, const double *m,
+double complex sum_real(double nu, unsigned int dim, double lambda, const double *m,
                         const double *x, const double *y, const int cutoffs[],
                         double zArgBound) {
     int zv[dim];    // counting vector in Z^dim
@@ -81,8 +61,11 @@ double complex sum_real(double nu, short dim, double lambda, const double *m,
     for (int k = 0; k < dim; k++) {
         totalCutoffs[k] = totalSummands;
         totalSummands *= 2 * cutoffs[k] + 1;
-    };
-    double complex s1[totalSummands];
+    }
+    double complex sum = 0.0;
+    double complex epsilon = 0.0;
+    double complex auxt;
+    double complex auxy;
     // First Sum (in real space)
     for (long n = 0; n < totalSummands; n++) {
         for (int k = 0; k < dim; k++) {
@@ -93,9 +76,13 @@ double complex sum_real(double nu, short dim, double lambda, const double *m,
         for (int i = 0; i < dim; i++) {
             lv[i] = (lv[i] - x[i]) / lambda;
         }
-        s1[n] = rot * crandall_g(dim, nu, lv, 1, zArgBound);
+        //summing using Kahan's method
+        auxy = rot * crandall_g(dim, nu, lv, 1, zArgBound) - epsilon;
+        auxt = sum + auxy;
+        epsilon = (auxt - sum) - auxy;
+        sum = auxt;
     }
-    return kahanSum(s1, totalSummands);
+    return sum;
 }
 
 /**
@@ -114,7 +101,7 @@ double complex sum_real(double nu, short dim, double lambda, const double *m,
  * sum_{k in m_invt whole_numbers ** dim without zero} G_{dim - nu}(lambda * (k + y))
  * X exp(2 * PI * I * x * k)
  */
-double complex sum_fourier(double nu, short dim, double lambda, const double *m_invt,
+double complex sum_fourier(double nu, unsigned int dim, double lambda, const double *m_invt,
                            const double *x, const double *y, const int cutoffs[],
                            double zArgBound) {
     int zv[dim];    // counting vector in Z^dim
@@ -127,7 +114,10 @@ double complex sum_fourier(double nu, short dim, double lambda, const double *m_
         totalSummands *= 2 * cutoffs[k] + 1;
     };
     long zeroIndex = (totalSummands - 1) / 2;
-    double complex s2[totalSummands];
+    double complex sum = 0.0;
+    double complex epsilon = 0.0;
+    double complex auxt;
+    double complex auxy;
     // second sum (in fourier space)
     for (long n = 0; n < zeroIndex; n++) {
         for (int k = 0; k < dim; k++) {
@@ -138,10 +128,12 @@ double complex sum_fourier(double nu, short dim, double lambda, const double *m_
             lv[i] = lv[i] + y[i];
         }
         double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
-        s2[n] = rot * crandall_g(dim, dim - nu, lv, lambda, zArgBound);
+        auxy = rot * crandall_g(dim, dim - nu, lv, lambda, zArgBound) - epsilon;
+        auxt = sum + auxy;
+        epsilon = (auxt - sum) - auxy;
+        sum = auxt;
     }
     // skips zero
-    s2[zeroIndex] = 0;
     for (long n = zeroIndex + 1; n < totalSummands; n++) {
         for (int k = 0; k < dim; k++) {
             zv[k] = ((n / totalCutoffs[k]) % (2 * cutoffs[k] + 1)) - cutoffs[k];
@@ -151,9 +143,12 @@ double complex sum_fourier(double nu, short dim, double lambda, const double *m_
             lv[i] = lv[i] + y[i];
         }
         double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
-        s2[n] = rot * crandall_g(dim, dim - nu, lv, lambda, zArgBound);
+        auxy = rot * crandall_g(dim, dim - nu, lv, lambda, zArgBound) - epsilon;
+        auxt = sum + auxy;
+        epsilon = (auxt - sum) - auxy;
+        sum = auxt;
     }
-    return kahanSum(s2, totalSummands);
+    return sum;
 }
 
 /**
@@ -165,7 +160,7 @@ double complex sum_fourier(double nu, short dim, double lambda, const double *m_
  * is needet.
  * @return projection of v to the elementary lattice cell.
  */
-double *vectorProj(short dim, const double *m, const double *m_invt,
+double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
                    const double *v) {
     bool todo = false;
     double *vt = malloc(dim * sizeof(double));
@@ -211,7 +206,7 @@ double *vectorProj(short dim, const double *m, const double *m_invt,
  * @param[in] regBool: 0 for no regularization, > 0 for the regularization.
  * @return function value of the regularized Epstein zeta.
  */
-double complex epsteinZetaInternal(double nu, int dim, const double *m,
+double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
                                    const double *x, const double *y, double lambda,
                                    int reg) {
     // 1. Transform: Compute determinant and fourier transformed matrix, scale

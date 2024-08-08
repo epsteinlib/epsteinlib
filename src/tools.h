@@ -13,9 +13,9 @@
 #ifndef EPSTEIN_TOOLS
 #define EPSTEIN_TOOLS
 #include <stdbool.h>
-double dot(int dim, const double *v1, const double *v2);
-void matrix_intVector(int dim, const double *m, const int *v, double *res);
-void transpose(int dim, double *m);
-bool equals(int dim, const double *v1, const double *v2);
-bool equalsZero(int dim, const double *v);
+double dot(unsigned int dim, const double *v1, const double *v2);
+void matrix_intVector(unsigned int dim, const double *m, const int *v, double *res);
+void transpose(unsigned int dim, double *m);
+bool equals(unsigned int dim, const double *v1, const double *v2);
+bool equalsZero(unsigned int dim, const double *v);
 #endif

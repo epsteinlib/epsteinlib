@@ -25,7 +25,7 @@
  * @param[in] regBool: 0 for no regularization, > 0 for the regularization.
  * @return function value of the regularized Epstein zeta.
  */
-double complex epsteinZetaInternal(double nu, int dim, const double *m,
+double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
                                    const double *x, const double *y, double lambda,
                                    int regBool);
 #endif
