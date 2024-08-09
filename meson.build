@@ -12,12 +12,6 @@ cc = meson.get_compiler('c')
 deps = []
 deps += cc.find_library('m', required : true)
 
-lapacke = dependency('lapacke', version : '>=3', required: false)
-if not lapacke.found()
-    lapacke = cc.find_library('lapacke', required : true)
-endif
-deps += lapacke
-
 incdir = include_directories('include')
 
 override_options = []

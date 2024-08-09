@@ -9,7 +9,7 @@ in
     std = {...}: {
       name = "epstein devshell";
       imports = [std.std.devshellProfiles.default];
-      packages = with nixpkgs; [git meson ninja pkg-config lapack doxygen_gui];
+      packages = with nixpkgs; [git meson ninja pkg-config doxygen_gui];
 
       commands = [
         {

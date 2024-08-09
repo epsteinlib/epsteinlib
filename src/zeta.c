@@ -11,12 +11,9 @@
  */
 
 #include <complex.h>
-#include <lapacke.h>
 #include <math.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 #include "crandall.h"
 #include "tools.h"
@@ -69,7 +66,8 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
     // First Sum (in real space)
     for (long n = 0; n < totalSummands; n++) {
         for (int k = 0; k < dim; k++) {
-            zv[k] = ((n / totalCutoffs[k]) % (2 * cutoffs[k] + 1)) - cutoffs[k];
+            zv[k] =
+                (((int)(n / totalCutoffs[k])) % (2 * cutoffs[k] + 1)) - cutoffs[k];
         }
         matrix_intVector(dim, m, zv, lv);
         double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
@@ -121,7 +119,8 @@ double complex sum_fourier(double nu, unsigned int dim, double lambda,
     // second sum (in fourier space)
     for (long n = 0; n < zeroIndex; n++) {
         for (int k = 0; k < dim; k++) {
-            zv[k] = ((n / totalCutoffs[k]) % (2 * cutoffs[k] + 1)) - cutoffs[k];
+            zv[k] =
+                (((int)(n / totalCutoffs[k])) % (2 * cutoffs[k] + 1)) - cutoffs[k];
         }
         matrix_intVector(dim, m_invt, zv, lv);
         for (int i = 0; i < dim; i++) {
@@ -136,7 +135,8 @@ double complex sum_fourier(double nu, unsigned int dim, double lambda,
     // skips zero
     for (long n = zeroIndex + 1; n < totalSummands; n++) {
         for (int k = 0; k < dim; k++) {
-            zv[k] = ((n / totalCutoffs[k]) % (2 * cutoffs[k] + 1)) - cutoffs[k];
+            zv[k] =
+                (((int)(n / totalCutoffs[k])) % (2 * cutoffs[k] + 1)) - cutoffs[k];
         }
         matrix_intVector(dim, m_invt, zv, lv);
         for (int i = 0; i < dim; i++) {
@@ -206,9 +206,9 @@ double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
  * @param[in] regBool: 0 for no regularization, > 0 for the regularization.
  * @return function value of the regularized Epstein zeta.
  */
-double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
-                                   const double *x, const double *y, double lambda,
-                                   int reg) {
+double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
+                                   const double *m, const double *x, const double *y,
+                                   double lambda, int reg) {
     // 1. Transform: Compute determinant and fourier transformed matrix, scale
     // both of them
     double m_fourier[dim * dim];
@@ -222,11 +222,10 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
         for (int j = 0; j < dim; j++) {
             m_copy[dim * i + j] = m[dim * i + j];
             m_real[dim * i + j] = m[dim * i + j];
-            m_fourier[dim * i + j] = (i == j) ? 1 : 0;
             isDiagonal = isDiagonal && ((i == j) || (m[dim * i + j] == 0));
         }
     }
-    LAPACKE_dgesv(LAPACK_ROW_MAJOR, dim, dim, m_copy, dim, p, m_fourier, dim);
+    invert(dim, m_copy, p, m_fourier);
     double vol = 1;
     for (int k = 0; k < dim; k++) {
         vol *= m_copy[dim * k + k];
@@ -257,23 +256,10 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
         }
     } else {
         // choose cutoff depending on smallest and biggest abs eigenvalue
-        double m_ev[dim];
-        double m_aux[dim];
-        for (int i = 0; i < dim; i++) {
-            for (int j = 0; j < dim; j++) {
-                m_copy[dim * i + j] = m_real[dim * i + j];
-            }
-        }
-        LAPACKE_dgeev(LAPACK_ROW_MAJOR, 'N', 'N', dim, m_copy, dim, m_ev, m_aux,
-                      NULL, dim, NULL, dim);
-        double ev_abs_min = fabs(m_ev[0]);
-        double ev_abs_max = fabs(m_ev[0]);
-        for (int k = 1; k < dim; k++) {
-            ev_abs_min = (fabs(m_ev[k]) < ev_abs_min) ? fabs(m_ev[k]) : ev_abs_min;
-            ev_abs_max = (fabs(m_ev[k]) > ev_abs_max) ? fabs(m_ev[k]) : ev_abs_max;
-        }
+        double ev_abs_max = inf_norm(dim, m_real);
+        double ev_abs_min_r = inf_norm(dim, m_fourier);
         for (int k = 0; k < dim; k++) {
-            cutoffsReal[k] = floor(cutoff_id / ev_abs_min);
+            cutoffsReal[k] = floor(cutoff_id * ev_abs_min_r);
             cutoffsFourier[k] = floor(cutoff_id * ev_abs_max);
         }
     }
@@ -287,7 +273,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
         }
     } else if (fabs(nu - dim) < EPS && equalsZero(dim, y_t2)) {
         res = NAN;
-
     } else {
         double zArgBound = assignzArgBound(nu);
         double complex s1;
@@ -328,11 +313,11 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
                              zArgBound) +
                  nc;
         }
-        free(x_t2);
-        free(y_t2);
         res = xfactor * pow(lambda * lambda / M_PI, -nu / 2.) / tgamma(nu / 2.) *
               (s1 + pow(lambda, dim) * s2);
     }
+    free(x_t2);
+    free(y_t2);
     return pow(ms, nu) * res;
 }
 #undef G_BOUND

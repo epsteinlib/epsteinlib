@@ -9,7 +9,7 @@
     src = inputs.self;
     outputs = ["out" "dev"];
 
-    nativeBuildInputs = with pkgs; [meson ninja pkg-config lapack];
+    nativeBuildInputs = with pkgs; [meson ninja pkg-config];
     buildInputs = [];
     mesonBuildType = buildtype;
 
