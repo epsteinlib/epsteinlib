@@ -31,8 +31,8 @@
  * @param[in] y: y vector of the Epstein Zeta function.
  * @return function value of the regularized Epstein zeta.
  */
-double complex epsteinZeta(double nu, unsigned int dim, const double *a, const double *x,
-                           const double *y);
+double complex epsteinZeta(double nu, unsigned int dim, const double *a,
+                           const double *x, const double *y);
 
 /**
  * @brief calculates the regularized Epstein zeta function.
@@ -43,8 +43,8 @@ double complex epsteinZeta(double nu, unsigned int dim, const double *a, const d
  * @param[in] y: y vector of the Epstein Zeta function.
  * @return function value of the regularized Epstein zeta.
  */
-double complex epsteinZetaReg(double nu, unsigned int dim, const double *a, const double *x,
-                              const double *y);
+double complex epsteinZetaReg(double nu, unsigned int dim, const double *a,
+                              const double *x, const double *y);
 
 #ifndef EPSTEIN_CRANDALL
 

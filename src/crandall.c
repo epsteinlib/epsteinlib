@@ -32,7 +32,8 @@
  * gammaStar is the twice regularized lower incomplete gamma function
  * gamma(s,x) / (gamma(s) * x ** s)
  */
-double complex crandall_gReg(unsigned int dim, double nu, const double *z, double prefactor) {
+double complex crandall_gReg(unsigned int dim, double nu, const double *z,
+                             double prefactor) {
     double complex zArgument = dot(dim, z, z);
     zArgument *= M_PI * prefactor * prefactor;
     return -tgamma(nu / 2) * egf_gammaStar(nu / 2, zArgument);
@@ -75,8 +76,8 @@ double assignzArgBound(double nu) {
  * @return upperGamma(nu/2,pi prefactor * z**2)
  *      / (pi * prefactor z**2)^(nu / 2) in
  */
-double complex crandall_g(unsigned int dim, double nu, const double *z, double prefactor,
-                          double zArgBound) {
+double complex crandall_g(unsigned int dim, double nu, const double *z,
+                          double prefactor, double zArgBound) {
     double zArgument = dot(dim, z, z);
     zArgument *= M_PI * prefactor * prefactor;
 
