@@ -149,7 +149,7 @@ double egf_qt(double a, double x) {
         double u2 = 0;
         double y = a * log(x);
         f = 1;
-        if(fabs(y) < 1) {
+        if (fabs(y) < 1) {
             for (int n = 1; n <= 30; n++) {
                 f /= (double)n;
                 u2 += f;

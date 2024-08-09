@@ -76,7 +76,7 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
         for (int i = 0; i < dim; i++) {
             lv[i] = (lv[i] - x[i]) / lambda;
         }
-        //summing using Kahan's method
+        // summing using Kahan's method
         auxy = rot * crandall_g(dim, nu, lv, 1, zArgBound) - epsilon;
         auxt = sum + auxy;
         epsilon = (auxt - sum) - auxy;
@@ -101,9 +101,9 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
  * sum_{k in m_invt whole_numbers ** dim without zero} G_{dim - nu}(lambda * (k + y))
  * X exp(2 * PI * I * x * k)
  */
-double complex sum_fourier(double nu, unsigned int dim, double lambda, const double *m_invt,
-                           const double *x, const double *y, const int cutoffs[],
-                           double zArgBound) {
+double complex sum_fourier(double nu, unsigned int dim, double lambda,
+                           const double *m_invt, const double *x, const double *y,
+                           const int cutoffs[], double zArgBound) {
     int zv[dim];    // counting vector in Z^dim
     double lv[dim]; // lattice vector
     // cuboid cutoffs
