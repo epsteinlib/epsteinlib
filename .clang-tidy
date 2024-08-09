@@ -1,0 +1,2 @@
+Checks:          'clang-diagnostic-*,clang-analyzer-*,bugprone-*,clang-analyzer-*,cert-*,concurrency-*,misc-*,modernize-*,performance-*,portability-*,readability-*,-readability-identifier-length,-readability-magic-numbers,-bugprone-easily-swappable-parameters'
+WarningsAsErrors: '*'

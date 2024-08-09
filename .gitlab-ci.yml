@@ -24,12 +24,9 @@ default:
      - |
       if [ "$OS" == "linux" ]; then
         apk update
-        apk add build-base pkgconf meson lapack-dev
+        apk add build-base pkgconf meson
       else if [ "$OS" == "darwin" ]; then
-        brew install meson ninja pkg-config lapack
-        export PKG_CONFIG_PATH='/usr/local/opt/lapack/lib/pkgconfig'
-        export LDFLAGS='-L/usr/local/opt/lapack/lib'
-        export CPPFLAGS='-I/usr/local/opt/lapack/include'
+        brew install meson ninja pkg-config
       else
         echo "OS '$OS' not handled yet."
       fi

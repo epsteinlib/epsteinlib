@@ -18,4 +18,6 @@ void matrix_intVector(unsigned int dim, const double *m, const int *v, double *r
 void transpose(unsigned int dim, double *m);
 bool equals(unsigned int dim, const double *v1, const double *v2);
 bool equalsZero(unsigned int dim, const double *v);
+void invert(unsigned int dim, double *m, int *p, double *r);
+double inf_norm(unsigned int dim, const double *m);
 #endif

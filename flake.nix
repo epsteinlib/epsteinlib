@@ -58,10 +58,7 @@
             hooks = {
               # C
               clang-format.enable = true;
-              clang-tidy = {
-                enable = true;
-                entry = "${_module.args.pkgs.clang-tools}/bin/clang-tidy --fix -checks=bugprone-*,clang-analyzer-*,cert-*,concurrency-*,misc-*,modernize-*,performance-*,portability-*,readability-*,-readability-identifier-length,-readability-magic-numbers,-bugprone-easily-swappable-parameters";
-              };
+              clang-tidy.enable = true;
 
               # Nix
               alejandra.enable = true;
