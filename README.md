@@ -27,9 +27,9 @@ which can be meromorphically continued to $\nu \in \mathbb C$. Here, the primed 
 The Epstein zeta function is implemented in this library as
 
 ```c
-double complex epsteinZeta(double nu, int dim, double *A, double *x, double *y);
+double complex epsteinZeta(double nu, unsigned int dim, const double *A, const double *x, const double *y);
 ```
-and evalutates to full precision over the whole parameter range for $\nu \in (-10,10)$.
+and evalutates to full precision over the whole parameter range up to ten dimensions.
 
 In addition, this library includes the regularized Epstein zeta function, which is analytic around $y=0$, and is defined via 
 $$
@@ -47,7 +47,7 @@ is the distributional Fourier transform of $\vert z \vert^{-\nu}$, where $\Gamma
 
 In this library, the regularized Epstein zeta function is included as
 ```c
-double complex epsteinZetaReg(double nu, int dim, double *A, double *x, double *y);
+double complex epsteinZetaReg(double nu, unsigned int dim, const double *A, const double *x, const double *y);
 ```
 
 ## Installation with meson
@@ -114,7 +114,7 @@ int main() {
 
     // Madelung constant found in literature
     double madelungRef = -1.7475645946331821906362120355443974;
-    int dim = 3;
+    unsigned int dim = 3;
     double m[] = {1, 0, 0, 0, 1,
                   0, 0, 0, 1};    // identity matrix for whole numbers
     double x[] = {0, 0, 0};       // no shift
