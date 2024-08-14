@@ -948,7 +948,9 @@ IMAGE_PATH             =
 # need to set EXTENSION_MAPPING for the extension otherwise the files are not
 # properly processed by doxygen.
 
-INPUT_FILTER           =
+# This sed command replaces single $ by \f$, since that is the only way doxygen
+# supports inline math. See https://github.com/doxygen/doxygen/issues/8009
+INPUT_FILTER           = "sed -E 's/ \$/ \\f\$/g;s/([^f\$])\$/\1\\f\$/g'"
 
 # The FILTER_PATTERNS tag can be used to specify filters on a per file pattern
 # basis. Doxygen will compare the file name with each pattern and apply the
