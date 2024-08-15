@@ -3,4 +3,5 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
+zeta_include = include_directories('.')
 install_headers('epsteinZeta.h')

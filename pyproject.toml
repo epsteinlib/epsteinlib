@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: 2024 Jan Schmitz <schmitz@num.uni-sb.de>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+[build-system]
+build-backend = 'mesonpy'
+requires = ['meson-python', 'cython']
+
+[project]
+name = 'epsteinlib'
+version = '0.3.0'
+dependencies = [
+  "numpy",
+]
+description = 'Python wrapper for epsteinlib'
+readme = 'README.md'
+requires-python = '>=3.8'
+license = {file = 'LICENSES/AGPL-3.0-only.txt'}
+authors = [
+  {name = 'Jan Schmitz', email = 'schmitz@num.uni-sb.de'},
+  {name = 'Jonathan Busse', email = 'jonathan.busse@dlr.de'},
+  {name = 'Ruben Gutendorf', email = 'ruben.gutendorf@uni-saarland.de'},
+  {name = 'Andreas Buchheit', email = 'buchheit@num.uni-sb.de'},
+]
+keywords = ["math", "scientific", "research"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+
+    "Intended Audience :: Developers",
+
+    "Programming Language :: Python :: 3",
+    "Programming Language :: C",
+    "Programming Language :: Cython",
+
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+
+    "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://epsteinlib.github.io/epsteinlib"
+Documentation = "https://epsteinlib.github.io/epsteinlib"
+Repository = "https://github.com/epsteinlib/epsteinlib"
+Issues = "https://github.com/epsteinlib/epsteinlib/issues"
+Changelog = "https://github.com/epsteinlib/epsteinlib/blob/master/CHANGELOG.md"
+
+[tool.black]
+line-length = 79

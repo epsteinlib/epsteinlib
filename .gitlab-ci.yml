@@ -24,14 +24,16 @@ default:
      - |
       if [ "$OS" == "linux" ]; then
         apk update
-        apk add build-base pkgconf meson
+        apk add build-base pkgconf meson python3-dev
       else if [ "$OS" == "darwin" ]; then
-        brew install meson ninja pkg-config
+        brew install meson ninja pkg-config python3
       else
         echo "OS '$OS' not handled yet."
       fi
       fi
-
+      # Prepare Python venv
+      python3 -m venv .venv
+      source .venv/bin/activate
 
 build:
   stage: build
@@ -51,6 +53,7 @@ build-manually:
     - .default_template
     - .before_script_template
   script:
+    - python3 -m pip install -r python/requirements.txt
     - meson setup build -Dbuildtype=release
     - meson compile -C build
   artifacts:
@@ -59,6 +62,13 @@ build-manually:
     paths:
       - build/
 
+pip-install:
+  stage: build
+  extends:
+    - .default_template
+    - .before_script_template
+  script:
+    - python3 -m pip install .
 
 build-docs:
   stage: build
@@ -71,6 +81,18 @@ build-docs:
       - html/
   tags: 
     - nix
+  dependencies: []
+
+tests:
+  stage: test
+  extends: .default_template
+  script:
+    - nix develop -c tests
+  artifacts:
+    name: 'coverage_report'
+    expose_as: 'Coverage Report'
+    paths:
+      - html/
   dependencies: []
 
 flake-check:
@@ -110,7 +132,7 @@ meson-test:
     - .before_script_template
   script:
     - !reference [build-manually, script]
-    - meson test -C build
+    - meson test -v -C build
   # Not supported in gitlab right now...
   # https://forum.gitlab.com/t/ci-specifying-artifact-dependencies-when-using-parallel-matrix/45026/6
   #needs:

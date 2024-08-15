@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: 2024 Jan Schmitz <schmitz@num.uni-sb.de>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+[tool.pylint.main]
+extension-pkg-allow-list = epsteinlib
+
+
+[TYPECHECK]
+ignored-modules=cython

@@ -3,5 +3,5 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-zeta_src = ['zeta.c', 'gamma.c', 'tools.c', 'crandall.c', 'epsteinZeta.c']
+zeta_src = files('zeta.c', 'gamma.c', 'tools.c', 'crandall.c', 'epsteinZeta.c')
 epsteinZetalib = library('epsteinZeta', zeta_src, include_directories : incdir, dependencies: deps, install: true, override_options: override_options)
