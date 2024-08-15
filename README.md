@@ -18,10 +18,12 @@ Contact: buchheit@num.uni-sb.de
 EpsteinLib is a C library for the fast and efficient computation of the Epstein zeta function for arbitary multidimensional lattices. Originally studied by Epstein [1,2], it forms the basis for the computation of general multidimensional lattice sums in classical and quantum physics applications [3]. Together with its regularization, it serves as the central ingredient in the singular Euler-Maclaurin (SEM) expansion, which generalizes the 300-year-old Euler summation formula to lattice sums in higher dimensions with physically relevant power-law interactions [4-5]. An efficiently computable representation of the Epstein zeta function is provided in [6,7].
 
 For a $d$-dimensional lattice $\Lambda=A\mathbb Z^d$, with $A\in \mathbb R^{d\times d}$ regular, $x,y \in \mathbb R^d$, and $\nu \in \mathbb C$, the Epstein zeta function is defined by the Dirichlet series
+
 $$
 Z_{\Lambda,\nu}\begin{vmatrix} x \\ y \end{vmatrix}
 = \sum_{z \in \Lambda}{}^{'} \frac{e^{-2\pi i  y \cdot  z}}{\left| x-  z\right|^\nu},\quad \mathrm{Re}(\nu)>d,
 $$
+
 which can be meromorphically continued to $\nu \in \mathbb C$. Here, the primed sum excludes the case $z = x.$
 
 The Epstein zeta function is implemented in this library as
@@ -35,18 +37,22 @@ def epstein_zeta(nu: float | int, A: NDArray[np.float64], x: NDArray[np.float64]
 ```
 and evalutates to full precision over the whole parameter range up to ten dimensions.
 
-In addition, this library includes the regularized Epstein zeta function, which is analytic around $y=0$, and is defined via 
+In addition, this library includes the regularized Epstein zeta function, which is analytic around $y=0$, and is defined via
+
 $$
 Z_{\Lambda,\nu}^{\mathrm{reg}}\begin{vmatrix} x \\ y \end{vmatrix} =
 e^{2\pi i x\cdot y}
 Z_{\Lambda,\nu}\left|\begin{aligned} x \\ y \end{aligned}\right| 
 -\frac{\hat{s}(y)}{V_{\Lambda}},
 $$
-where $V_{\Lambda}=|\det A|$ is the volume of the elementary lattice cell, 
+
+where $V_{\Lambda}=|\det A|$ is the volume of the elementary lattice cell,
+
 $$
 \hat{s}(y)=-\pi^{\nu-\frac{d}{2}}
 	\frac{\Gamma((d-\nu)/2)}{\Gamma(\nu/2)}|y|^{\nu-d}
 $$
+
 is the distributional Fourier transform of $\vert z \vert^{-\nu}$, where $\Gamma$ denotes the gamma function.
 
 In this library, the regularized Epstein zeta function is included as
