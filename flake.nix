@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2024 Jan Schmitz <schmitz@num.uni-sb.de>
+#
+# SPDX-License-Identifier: AGPL-3.0-only
 {
   outputs = {
     self,
@@ -91,6 +94,14 @@
                   locale = "en-us";
                 };
               };
+
+              # Python
+              black.enable = true;
+              mypy.enable = true;
+              pylint.enable = true;
+
+              # Misc
+              reuse.enable = true;
             };
           };
         };
@@ -121,6 +132,8 @@
             clang-format.enable = true;
             # Nix
             alejandra.enable = true;
+            # Python
+            black.enable = true;
           };
         };
       };

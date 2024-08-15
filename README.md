@@ -7,9 +7,9 @@ SPDX-FileCopyrightText: 2024 Ruben Gutendorf <ruben.gutendorf@uni-saarland.de>
 SPDX-License-Identifier: AGPL-3.0-only
 -->
 
-## EpsteinLib
+# EpsteinLib
 
-Experimental alpha version 0.1.0
+Experimental alpha version
 
 Authors: Andreas A. Buchheit, Jonathan Busse, Ruben Gutendorf, DevOps: Jan Schmitz
 
@@ -28,6 +28,10 @@ The Epstein zeta function is implemented in this library as
 
 ```c
 double complex epsteinZeta(double nu, unsigned int dim, const double *A, const double *x, const double *y);
+```
+or
+```python
+def epstein_zeta(nu: float | int, A: NDArray[np.float64], x: NDArray[np.float64], y: NDArray[np.float64]) -> complex
 ```
 and evalutates to full precision over the whole parameter range up to ten dimensions.
 
@@ -49,23 +53,40 @@ In this library, the regularized Epstein zeta function is included as
 ```c
 double complex epsteinZetaReg(double nu, unsigned int dim, const double *A, const double *x, const double *y);
 ```
+or
+```python
+def epstein_zeta_reg(nu: float | int, A: NDArray[np.float64], x: NDArray[np.float64], y: NDArray[np.float64]) -> complex
+```
 
-## Installation with meson
-
-
-1. Install meson, ninja, pkg-config, e.g. with 
+## Installation
+Install our required dependencies: meson, ninja, pkg-config, python3 e.g. with
 ```bash
 # Archlinux
-pacman -S meson ninja pkgconf
+pacman -S meson ninja pkgconf python
 
 # MacOS
-brew install meson ninja pkg-config
+brew install meson ninja pkg-config python3
 ```
-2. `cd <path/to/repo>`
+
+### Installing only the Python wrapper with pip
+```bash
+# Create a virtualenvironment and activate it if you are not already inside one.
+python3 -m venv .venv && source .venv/bin/activate
+# Install epsteinlib
+python -m pip install epsteinlib
+```
+
+### Installing the C library and the Python wrapper with meson
+1. git clone https://github.com/epsteinlib/epsteinlib.git
+2. `cd epsteinlib`
 3. `meson setup build`
 4. `meson compile -C build`
 5. To test the library, run `meson test -C build`
-### For system-wide installation
+
+Proceed either with system-wide or local installation
+
+<details><summary>System-wide installation</summary>
+
 Meson supports a system-wide installation of the compiled library. After that, you can use `#include <epsteinZeta.h>` and link with `gcc -lepsteinZeta`. This may require superuser rights.
 
 6. To install system-wide: `meson install -C build`.
@@ -80,8 +101,10 @@ export $LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/path/to/library
 # MacOS
 export $DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/path/to/library
 ```
+</details>
 
-### For local installation
+<details><summary>Local installation</summary>
+
 6. Copy the header `include/epsteinZeta.h` and move the compiled library `build/src/libepsteinZeta.so` to places of your choice, e. g.
 ```bash
 cp include/epsteinZeta.h /your/path/to/include
@@ -89,17 +112,15 @@ mv build/src/libepsteinZeta.so /your/path/to/library
 ```
 7. To test your library, try to compile `test/lattice_sum.c` with the command `gcc -o lattice_sum lattice_sum.c -lm -L/your/path/to/library -lepsteinZeta -I/your/path/to/include`.
 
-## View api documentation
+</details>
 
-1. install [doxygen](https://www.doxygen.nl/manual/install.html)
-2. `cd <path/to/repo>`
-3. `doxygen`
-4. open `html/index.html` in browser
+## View api documentation
+See https://epsteinlib.github.io/epsteinlib/
 
 ## Usage
 
 Minimal working examples for calculating the Madelung constant in $3$ dimensions.
-### in c
+### in C
 ``` c
 // If the library is installed, compile with `gcc -o lattice_sum lattice_sum.c -lm -lepsteinZeta 
 // If the library is not installed, compile with `gcc -o lattice_sum lattice_sum.c -lm -L/path/to/library -lepsteinZeta -I/path/to/include
@@ -129,7 +150,84 @@ int main() {
     return fabs(madelung - madelungRef) > pow(10, -14);
 }
 ```
+### in Python 
 
+```py
+import numpy as np
+from epsteinlib import epstein_zeta
+
+madelung_ref = -1.7475645946331821906362120355443974
+dim = 3
+a = np.identity(dim)            # identity matrix for whole numbers
+x = np.zeros(dim)               # no shift
+y = np.full(dim, 0.5)           # alternating sum
+nu = 1.0
+madelung = np.real(epstein_zeta(nu, a, x, y))
+print(f"Madelung sum in 3 dimensions:\t {madelung:.16f}")
+print(f"Reference value:\t\t {madelung_ref:.16f}")
+print(f"Relative error:\t\t\t +{abs(madelung_ref - madelung) / abs(madelung_ref):.2e}")
+```
+
+## Development environment
+We provide a nix devshell to have a reproducible development environment with the same dependencies across different operating systems. Once you have installed and configured nix starting developing is as easy as running `nix develop`.
+
+<details><summary>Nix installation instructions</summary>
+
+### Nix based - recommended
+1. Install [nix](https://nixos.org/download/); Follow the [wiki](https://wiki.archlinux.org/title/Nix)
+2. Configure nix by executing
+```bash
+sudo tee -a /etc/nix/nix.conf <<CFG
+max-jobs = auto
+#max-jobs = 1
+experimental-features = nix-command flakes auto-allocate-uids
+auto-allocate-uids = true
+auto-optimise-store = true
+CFG
+```
+3. `systemctl enable --now nix-daemon.socket`
+4. `usermod -a -G nix-users <your username>`
+5. Reboot
+6. `cd <path/to/repo>`
+7. `nix develop` or `nix run -- <your args>`
+
+### Nix-Portable based - if you do not have root rights
+1. Install [nix-portable](https://github.com/DavHau/nix-portable):
+```bash
+mkdir -p ~/.local/bin
+cd ~/.local/bin
+
+curl -L https://github.com/DavHau/nix-portable/releases/latest/download/nix-portable-$(uname -m) > ./nix-portable
+chmod +x ./nix-portable
+cat > ./nix <<NIX
+#!/usr/bin/env bash
+CURDIR=\$(dirname "\$(readlink -f "\$0")")
+NP_RUNTIME=bwrap "\$CURDIR/nix-portable" nix \$@
+NIX
+chmod +x ./nix
+
+export PATH=~/.local/bin:"$PATH"
+cd ~
+nix run 'nixpkgs#hello'
+
+```
+2. Configure nix.conf by executing
+```bash
+tee -a ~/.nix-portable/conf/nix.conf <<CFG
+max-jobs = auto
+#max-jobs = 1
+auto-optimise-store = true
+CFG
+```
+3. Add .local/bin permanently to your PATH
+```bash
+echo 'PATH=$HOME/.local/bin:"$PATH"' >> ~/.env
+echo 'export $(envsubst < .env)' | tee -a .bashrc >> .zshrc
+```
+
+4. `cd <path/to/repo>`
+5. `nix develop` or `nix run -- <your args>`
+</details>
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.

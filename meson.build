@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-project('epstein', 'c', version:'0.1.0', default_options: ['werror=true', 'c_std=gnu11', 'buildtype=release', 'default_library=shared'])
+project('epstein', 'c', 'cython', version:'0.3.0', default_options: ['werror=true', 'c_std=gnu11', 'buildtype=release', 'default_library=shared'])
 
 add_global_arguments('-Wno-error=cpp', language: 'c')
 
@@ -27,4 +27,4 @@ endif
 subdir('include')
 subdir('src')
 subdir('test')
-
+subdir('python')
