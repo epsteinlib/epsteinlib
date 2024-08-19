@@ -93,30 +93,13 @@ enum dom egf_ldomain(double a, double x) {
  */
 double egf_pt(double a, double x) {
     // optional für x >= 10000: Prüfe Restglied
-    double sn = 0;
-    double add = 1;
-    for (int i = 0; i < 30; i++) {
+    double sn = 1;
+    double add = x / (a + 1);
+    for (int i = 1; i < 80 && fabs(add / sn) >= EGF_EPS; i++) {
         sn += add;
         add *= (x / (a + i + 1));
     }
-    return sn * pow(x, a) * exp(-x) / tgamma(a + 1);
-}
-
-/**
- * @brief calculate twice regularized lower incomplete gamma function gamma(a,x)
- * / (x^a * Gamma(a)) with the recursion formula.
- * @param[in] a: exponent of the lower incomplete upper gamma function.
- * @param[in] x: lower integral boundary of the lower incomplete gamma function.
- * @return function value of the lower incomplete gamma function.
- */
-double egf_pt_reg(double a, double x) {
-    double s = 1. / tgamma(a + 1);
-    double r = s;
-    for (int n = 1; n <= 40 /*&& s / r >= EGF_EPS*/; n++) {
-        s *= x / (a + n);
-        r += s;
-    }
-    return r * exp(-x);
+    return sn * exp(-x) / tgamma(a + 1);
 }
 
 /**
@@ -198,7 +181,7 @@ double egf_cf(double a, double x) {
     double s = 1;
     double rp = 1; // t_k-1
     double rv = 0; // rho_0
-    for (int k = 1; k <= 60; k++) {
+    for (int k = 1; k <= 200 && fabs(rp / s) >= EGF_EPS; k++) {
         double ak =
             k * (a - k) / (double)((x + 2 * k - 1 - a) * (x + 2 * k + 1 - a));
         rv = -ak * (1 + rv) / (1 + ak * (1 + rv));
@@ -286,7 +269,7 @@ double egf_ugamma(double a, double x) {
     enum dom g = egf_domain(a, x);
     switch (g) {
     case pt:
-        r = tgamma(a) * (1 - egf_pt(a, x));
+        r = tgamma(a) * (1 - egf_pt(a, x) * pow(x, a));
         break;
     case qt:
         r = egf_qt(a, x);
@@ -322,7 +305,7 @@ double egf_gammaStar(double a, double x) {
     switch (g) {
     case pt:
     case qt:
-        r = egf_pt_reg(a, x);
+        r = egf_pt(a, x);
         break;
     case cf:
         if (a <= 0.1 && fabs(a - nearbyint(a)) < EGF_EPS) {
