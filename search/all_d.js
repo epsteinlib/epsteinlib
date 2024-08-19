@@ -1,6 +1,9 @@
 var searchData=
 [
-  ['tools_2ec_0',['tools.c',['../tools_8c.html',1,'']]],
-  ['tools_2eh_1',['tools.h',['../tools_8h.html',1,'']]],
-  ['transpose_2',['transpose',['../tools_8c.html#a3e4573cdd65e2eaddce316dbd632e48b',1,'transpose(unsigned int dim, double *m):&#160;tools.c'],['../tools_8h.html#a3e4573cdd65e2eaddce316dbd632e48b',1,'transpose(unsigned int dim, double *m):&#160;tools.c']]]
+  ['pip_0',['Installing only the Python wrapper with pip',['../index.html#autotoc_md2',1,'']]],
+  ['portable_20based_20if_20you_20do_20not_20have_20root_20rights_1',['Nix-Portable based - if you do not have root rights',['../index.html#autotoc_md10',1,'']]],
+  ['prepare_5finputs_2',['prepare_inputs',['../namespace__epsteinlib.html#ac676eb08e04129d2fc8c6871587f7e7f',1,'_epsteinlib']]],
+  ['python_3',['in Python',['../index.html#autotoc_md7',1,'']]],
+  ['python_20wrapper_20with_20meson_4',['Installing the C library and the Python wrapper with meson',['../index.html#autotoc_md3',1,'']]],
+  ['python_20wrapper_20with_20pip_5',['Installing only the Python wrapper with pip',['../index.html#autotoc_md2',1,'']]]
 ];

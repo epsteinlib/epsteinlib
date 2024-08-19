@@ -1,6 +1,7 @@
 var searchData=
 [
-  ['main_0',['main',['../lattice__sum_8c.html#ae66f6b31b5ad750f1fe042a706a4e3d4',1,'lattice_sum.c']]],
-  ['matrix_5fintvector_1',['matrix_intVector',['../tools_8c.html#a1ceb5734431f141fb42d8282173e4df9',1,'matrix_intVector(unsigned int dim, const double *m, const int *v, double *res):&#160;tools.c'],['../tools_8h.html#a1ceb5734431f141fb42d8282173e4df9',1,'matrix_intVector(unsigned int dim, const double *m, const int *v, double *res):&#160;tools.c']]],
-  ['meson_2',['Installation with meson',['../index.html#autotoc_md1',1,'']]]
+  ['lattice_5fsum_0',['lattice_sum',['../namespacelattice__sum.html',1,'']]],
+  ['lattice_5fsum_2ec_1',['lattice_sum.c',['../lattice__sum_8c.html',1,'']]],
+  ['library_2',['Epstein Zeta Library',['../index.html',1,'']]],
+  ['library_20and_20the_20python_20wrapper_20with_20meson_3',['Installing the C library and the Python wrapper with meson',['../index.html#autotoc_md3',1,'']]]
 ];

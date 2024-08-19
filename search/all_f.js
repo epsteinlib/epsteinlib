@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['validate_5finputs_0',['validate_inputs',['../namespace__epsteinlib.html#a23023363cf479a3ee8db4c55a83a2d2c',1,'_epsteinlib']]],
-  ['vectorproj_1',['vectorProj',['../zeta_8c.html#a527140d834111cb62939bb08885cc47b',1,'zeta.c']]],
-  ['view_20api_20documentation_2',['View api documentation',['../index.html#autotoc_md4',1,'']]]
+  ['sum_5ffourier_0',['sum_fourier',['../zeta_8c.html#a23f1e34460959966704420c4c69af3d3',1,'zeta.c']]],
+  ['sum_5freal_1',['sum_real',['../zeta_8c.html#aff681fec488c4a77e615158ff027472a',1,'zeta.c']]]
 ];
