@@ -9,13 +9,15 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 # EpsteinLib
 
-Experimental alpha version
+Version 0.3
 
 Authors: Andreas A. Buchheit, Jonathan Busse, Ruben Gutendorf, DevOps: Jan Schmitz
 
 Contact: buchheit@num.uni-sb.de
 
-EpsteinLib is a C library for the fast and efficient computation of the Epstein zeta function for arbitary multidimensional lattices. Originally studied by Epstein [1,2], it forms the basis for the computation of general multidimensional lattice sums in classical and quantum physics applications [3]. Together with its regularization, it serves as the central ingredient in the singular Euler-Maclaurin (SEM) expansion, which generalizes the 300-year-old Euler summation formula to lattice sums in higher dimensions with physically relevant power-law interactions [4-5]. An efficiently computable representation of the Epstein zeta function is provided in [6,7].
+EpsteinLib is a C library designed for the fast and efficient computation of the Epstein zeta function for arbitrary multidimensional lattices. In addition to the C library, we also offer a Python package, epsteinlib, which can be easily installed via pip.
+
+Originally studied by Epstein [1,2], the Epstein zeta function forms the basis for computing general multidimensional lattice sums in classical and quantum physics applications [3]. Together with its regularization, it serves as the central ingredient in the singular Euler-Maclaurin (SEM) expansion, which generalizes the 300-year-old Euler summation formula to lattice sums in higher dimensions with physically relevant power-law interactions [4-5]. An efficiently computable representation of the Epstein zeta function is provided in [6,7].
 
 For a $d$-dimensional lattice $\Lambda=A\mathbb Z^d$, with $A\in \mathbb R^{d\times d}$ regular, $x,y \in \mathbb R^d$, and $\nu \in \mathbb C$, the Epstein zeta function is defined by the Dirichlet series
 
@@ -31,7 +33,7 @@ The Epstein zeta function is implemented in this library as
 ```c
 double complex epsteinZeta(double nu, unsigned int dim, const double *A, const double *x, const double *y);
 ```
-or
+In the Python package, it is implemented as
 ```python
 def epstein_zeta(nu: float | int, A: NDArray[np.float64], x: NDArray[np.float64], y: NDArray[np.float64]) -> complex
 ```
