@@ -2,6 +2,12 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
+workflow:
+  rules: # Run Pipeline for merge requests, tags and the default branch
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
 default:
   image:
     name: alpine:latest
@@ -142,3 +148,50 @@ meson-test:
   #      matrix:
   #        - ARCH: $ARCH
   #          OS: $OS
+
+
+pages:
+  stage: deploy
+  # Only works when https://docs.gitlab.com/ee/ci/yaml/#pagespagespath_prefix gets free
+  # makes pages-preview obsolete
+  #variables:
+  #  PAGES_PREFIX: "" # No prefix by default (main)
+  #pages:
+  #  path_prefix: "$PAGES_PREFIX"
+  script:
+    - mv html public
+    - echo "Pages accessible through ${CI_PAGES_URL}/${PAGES_PREFIX}"
+  dependencies:
+    - build-docs
+    - tests
+  artifacts:
+    paths:
+      - public
+  rules:
+   - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+   #- if: $CI_PIPELINE_SOURCE == "merge_request_event"
+   #  variables:
+   #    PAGES_PREFIX: '_mr-$CI_MERGE_REQUEST_IID'
+  tags: 
+    - x86_64-linux
+
+
+pages-preview:
+  stage: deploy
+  script:
+    - ls -alh html
+  dependencies:
+    - build-docs
+    - tests
+  artifacts:
+    paths:
+      - html
+  environment:
+      name: preview/$CI_COMMIT_REF_SLUG
+      url: "https://gl-pages.num.uni-sb.de/$CI_PROJECT_NAMESPACE/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/html/index.html"
+      auto_stop_in: 1 week
+  rules:
+   - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+   - if: $CI_COMMIT_TAG
+  tags: 
+    - x86_64-linux
