@@ -9,6 +9,16 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 # Changelog
 
+## [0.4.0] - unreleased
+### Breaking Changes
+
+### Changed
+
+### Added
+-  Build support as meson subproject
+
+### Fixed
+
 ## [0.3.0] - 2024-08-19
 
 ### Breaking Changes

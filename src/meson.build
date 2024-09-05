@@ -4,4 +4,10 @@
 # SPDX-License-Identifier: CC0-1.0
 
 zeta_src = files('zeta.c', 'gamma.c', 'tools.c', 'crandall.c', 'epsteinZeta.c')
-epsteinZetalib = library('epsteinZeta', zeta_src, include_directories : incdir, dependencies: deps, install: true, override_options: override_options)
+epsteinlib = library('epsteinlib', zeta_src, include_directories : incdir, dependencies: deps, install: true, override_options: override_options)
+
+epsteinlib_dep = declare_dependency(include_directories : incdir, link_with : epsteinlib)
+
+# Generate pkgconfig file
+pkgconf = import('pkgconfig')
+pkgconf.generate(epsteinlib)
