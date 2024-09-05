@@ -3,9 +3,9 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-project('epstein', 'c', 'cython', version:'0.3.0', default_options: ['werror=true', 'c_std=gnu11', 'buildtype=release', 'default_library=shared'])
+project('epsteinlib', 'c', 'cython', version:'0.3.0', default_options: ['werror=true', 'c_std=gnu11', 'buildtype=release', 'default_library=shared'])
 
-add_global_arguments('-Wno-error=cpp', language: 'c')
+add_project_arguments('-Wno-error=cpp', language: 'c')
 
 cc = meson.get_compiler('c')
 

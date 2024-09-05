@@ -6,10 +6,11 @@
   cell,
 }: let
   inherit (inputs) nixpkgs;
+  inherit (nixpkgs) lib;
   pkgs = nixpkgs;
   pythonPackages = with pkgs.python3Packages; [cython numpy mpmath];
   build_epstein = buildtype: (pkgs.stdenv.mkDerivation {
-    name = "libepstein";
+    name = "epsteinlib";
     src = inputs.self;
     outputs = ["out" "dev"];
 
@@ -20,8 +21,8 @@
     enableParallelBuilding = true;
 
     meta = {
-      homepage = "https://feanor.num.uni-sb.de/gutendorf/epstein_bibliothek";
-      # license = with licenses; [gpl3Only];
+      homepage = "https://github.com/epsteinlib/epsteinlib";
+      license = with lib.licenses; [agpl3Only];
       mainProgram = "epsteinlib_c-lattice_sum";
     };
   });
