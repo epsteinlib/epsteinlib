@@ -9,10 +9,10 @@ Python wrapper for the Epstein Zeta function
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
-import numpy as np
-from numpy.typing import NDArray
 import cython
+import numpy as np
 from cython.cimports.epsteinlib import epsteinZeta, epsteinZetaReg
+from numpy.typing import NDArray
 
 
 def validate_inputs(

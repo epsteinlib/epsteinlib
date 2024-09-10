@@ -9,38 +9,36 @@ requires = ['meson-python', 'cython']
 [project]
 name = 'epsteinlib'
 version = '0.3.0'
-dependencies = [
-  "numpy",
-]
+dependencies = ["numpy"]
 description = 'Python wrapper for epsteinlib'
 readme = 'README.md'
 requires-python = '>=3.8'
-license = {file = 'LICENSES/AGPL-3.0-only.txt'}
+license = { file = 'LICENSES/AGPL-3.0-only.txt' }
 authors = [
-  {name = 'Jan Schmitz', email = 'schmitz@num.uni-sb.de'},
-  {name = 'Jonathan Busse', email = 'jonathan.busse@dlr.de'},
-  {name = 'Ruben Gutendorf', email = 'ruben.gutendorf@uni-saarland.de'},
-  {name = 'Andreas Buchheit', email = 'buchheit@num.uni-sb.de'},
+  { name = 'Jan Schmitz', email = 'schmitz@num.uni-sb.de' },
+  { name = 'Jonathan Busse', email = 'jonathan.busse@dlr.de' },
+  { name = 'Ruben Gutendorf', email = 'ruben.gutendorf@uni-saarland.de' },
+  { name = 'Andreas Buchheit', email = 'buchheit@num.uni-sb.de' },
 ]
 keywords = ["math", "scientific", "research"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+  "Development Status :: 3 - Alpha",
 
-    "Intended Audience :: Developers",
+  "Intended Audience :: Developers",
 
-    "Programming Language :: Python :: 3",
-    "Programming Language :: C",
-    "Programming Language :: Cython",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: C",
+  "Programming Language :: Cython",
 
-    "License :: OSI Approved :: GNU Affero General Public License v3",
+  "License :: OSI Approved :: GNU Affero General Public License v3",
 
-    "Operating System :: POSIX :: Linux",
-    "Operating System :: MacOS",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: MacOS",
 
-    "Topic :: Scientific/Engineering :: Mathematics",
-    "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Scientific/Engineering :: Mathematics",
+  "Topic :: Software Development :: Libraries :: Python Modules",
 
-    "Typing :: Typed",
+  "Typing :: Typed",
 ]
 
 [project.urls]
@@ -52,3 +50,7 @@ Changelog = "https://github.com/epsteinlib/epsteinlib/blob/main/CHANGELOG.md"
 
 [tool.black]
 line-length = 79
+
+[tool.isort]
+profile = "black"
+line_length = 79

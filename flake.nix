@@ -73,6 +73,26 @@
                 };
               };
               statix.enable = true;
+
+              # Python
+              black.enable = true;
+              isort.enable = true;
+              mypy.enable = true;
+              pylint.enable = true;
+              pyupgrade.enable = true;
+
+              # Misc
+              check-added-large-files.enable = true;
+              check-case-conflicts.enable = true;
+              check-executables-have-shebangs.enable = true;
+              check-shebang-scripts-are-executable.enable = true;
+              check-symlinks.enable = true;
+              check-vcs-permalinks.enable = true;
+              detect-private-keys.enable = true;
+              end-of-file-fixer.enable = true;
+              mixed-line-endings.enable = true;
+              reuse.enable = true;
+              trim-trailing-whitespace.enable = true;
               typos = {
                 enable = true;
                 settings = {
@@ -81,27 +101,17 @@
                     check-filename = false
                     extend-ignore-re = [
                       "PNGs",
-                      "ba"
+                      "ba",
+                      "ND"
                     ]
-
-                    [type.nb]
-                    extend-glob = ["*.nb"]
-                    check-file = false
-                    [type.md]
-                    extend-glob = ["*.md"]
-                    check-file = false
                   '';
                   locale = "en-us";
                 };
               };
 
-              # Python
-              black.enable = true;
-              mypy.enable = true;
-              pylint.enable = true;
-
-              # Misc
-              reuse.enable = true;
+              # TOML
+              check-toml.enable = true;
+              taplo.enable = true;
             };
           };
         };
@@ -134,6 +144,10 @@
             alejandra.enable = true;
             # Python
             black.enable = true;
+            # TOML
+            taplo.enable = true;
+            # Yaml
+            yamlfmt.enable = true;
           };
         };
       };

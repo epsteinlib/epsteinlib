@@ -10,14 +10,16 @@
 
 import unittest
 from typing import Callable
-import numpy as np
+
 import benchmark_functions as bf
+import numpy as np
 from numpy.typing import NDArray
+
 from epsteinlib import (
-    validate_inputs,
-    prepare_inputs,
     epstein_zeta,
     epstein_zeta_reg,
+    prepare_inputs,
+    validate_inputs,
 )
 
 

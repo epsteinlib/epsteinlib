@@ -37,14 +37,14 @@ In the Python package, it is implemented as
 ```python
 def epstein_zeta(nu: float | int, A: NDArray[np.float64], x: NDArray[np.float64], y: NDArray[np.float64]) -> complex
 ```
-and evalutates to full precision over the whole parameter range up to ten dimensions.
+and evaluates to full precision over the whole parameter range up to ten dimensions.
 
 In addition, this library includes the regularized Epstein zeta function, which is analytic around $y=0$, and is defined via
 
 $$
 Z_{\Lambda,\nu}^{\mathrm{reg}}\begin{vmatrix} x \\ y \end{vmatrix} =
 e^{2\pi i x\cdot y}
-Z_{\Lambda,\nu}\left|\begin{aligned} x \\ y \end{aligned}\right| 
+Z_{\Lambda,\nu}\left|\begin{aligned} x \\ y \end{aligned}\right|
 -\frac{\hat{s}(y)}{V_{\Lambda}},
 $$
 
@@ -130,7 +130,7 @@ See https://epsteinlib.github.io/epsteinlib/
 Minimal working examples for calculating the Madelung constant in $3$ dimensions.
 ### in C
 ``` c
-// If the library is installed, compile with `gcc -o lattice_sum lattice_sum.c -lm -lepsteinZeta 
+// If the library is installed, compile with `gcc -o lattice_sum lattice_sum.c -lm -lepsteinZeta
 // If the library is not installed, compile with `gcc -o lattice_sum lattice_sum.c -lm -L/path/to/library -lepsteinZeta -I/path/to/include
 
 #include <complex.h>
@@ -158,7 +158,7 @@ int main() {
     return fabs(madelung - madelungRef) > pow(10, -14);
 }
 ```
-### in Python 
+### in Python
 
 ```py
 import numpy as np
