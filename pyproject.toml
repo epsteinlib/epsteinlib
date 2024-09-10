@@ -48,7 +48,7 @@ Homepage = "https://epsteinlib.github.io/epsteinlib"
 Documentation = "https://epsteinlib.github.io/epsteinlib"
 Repository = "https://github.com/epsteinlib/epsteinlib"
 Issues = "https://github.com/epsteinlib/epsteinlib/issues"
-Changelog = "https://github.com/epsteinlib/epsteinlib/blob/master/CHANGELOG.md"
+Changelog = "https://github.com/epsteinlib/epsteinlib/blob/main/CHANGELOG.md"
 
 [tool.black]
 line-length = 79
