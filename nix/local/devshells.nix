@@ -12,7 +12,7 @@ in
     std = {...}: {
       name = "epstein devshell";
       imports = [std.std.devshellProfiles.default];
-      packages = with nixpkgs; cell.packages.epsteinlib.nativeBuildInputs ++ [git doxygen_gui neovim gcovr python3Packages.twine python3Packages.build];
+      packages = with nixpkgs; cell.packages.epsteinlib.nativeBuildInputs ++ [git doxygen_gui graphviz neovim gcovr python3Packages.twine python3Packages.build];
 
       commands = [
         {
@@ -46,7 +46,7 @@ in
         }
         {
           name = "docs";
-          command = "doxygen Doxyfile && ${nixpkgs.xdg-utils}/bin/xdg-open html/index.html";
+          command = "PROJECT_NUMBER=$(cat VERSION) doxygen Doxyfile && (${nixpkgs.xdg-utils}/bin/xdg-open html/index.html || true)";
           help = "generate and show documentation";
           category = "Tooling";
         }

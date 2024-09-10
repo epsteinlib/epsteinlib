@@ -8,7 +8,7 @@ requires = ['meson-python', 'cython']
 
 [project]
 name = 'epsteinlib'
-version = '0.3.0'
+dynamic = ['version']
 dependencies = ["numpy"]
 description = 'Python wrapper for epsteinlib'
 readme = 'README.md'
