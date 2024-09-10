@@ -9,8 +9,6 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 # EpsteinLib
 
-Version 0.3
-
 Authors: Andreas A. Buchheit, Jonathan Busse, Ruben Gutendorf, DevOps: Jan Schmitz
 
 Contact: buchheit@num.uni-sb.de

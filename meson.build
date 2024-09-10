@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-project('epsteinlib', 'c', 'cython', version:'0.3.0', default_options: ['werror=true', 'c_std=gnu11', 'buildtype=release', 'default_library=shared'])
+project('epsteinlib', 'c', 'cython', version: files('VERSION'), default_options: ['werror=true', 'c_std=gnu11', 'buildtype=release', 'default_library=shared'])
 
 add_project_arguments('-Wno-error=cpp', language: 'c')
 
