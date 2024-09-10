@@ -12,7 +12,7 @@ default:
   image:
     name: alpine:latest
     pull_policy: [always, if-not-present]
-  tags: 
+  tags:
     - nix
 
 .default_template:
@@ -55,7 +55,7 @@ build-dbg:
 
 build-manually:
   stage: build
-  extends: 
+  extends:
     - .default_template
     - .before_script_template
   script:
@@ -85,7 +85,7 @@ build-docs:
     expose_as: 'Documentation'
     paths:
       - html/
-  tags: 
+  tags:
     - nix
   dependencies: []
 
@@ -133,7 +133,7 @@ pre-commit:
 
 meson-test:
   stage: test
-  extends: 
+  extends:
     - .default_template
     - .before_script_template
   script:
@@ -172,7 +172,7 @@ pages:
    #- if: $CI_PIPELINE_SOURCE == "merge_request_event"
    #  variables:
    #    PAGES_PREFIX: '_mr-$CI_MERGE_REQUEST_IID'
-  tags: 
+  tags:
     - x86_64-linux
 
 
@@ -180,6 +180,9 @@ pages-preview:
   stage: deploy
   script:
     - ls -alh html
+  needs:
+    - build-docs
+    - tests
   dependencies:
     - build-docs
     - tests
@@ -193,5 +196,5 @@ pages-preview:
   rules:
    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
    - if: $CI_COMMIT_TAG
-  tags: 
+  tags:
     - x86_64-linux

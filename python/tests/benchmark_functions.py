@@ -9,7 +9,7 @@
 """Reference functions for benchmarking purposes."""
 
 import numpy as np
-from mpmath import zeta, mp, pi, gamma
+from mpmath import gamma, mp, pi, zeta
 from numpy.typing import NDArray
 
 # 50 decimal places precision in mpmath.zeta
