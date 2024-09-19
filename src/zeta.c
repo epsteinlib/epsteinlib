@@ -45,7 +45,7 @@
  * the incomplete gamma evaluation.
  * @return helper function for the first sum in crandalls formula. Calculates
  * sum_{z in m whole_numbers ** dim} G_{nu}((z - x) / lambda))
- * X exp(2 * PI * I * z * y)
+ * X exp(-2 * PI * I * z * y)
  */
 double complex sum_real(double nu, unsigned int dim, double lambda, const double *m,
                         const double *x, const double *y, const int cutoffs[],
@@ -72,10 +72,10 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
         matrix_intVector(dim, m, zv, lv);
         double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
         for (int i = 0; i < dim; i++) {
-            lv[i] = (lv[i] - x[i]) / lambda;
+            lv[i] = lv[i] - x[i];
         }
         // summing using Kahan's method
-        auxy = rot * crandall_g(dim, nu, lv, 1, zArgBound) - epsilon;
+        auxy = rot * crandall_g(dim, nu, lv, 1. / lambda, zArgBound) - epsilon;
         auxt = sum + auxy;
         epsilon = (auxt - sum) - auxy;
         sum = auxt;
@@ -97,7 +97,7 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
  * the incomplete gamma evaluation.
  * @return helper function for the second sum in crandalls formula. Calculates
  * sum_{k in m_invt whole_numbers ** dim without zero} G_{dim - nu}(lambda * (k + y))
- * X exp(2 * PI * I * x * k)
+ * X exp(-2 * PI * I * x * (k + y))
  */
 double complex sum_fourier(double nu, unsigned int dim, double lambda,
                            const double *m_invt, const double *x, const double *y,
