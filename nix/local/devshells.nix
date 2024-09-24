@@ -21,7 +21,8 @@ in
                      meson setup --reconfigure build -Db_coverage=true &&
                      meson compile -C build &&
                      meson test -v -C build
-                     mkdir -p html && gcovr --html-details html/coverage.html &&
+                     mkdir -p html &&
+                     gcovr --html-details html/coverage.html --txt --txt-metric branch --print-summary --exclude 'build/python/.*pyx.c' &&
                      popd
                     ";
           help = "run the unit tests";

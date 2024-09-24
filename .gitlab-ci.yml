@@ -99,6 +99,7 @@ tests:
     expose_as: 'Coverage Report'
     paths:
       - html/
+  coverage: '/^TOTAL.*\s+(\d+\%)$/'
   dependencies: []
 
 flake-check:
