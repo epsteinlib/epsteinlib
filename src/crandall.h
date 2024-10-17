@@ -17,14 +17,31 @@
 #define EPSTEIN_CRANDALL
 /**
  * @brief Calculates the regularization of the zero summand in the second
- * sum in Crandall's formula. That is, the summand for k = 0.
+ * sum in Crandall's formula in the special case of
+ * nu = dim + 2k for some natural number k.
+ * @param[in] s: dimension minus exponent of the regularized Epstein zeta function.
+ * @param[in] arg: input of the function
+ * @param[in] k: k = - s / 2 = (nu - d) / 2 as an integer
+ * @param[in] lambda: scaling parameter of crandalls formula
+ * @return arg ** (- s / 2) * (gamma(s / 2, arg) + ((-1)^k / k! ) * (log(arg) -
+ * log(lambda ** 2))
+ */
+double complex crandall_gReg_nuequalsdim(double s, double arg, double k,
+                                         double lambda);
+
+/**
+ * @brief Calculates the regularization of the zero summand in the second
+ * sum in Crandall's formula.
  * @param[in] dim: dimension of the input vectors
- * @param[in] nu: exponent of the regularized Epstein zeta function.
+ * @param[in] s: dimension minus exponent of the regularized Epstein zeta function,
+ * that is d - nu
  * @param[in] z: input vector of the function
  * @param[in] prefactor: prefactor of the vector, e. g. lambda
- * @return gamma(nu/2) * gammaStar(nu/2, pi * prefactor * z**2), where
- * gammaStar is the twice regularized lower incomplete gamma function
- * gamma(s,x) / (gamma(s) * x ** s)
+ * @return - gamma(s/2) * gammaStar(s/2, pi * prefactor * z**2),
+ * where gammaStar is the twice regularized lower incomplete gamma function if s is
+ * not equal to - 2k and (pi * prefactor * y ** 2) ** (- s / 2)
+ * (gamma(s / 2, pi * prefactor * z ** 2) + ((-1)^k / k! ) * (log(pi * y ** 2) -
+ * log(prefactor ** 2))) if s is  equal to - 2k for non negative natural number k
  */
 double complex crandall_gReg(unsigned int dim, double nu, const double *z,
                              double prefactor);

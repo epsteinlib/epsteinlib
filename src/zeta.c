@@ -203,7 +203,7 @@ double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
  * @param[in] x: x vector of the Epstein Zeta function.
  * @param[in] y: y vector of the Epstein Zeta function.
  * @param[in] lambda: relative weight of the sums in Crandall's formula.
- * @param[in] regBool: 0 for no regularization, > 0 for the regularization.
+ * @param[in] reg: 0 for no regularization, > 0 for the regularization.
  * @return function value of the regularized Epstein zeta.
  */
 double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
@@ -271,7 +271,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         } else {
             res = 0;
         }
-    } else if (fabs(nu - dim) < EPS && equalsZero(dim, y_t2)) {
+    } else if (fabs(nu - dim) < EPS && equalsZero(dim, y_t2) && reg == 0) {
         res = NAN;
     } else {
         double zArgBound = assignzArgBound(nu);

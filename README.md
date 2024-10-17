@@ -35,6 +35,10 @@ In the Python package, it is implemented as
 ```python
 def epstein_zeta(nu: float | int, A: NDArray[np.float64], x: NDArray[np.float64], y: NDArray[np.float64]) -> complex
 ```
+In the Mathematica package, it is implemented as
+```mathematica
+EpsteinZeta[\[Nu],A,x,y]
+```
 and evaluates to full precision over the whole parameter range up to ten dimensions.
 
 In addition, this library includes the regularized Epstein zeta function, which is analytic around $y=0$, and is defined via
@@ -46,24 +50,30 @@ Z_{\Lambda,\nu}\left|\begin{aligned} x \\ y \end{aligned}\right|
 -\frac{\hat{s}(y)}{V_{\Lambda}},
 $$
 
-where $V_{\Lambda}=|\det A|$ is the volume of the elementary lattice cell,
+where $V_{\Lambda}=|\det A|$ is the volume of the elementary lattice cell, and
 
 $$
-\hat{s}(y)=-\pi^{\nu-\frac{d}{2}}
-	\frac{\Gamma((d-\nu)/2)}{\Gamma(\nu/2)}|y|^{\nu-d}
+\hat{s}_\nu(\bm y) = \frac{\pi^{\nu/2}}{\Gamma(\nu/2)}\Gamma\big((d-\nu)/2\big)  (\pi \bm y^2)^{(\nu - d)/2},\quad \nu \not\in (d+2\mathbb N_0)
 $$
 
-is the distributional Fourier transform of $\vert z \vert^{-\nu}$, where $\Gamma$ denotes the gamma function.
+is the distributional Fourier transform of $\vert z \vert^{-\nu}$, where $\Gamma$ denotes the gamma function and we adopt the choice
 
-In this library, the regularized Epstein zeta function is included as
+$$
+\hat s_{d+2k}(\bm y)= \frac{\pi^{k+d/2}}{\Gamma(k+d/2)}\frac{(-1)^{k+1}}{k!} ( \pi \bm y^2 )^{k} \log (\pi  \bm y^{2}),\quad k\in \mathbb N_0.
+$$
+
+In the c library, the regularized Epstein zeta function is included as
 ```c
 double complex epsteinZetaReg(double nu, unsigned int dim, const double *A, const double *x, const double *y);
 ```
-or
+in the Python package as
 ```python
 def epstein_zeta_reg(nu: float | int, A: NDArray[np.float64], x: NDArray[np.float64], y: NDArray[np.float64]) -> complex
 ```
-
+and in the Mathematica package as
+```mathematica
+EpsteinZetaReg[\[Nu],A,x,y]
+```
 ## Installation
 Install our required dependencies: meson, ninja, pkg-config, python3 e.g. with
 ```bash
@@ -173,6 +183,28 @@ print(f"Madelung sum in 3 dimensions:\t {madelung:.16f}")
 print(f"Reference value:\t\t {madelung_ref:.16f}")
 print(f"Relative error:\t\t\t +{abs(madelung_ref - madelung) / abs(madelung_ref):.2e}")
 ```
+
+### in Mathematica
+
+```mathematica
+<<"EpsteinZeta.wl"
+
+madelungRef = -1.7475645946331821906362120355443974;
+
+dim = 3;
+A = IdentityMatrix[dim];
+x = ConstantArray[0, dim];
+y = ConstantArray[0.5, dim];
+\[Nu] = 1.0;
+
+madelung = Re[EpsteinZeta[\[Nu], A, x, y]];
+
+Print["Madelung sum in 3 dimensions: ", NumberForm[madelung, 16]];
+Print["Reference value:              ", NumberForm[madelungRef, 16]];
+Print["Relative error:               +", ScientificForm[Abs[madelungRef - madelung]/Abs[madelungRef], 2]];
+```
+
+Executing this code snipped in the same folder as `EpsteinZeta.wl` and setting `SetDirectory[NotebookDirectory[]]` is the easiest way to help mathematica find the package.
 
 ## Development environment
 We provide a nix devshell to have a reproducible development environment with the same dependencies across different operating systems. Once you have installed and configured nix starting developing is as easy as running `nix develop`.

@@ -12,6 +12,10 @@ cc = meson.get_compiler('c')
 deps = []
 deps += cc.find_library('m', required : true)
 
+# Initialize source files list
+# Populate in subdirectories using zeta_src +=
+zeta_src = []
+
 incdir = include_directories('include')
 
 override_options = []
@@ -25,6 +29,7 @@ if get_option('buildtype') == 'release'
 endif
 
 subdir('include')
+subdir('mathematica')
 subdir('src')
 subdir('test')
 subdir('python')
