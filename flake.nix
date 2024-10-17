@@ -58,6 +58,13 @@
         pre-commit = {
           check.enable = false; # Do not run in nix flake check because our dependencies are not available in this environment.
           settings = {
+            # addGcRoot fixes issue:
+            # =====> .pre-commit-config.yaml is not a file
+            # introduced in
+            # https://github.com/cachix/git-hooks.nix/commit/55b98216505b209b09499cfa39b34a3d63bc9ca3
+            # to enforce line 367
+            # ln -fs ${configFile} "''${GIT_WC}/.pre-commit-config.yaml"
+            addGcRoot = false;
             hooks = {
               # C
               clang-format.enable = true;
@@ -102,7 +109,8 @@
                     extend-ignore-re = [
                       "PNGs",
                       "ba",
-                      "ND"
+                      "ND",
+                      'CompressedData\["(.|\n)*"\]',
                     ]
                   '';
                   locale = "en-us";

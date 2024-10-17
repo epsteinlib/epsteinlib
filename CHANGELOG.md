@@ -11,11 +11,14 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 ## [0.4.0] - unreleased
 ### Breaking Changes
+- Shared library is now called `libepstein.so`
 
 ### Changed
 
 ### Added
--  Build support as meson subproject
+- Build support as meson subproject
+- Mathematica interface
+- Epstein zeta regularized evaluates at $\nu=-2\mathbb N$
 
 ### Fixed
 
