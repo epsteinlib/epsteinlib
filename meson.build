@@ -31,5 +31,5 @@ endif
 subdir('include')
 subdir('mathematica')
 subdir('src')
-subdir('test')
+subdir('example')
 subdir('python')
