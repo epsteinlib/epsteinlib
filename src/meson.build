@@ -11,3 +11,6 @@ epsteinlib_dep = declare_dependency(include_directories : incdir, link_with : ep
 # Generate pkgconfig file
 pkgconf = import('pkgconfig')
 pkgconf.generate(epsteinlib)
+
+# include unittests
+subdir('tests')
