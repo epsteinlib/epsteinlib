@@ -28,6 +28,14 @@ if get_option('buildtype') == 'release'
     add_project_arguments(['-fno-math-errno'], language: 'c')
 endif
 
+python_only = get_option('python_only')
+
+if host_machine.system() == 'windows' and meson.get_compiler('c').get_id() == 'gcc'
+    # This avoids having to run 'os.add_dll_directory("/msys64/mingw64/bin")' before importing the python module
+    add_project_link_arguments('-static-libgcc', language: 'c')
+endif
+
+
 subdir('include')
 subdir('mathematica')
 subdir('src')

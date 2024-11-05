@@ -8,9 +8,7 @@ py = py_mod.find_installation(pure: false)
 py.extension_module(
     'epsteinlib',
     'epsteinlib.pyx',
-    zeta_src,
-    dependencies: deps,
-    include_directories: zeta_include,
+    link_whole: epsteinlib.get_static_lib(),
     install: true,
 )
 # Install stub file
