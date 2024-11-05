@@ -84,6 +84,10 @@ pacman -S meson ninja pkgconf python
 brew install meson ninja pkg-config python3
 ```
 
+Currently, we support native Windows builds only with GCC installed via https://www.msys2.org/. Different environments may or may not work.
+However, for the full out of the box development experience
+we encourage Windows users to use [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) and follow the Linux installation instructions.
+
 ### Installing only the Python wrapper with pip
 ```bash
 # Create a virtualenvironment and activate it if you are not already inside one.

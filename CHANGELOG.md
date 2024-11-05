@@ -17,6 +17,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 ### Added
 - Build support as meson subproject
+- Build support on Windows
 - Mathematica interface
 - Epstein zeta regularized evaluates at $\nu=-2\mathbb N$
 
