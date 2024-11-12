@@ -12,6 +12,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 ## [0.4.0] - unreleased
 ### Breaking Changes
 - Shared library is now called `libepstein.so`
+- Moved Python library from `epsteinlib` nix package to `epsteinlib_python`
 
 ### Changed
 
