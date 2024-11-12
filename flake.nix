@@ -7,7 +7,7 @@
     nixpkgs,
     flake-parts,
     pre-commit-hooks-nix,
-    std,
+    devshell,
     ...
   } @ inputs: let
     supportedSystems = [
@@ -19,31 +19,17 @@
     nixpkgsConfig = {
       allowUnsupportedSystem = true;
     };
-    std_flake_out =
-      std.growOn {
-        inherit inputs nixpkgsConfig;
-        cellsFrom = ./nix;
-
-        cellBlocks = with std.blockTypes; [
-          (runnables "apps")
-          (installables "packages")
-          (pkgs "pkgs")
-          (devshells "devshells")
-        ];
-      }
-      {
-        packages = std.harvest inputs.self [["local" "packages"] ["local" "pkgs"]];
-        devShells = std.harvest inputs.self ["local" "devshells"];
-      };
     flake_parts_out = flake-parts.lib.mkFlake {inherit inputs;} {
-      flake = {inherit std_flake_out;};
       imports = [
         inputs.pre-commit-hooks-nix.flakeModule
-        inputs.std.flakeModule
         inputs.treefmt-nix.flakeModule
+        inputs.devshell.flakeModule
+        ./nix/packages.nix
+        ./nix/devshells.nix
       ];
       systems = supportedSystems;
       perSystem = {
+        self',
         config,
         inputs',
         lib,
@@ -65,13 +51,23 @@
             # to enforce line 367
             # ln -fs ${configFile} "''${GIT_WC}/.pre-commit-config.yaml"
             addGcRoot = false;
-            hooks = {
+
+            hooks = let
+              mypy_wrapper = pkgs.writeShellScript "mypy" ''
+                MYPYPATH=${self'.packages.epsteinlib_python}/lib/python3.11/site-packages/ ${self'.packages.pythonDevEnv}/bin/mypy "$@"
+              '';
+              pylint_wrapper = pkgs.writeShellScript "pylint" ''
+                ${self'.packages.pythonDevEnv}/bin/pylint "$@"
+              '';
+            in {
               # C
               clang-format.enable = true;
-              clang-tidy.enable = true;
+              clang-tidy = {
+                enable = true;
+              };
 
               # Nix
-              alejandra.enable = true;
+              alejandra.enable = false;
               deadnix = {
                 enable = true;
                 settings = {
@@ -84,8 +80,14 @@
               # Python
               black.enable = true;
               isort.enable = true;
-              mypy.enable = true;
-              pylint.enable = true;
+              mypy = {
+                enable = true;
+                settings.binPath = "${mypy_wrapper}";
+              };
+              pylint = {
+                enable = true;
+                settings.binPath = "${pylint_wrapper}";
+              };
               pyupgrade.enable = true;
 
               # Misc
@@ -123,23 +125,33 @@
             };
           };
         };
+
         devShells = let
-          inherit (std_flake_out.packages.${system}) epsteinlib;
+          inherit (self'.devShells) _epstein;
         in rec {
-          epstein_devshell = pkgs.mkShell {
-            inherit (config.pre-commit.devShell) shellHook nativeBuildInputs;
+          epstein = pkgs.mkShell {
+            inherit (_epstein) shellHook;
 
             inputsFrom = [
-              std_flake_out.devShells.${system}.std
-              epsteinlib
+              self'.packages.default
             ];
             packages = [
-              epsteinlib
+              self'.packages.default
+              self'.packages.default.optional-dependencies.dev
+            ];
+          };
+          epstein_devshell = pkgs.mkShell {
+            shellHook = config.pre-commit.installationScript + epstein.shellHook;
+
+            inputsFrom = [
+              epstein
+            ];
+            packages = [
+              config.pre-commit.settings.enabledPackages
             ];
           };
           default = epstein_devshell;
         };
-        packages = std_flake_out.packages.${system};
 
         treefmt = {
           projectRootFile = "flake.nix";
@@ -161,7 +173,7 @@
       };
     };
   in
-    std_flake_out // flake_parts_out;
+    flake_parts_out;
 
   inputs = {
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.05";
@@ -180,14 +192,6 @@
     devshell = {
       url = "github:numtide/devshell";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-    std = {
-      url = "github:divnix/std";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        devshell.url = "github:numtide/devshell";
-        devshell.follows = "devshell";
-      };
     };
   };
 }

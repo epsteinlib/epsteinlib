@@ -1,19 +1,13 @@
 # SPDX-FileCopyrightText: 2024 Jan Schmitz <schmitz@num.uni-sb.de>
 #
 # SPDX-License-Identifier: AGPL-3.0-only
-{
-  inputs,
-  cell,
-}: let
-  inherit (inputs) nixpkgs std;
-  l = nixpkgs.lib // builtins;
-in
-  l.mapAttrs (_: std.lib.dev.mkShell) {
-    std = {...}: {
-      name = "epstein devshell";
-      imports = [std.std.devshellProfiles.default];
-      packages = with nixpkgs; cell.packages.epsteinlib.nativeBuildInputs ++ [git doxygen_gui graphviz neovim gcovr python3Packages.twine python3Packages.build];
-
+_: {
+  perSystem = {
+    pkgs,
+    self',
+    ...
+  }: {
+    devshells._epstein = {
       commands = [
         {
           name = "tests";
@@ -47,7 +41,7 @@ in
         }
         {
           name = "docs";
-          command = "PROJECT_NUMBER=$(cat VERSION) doxygen Doxyfile && (${nixpkgs.xdg-utils}/bin/xdg-open html/index.html || true)";
+          command = "PROJECT_NUMBER=$(cat VERSION) doxygen Doxyfile && (${pkgs.xdg-utils}/bin/xdg-open html/index.html || true)";
           help = "generate and show documentation";
           category = "Tooling";
         }
@@ -71,4 +65,5 @@ in
         }
       ];
     };
-  }
+  };
+}

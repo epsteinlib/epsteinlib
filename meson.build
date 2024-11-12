@@ -40,4 +40,6 @@ subdir('include')
 subdir('mathematica')
 subdir('src')
 subdir('example')
-subdir('python')
+if not get_option('C_only')
+    subdir('python')
+endif
