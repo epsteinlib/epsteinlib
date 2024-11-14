@@ -46,7 +46,7 @@ In addition, this library includes the regularized Epstein zeta function, which 
 $$
 Z_{\Lambda,\nu}^{\mathrm{reg}}\begin{vmatrix} \boldsymbol x \newline\boldsymbol y \end{vmatrix} =
 e^{2\pi i \boldsymbol x\cdot\boldsymbol y}
-Z_{\Lambda,\nu}\left|\begin{aligned} \boldsymbol x \\\boldsymbol y \end{aligned}\right|
+Z_{\Lambda,\nu}\left|\begin{aligned} \boldsymbol x \newline\boldsymbol y \end{aligned}\right|
 -\frac{\hat{s}(\boldsymbol y)}{V_{\Lambda}},
 $$
 
