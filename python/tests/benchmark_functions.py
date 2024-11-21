@@ -1,7 +1,5 @@
-# SPDX-FileCopyrightText: 2024 Andreas Buchheit <buchheit@num.uni-sb.de>
 # SPDX-FileCopyrightText: 2024 Jan Schmitz <schmitz@num.uni-sb.de>
 # SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan.busse@dlr.de>
-# SPDX-FileCopyrightText: 2024 Ruben Gutendorf <ruben.gutendorf@uni-saarland.de>
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
@@ -114,6 +112,36 @@ def epstein_zeta_m1m1_half0_id(nu: float) -> float:
         * dirichlet_beta(nu / 2)
         * float(zeta(nu / 2))
     )
+
+
+def epstein_zeta_onehalf0sqrt3half_00_00(nu: float) -> float:
+    """
+    Compute the Epstein Zeta function for a given nu and
+
+    x = [0, 0]
+    y = [0, 0]
+    a = [[1, 1/2], [0, sqrt(3)/2]]
+
+    Representation in terms of the (hurwitz) Zeta function.
+    """
+    return (
+        3 ** (1 - nu / 2)
+        * 2
+        * float(zeta(nu / 2) * (zeta(nu / 2, 1 / 3) - zeta(nu / 2, 2 / 3)))
+    )
+
+
+def epstein_zeta_diag2sqrt242_0m1m1_4sqrt2th00(nu: float) -> float:
+    """
+    Compute the Epstein Zeta function for a given nu and
+
+    x = [0, -1, -1]
+    y = [-4*sqrt(2), 0, 0]
+    a = [[2sqrt(2), 0, 0], [0, 4, 0], [0, 0, 2]]
+
+    Representation in terms of the Dirichlet Beta function.
+    """
+    return 2 ** (1 - nu / 2) * dirichlet_beta(nu - 1)
 
 
 def epstein_zeta_half000_0000_id(nu: float) -> float:

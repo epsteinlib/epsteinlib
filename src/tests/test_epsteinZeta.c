@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 #include "epsteinZeta.h"
+#include "utils.h"
 #include <complex.h>
 #include <errno.h>
 #include <math.h>
@@ -17,73 +18,25 @@
 #define BASE_PATH "csv"
 #endif
 
-/**
- * @brief prints vector to terminal, is used in unitTest.
- * @param name: name of the vector as a string.
- * @param vec: vector.
- * @param dim: size of the vector.
- */
-void printVectorUnitTest(const char *name, double *vec, int dim) {
-    printf("%s[", name);
-    for (int i = 0; i < dim; ++i) {
-        printf("%.16lf", vec[i]);
-        if (i != dim - 1) {
-            printf(", ");
-        }
-    }
-    printf("]\n");
-}
-
-/**
- * @brief prints square matrix to terminal, is used in unitTest.
- * @param name: name of the matrix as a string.
- * @param mat: matrix.
- * @param dim: size of the matrix.
- */
-void printMatrixUnitTest(const char *name, const double *mat, int dim) {
-    printf("%s", name);
-    double matrixEntry;
-    for (int i = 0; i < dim; ++i) {
-        printf("\t\t [");
-        for (int j = 0; j < dim; ++j) {
-            matrixEntry = mat[i * dim + j];
-            if (pow(matrixEntry, 2) < 100) {
-                printf("%.16f", matrixEntry);
-            } else {
-                printf("%.2e", matrixEntry * pow(10, 9));
-            }
-            if (j != dim - 1) {
-                printf(", ");
-            }
-        }
-        printf("]\n");
-    }
-}
-
 /*!
- * @brief absolute difference between to complex numbers.
- * @param ref: reference value.
- * @param comp: compparison value.
- * @return sqrt(rev - comp)
+ * @brief Free memory allocated for test resources.
+ *
+ * This function deallocates memory that was dynamically allocated for various
+ * arrays used in the Epstein Zeta function tests.
+ *
+ * @param[in] a Pointer to the matrix of coefficients.
+ * @param[in] nu Pointer to the array of nu values.
+ * @param[in] x Pointer to the array of x values.
+ * @param[in] y Pointer to the array of y values.
+ * @param[in] zetaRef Pointer to the array of reference zeta values.
  */
-double errAbs(double complex ref, double complex comp) {
-    double complex diff = ref - comp;
-    double norm = creal(diff) * creal(diff) + cimag(diff) * cimag(diff);
-    return sqrt(norm);
-}
-
-/*!
- * @brief relative difference between to complex numbers.
- * @param ref: reference value.
- * @param comp: compparison value.
- * @return errAbs / norm(ref)
- */
-double errRel(double complex ref, double complex comp) {
-    if (ref == 0) {
-        return errAbs(ref, comp);
-    }
-    return errAbs(ref, comp) /
-           sqrt(creal(ref) * creal(ref) + cimag(ref) * cimag(ref));
+void freeTestResources(double *a, double *nu, double *x, double *y,
+                       double *zetaRef) {
+    free(a);
+    free(nu);
+    free(x);
+    free(y);
+    free(zetaRef);
 }
 
 /*!
@@ -95,7 +48,7 @@ double errRel(double complex ref, double complex comp) {
  *
  * @return 0 if all tests pass, 1 if any test fails.
  */
-int epsteinZetaTest() {
+int test_epsteinZeta_epsteinZetaReg() {
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/epsteinZeta_Ref.csv", // NOLINT
                           BASE_PATH);
@@ -106,6 +59,7 @@ int epsteinZetaTest() {
     if (zetaRegRefData == NULL) {
         return fprintf(stderr, "Error opening file: %s\n", path);
     }
+
     int dim = 2;
     double *a = malloc((int)(dim * dim) * sizeof(double));
     double *nu = malloc(2 * sizeof(double));
@@ -121,11 +75,24 @@ int epsteinZetaTest() {
     double tol = pow(10, -13);
     int testsPassed = 0;
     int totalTests = 0;
+    int testsPassedOverall = 0;
+    int totalTestsOverall = 0;
+    printf("Processing file: %s ... ", path);
 
-    while (fscanf(zetaRegRefData, // NOLINT
-                  "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", a, a + 1, a + 2,
-                  a + 3, nu, nu + 1, x, x + 1, y, y + 1, zetaRef,
-                  zetaRef + 1) == 12) {
+    int scanResult;
+    char line[256];
+    while (fgets(line, sizeof(line), zetaRegRefData) != NULL) {
+        scanResult =
+            sscanf(line, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf", // NOLINT
+                   nu, nu + 1, a, a + 1, a + 2, a + 3, x, x + 1, y, y + 1, zetaRef,
+                   zetaRef + 1);
+
+        if (scanResult != 12) {
+            printf("Error reading line: %s\n", line);
+            printf("Scanned %d values instead of 12\n", scanResult);
+            continue;
+        }
+
         nuReal = nu[0];
         zetaC = epsteinZeta(nuReal, dim, a, x, y);
         zetaM = zetaRef[0] + zetaRef[1] * I;
@@ -153,22 +120,55 @@ int epsteinZetaTest() {
             printf("\n");
         }
     }
+    printf("%d out of %d tests passed.\n", testsPassed, totalTests);
+
+    testsPassedOverall += testsPassed;
+    totalTestsOverall += totalTests;
+
+    totalTests = 0;
+    testsPassed = 0;
+
     if (fclose(zetaRegRefData) != 0) {
+        free(a);
+        free(nu);
+        free(x);
+        free(y);
+        free(zetaRef);
         return fprintf(stderr, "Error closing file: %d\n", errno);
     }
     result = snprintf(path, sizeof(path), "%s/epsteinZetaReg_Ref.csv", // NOLINT
                       BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
+        free(a);
+        free(nu);
+        free(x);
+        free(y);
+        free(zetaRef);
         return fprintf(stderr, "Error creating file path\n");
     }
     zetaRegRefData = fopen(path, "r");
     if (zetaRegRefData == NULL) {
+        free(a);
+        free(nu);
+        free(x);
+        free(y);
+        free(zetaRef);
         return fprintf(stderr, "Error opening file: %s\n", path);
     }
-    while (fscanf(zetaRegRefData, // NOLINT
-                  "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", a, a + 1, a + 2,
-                  a + 3, nu, nu + 1, x, x + 1, y, y + 1, zetaRef,
-                  zetaRef + 1) == 12) {
+
+    printf("Processing file: %s ... ", path);
+    while (fgets(line, sizeof(line), zetaRegRefData) != NULL) {
+        scanResult =
+            sscanf(line, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf", // NOLINT
+                   nu, nu + 1, a, a + 1, a + 2, a + 3, x, x + 1, y, y + 1, zetaRef,
+                   zetaRef + 1);
+
+        if (scanResult != 12) {
+            printf("Error reading line: %s\n", line);
+            printf("Scanned %d values instead of 12\n", scanResult);
+            continue;
+        }
+
         nuReal = nu[0];
         zetaC = epsteinZetaReg(nuReal, dim, a, x, y);
         zetaM = zetaRef[0] + zetaRef[1] * I;
@@ -198,19 +198,21 @@ int epsteinZetaTest() {
     }
 
     if (fclose(zetaRegRefData) != 0) {
+        freeTestResources(a, nu, x, y, zetaRef);
         return fprintf(stderr, "Error closing file: %d\n", errno);
     }
-    free(a);
-    free(nu);
-    free(x);
-    free(y);
-    free(zetaRef);
 
-    printf("%d out of %d tests passed\n", testsPassed, totalTests);
-    return (testsPassed == totalTests) ? 0 : 1;
+    freeTestResources(a, nu, x, y, zetaRef);
+
+    printf("%d out of %d tests passed.\n", testsPassed, totalTests);
+
+    testsPassedOverall += testsPassed;
+    totalTestsOverall += totalTests;
+
+    return (testsPassedOverall == totalTestsOverall) ? 0 : 1;
 }
 
 int main() {
-    int result = epsteinZetaTest();
+    int result = test_epsteinZeta_epsteinZetaReg();
     return result;
 }
