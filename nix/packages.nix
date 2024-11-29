@@ -16,6 +16,7 @@
           mypy
           mpmath
           numpy
+          matplotlib
           self'.packages.epsteinlib_python
           pylint
         ]
