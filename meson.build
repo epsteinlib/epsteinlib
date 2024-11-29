@@ -39,7 +39,7 @@ endif
 subdir('include')
 subdir('mathematica')
 subdir('src')
-subdir('example')
+subdir('examples/c')
 if not get_option('C_only')
     subdir('python')
 endif

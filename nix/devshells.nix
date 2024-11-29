@@ -14,12 +14,12 @@ _: {
           command = "pushd $(git rev-parse --show-toplevel) &&
                      meson setup --reconfigure build -Db_coverage=true &&
                      meson compile -C build &&
-                     meson test -v -C build
+                     meson test -v -C build $@
                      mkdir -p html &&
                      gcovr --html-details html/coverage.html --txt --txt-metric branch --print-summary --exclude 'build/python/.*pyx.c' --exclude 'src/tests/.*.c' &&
                      popd
                     ";
-          help = "run the unit tests";
+          help = "run the unit tests (arguments are passed to meson test, e.g. for only running specific tests)";
           category = "Testing";
         }
         {

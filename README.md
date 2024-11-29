@@ -188,6 +188,15 @@ print(f"Reference value:\t\t {madelung_ref:.16f}")
 print(f"Relative error:\t\t\t +{abs(madelung_ref - madelung) / abs(madelung_ref):.2e}")
 ```
 
+In the `examples/python/` folder, you can find two more Python examples:
+
+1. `dispersion_relation_3d.py`: This script demonstrates how to use EpsteinLib to calculate quantum dispersion relations in 3D.
+2. `sem_gaussian_1d.py`: This script showcases the Singular Euler-Maclaurin (SEM) expansion for a Gaussian function in 1D. It has an optional argument `--nu` that can be used to set the value of nu. For example, you can run it with `python sem_gaussian_1d.py --nu 1`. If no value is provided, it defaults to nu = 1.5.
+
+These examples, along with the `lattice_sum.py` script, provide a comprehensive overview of how to use EpsteinLib in various scenarios.
+
+
+
 ### in Mathematica
 
 ```mathematica
