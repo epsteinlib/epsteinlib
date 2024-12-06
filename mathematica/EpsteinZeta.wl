@@ -66,7 +66,7 @@ NaNQ = ResourceFunction["NaNQ"];
 
 
 (* Internal function to compute the Epstein zeta function *)
-epsteinZetaCInternal[\[Nu]_?NumericQ, a_?NumericQ, x_?NumericQ, y_?NumericQ, foreignFunction_] :=
+epsteinZetaCInternal[\[Nu]_, a_, x_, y_, foreignFunction_] :=
 Module[
   {aMemory, xMemory, yMemory, dim, buffer, zetaMemory, epsteinZetaObject, realPart, imagPart},
 
@@ -101,8 +101,8 @@ Module[
 
 
 (* Define the public Epstein zeta functions *)
-EpsteinZeta[\[Nu]_?NumericQ, A_?NumericQ, x_?NumericQ, y_?NumericQ] := epsteinZetaCInternal[\[Nu], A, x, y, foreignFunctionEpsteinZeta]
-EpsteinZetaReg[\[Nu]_?NumericQ, A_?NumericQ, x_?NumericQ, y_?NumericQ] := epsteinZetaCInternal[\[Nu], A, x, y, foreignFunctionEpsteinZetaReg]
+EpsteinZeta[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ], x_/;VectorQ[x] && AllTrue[x, NumericQ], y_/;VectorQ[y] && AllTrue[y, NumericQ]] := epsteinZetaCInternal[\[Nu], A, x, y, foreignFunctionEpsteinZeta]
+EpsteinZetaReg[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ], x_/;VectorQ[x] && AllTrue[x, NumericQ], y_/;VectorQ[y] && AllTrue[y, NumericQ]] := epsteinZetaCInternal[\[Nu], A, x, y, foreignFunctionEpsteinZetaReg]
 
 
 If[libPath =!= $Failed &&
