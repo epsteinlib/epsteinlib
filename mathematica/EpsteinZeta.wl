@@ -62,13 +62,15 @@ If[Head[foreignFunctionEpsteinZetaReg] =!= ForeignFunction,
 ]
 
 
-(* Internal function to compute the Epstein zeta function *)
-epsteinZetaCInternal[\[Nu]External_, aExternal_, xExternal_, yExternal_, foreignFunctionExternal_] :=
-Module[
-  {\[Nu]=\[Nu]External, a=aExternal, x = xExternal, y=yExternal, foreignFunction = foreignFunctionExternal,
-  aMemory, xMemory, yMemory, dim, buffer, zetaMemory, epsteinZetaObject},
+NaNQ = ResourceFunction["NaNQ"];
 
-  dim = Length@a;
+
+(* Internal function to compute the Epstein zeta function *)
+epsteinZetaCInternal[\[Nu]_?NumericQ, a_?NumericQ, x_?NumericQ, y_?NumericQ, foreignFunction_] :=
+Module[
+  {aMemory, xMemory, yMemory, dim, buffer, zetaMemory, epsteinZetaObject, realPart, imagPart},
+
+  dim = Length[a];
 
   aMemory = RawMemoryAllocate["CDouble", dim * dim];
   xMemory = RawMemoryAllocate["CDouble", dim];
@@ -81,8 +83,14 @@ Module[
   zetaMemory = RawMemoryAllocate["CDouble", 2];
   epsteinZetaObject = foreignFunction[zetaMemory, N[\[Nu]], dim, aMemory, xMemory, yMemory];
 
+  realPart = RawMemoryRead[zetaMemory, 0];
+  imagPart = RawMemoryRead[zetaMemory, 1];
+
   If[PossibleZeroQ@epsteinZetaObject,
-    RawMemoryRead[zetaMemory, 0] + I*RawMemoryRead[zetaMemory, 1],
+    If[!NaNQ[N@realPart] && !NaNQ[N@imagPart],
+      realPart + I*imagPart,
+      ComplexInfinity
+    ],
     Print["Error: Calculation failed"];
     Print["Input parameters: \[Nu] = ", \[Nu], ", a = ", a, ", x = ", x, ", y = ", y];
     Print["Dimension: ", dim];
@@ -93,8 +101,8 @@ Module[
 
 
 (* Define the public Epstein zeta functions *)
-EpsteinZeta[\[Nu]_, A_, x_, y_] := epsteinZetaCInternal[\[Nu], A, x, y, foreignFunctionEpsteinZeta]
-EpsteinZetaReg[\[Nu]_, A_, x_, y_] := epsteinZetaCInternal[\[Nu], A, x, y, foreignFunctionEpsteinZetaReg]
+EpsteinZeta[\[Nu]_?NumericQ, A_?NumericQ, x_?NumericQ, y_?NumericQ] := epsteinZetaCInternal[\[Nu], A, x, y, foreignFunctionEpsteinZeta]
+EpsteinZetaReg[\[Nu]_?NumericQ, A_?NumericQ, x_?NumericQ, y_?NumericQ] := epsteinZetaCInternal[\[Nu], A, x, y, foreignFunctionEpsteinZetaReg]
 
 
 If[libPath =!= $Failed &&

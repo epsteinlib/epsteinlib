@@ -27,7 +27,6 @@ class TestEpsteinZeta(unittest.TestCase):
     by comparison to analytic representations in special cases.
     """
 
-    print("deleteme")
     # Class variables
     offset: float = (
         0.01  # problems for python values with 0ffset <= 0.001, no problems with matheamtica values
@@ -180,6 +179,35 @@ class TestEpsteinZeta(unittest.TestCase):
             x,
             y,
             bf.epstein_zeta_half000_0000_id,
+        )
+
+    def test_singularity(self) -> None:
+        """
+        Test if the Epstein Zeta function returns nan for singularity case.
+        """
+        nu: float = 1.0
+        a: NDArray[np.float64] = np.array([[1.0]])
+        x: NDArray[np.float64] = np.array([0.0])
+        y: NDArray[np.float64] = np.array([0.0])
+
+        result = epstein_zeta(nu, a, x, y)
+        self.assertTrue(np.isnan(result), f"Expected nan, but got {result}")
+
+    def test_no_singularity_in_reg(self) -> None:
+        """
+        Test if the Epstein Zeta function returns nan for singularity case.
+        """
+        nu: float = 1.0
+        a: NDArray[np.float64] = np.array([[1.0]])
+        x: NDArray[np.float64] = np.array([0.0])
+        y: NDArray[np.float64] = np.array([0.0])
+
+        result = epstein_zeta_reg(nu, a, x, y)
+        self.assertFalse(
+            np.isnan(result), f"Expected a number, but got {result}"
+        )
+        self.assertTrue(
+            np.isfinite(result), f"Expected a finite number, but got {result}"
         )
 
 
