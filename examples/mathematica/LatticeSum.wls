@@ -6,7 +6,7 @@
    SPDX-License-Identifier: AGPL-3.0-only *)
 
 
-SetDirectory[NotebookDirectory[]];
+SetDirectory[NotebookDirectory[]<>"../../mathematica/"];
 <<"EpsteinZeta.wl"
 
 
