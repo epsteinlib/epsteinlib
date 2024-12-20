@@ -8,6 +8,7 @@ _: {
     ...
   }: {
     devshells._epstein = {
+      devshell.prj_root_fallback.eval = "$(git rev-parse --show-toplevel)";
       commands = [
         {
           name = "tests";

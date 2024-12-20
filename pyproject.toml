@@ -56,4 +56,4 @@ profile = "black"
 line_length = 79
 
 [tool.meson-python.args]
-setup = ["-Dpython_only=true"]
+setup = ["-Dbuild_C=false"]

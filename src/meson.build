@@ -3,6 +3,8 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
+python_only = not build_C and build_python
+
 zeta_src += files('zeta.c', 'gamma.c', 'tools.c', 'crandall.c', 'epsteinZeta.c')
 epsteinlib = both_libraries('epstein', zeta_src, include_directories : incdir, dependencies: deps, install: not python_only, override_options: override_options)
 
