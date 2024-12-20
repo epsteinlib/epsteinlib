@@ -2,9 +2,6 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-py_mod = import('python')
-py = py_mod.find_installation(pure: false)
-
 py.extension_module(
     'epsteinlib',
     'epsteinlib.pyx',

@@ -28,11 +28,26 @@ if get_option('buildtype') == 'release'
     add_project_arguments(['-fno-math-errno'], language: 'c')
 endif
 
-python_only = get_option('python_only')
+build_C = get_option('build_C')
+build_python = get_option('build_python')
+
+if not build_C and not build_python
+    error('The build_C and build_Python options are disabled. Nothing to build!')
+endif
 
 if host_machine.system() == 'windows' and meson.get_compiler('c').get_id() == 'gcc'
     # This avoids having to run 'os.add_dll_directory("/msys64/mingw64/bin")' before importing the python module
     add_project_link_arguments('-static-libgcc', language: 'c')
+endif
+
+if build_python
+    py_mod = import('python')
+    py = py_mod.find_installation(pure: false)
+
+    if host_machine.system() == 'darwin' and py.language_version() == '3.8'
+        # This fixes build failure on MacOS with Python 3.8
+        add_project_arguments('-Wno-deprecated-declarations', language: 'c')
+    endif
 endif
 
 
@@ -40,6 +55,6 @@ subdir('include')
 subdir('mathematica')
 subdir('src')
 subdir('examples/c')
-if not get_option('C_only')
+if build_python
     subdir('python')
 endif

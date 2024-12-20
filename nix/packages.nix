@@ -43,7 +43,7 @@
       ];
       buildInputs = [];
       mesonBuildType = buildtype;
-      mesonFlags = ["-DC_only=true"];
+      mesonFlags = ["-Dbuild_python=false"];
 
       enableParallelBuilding = true;
 

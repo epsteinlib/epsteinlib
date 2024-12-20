@@ -21,8 +21,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 - Build support on Windows
 - Mathematica interface
 - Epstein zeta regularized evaluates at $\nu=-2\mathbb N$
+- Github CI
 
 ### Fixed
+- macOS builds with Python 3.8
 
 ## [0.3.0] - 2024-08-19
 

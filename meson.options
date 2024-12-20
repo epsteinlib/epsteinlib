@@ -1,2 +1,2 @@
-option('python_only', type : 'boolean', value : false, description : 'Do not install anything else other than the Python extension. This needs to be set to true for pip install to work on Windows.')
-option('C_only', type : 'boolean', value : false, description : 'Do only build and install the C library.')
+option('build_python', type : 'boolean', value : true, description : 'Do build and install the Python extension. Note: build_C needs to be set to false for pip install to work on Windows.')
+option('build_C', type : 'boolean', value : true, description : 'Do build and install the C library.')
