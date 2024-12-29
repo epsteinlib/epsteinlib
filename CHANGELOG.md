@@ -16,6 +16,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 ### Fixed
 
+## [0.4.1] - 2024-12-29
+### Fixed
+- pypi release
 
 ## [0.4.0] - 2024-12-29
 ### Breaking Changes
