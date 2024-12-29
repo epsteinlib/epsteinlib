@@ -14,13 +14,22 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  extensions: ["tex2jax.js"],
-  jax: ["input/TeX","output/HTML-CSS"],
-});
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['[tex]/ams','[tex]/newcommand','[tex]/noundefined','[tex]/require','[tex]/autoload','[tex]/configmacros']
+  },
+  tex: {
+    macros: {},
+    packages: ['base','configmacros','ams','newcommand','noundefined','require','autoload','configmacros']
+  }
+};
 </script>
-<script type="text/javascript" async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js"></script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -30,7 +39,7 @@ MathJax.Hub.Config({
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Epstein Zeta Library<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">Epstein Zeta Library<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">Calculates the Epstein Zeta function</div>
   </td>
@@ -207,7 +216,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>x vector of the Epstein Zeta function. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>y vector of the Epstein Zeta function. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">lambda</td><td>relative weight of the sums in Crandall's formula. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">regBool</td><td>0 for no regularization, &gt; 0 for the regularization. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">reg</td><td>0 for no regularization, &gt; 0 for the regularization. </td></tr>
   </table>
   </dd>
 </dl>
@@ -278,7 +287,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>helper function for the second sum in crandalls formula. Calculates sum_{k in m_invt whole_numbers ** dim without zero} G_{dim - nu}(lambda * (k + y)) X exp(2 * PI * I * x * k) </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>helper function for the second sum in crandalls formula. Calculates sum_{k in m_invt whole_numbers ** dim without zero} G_{dim - nu}(lambda * (k + y)) X exp(-2 * PI * I * x * (k + y)) </dd></dl>
 
 </div>
 </div>
@@ -345,7 +354,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>helper function for the first sum in crandalls formula. Calculates sum_{z in m whole_numbers ** dim} G_{nu}((z - x) / lambda)) X exp(2 * PI * I * z * y) </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>helper function for the first sum in crandalls formula. Calculates sum_{z in m whole_numbers ** dim} G_{nu}((z - x) / lambda)) X exp(-2 * PI * I * z * y) </dd></dl>
 
 </div>
 </div>

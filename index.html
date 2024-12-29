@@ -14,13 +14,22 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  extensions: ["tex2jax.js"],
-  jax: ["input/TeX","output/HTML-CSS"],
-});
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['[tex]/ams','[tex]/newcommand','[tex]/noundefined','[tex]/require','[tex]/autoload','[tex]/configmacros']
+  },
+  tex: {
+    macros: {},
+    packages: ['base','configmacros','ams','newcommand','noundefined','require','autoload','configmacros']
+  }
+};
 </script>
-<script type="text/javascript" async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js"></script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -30,7 +39,7 @@ MathJax.Hub.Config({
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Epstein Zeta Library<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">Epstein Zeta Library<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">Calculates the Epstein Zeta function</div>
   </td>
@@ -85,35 +94,38 @@ $(function() {
 <div class="textblock"><p><a class="anchor" id="md_README"></a></p>
 <h1><a class="anchor" id="autotoc_md0"></a>
 EpsteinLib</h1>
-<p>Version 0.3</p>
 <p>Authors: Andreas A. Buchheit, Jonathan Busse, Ruben Gutendorf, DevOps: Jan Schmitz</p>
 <p>Contact: <a href="#" onclick="location.href='mai'+'lto:'+'buc'+'hh'+'eit'+'@n'+'um.'+'un'+'i-s'+'b.'+'de'; return false;">buchh<span class="obfuscator">.nosp@m.</span>eit@<span class="obfuscator">.nosp@m.</span>num.u<span class="obfuscator">.nosp@m.</span>ni-s<span class="obfuscator">.nosp@m.</span>b.de</a></p>
 <p>EpsteinLib is a C library designed for the fast and efficient computation of the Epstein zeta function for arbitrary multidimensional lattices. In addition to the C library, we also offer a Python package, epsteinlib, which can be easily installed via pip.</p>
 <p>Originally studied by Epstein [1,2], the Epstein zeta function forms the basis for computing general multidimensional lattice sums in classical and quantum physics applications [3]. Together with its regularization, it serves as the central ingredient in the singular Euler-Maclaurin (SEM) expansion, which generalizes the 300-year-old Euler summation formula to lattice sums in higher dimensions with physically relevant power-law interactions [4-5]. An efficiently computable representation of the Epstein zeta function is provided in [6,7].</p>
-<p>For a \(d\)-dimensional lattice \(\Lambda=A\mathbb Z^d\), with \(A\in \mathbb R^{d\times d}\) regular, \(x,y \in \mathbb R^d\), and \(\nu \in \mathbb C\), the Epstein zeta function is defined by the Dirichlet series</p>
-<p>$$ Z_{\Lambda,\nu}\begin{vmatrix} x \ y \end{vmatrix} = \sum_{z \in \Lambda}{}^{'} \frac{e^{-2\pi i y \cdot z}}{\left| x- z\right|^\nu},\quad \mathrm{Re}(\nu)&gt;d, $$</p>
-<p>which can be meromorphically continued to \(\nu \in \mathbb C\). Here, the primed sum excludes the case \(z = x.\)</p>
+<p>For a \(d\)-dimensional lattice \(\Lambda=A\mathbb Z^d\), with \(A\in \mathbb R^{d\times d}\) regular, \(\boldsymbol x,\boldsymbol y \in \mathbb R^d\), and \(\nu \in \mathbb C\), the Epstein zeta function is defined by the Dirichlet series</p>
+<p>$$ Z_{\Lambda,\nu}\begin{vmatrix} \boldsymbol x \newline\boldsymbol y \end{vmatrix} = \sum_{z \in \Lambda}{}^{'} \frac{e^{-2\pi i \boldsymbol y \cdot \boldsymbol z}}{\left| \boldsymbol x- \boldsymbol z\right|^\nu},\quad \mathrm{Re}(\nu)&gt;d, $$</p>
+<p>which can be meromorphically continued to \(\nu \in \mathbb C\). Here, the primed sum excludes the case \(\boldsymbol z = \boldsymbol x.\)</p>
 <p>The Epstein zeta function is implemented in this library as</p>
 <div class="fragment"><div class="line"><span class="keywordtype">double</span> complex <a class="code hl_function" href="epsteinZeta_8c.html#aff1fe7852bf36a72e0da86f19912e870">epsteinZeta</a>(<span class="keywordtype">double</span> nu, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> dim, <span class="keyword">const</span> <span class="keywordtype">double</span> *A, <span class="keyword">const</span> <span class="keywordtype">double</span> *x, <span class="keyword">const</span> <span class="keywordtype">double</span> *y);</div>
 <div class="ttc" id="aepsteinZeta_8c_html_aff1fe7852bf36a72e0da86f19912e870"><div class="ttname"><a href="epsteinZeta_8c.html#aff1fe7852bf36a72e0da86f19912e870">epsteinZeta</a></div><div class="ttdeci">double complex epsteinZeta(double nu, unsigned int dim, const double *a, const double *x, const double *y)</div><div class="ttdoc">calculates the Epstein Zeta function.</div><div class="ttdef"><b>Definition</b> epsteinZeta.c:34</div></div>
 </div><!-- fragment --><p> In the Python package, it is implemented as </p><div class="fragment"><div class="line"><span class="keyword">def </span>epstein_zeta(nu: float | int, A: NDArray[np.float64], x: NDArray[np.float64], y: NDArray[np.float64]) -&gt; complex</div>
-</div><!-- fragment --><p> and evalutates to full precision over the whole parameter range up to ten dimensions.</p>
-<p>In addition, this library includes the regularized Epstein zeta function, which is analytic around \(y=0\), and is defined via</p>
-<p>$$ Z_{\Lambda,\nu}^{\mathrm{reg}}\begin{vmatrix} x \ y \end{vmatrix} = e^{2\pi i x\cdot y} Z_{\Lambda,\nu}\left|\begin{aligned} x \ y \end{aligned}\right| -\frac{\hat{s}(y)}{V_{\Lambda}}, $$</p>
-<p>where \(V_{\Lambda}=|\det A|\) is the volume of the elementary lattice cell,</p>
-<p>$$ \hat{s}(y)=-\pi^{\nu-\frac{d}{2}} \frac{\Gamma((d-\nu)/2)}{\Gamma(\nu/2)}|y|^{\nu-d} $$</p>
-<p>is the distributional Fourier transform of \(\vert z \vert^{-\nu}\), where \(\Gamma\) denotes the gamma function.</p>
-<p>In this library, the regularized Epstein zeta function is included as </p><div class="fragment"><div class="line"><span class="keywordtype">double</span> complex <a class="code hl_function" href="epsteinZeta_8c.html#aefe3a4ced16ddbd4a7b1727df9e999b2">epsteinZetaReg</a>(<span class="keywordtype">double</span> nu, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> dim, <span class="keyword">const</span> <span class="keywordtype">double</span> *A, <span class="keyword">const</span> <span class="keywordtype">double</span> *x, <span class="keyword">const</span> <span class="keywordtype">double</span> *y);</div>
+</div><!-- fragment --><p> In the Mathematica package, it is implemented as </p><div class="fragment"><div class="line">EpsteinZeta[\[Nu],A,x,y]</div>
+</div><!-- fragment --><p> and evaluates to full precision over the whole parameter range up to ten dimensions.</p>
+<p>In addition, this library includes the regularized Epstein zeta function, which is analytic around \(\boldsymbol y=0\), and is defined via</p>
+<p>$$ Z_{\Lambda,\nu}^{\mathrm{reg}}\begin{vmatrix} \boldsymbol x \newline\boldsymbol y \end{vmatrix} = e^{2\pi i \boldsymbol x\cdot\boldsymbol y} Z_{\Lambda,\nu}\left|\begin{aligned} \boldsymbol x \newline\boldsymbol y \end{aligned}\right| -\frac{\hat{s}(\boldsymbol y)}{V_{\Lambda}}, $$</p>
+<p>where \(V_{\Lambda}=|\det A|\) is the volume of the elementary lattice cell, and</p>
+<p>$$ \hat{s}_\nu(\boldsymbol y) = \frac{\pi^{\nu/2}}{\Gamma(\nu/2)}\Gamma\big((d-\nu)/2\big) (\pi \boldsymbol y^2)^{(\nu - d)/2},\quad \nu \not\in (d+2\mathbb N_0) $$</p>
+<p>is the distributional Fourier transform of \(\vert\boldsymbol z \vert^{-\nu}\), where \(\Gamma\) denotes the gamma function and we adopt the choice</p>
+<p>$$ \hat s_{d+2k}(\boldsymbol y)= \frac{\pi^{k+d/2}}{\Gamma(k+d/2)}\frac{(-1)^{k+1}}{k!} ( \pi \boldsymbol y^2 )^{k} \log (\pi \boldsymbol y^{2}),\quad k\in \mathbb N_0. $$</p>
+<p>In the c library, the regularized Epstein zeta function is included as </p><div class="fragment"><div class="line"><span class="keywordtype">double</span> complex <a class="code hl_function" href="epsteinZeta_8c.html#aefe3a4ced16ddbd4a7b1727df9e999b2">epsteinZetaReg</a>(<span class="keywordtype">double</span> nu, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> dim, <span class="keyword">const</span> <span class="keywordtype">double</span> *A, <span class="keyword">const</span> <span class="keywordtype">double</span> *x, <span class="keyword">const</span> <span class="keywordtype">double</span> *y);</div>
 <div class="ttc" id="aepsteinZeta_8c_html_aefe3a4ced16ddbd4a7b1727df9e999b2"><div class="ttname"><a href="epsteinZeta_8c.html#aefe3a4ced16ddbd4a7b1727df9e999b2">epsteinZetaReg</a></div><div class="ttdeci">double complex epsteinZetaReg(double nu, unsigned int dim, const double *a, const double *x, const double *y)</div><div class="ttdoc">calculates the regularized Epstein Zeta function.</div><div class="ttdef"><b>Definition</b> epsteinZeta.c:49</div></div>
-</div><!-- fragment --><p> or </p><div class="fragment"><div class="line"><span class="keyword">def </span>epstein_zeta_reg(nu: float | int, A: NDArray[np.float64], x: NDArray[np.float64], y: NDArray[np.float64]) -&gt; complex</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md1"></a>
+</div><!-- fragment --><p> in the Python package as </p><div class="fragment"><div class="line"><span class="keyword">def </span>epstein_zeta_reg(nu: float | int, A: NDArray[np.float64], x: NDArray[np.float64], y: NDArray[np.float64]) -&gt; complex</div>
+</div><!-- fragment --><p> and in the Mathematica package as </p><div class="fragment"><div class="line">EpsteinZetaReg[\[Nu],A,x,y]</div>
+</div><!-- fragment --> <h2><a class="anchor" id="autotoc_md1"></a>
 Installation</h2>
 <p>Install our required dependencies: meson, ninja, pkg-config, python3 e.g. with </p><div class="fragment"><div class="line"># Archlinux</div>
 <div class="line">pacman -S meson ninja pkgconf python</div>
 <div class="line"> </div>
 <div class="line"># MacOS</div>
 <div class="line">brew install meson ninja pkg-config python3</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md2"></a>
+</div><!-- fragment --><p>Currently, we support native Windows builds only with GCC installed via <a href="https://www.msys2.org/">https://www.msys2.org/</a>. Different environments may or may not work. However, for the full out of the box development experience we encourage Windows users to use <a href="https://learn.microsoft.com/en-us/windows/wsl/install">WSL2</a> and follow the Linux installation instructions.</p>
+<h3><a class="anchor" id="autotoc_md2"></a>
 Installing only the Python wrapper with pip</h3>
 <div class="fragment"><div class="line"># Create a virtualenvironment and activate it if you are not already inside one.</div>
 <div class="line">python3 -m venv .venv &amp;&amp; source .venv/bin/activate</div>
@@ -133,10 +145,10 @@ Installing the C library and the Python wrapper with meson</h3>
 <summary >
 System-wide installation</summary>
 <p></p>
-<p>Meson supports a system-wide installation of the compiled library. After that, you can use <code>#include &lt;<a class="el" href="epsteinZeta_8h.html" title="Calculates the (regularized) Epstein zeta function.">epsteinZeta.h</a>&gt;</code> and link with <code>gcc -lepsteinZeta</code>. This may require superuser rights.</p>
+<p>Meson supports a system-wide installation of the compiled library. After that, you can use <code>#include &lt;epsteinZeta.h&gt;</code> and link with <code>gcc -lepsteinZeta</code>. This may require superuser rights.</p>
 <ol type="1">
 <li>To install system-wide: <code>meson install -C build</code>.</li>
-<li>Try to compile the sample program in <code><a class="el" href="lattice__sum_8c.html" title="Calculates the Madelung constant.">test/lattice_sum.c</a></code> with the command <code>gcc -o <a class="el" href="namespacelattice__sum.html">lattice_sum</a> <a class="el" href="lattice__sum_8c.html" title="Calculates the Madelung constant.">lattice_sum.c</a> -lm -lepsteinZeta</code>. You may encounter the problem that the shared library cannot be found. In this case, you need to modify the environment variables. Please continue with the next step. Otherwise, you are done.</li>
+<li>Try to compile the sample program in <code>test/lattice_sum.c</code> with the command <code>gcc -o lattice_sum lattice_sum.c -lm -lepsteinZeta</code>. You may encounter the problem that the shared library cannot be found. In this case, you need to modify the environment variables. Please continue with the next step. Otherwise, you are done.</li>
 <li>Update the environment variables to correctly locate the shared library at runtime. You can find <code>/path/to/library</code> in the output given by <code>meson install</code>. <div class="fragment"><div class="line"># Linux</div>
 <div class="line">export \f$LD_LIBRARY_PATH=\f$LD_LIBRARY_PATH:/path/to/library</div>
 <div class="line"> </div>
@@ -153,7 +165,7 @@ Local installation</summary>
 <li>Copy the header <code>include/epsteinZeta.h</code> and move the compiled library <code>build/src/libepsteinZeta.so</code> to places of your choice, e. g. <div class="fragment"><div class="line">cp include/epsteinZeta.h /your/path/to/include</div>
 <div class="line">mv build/src/libepsteinZeta.so /your/path/to/library</div>
 </div><!-- fragment --></li>
-<li>To test your library, try to compile <code><a class="el" href="lattice__sum_8c.html" title="Calculates the Madelung constant.">test/lattice_sum.c</a></code> with the command <code>gcc -o <a class="el" href="namespacelattice__sum.html">lattice_sum</a> <a class="el" href="lattice__sum_8c.html" title="Calculates the Madelung constant.">lattice_sum.c</a> -lm -L/your/path/to/library -lepsteinZeta -I/your/path/to/include</code>.</li>
+<li>To test your library, try to compile <code>test/lattice_sum.c</code> with the command <code>gcc -o lattice_sum lattice_sum.c -lm -L/your/path/to/library -lepsteinZeta -I/your/path/to/include</code>.</li>
 </ol>
 <p></p>
 </details>
@@ -166,7 +178,7 @@ Usage</h2>
 <h3><a class="anchor" id="autotoc_md6"></a>
 in C</h3>
 <div class="fragment"><div class="line"> c</div>
-<div class="line">// If the library is installed, compile with `gcc -o lattice_sum lattice_sum.c -lm -lepsteinZeta </div>
+<div class="line">// If the library is installed, compile with `gcc -o lattice_sum lattice_sum.c -lm -lepsteinZeta</div>
 <div class="line">// If the library is not installed, compile with `gcc -o lattice_sum lattice_sum.c -lm -L/path/to/library -lepsteinZeta -I/path/to/include</div>
 <div class="line"> </div>
 <div class="line">#include &lt;complex.h&gt;</div>
@@ -208,7 +220,31 @@ in Python</h3>
 <div class="line">print(f<span class="stringliteral">&quot;Madelung sum in 3 dimensions:\t {madelung:.16f}&quot;</span>)</div>
 <div class="line">print(f<span class="stringliteral">&quot;Reference value:\t\t {madelung_ref:.16f}&quot;</span>)</div>
 <div class="line">print(f<span class="stringliteral">&quot;Relative error:\t\t\t +{abs(madelung_ref - madelung) / abs(madelung_ref):.2e}&quot;</span>)</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md8"></a>
+</div><!-- fragment --><p>In the <code>examples/python/</code> folder, you can find two more Python examples:</p>
+<ol type="1">
+<li><code>dispersion_relation_3d.py</code>: This script demonstrates how to use EpsteinLib to calculate quantum dispersion relations in 3D.</li>
+<li><code>sem_gaussian_1d.py</code>: This script showcases the Singular Euler-Maclaurin (SEM) expansion for a Gaussian function in 1D. It has an optional argument <code>--nu</code> that can be used to set the value of nu. For example, you can run it with <code>python sem_gaussian_1d.py --nu 1</code>. If no value is provided, it defaults to nu = 1.5.</li>
+</ol>
+<p>These examples, along with the <code>lattice_sum.py</code> script, provide a comprehensive overview of how to use EpsteinLib in various scenarios.</p>
+<h3><a class="anchor" id="autotoc_md8"></a>
+in Mathematica</h3>
+<div class="fragment"><div class="line">&lt;&lt;&quot;EpsteinZeta.wl&quot;</div>
+<div class="line"> </div>
+<div class="line">madelungRef = -1.7475645946331821906362120355443974;</div>
+<div class="line"> </div>
+<div class="line">dim = 3;</div>
+<div class="line">A = IdentityMatrix[dim];</div>
+<div class="line">x = ConstantArray[0, dim];</div>
+<div class="line">y = ConstantArray[0.5, dim];</div>
+<div class="line">\[Nu] = 1.0;</div>
+<div class="line"> </div>
+<div class="line">madelung = Re[EpsteinZeta[\[Nu], A, x, y]];</div>
+<div class="line"> </div>
+<div class="line">Print[&quot;Madelung sum in 3 dimensions: &quot;, NumberForm[madelung, 16]];</div>
+<div class="line">Print[&quot;Reference value:              &quot;, NumberForm[madelungRef, 16]];</div>
+<div class="line">Print[&quot;Relative error:               +&quot;, ScientificForm[Abs[madelungRef - madelung]/Abs[madelungRef], 2]];</div>
+</div><!-- fragment --><p>Executing this code snipped in the same folder as <code>EpsteinZeta.wl</code> and setting <code>SetDirectory[NotebookDirectory[]]</code> is the easiest way to help mathematica find the package.</p>
+<h2><a class="anchor" id="autotoc_md9"></a>
 Development environment</h2>
 <p>We provide a nix devshell to have a reproducible development environment with the same dependencies across different operating systems. Once you have installed and configured nix starting developing is as easy as running <code>nix develop</code>.</p>
 <details >
@@ -217,7 +253,7 @@ Nix installation instructions</summary>
 <p></p>
 <p></p>
 </details>
-<h3><a class="anchor" id="autotoc_md9"></a>
+<h3><a class="anchor" id="autotoc_md10"></a>
 Nix based - recommended</h3>
 <ol type="1">
 <li>Install <a href="https://nixos.org/download/">nix</a>; Follow the <a href="https://wiki.archlinux.org/title/Nix">wiki</a></li>
@@ -235,7 +271,7 @@ Nix based - recommended</h3>
 <li><code>cd &lt;path/to/repo&gt;</code></li>
 <li><code>nix develop</code> or <code>nix run -- &lt;your args&gt;</code></li>
 </ol>
-<h3><a class="anchor" id="autotoc_md10"></a>
+<h3><a class="anchor" id="autotoc_md11"></a>
 Nix-Portable based - if you do not have root rights</h3>
 <ol type="1">
 <li>Install <a href="https://github.com/DavHau/nix-portable">nix-portable</a>: <div class="fragment"><div class="line">mkdir -p ~/.local/bin</div>
@@ -266,10 +302,10 @@ Nix-Portable based - if you do not have root rights</h3>
 <li><code>cd &lt;path/to/repo&gt;</code></li>
 <li><code>nix develop</code> or <code>nix run -- &lt;your args&gt;</code> </li>
 </ol>
-<h2><a class="anchor" id="autotoc_md11"></a>
+<h2><a class="anchor" id="autotoc_md12"></a>
 Contributing</h2>
 <p>Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.</p>
-<h2><a class="anchor" id="autotoc_md12"></a>
+<h2><a class="anchor" id="autotoc_md13"></a>
 References</h2>
 <p>[1] P. Epstein. “Zur Theorie allgemeiner Zetafunctionen”. Math. Ann. 56 (1903), pp. 615–644.</p>
 <p>[2] P. Epstein. “Zur Theorie allgemeiner Zetafunktionen. II”. Math. Ann. 63 (1906), pp. 205–216</p>

@@ -14,13 +14,22 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  extensions: ["tex2jax.js"],
-  jax: ["input/TeX","output/HTML-CSS"],
-});
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['[tex]/ams','[tex]/newcommand','[tex]/noundefined','[tex]/require','[tex]/autoload','[tex]/configmacros']
+  },
+  tex: {
+    macros: {},
+    packages: ['base','configmacros','ams','newcommand','noundefined','require','autoload','configmacros']
+  }
+};
 </script>
-<script type="text/javascript" async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js"></script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -30,7 +39,7 @@ MathJax.Hub.Config({
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Epstein Zeta Library<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">Epstein Zeta Library<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">Calculates the Epstein Zeta function</div>
   </td>
@@ -102,17 +111,21 @@ $(function() { codefold.init(0); });
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#ifndef EPSTEIN_CRANDALL</span></div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#define EPSTEIN_CRANDALL</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="keywordtype">double</span> complex <a class="code hl_function" href="crandall_8h.html#adec3c594701f4a37297ed99a5a016202">crandall_gReg</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> dim, <span class="keywordtype">double</span> nu, <span class="keyword">const</span> <span class="keywordtype">double</span> *z,</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>                             <span class="keywordtype">double</span> prefactor);</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="crandall_8h.html#aad749ef8f396e44de09256228fd10a32">   29</a></span><span class="keywordtype">double</span> complex <a class="code hl_function" href="crandall_8h.html#aad749ef8f396e44de09256228fd10a32">crandall_gReg_nuequalsdim</a>(<span class="keywordtype">double</span> s, <span class="keywordtype">double</span> arg, <span class="keywordtype">double</span> k,</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>                                         <span class="keywordtype">double</span> lambda);</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="keywordtype">double</span> <a class="code hl_function" href="crandall_8h.html#a4f002c9beeec45b933c400a0cf699257">assignzArgBound</a>(<span class="keywordtype">double</span> nu);</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="keywordtype">double</span> complex <a class="code hl_function" href="crandall_8h.html#a36e2886859961d74dcd67893106d9335">crandall_g</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> dim, <span class="keywordtype">double</span> nu, <span class="keyword">const</span> <span class="keywordtype">double</span> *z,</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>                          <span class="keywordtype">double</span> prefactor, <span class="keywordtype">double</span> zArgBound);</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="acrandall_8h_html_a36e2886859961d74dcd67893106d9335"><div class="ttname"><a href="crandall_8h.html#a36e2886859961d74dcd67893106d9335">crandall_g</a></div><div class="ttdeci">double complex crandall_g(unsigned int dim, double nu, const double *z, double prefactor, double zArgBound)</div><div class="ttdoc">Assumes x and y to be in the respective elementary lattice cell. Multiply with exp(2 * PI * i * x * y...</div><div class="ttdef"><b>Definition</b> crandall.c:79</div></div>
-<div class="ttc" id="acrandall_8h_html_a4f002c9beeec45b933c400a0cf699257"><div class="ttname"><a href="crandall_8h.html#a4f002c9beeec45b933c400a0cf699257">assignzArgBound</a></div><div class="ttdeci">double assignzArgBound(double nu)</div><div class="ttdoc">calculates bounds on when to use asymptotic expansion of the upper incomplete gamma function,...</div><div class="ttdef"><b>Definition</b> crandall.c:49</div></div>
-<div class="ttc" id="acrandall_8h_html_adec3c594701f4a37297ed99a5a016202"><div class="ttname"><a href="crandall_8h.html#adec3c594701f4a37297ed99a5a016202">crandall_gReg</a></div><div class="ttdeci">double complex crandall_gReg(unsigned int dim, double nu, const double *z, double prefactor)</div><div class="ttdoc">Calculates the regularization of the zero summand in the second sum in Crandall's formula....</div><div class="ttdef"><b>Definition</b> crandall.c:35</div></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="keywordtype">double</span> complex <a class="code hl_function" href="crandall_8h.html#adec3c594701f4a37297ed99a5a016202">crandall_gReg</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> dim, <span class="keywordtype">double</span> nu, <span class="keyword">const</span> <span class="keywordtype">double</span> *z,</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>                             <span class="keywordtype">double</span> prefactor);</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="keywordtype">double</span> <a class="code hl_function" href="crandall_8h.html#a4f002c9beeec45b933c400a0cf699257">assignzArgBound</a>(<span class="keywordtype">double</span> nu);</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="keywordtype">double</span> complex <a class="code hl_function" href="crandall_8h.html#a36e2886859961d74dcd67893106d9335">crandall_g</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> dim, <span class="keywordtype">double</span> nu, <span class="keyword">const</span> <span class="keywordtype">double</span> *z,</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>                          <span class="keywordtype">double</span> prefactor, <span class="keywordtype">double</span> zArgBound);</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="acrandall_8h_html_a36e2886859961d74dcd67893106d9335"><div class="ttname"><a href="crandall_8h.html#a36e2886859961d74dcd67893106d9335">crandall_g</a></div><div class="ttdeci">double complex crandall_g(unsigned int dim, double nu, const double *z, double prefactor, double zArgBound)</div><div class="ttdoc">Assumes x and y to be in the respective elementary lattice cell. Multiply with exp(2 * PI * i * x * y...</div><div class="ttdef"><b>Definition</b> crandall.c:127</div></div>
+<div class="ttc" id="acrandall_8h_html_a4f002c9beeec45b933c400a0cf699257"><div class="ttname"><a href="crandall_8h.html#a4f002c9beeec45b933c400a0cf699257">assignzArgBound</a></div><div class="ttdeci">double assignzArgBound(double nu)</div><div class="ttdoc">calculates bounds on when to use asymptotic expansion of the upper incomplete gamma function,...</div><div class="ttdef"><b>Definition</b> crandall.c:97</div></div>
+<div class="ttc" id="acrandall_8h_html_aad749ef8f396e44de09256228fd10a32"><div class="ttname"><a href="crandall_8h.html#aad749ef8f396e44de09256228fd10a32">crandall_gReg_nuequalsdim</a></div><div class="ttdeci">double complex crandall_gReg_nuequalsdim(double s, double arg, double k, double lambda)</div><div class="ttdoc">Calculates the regularization of the zero summand in the second sum in Crandall's formula in the spec...</div></div>
+<div class="ttc" id="acrandall_8h_html_adec3c594701f4a37297ed99a5a016202"><div class="ttname"><a href="crandall_8h.html#adec3c594701f4a37297ed99a5a016202">crandall_gReg</a></div><div class="ttdeci">double complex crandall_gReg(unsigned int dim, double nu, const double *z, double prefactor)</div><div class="ttdoc">Calculates the regularization of the zero summand in the second sum in Crandall's formula.</div><div class="ttdef"><b>Definition</b> crandall.c:79</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

@@ -14,13 +14,22 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  extensions: ["tex2jax.js"],
-  jax: ["input/TeX","output/HTML-CSS"],
-});
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['[tex]/ams','[tex]/newcommand','[tex]/noundefined','[tex]/require','[tex]/autoload','[tex]/configmacros']
+  },
+  tex: {
+    macros: {},
+    packages: ['base','configmacros','ams','newcommand','noundefined','require','autoload','configmacros']
+  }
+};
 </script>
-<script type="text/javascript" async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js"></script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -30,7 +39,7 @@ MathJax.Hub.Config({
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Epstein Zeta Library<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">Epstein Zeta Library<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">Calculates the Epstein Zeta function</div>
   </td>
@@ -117,8 +126,11 @@ This graph shows which files directly or indirectly include this file:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:aad749ef8f396e44de09256228fd10a32" id="r_aad749ef8f396e44de09256228fd10a32"><td class="memItemLeft" align="right" valign="top">double complex&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aad749ef8f396e44de09256228fd10a32">crandall_gReg_nuequalsdim</a> (double s, double arg, double k, double lambda)</td></tr>
+<tr class="memdesc:aad749ef8f396e44de09256228fd10a32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the regularization of the zero summand in the second sum in Crandall's formula in the special case of nu = dim + 2k for some natural number k.  <br /></td></tr>
+<tr class="separator:aad749ef8f396e44de09256228fd10a32"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adec3c594701f4a37297ed99a5a016202" id="r_adec3c594701f4a37297ed99a5a016202"><td class="memItemLeft" align="right" valign="top">double complex&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adec3c594701f4a37297ed99a5a016202">crandall_gReg</a> (unsigned int dim, double nu, const double *z, double prefactor)</td></tr>
-<tr class="memdesc:adec3c594701f4a37297ed99a5a016202"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the regularization of the zero summand in the second sum in Crandall's formula. That is, the summand for k = 0.  <br /></td></tr>
+<tr class="memdesc:adec3c594701f4a37297ed99a5a016202"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the regularization of the zero summand in the second sum in Crandall's formula.  <br /></td></tr>
 <tr class="separator:adec3c594701f4a37297ed99a5a016202"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4f002c9beeec45b933c400a0cf699257" id="r_a4f002c9beeec45b933c400a0cf699257"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4f002c9beeec45b933c400a0cf699257">assignzArgBound</a> (double nu)</td></tr>
 <tr class="memdesc:a4f002c9beeec45b933c400a0cf699257"><td class="mdescLeft">&#160;</td><td class="mdescRight">calculates bounds on when to use asymptotic expansion of the upper incomplete gamma function, depending on the value of nu.  <br /></td></tr>
@@ -218,7 +230,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>nu</em>, </span></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>s</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -233,17 +245,60 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Calculates the regularization of the zero summand in the second sum in Crandall's formula. That is, the summand for k = 0. </p>
+<p>Calculates the regularization of the zero summand in the second sum in Crandall's formula. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">dim</td><td>dimension of the input vectors </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">nu</td><td>exponent of the regularized Epstein zeta function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">s</td><td>dimension minus exponent of the regularized Epstein zeta function, that is d - nu </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">z</td><td>input vector of the function </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">prefactor</td><td>prefactor of the vector, e. g. lambda </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>gamma(nu/2) * gammaStar(nu/2, pi * prefactor * z**2), where gammaStar is the twice regularized lower incomplete gamma function gamma(s,x) / (gamma(s) * x ** s) </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>- gamma(s/2) * gammaStar(s/2, pi * prefactor * z**2), where gammaStar is the twice regularized lower incomplete gamma function if s is not equal to - 2k and (pi * prefactor * y ** 2) ** (- s / 2) (gamma(s / 2, pi * prefactor * z ** 2) + ((-1)^k / k! ) * (log(pi * y ** 2) - log(prefactor ** 2))) if s is equal to - 2k for non negative natural number k </dd></dl>
+
+</div>
+</div>
+<a id="aad749ef8f396e44de09256228fd10a32" name="aad749ef8f396e44de09256228fd10a32"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad749ef8f396e44de09256228fd10a32">&#9670;&#160;</a></span>crandall_gReg_nuequalsdim()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double complex crandall_gReg_nuequalsdim </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>s</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>arg</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>k</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>lambda</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculates the regularization of the zero summand in the second sum in Crandall's formula in the special case of nu = dim + 2k for some natural number k. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">s</td><td>dimension minus exponent of the regularized Epstein zeta function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">arg</td><td>input of the function </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">k</td><td>k = - s / 2 = (nu - d) / 2 as an integer </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">lambda</td><td>scaling parameter of crandalls formula </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>arg ** (- s / 2) * (gamma(s / 2, arg) + ((-1)^k / k! ) * (log(arg) - log(lambda ** 2)) </dd></dl>
 
 </div>
 </div>

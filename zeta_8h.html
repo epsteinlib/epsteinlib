@@ -14,13 +14,22 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  extensions: ["tex2jax.js"],
-  jax: ["input/TeX","output/HTML-CSS"],
-});
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['[tex]/ams','[tex]/newcommand','[tex]/noundefined','[tex]/require','[tex]/autoload','[tex]/configmacros']
+  },
+  tex: {
+    macros: {},
+    packages: ['base','configmacros','ams','newcommand','noundefined','require','autoload','configmacros']
+  }
+};
 </script>
-<script type="text/javascript" async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js"></script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -30,7 +39,7 @@ MathJax.Hub.Config({
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Epstein Zeta Library<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">Epstein Zeta Library<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">Calculates the Epstein Zeta function</div>
   </td>
@@ -180,6 +189,19 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>y vector of the Epstein Zeta function. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">lambda</td><td>relative weight of the sums in Crandall's formula. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">regBool</td><td>0 for no regularization, &gt; 0 for the regularization. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>function value of the regularized Epstein zeta.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">nu</td><td>exponent for the Epstein zeta function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dim</td><td>dimension of the input vectors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">m</td><td>matrix that transforms the lattice in the Epstein Zeta function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>x vector of the Epstein Zeta function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>y vector of the Epstein Zeta function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">lambda</td><td>relative weight of the sums in Crandall's formula. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">reg</td><td>0 for no regularization, &gt; 0 for the regularization. </td></tr>
   </table>
   </dd>
 </dl>

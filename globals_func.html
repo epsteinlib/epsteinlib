@@ -14,13 +14,22 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  extensions: ["tex2jax.js"],
-  jax: ["input/TeX","output/HTML-CSS"],
-});
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['[tex]/ams','[tex]/newcommand','[tex]/noundefined','[tex]/require','[tex]/autoload','[tex]/configmacros']
+  },
+  tex: {
+    macros: {},
+    packages: ['base','configmacros','ams','newcommand','noundefined','require','autoload','configmacros']
+  }
+};
 </script>
-<script type="text/javascript" async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js"></script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -30,7 +39,7 @@ MathJax.Hub.Config({
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Epstein Zeta Library<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">Epstein Zeta Library<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">Calculates the Epstein Zeta function</div>
   </td>
@@ -87,8 +96,10 @@ $(function() {
 
 
 <h3><a id="index_c" name="index_c"></a>- c -</h3><ul>
-<li>crandall_g()&#160;:&#160;<a class="el" href="crandall_8c.html#a36e2886859961d74dcd67893106d9335">crandall.c</a>, <a class="el" href="crandall_8h.html#a36e2886859961d74dcd67893106d9335">crandall.h</a>, <a class="el" href="epsteinZeta_8h.html#aab27dad9e96c1e9cd48edbd17ac918cb">epsteinZeta.h</a></li>
-<li>crandall_gReg()&#160;:&#160;<a class="el" href="crandall_8c.html#adec3c594701f4a37297ed99a5a016202">crandall.c</a>, <a class="el" href="crandall_8h.html#adec3c594701f4a37297ed99a5a016202">crandall.h</a>, <a class="el" href="epsteinZeta_8h.html#af35077ea43c4181a583a5b5bd658b0fb">epsteinZeta.h</a></li>
+<li>crandall_g()&#160;:&#160;<a class="el" href="crandall_8c.html#a36e2886859961d74dcd67893106d9335">crandall.c</a>, <a class="el" href="crandall_8h.html#a36e2886859961d74dcd67893106d9335">crandall.h</a></li>
+<li>crandall_gReg()&#160;:&#160;<a class="el" href="crandall_8c.html#a19eb7f9554b517d5a8f10f2dfd44b78a">crandall.c</a>, <a class="el" href="crandall_8h.html#adec3c594701f4a37297ed99a5a016202">crandall.h</a></li>
+<li>crandall_gReg_nuequalsdim()&#160;:&#160;<a class="el" href="crandall_8h.html#aad749ef8f396e44de09256228fd10a32">crandall.h</a></li>
+<li>crandall_gReg_nuequalsdimplus2k()&#160;:&#160;<a class="el" href="crandall_8c.html#abb4ca690eaebb15053de49b6015eb34d">crandall.c</a></li>
 </ul>
 
 
@@ -106,10 +117,10 @@ $(function() {
 <li>egf_rek()&#160;:&#160;<a class="el" href="gamma_8c.html#a8fddf937731aa93c435816c8fc1ee9db">gamma.c</a></li>
 <li>egf_ua()&#160;:&#160;<a class="el" href="gamma_8c.html#a83916b407f1fe146265896ee335f887e">gamma.c</a></li>
 <li>egf_ua_r()&#160;:&#160;<a class="el" href="gamma_8c.html#a47c752ef0ca1abca0c9bcd2522a95171">gamma.c</a></li>
-<li>egf_ugamma()&#160;:&#160;<a class="el" href="gamma_8h.html#ac519d4e144fc3904c8ef9b8291415f5c">gamma.h</a>, <a class="el" href="gamma_8c.html#ac519d4e144fc3904c8ef9b8291415f5c">gamma.c</a></li>
-<li>epsteinZeta()&#160;:&#160;<a class="el" href="epsteinZeta_8c.html#aff1fe7852bf36a72e0da86f19912e870">epsteinZeta.c</a>, <a class="el" href="epsteinZeta_8h.html#afbe1bf38bc25fc754512cecac2c7cf71">epsteinZeta.h</a></li>
+<li>egf_ugamma()&#160;:&#160;<a class="el" href="gamma_8c.html#ac519d4e144fc3904c8ef9b8291415f5c">gamma.c</a>, <a class="el" href="gamma_8h.html#ac519d4e144fc3904c8ef9b8291415f5c">gamma.h</a></li>
+<li>epsteinZeta()&#160;:&#160;<a class="el" href="epsteinZeta_8c.html#aff1fe7852bf36a72e0da86f19912e870">epsteinZeta.c</a></li>
 <li>epsteinZetaInternal()&#160;:&#160;<a class="el" href="zeta_8c.html#aaaea750a87f3948e4c3cd05fa8845482">zeta.c</a>, <a class="el" href="zeta_8h.html#af1801340afc5abb262bc7e389b1a6c88">zeta.h</a></li>
-<li>epsteinZetaReg()&#160;:&#160;<a class="el" href="epsteinZeta_8c.html#aefe3a4ced16ddbd4a7b1727df9e999b2">epsteinZeta.c</a>, <a class="el" href="epsteinZeta_8h.html#a2bc760eb6d2bc0fe082a89ad1a885111">epsteinZeta.h</a></li>
+<li>epsteinZetaReg()&#160;:&#160;<a class="el" href="epsteinZeta_8c.html#aefe3a4ced16ddbd4a7b1727df9e999b2">epsteinZeta.c</a></li>
 <li>equals()&#160;:&#160;<a class="el" href="tools_8c.html#a90f043e9d6274d24cdc93ea39e4729d4">tools.c</a>, <a class="el" href="tools_8h.html#a90f043e9d6274d24cdc93ea39e4729d4">tools.h</a></li>
 <li>equalsZero()&#160;:&#160;<a class="el" href="tools_8c.html#a36ca73e4d16386b0f7ab52e9cc8cc657">tools.c</a>, <a class="el" href="tools_8h.html#a36ca73e4d16386b0f7ab52e9cc8cc657">tools.h</a></li>
 </ul>
@@ -122,7 +133,6 @@ $(function() {
 
 
 <h3><a id="index_m" name="index_m"></a>- m -</h3><ul>
-<li>main()&#160;:&#160;<a class="el" href="lattice__sum_8c.html#ae66f6b31b5ad750f1fe042a706a4e3d4">lattice_sum.c</a></li>
 <li>matrix_intVector()&#160;:&#160;<a class="el" href="tools_8c.html#a1ceb5734431f141fb42d8282173e4df9">tools.c</a>, <a class="el" href="tools_8h.html#a1ceb5734431f141fb42d8282173e4df9">tools.h</a></li>
 </ul>
 

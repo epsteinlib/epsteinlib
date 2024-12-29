@@ -14,13 +14,22 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  extensions: ["tex2jax.js"],
-  jax: ["input/TeX","output/HTML-CSS"],
-});
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['[tex]/ams','[tex]/newcommand','[tex]/noundefined','[tex]/require','[tex]/autoload','[tex]/configmacros']
+  },
+  tex: {
+    macros: {},
+    packages: ['base','configmacros','ams','newcommand','noundefined','require','autoload','configmacros']
+  }
+};
 </script>
-<script type="text/javascript" async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js"></script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -30,7 +39,7 @@ MathJax.Hub.Config({
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Epstein Zeta Library<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">Epstein Zeta Library<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">Calculates the Epstein Zeta function</div>
   </td>
@@ -80,7 +89,6 @@ $(function() {
 
 <div class="contents">
 <div class="textblock">Here is a list of all documented namespace functions with links to the namespaces they belong to:</div><ul>
-<li>check_madelung()&#160;:&#160;<a class="el" href="namespacelattice__sum.html#ac736e76c077a6ad91c486ab90491fbec">lattice_sum</a></li>
 <li>epstein_zeta()&#160;:&#160;<a class="el" href="namespace__epsteinlib.html#ac7a17062bab687ce9189ad8c904206f0">_epsteinlib</a></li>
 <li>epstein_zeta_c_call()&#160;:&#160;<a class="el" href="namespace__epsteinlib.html#a5917c7018eab0058f9c59b6d3396b8a0">_epsteinlib</a></li>
 <li>epstein_zeta_reg()&#160;:&#160;<a class="el" href="namespace__epsteinlib.html#a517307cc6ffdf464f9a2a91b8c6d6f2e">_epsteinlib</a></li>

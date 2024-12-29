@@ -14,13 +14,22 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  extensions: ["tex2jax.js"],
-  jax: ["input/TeX","output/HTML-CSS"],
-});
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  },
+  loader: {
+    load: ['[tex]/ams','[tex]/newcommand','[tex]/noundefined','[tex]/require','[tex]/autoload','[tex]/configmacros']
+  },
+  tex: {
+    macros: {},
+    packages: ['base','configmacros','ams','newcommand','noundefined','require','autoload','configmacros']
+  }
+};
 </script>
-<script type="text/javascript" async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js"></script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -30,7 +39,7 @@ MathJax.Hub.Config({
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Epstein Zeta Library<span id="projectnumber">&#160;0.3.0</span>
+   <div id="projectname">Epstein Zeta Library<span id="projectnumber">&#160;0.4.0</span>
    </div>
    <div id="projectbrief">Calculates the Epstein Zeta function</div>
   </td>
@@ -93,24 +102,23 @@ $(function() {
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;complex.h&gt;</code><br />
 <code>#include &lt;stdbool.h&gt;</code><br />
-<code>#include &quot;<a class="el" href="epsteinZeta_8h_source.html">epsteinZeta.h</a>&quot;</code><br />
+<code>#include &quot;epsteinZeta.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="zeta_8h_source.html">zeta.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for epsteinZeta.c:</div>
 <div class="dyncontent">
 <div class="center"><img src="epsteinZeta_8c__incl.png" border="0" usemap="#asrc_2epsteinZeta_8c" alt=""/></div>
 <map name="asrc_2epsteinZeta_8c" id="asrc_2epsteinZeta_8c">
-<area shape="rect" title="Calculates the (regularized) Epstein zeta function." alt="" coords="54,5,176,31"/>
-<area shape="rect" title=" " alt="" coords="131,153,211,178"/>
-<area shape="poly" title=" " alt="" coords="79,34,50,47,24,64,9,83,9,92,13,103,34,124,60,140,88,150,116,157,115,162,87,155,57,145,31,129,9,106,3,93,4,81,20,60,47,42,77,29"/>
-<area shape="rect" title=" " alt="" coords="24,79,97,105"/>
-<area shape="poly" title=" " alt="" coords="108,33,81,68,77,65,104,30"/>
-<area shape="rect" href="epsteinZeta_8h.html" title="Calculates the (regularized) Epstein zeta function." alt="" coords="121,79,221,105"/>
-<area shape="poly" title=" " alt="" coords="126,30,154,65,150,68,122,33"/>
-<area shape="rect" href="zeta_8h.html" title="Calculates the (regularized) Epstein zeta function." alt="" coords="245,79,300,105"/>
-<area shape="poly" title=" " alt="" coords="143,29,233,70,231,75,141,34"/>
-<area shape="poly" title=" " alt="" coords="174,105,174,137,168,137,168,105"/>
-<area shape="poly" title=" " alt="" coords="257,107,202,145,199,141,254,103"/>
+<area shape="rect" title="Calculates the (regularized) Epstein zeta function." alt="" coords="54,5,175,31"/>
+<area shape="rect" title=" " alt="" coords="88,153,167,178"/>
+<area shape="poly" title=" " alt="" coords="78,34,49,47,24,63,9,82,8,92,13,103,25,118,40,130,74,148,72,153,37,135,21,122,8,106,3,93,4,80,20,59,47,42,76,29"/>
+<area shape="rect" title=" " alt="" coords="23,79,96,105"/>
+<area shape="poly" title=" " alt="" coords="107,33,80,68,76,65,103,30"/>
+<area shape="rect" title=" " alt="" coords="121,79,220,105"/>
+<area shape="poly" title=" " alt="" coords="126,30,154,65,149,68,121,33"/>
+<area shape="rect" href="zeta_8h.html" title="Calculates the (regularized) Epstein zeta function." alt="" coords="244,79,299,105"/>
+<area shape="poly" title=" " alt="" coords="142,29,232,70,230,75,140,34"/>
+<area shape="poly" title=" " alt="" coords="248,108,167,148,164,143,246,103"/>
 </map>
 </div>
 </div><table class="memberdecls">
