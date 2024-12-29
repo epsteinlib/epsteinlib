@@ -9,12 +9,18 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 # Changelog
 
-## [0.4.0] - unreleased
+## [0.5.0] - unreleased
+### Breaking Changes
+
+### Added
+
+### Fixed
+
+
+## [0.4.0] - 2024-12-29
 ### Breaking Changes
 - Shared library is now called `libepstein.so`
 - Moved Python library from `epsteinlib` nix package to `epsteinlib_python`
-
-### Changed
 
 ### Added
 - Build support as meson subproject
