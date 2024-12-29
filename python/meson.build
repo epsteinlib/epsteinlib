@@ -10,6 +10,7 @@ py.extension_module(
 )
 # Install stub file
 py.install_sources('epsteinlib.pyi')
+meson.add_dist_script('remove_symlink.sh')
 
 python_module_build_dir = meson.current_build_dir()
 subdir('tests')
