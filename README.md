@@ -13,9 +13,9 @@ Authors: Andreas A. Buchheit, Jonathan Busse, Ruben Gutendorf, DevOps: Jan Schmi
 
 Contact: buchheit@num.uni-sb.de
 
-EpsteinLib is a C library designed for the fast and efficient computation of the Epstein zeta function for arbitrary multidimensional lattices. In addition to the C library, we also offer a Python package, epsteinlib, which can be easily installed via pip.
+EpsteinLib is a C library designed for the fast and efficient computation of the Epstein zeta function for arbitrary multidimensional lattices. In addition to the C library, we also offer a Python package, epsteinlib, which can be easily installed via pip. For more information on the properties of the Epstein zeta function and on the underlying algorithm, see our recent preprint https://arxiv.org/abs/2412.16317.
 
-Originally studied by Epstein [1,2], the Epstein zeta function forms the basis for computing general multidimensional lattice sums in classical and quantum physics applications [3]. Together with its regularization, it serves as the central ingredient in the singular Euler-Maclaurin (SEM) expansion, which generalizes the 300-year-old Euler summation formula to lattice sums in higher dimensions with physically relevant power-law interactions [4-5]. An efficiently computable representation of the Epstein zeta function is provided in [6,7].
+Originally studied by Epstein [1,2], the Epstein zeta function forms the basis for computing general multidimensional lattice sums in classical and quantum physics applications [3]. Together with its regularization, it serves as the central ingredient in the singular Euler-Maclaurin (SEM) expansion, which generalizes the 300-year-old Euler summation formula to lattice sums in higher dimensions with physically relevant power-law interactions [4-5]. An efficiently computable representation of the Epstein zeta function is provided in [6,7,8]. In [8], we discuss in detail the analytical properties of the Epstein zeta function and present an algorithm for its computation, complete with error bounds.
 
 For a $d$-dimensional lattice $\Lambda=A\mathbb Z^d$, with $A\in \mathbb R^{d\times d}$ regular, $\boldsymbol x,\boldsymbol y \in \mathbb R^d$, and $\nu \in \mathbb C$, the Epstein zeta function is defined by the Dirichlet series
 
@@ -297,4 +297,6 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 [6] R. Crandall. “Unified algorithms for polylogarithm, L-series, and zeta variants”. Algorithmic Reflections: Selected Works. PSIpress, 2012
 
-[7] Andreas A. Buchheit, Torsten Keßler, and Kirill Serkh. "On the computation of lattice sums without translational invariance". arXiv preprint arXiv:2403.03213.
+[7] Andreas A. Buchheit, Torsten Keßler, and Kirill Serkh. "On the computation of lattice sums without translational invariance". Mathematics of Computation (Oct. 2024)
+
+[8] Andreas A. Buchheit, Jonathan Busse, and Ruben Gutendorf. "Computation and properties of the Epstein zeta function with high-performance implementation in EpsteinLib". arXiv preprint arXiv:2412.16317 (2024).
