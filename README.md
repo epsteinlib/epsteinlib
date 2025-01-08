@@ -7,6 +7,14 @@ SPDX-FileCopyrightText: 2024 Ruben Gutendorf <ruben.gutendorf@uni-saarland.de>
 SPDX-License-Identifier: AGPL-3.0-only
 -->
 
+
+<img align="right" src="https://avatars.githubusercontent.com/u/177750891?v=4" width="175">
+
+[![HitCount](https://hits.dwyl.com/epsteinlib/epsteinlib.svg)](https://hits.dwyl.com/epsteinlib/epsteinlib)
+[![PyPI download month](https://img.shields.io/pypi/dm/epsteinlib.svg?label=PyPI%20downloads)](https://pypi.python.org/pypi/epsteinlib/)
+[![Pipeline status](https://img.shields.io/github/check-runs/epsteinlib/epsteinlib/main)](https://github.com/epsteinlib/epsteinlib/actions)
+[![PyPI status](https://img.shields.io/badge/DOI-10.48550%2FarXiv.2412.16317-blue.svg)](https://doi.org/10.48550/arXiv.2412.16317)
+
 # EpsteinLib
 
 Authors: Andreas A. Buchheit, Jonathan Busse, Ruben Gutendorf, DevOps: Jan Schmitz
