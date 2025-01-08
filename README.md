@@ -8,7 +8,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 -->
 
 
-<img align="right" src="https://avatars.githubusercontent.com/u/177750891?v=4" width="175">
+<img align="right" src="https://avatars.githubusercontent.com/u/177750891?v=4" width="110">
 
 [![HitCount](https://hits.dwyl.com/epsteinlib/epsteinlib.svg)](https://hits.dwyl.com/epsteinlib/epsteinlib)
 [![PyPI download month](https://img.shields.io/pypi/dm/epsteinlib.svg?label=PyPI%20downloads)](https://pypi.python.org/pypi/epsteinlib/)
