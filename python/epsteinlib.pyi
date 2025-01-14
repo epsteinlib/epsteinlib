@@ -1,20 +1,21 @@
 import cython
 import numpy as np
 from numpy.typing import NDArray as NDArray
+from typing import Any, Union
 
 def validate_inputs(
-    nu: float | int,
-    A: NDArray[np.float64],
-    x: NDArray[np.float64],
-    y: NDArray[np.float64],
+    nu: Union[float, int],
+    A: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    x: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    y: NDArray[Union[np.integer[Any], np.floating[Any]]],
 ) -> None: ...
 def prepare_inputs(
-    nu: float | int,
-    A: NDArray[np.float64],
-    x: NDArray[np.float64],
-    y: NDArray[np.float64],
+    nu: Union[float, int],
+    A: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    x: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    y: NDArray[Union[np.integer[Any], np.floating[Any]]],
 ) -> tuple[
-    float | int,
+    np.float64,
     int,
     NDArray[np.float64],
     NDArray[np.float64],
@@ -28,10 +29,10 @@ def epstein_zeta_c_call(
     y: cython.double[None],
 ) -> complex: ...
 def epstein_zeta(
-    nu: float | int,
-    A: NDArray[np.float64],
-    x: NDArray[np.float64],
-    y: NDArray[np.float64],
+    nu: Union[float, int],
+    A: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    x: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    y: NDArray[Union[np.integer[Any], np.floating[Any]]],
 ) -> complex: ...
 def epstein_zeta_reg_c_call(
     nu: cython.double,
@@ -41,8 +42,8 @@ def epstein_zeta_reg_c_call(
     y: cython.double[None],
 ) -> complex: ...
 def epstein_zeta_reg(
-    nu: float | int,
-    A: NDArray[np.float64],
-    x: NDArray[np.float64],
-    y: NDArray[np.float64],
+    nu: Union[float, int],
+    A: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    x: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    y: NDArray[Union[np.integer[Any], np.floating[Any]]],
 ) -> complex: ...

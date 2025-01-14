@@ -9,6 +9,8 @@ Python wrapper for the Epstein Zeta function
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
+from typing import Any, Union
+
 import cython
 import numpy as np
 from cython.cimports.epsteinlib import epsteinZeta, epsteinZetaReg
@@ -16,10 +18,12 @@ from numpy.typing import NDArray
 
 
 def validate_inputs(
-    nu: float | int,
-    A: NDArray[np.float64],  # pylint: disable=invalid-name
-    x: NDArray[np.float64],
-    y: NDArray[np.float64],
+    nu: Union[float, int],
+    A: NDArray[  # pylint: disable=invalid-name
+        Union[np.integer[Any], np.floating[Any]]
+    ],
+    x: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    y: NDArray[Union[np.integer[Any], np.floating[Any]]],
 ) -> None:
     """
     Validate the inputs for the Epstein zeta function calculation.
@@ -33,17 +37,25 @@ def validate_inputs(
     if (
         not isinstance(x, np.ndarray)
         or x.ndim != 1
-        or not np.issubdtype(x.dtype, np.number)
-        or np.issubdtype(x.dtype, complex)
+        or not (
+            np.issubdtype(x.dtype, np.integer)
+            or np.issubdtype(x.dtype, np.floating)
+        )
     ):
-        raise TypeError("x must be a 1D NumPy array of real numbers")
+        raise TypeError(
+            "x must be a 1D NumPy array of real numbers (int or float)"
+        )
     if (
         not isinstance(y, np.ndarray)
         or y.ndim != 1
-        or not np.issubdtype(y.dtype, np.number)
-        or np.issubdtype(y.dtype, complex)
+        or not (
+            np.issubdtype(y.dtype, np.integer)
+            or np.issubdtype(y.dtype, np.floating)
+        )
     ):
-        raise TypeError("y must be a 1D NumPy array of real numbers")
+        raise TypeError(
+            "y must be a 1D NumPy array of real numbers (int or float)"
+        )
 
     if x.shape[0] != y.shape[0]:
         raise ValueError("x and y must have the same length")
@@ -55,25 +67,28 @@ def validate_inputs(
     if (
         not isinstance(A, np.ndarray)
         or A.shape != (dim, dim)
-        or not np.issubdtype(A.dtype, np.number)
-        or np.issubdtype(A.dtype, complex)
+        or not (
+            np.issubdtype(A.dtype, np.integer)
+            or np.issubdtype(A.dtype, np.floating)
+        )
     ):
         raise ValueError(
-            f"""A must be a 2D NumPy array with shape"
-            ({dim}, {dim}) of real numbers"""
+            f"A must be a 2D NumPy array with shape ({dim}, {dim}) of real numbers (int or float)"
         )
 
     if not isinstance(nu, (float, int)):
-        raise TypeError("nu must be a real number")
+        raise TypeError("nu must be a real number (int or float)")
 
 
 def prepare_inputs(
-    nu: float | int,
-    A: NDArray[np.float64],  # pylint: disable=invalid-name
-    x: NDArray[np.float64],
-    y: NDArray[np.float64],
+    nu: Union[float, int],
+    A: NDArray[  # pylint: disable=invalid-name
+        Union[np.integer[Any], np.floating[Any]]
+    ],
+    x: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    y: NDArray[Union[np.integer[Any], np.floating[Any]]],
 ) -> tuple[
-    float | int,
+    np.float64,
     int,
     NDArray[np.float64],
     NDArray[np.float64],
@@ -81,22 +96,26 @@ def prepare_inputs(
 ]:
     """
     Prepare the inputs for the Epstein zeta function calculation.
-    Makes sure, the input arrays are C_CONTIGUOUS of type float, see
+    Makes sure, the input arrays are C_CONTIGUOUS of type float64, see
     https://numpy.org/doc/stable/reference/generated/numpy.ndarray.flags.html
     """
-    a = A.reshape(-1)
+
+    # Convert (dim, dim) matrix A to 1D array a for cython compatibility
     dim = x.shape[0]
+    a = A.reshape(-1)  # pylint: disable=invalid-name
 
-    # Ensure the arrays are of type float64
-    A = np.array(A, dtype=np.float64)
-    x = np.array(x, dtype=np.float64)
-    y = np.array(y, dtype=np.float64)
+    # Ensure arrays and nu are of type float64
+    nu_out: np.float64 = np.float64(nu)
+    a_out: NDArray[np.float64] = a.astype(np.float64, copy=False)
+    x_out: NDArray[np.float64] = x.astype(np.float64, copy=False)
+    y_out: NDArray[np.float64] = y.astype(np.float64, copy=False)
 
-    # ENSURE arrays are C_CONTIGUOUS
-    a = np.ascontiguousarray(a) if not a.flags.c_contiguous else a
-    x = np.ascontiguousarray(x) if not x.flags.c_contiguous else x
-    y = np.ascontiguousarray(y) if not y.flags.c_contiguous else y
-    return nu, dim, a, x, y
+    # Ensure arrays are C_CONTIGUOUS
+    a_out = np.ascontiguousarray(a_out)
+    x_out = np.ascontiguousarray(x_out)
+    y_out = np.ascontiguousarray(y_out)
+
+    return nu_out, dim, a_out, x_out, y_out
 
 
 def epstein_zeta_c_call(
@@ -119,17 +138,19 @@ def epstein_zeta_c_call(
 
 
 def epstein_zeta(
-    nu: float | int,
-    A: NDArray[np.float64],  # pylint: disable=invalid-name
-    x: NDArray[np.float64],
-    y: NDArray[np.float64],
+    nu: Union[float, int],
+    A: NDArray[  # pylint: disable=invalid-name
+        Union[np.integer[Any], np.floating[Any]]
+    ],
+    x: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    y: NDArray[Union[np.integer[Any], np.floating[Any]]],
 ) -> complex:
     """
     Calculate the Epstein zeta function.
     """
     validate_inputs(nu, A, x, y)
-    nu, dim, a, x, y = prepare_inputs(nu, A, x, y)
-    return epstein_zeta_c_call(nu, dim, a, x, y)
+    nu_cython, dim, a_cython, x_cython, y_cython = prepare_inputs(nu, A, x, y)
+    return epstein_zeta_c_call(nu_cython, dim, a_cython, x_cython, y_cython)
 
 
 def epstein_zeta_reg_c_call(
@@ -152,14 +173,18 @@ def epstein_zeta_reg_c_call(
 
 
 def epstein_zeta_reg(
-    nu: float | int,
-    A: NDArray[np.float64],  # pylint: disable=invalid-name
-    x: NDArray[np.float64],
-    y: NDArray[np.float64],
+    nu: Union[float, int],
+    A: NDArray[  # pylint: disable=invalid-name
+        Union[np.integer[Any], np.floating[Any]]
+    ],
+    x: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    y: NDArray[Union[np.integer[Any], np.floating[Any]]],
 ) -> complex:
     """
     Calculate the regularized Epstein zeta function.
     """
     validate_inputs(nu, A, x, y)
-    nu, dim, a, x, y = prepare_inputs(nu, A, x, y)
-    return epstein_zeta_reg_c_call(nu, dim, a, x, y)
+    nu_cython, dim, a_cython, x_cython, y_cython = prepare_inputs(nu, A, x, y)
+    return epstein_zeta_reg_c_call(
+        nu_cython, dim, a_cython, x_cython, y_cython
+    )
