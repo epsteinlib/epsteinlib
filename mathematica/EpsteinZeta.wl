@@ -113,12 +113,14 @@ EpsteinZetaReg[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ],
 
 
 (* Check if package loaded successfully *)
+epsteinLoad::info = "`1`";
 If[libPath =!= $Failed &&
    Head[foreignFunctionEpsteinZeta] === ForeignFunction &&
    Head[foreignFunctionEpsteinZetaReg] === ForeignFunction &&
    PossibleZeroQ[EpsteinZeta[-2, {{1}}, {1}, {0}]] &&
    PossibleZeroQ[EpsteinZetaReg[-2, {{1}}, {1}, {0}]],
-  Print["The (regularized) Epstein zeta function can be called using:
+  Message[epsteinLoad::info,
+   "The (regularized) Epstein zeta function can be called using:
   EpsteinZeta[\[Nu], A, x, y]
   EpsteinZetaReg[\[Nu], A, x, y]
 Where:
