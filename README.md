@@ -41,7 +41,12 @@ double complex epsteinZeta(double nu, unsigned int dim, const double *A, const d
 ```
 In the Python package, it is implemented as
 ```python
-def epstein_zeta(nu: float | int, A: NDArray[np.float64], x: NDArray[np.float64], y: NDArray[np.float64]) -> complex
+def epstein_zeta(
+    nu: Union[float, int],
+    A: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    x: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    y: NDArray[Union[np.integer[Any], np.floating[Any]]],
+) -> complex
 ```
 In the Mathematica package, it is implemented as
 ```mathematica
@@ -76,8 +81,14 @@ double complex epsteinZetaReg(double nu, unsigned int dim, const double *A, cons
 ```
 in the Python package as
 ```python
-def epstein_zeta_reg(nu: float | int, A: NDArray[np.float64], x: NDArray[np.float64], y: NDArray[np.float64]) -> complex
+def epstein_zeta_reg(
+    nu: Union[float, int],
+    A: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    x: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    y: NDArray[Union[np.integer[Any], np.floating[Any]]],
+) -> complex
 ```
+
 and in the Mathematica package as
 ```mathematica
 EpsteinZetaReg[\[Nu],A,x,y]
