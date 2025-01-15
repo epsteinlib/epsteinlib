@@ -8,11 +8,11 @@ _: {
     ...
   }: {
     devshells._epstein = {
-      devshell.prj_root_fallback.eval = "$(git rev-parse --show-toplevel)";
+      devshell.prj_root_fallback.eval = ".";
       commands = [
         {
           name = "tests";
-          command = "pushd $(git rev-parse --show-toplevel) &&
+          command = "pushd . &&
                      meson setup --reconfigure build -Db_coverage=true &&
                      meson compile -C build &&
                      meson test -v -C build $@
@@ -31,7 +31,7 @@ _: {
         }
         {
           name = "generate_python_stubs";
-          command = "pushd $(git rev-parse --show-toplevel)/python &&
+          command = "pushd ./python &&
                      stubgen epsteinlib.pyx -o .out &&
                      mv .out/__main__.pyi epsteinlib.pyi &&
                      rm -r .out &&
