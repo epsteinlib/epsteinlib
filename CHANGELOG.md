@@ -16,6 +16,13 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 ### Fixed
 
+## [0.4.2] - unreleased
+
+### Added
+- Python wrapper now uses `Union` from `typing` to support Python versions $<3.10$
+- Python wrapper supports any `np.floating[Any]` or `np.integer[Any]` type arrays for `A`, `x`, and `y`
+- Loading message of `<<"EpsteinZeta.wl"` in Mathematica can now be suppressed using `Quiet`, e.g. `Quiet@<<"EpsteinZeta.wl"`
+
 ## [0.4.1] - 2024-12-29
 ### Fixed
 - pypi release
