@@ -37,10 +37,9 @@ ParallelEvaluate[Quiet[<<"EpsteinZeta.wl"]];
 
 
 (* ::Text:: *)
-(*Install MaTeX for L AT EX figure annotations.*)
+(*Install MaTeX for L AT EX figure annotations. If MaTeX is not installed already uncomment the ResourceFunction line to install it.*)
 
-
-ResourceFunction["MaTeXInstall"];
+(*ResourceFunction["MaTeXInstall"][];*)
 Needs["MaTeX`"];
 
 
