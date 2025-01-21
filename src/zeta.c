@@ -167,7 +167,7 @@ double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
     for (int i = 0; i < dim; i++) {
         vt[i] = 0;
         for (int j = 0; j < dim; j++) {
-            vt[i] += m_invt[dim * j + i] * v[j];
+            vt[i] += m_invt[(dim * j) + i] * v[j];
         }
     }
     // check if projection is needed, else copy
@@ -182,7 +182,7 @@ double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
         for (int i = 0; i < dim; i++) {
             vres[i] = 0;
             for (int j = 0; j < dim; j++) {
-                vres[i] += m[dim * i + j] * vt[j];
+                vres[i] += m[(dim * i) + j] * vt[j];
             }
         }
         free(vt);
@@ -220,15 +220,15 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     bool isDiagonal = 1;
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
-            m_copy[dim * i + j] = m[dim * i + j];
-            m_real[dim * i + j] = m[dim * i + j];
-            isDiagonal = isDiagonal && ((i == j) || (m[dim * i + j] == 0));
+            m_copy[(dim * i) + j] = m[(dim * i) + j];
+            m_real[(dim * i) + j] = m[(dim * i) + j];
+            isDiagonal = isDiagonal && ((i == j) || (m[(dim * i) + j] == 0));
         }
     }
     invert(dim, m_copy, p, m_fourier);
     double vol = 1;
     for (int k = 0; k < dim; k++) {
-        vol *= m_copy[dim * k + k];
+        vol *= m_copy[(dim * k) + k];
     }
     transpose(dim, m_fourier);
     vol = fabs(vol);
@@ -251,8 +251,8 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     if (isDiagonal) {
         // Chose absolute diag. entries for cutoff
         for (int k = 0; k < dim; k++) {
-            cutoffsReal[k] = floor(cutoff_id / fabs(m_real[dim * k + k]));
-            cutoffsFourier[k] = floor(cutoff_id * fabs(m_real[dim * k + k]));
+            cutoffsReal[k] = floor(cutoff_id / fabs(m_real[(dim * k) + k]));
+            cutoffsFourier[k] = floor(cutoff_id * fabs(m_real[(dim * k) + k]));
         }
     } else {
         // choose cutoff depending on smallest and biggest abs eigenvalue
@@ -265,7 +265,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     }
     // handle special case of non-positive integer values nu.
     double complex res;
-    if (nu < 1 && fabs(nu / 2. - nearbyint(nu / 2.)) < EPS) {
+    if (nu < 1 && fabs((nu / 2.) - nearbyint(nu / 2.)) < EPS) {
         if (dot(dim, x_t2, x_t2) == 0 && nu == 0) {
             res = -1 * cexp(-2 * M_PI * I * dot(dim, x_t1, y_t2));
         } else {

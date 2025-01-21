@@ -61,7 +61,7 @@ int test_epsteinZeta_epsteinZetaReg() {
     }
 
     int dim = 2;
-    double *a = malloc((int)(dim * dim) * sizeof(double));
+    double *a = malloc((int)(dim * dim) * sizeof(double)); // NOLINT
     double *nu = malloc(2 * sizeof(double));
     double *x = malloc(dim * sizeof(double));
     double *y = malloc(dim * sizeof(double));
@@ -105,7 +105,7 @@ int test_epsteinZeta_epsteinZetaReg() {
             testsPassed++;
         } else {
             printf("\nWarning! ");
-            { printf("zeta:   "); }
+            printf("zeta:   ");
             printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
                    "%.16lf "
                    "%+.16lf I (reference implementation)\n",
@@ -181,7 +181,7 @@ int test_epsteinZeta_epsteinZetaReg() {
             testsPassed++;
         } else {
             printf("\nWarning! ");
-            { printf("zeta reg:"); }
+            printf("zeta reg:");
             printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
                    "%.16lf "
                    "%+.16lf I (reference implementation)\n",

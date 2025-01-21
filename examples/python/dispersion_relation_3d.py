@@ -58,7 +58,11 @@ def plot_dispersion_relation(
     k_ticks = np.arange(-0.4, 0.41, 0.2)
     y_ticks = np.arange(0, 41, 10)
     plot_colors = ["#1f77b4", "#ff7f0e", "#2ca02c"]  # Blue, Orange, Green
-    line_plot_style = {"color": "black", "alpha": 0.7, "linewidth": 2}
+    line_plot_style = {
+        "color": "black",
+        "alpha": 0.7,
+        "linewidth": 2,
+    }
 
     fig, ax = plt.subplots(figsize=(12, 8))
     fig.suptitle(
@@ -69,8 +73,8 @@ def plot_dispersion_relation(
     ax.set_ylabel(
         r"$\hbar \,\omega(\mathbf{k})/(JS)$", fontsize=frame_label_size
     )
-    ax.set_xlim([-0.51, 0.51])
-    ax.set_ylim([-1, 40])
+    ax.set_xlim((-0.51, 0.51))
+    ax.set_ylim((-1, 40))
     ax.set_xticks(k_ticks)
     ax.set_yticks(y_ticks)
     ax.tick_params(axis="both", which="major", labelsize=frame_tick_size)
@@ -78,9 +82,15 @@ def plot_dispersion_relation(
     nu1range = np.linspace(0, 0.28, 100)
     nu2range = np.linspace(0, 0.37, 100)
     nu3range = np.linspace(-0.38, 0, 100)
-    ax.plot(nu1range, [59 * nu for nu in nu1range], **line_plot_style)
-    ax.plot(nu2range, [53 * np.sqrt(nu) for nu in nu2range], **line_plot_style)
-    ax.plot(nu3range, [220 * nu**2 for nu in nu3range], **line_plot_style)
+    ax.plot(
+        nu1range, [59 * nu for nu in nu1range], **line_plot_style  # type: ignore[arg-type]
+    )
+    ax.plot(
+        nu2range, [53 * np.sqrt(nu) for nu in nu2range], **line_plot_style  # type: ignore[arg-type]
+    )
+    ax.plot(
+        nu3range, [220 * nu**2 for nu in nu3range], **line_plot_style  # type: ignore[arg-type]
+    )
 
     for i, nu in enumerate(nurange):
         ax.plot(
