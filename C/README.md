@@ -109,7 +109,7 @@ we encourage Windows users to use [WSL2](https://learn.microsoft.com/en-us/windo
 
 ### Installing only the Python wrapper with pip
 ```bash
-# Create a virtualenvironment and activate it if you are not already inside one.
+# Create and activate a virtual environment, if you're not already in one.
 python3 -m venv .venv && source .venv/bin/activate
 # Install epsteinlib
 python -m pip install epsteinlib
@@ -122,11 +122,11 @@ python -m pip install epsteinlib
 4. `meson compile -C build`
 5. To test the library, run `meson test -C build`
 
-Proceed either with system-wide or local installation
+Proceed either with system-wide or local installation.
 
 <details><summary>System-wide installation</summary>
 
-Meson supports a system-wide installation of the compiled library. After that, you can use `#include <epsteinZeta.h>` and link with `gcc -lepsteinZeta`. This may require superuser rights.
+Meson supports a system-wide installation of the compiled library. After that, you can use `#include <epsteinZeta.h>` and link the library with `gcc -lepsteinZeta`. This may require superuser rights.
 
 6. To install system-wide: `meson install -C build`.
 
@@ -154,15 +154,15 @@ mv build/src/libepsteinZeta.so /your/path/to/library
 </details>
 
 ## View api documentation
-See https://epsteinlib.github.io/epsteinlib/
+See https://epsteinlib.github.io/epsteinlib/.
 
 ## Usage
 
 Minimal working examples for calculating the Madelung constant in $3$ dimensions.
 ### in C
 ``` c
-// If the library is installed, compile with `gcc -o lattice_sum lattice_sum.c -lm -lepsteinZeta
-// If the library is not installed, compile with `gcc -o lattice_sum lattice_sum.c -lm -L/path/to/library -lepsteinZeta -I/path/to/include
+// If the library is installed, compile with `gcc -o lattice_sum lattice_sum.c -lm -lepsteinZeta`
+// If the library is not installed, compile with `gcc -o lattice_sum lattice_sum.c -lm -L/path/to/library -lepsteinZeta -I/path/to/include`
 
 #include <complex.h>
 #include <math.h>
@@ -239,7 +239,7 @@ Print["Relative error:               +", ScientificForm[Abs[madelungRef - madelu
 Executing this code snipped in the same folder as `EpsteinZeta.wl` and setting `SetDirectory[NotebookDirectory[]]` is the easiest way to help mathematica find the package.
 
 ## Development environment
-We provide a nix devshell to have a reproducible development environment with the same dependencies across different operating systems. Once you have installed and configured nix starting developing is as easy as running `nix develop`.
+We provide a nix devshell to have a reproducible development environment with the same dependencies across different operating systems. Once you have installed and configured nix, starting developing is as easy as running `nix develop`.
 
 <details><summary>Nix installation instructions</summary>
 
@@ -281,7 +281,7 @@ cd ~
 nix run 'nixpkgs#hello'
 
 ```
-2. Configure nix.conf by executing
+2. Configure `nix.conf` by executing
 ```bash
 tee -a ~/.nix-portable/conf/nix.conf <<CFG
 max-jobs = auto
@@ -289,7 +289,7 @@ max-jobs = auto
 auto-optimise-store = true
 CFG
 ```
-3. Add .local/bin permanently to your PATH
+3. Add `.local/bin` permanently to your PATH
 ```bash
 echo 'PATH=$HOME/.local/bin:"$PATH"' >> ~/.env
 echo 'export $(envsubst < .env)' | tee -a .bashrc >> .zshrc
