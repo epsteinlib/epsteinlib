@@ -80,7 +80,7 @@ double complex crandall_gReg(unsigned int dim, double s, const double *z,
                              double prefactor) {
     double zArgument = dot(dim, z, z);
     zArgument *= M_PI * prefactor * prefactor;
-    double k = -(double)nearbyint(s / 2.);
+    double k = -nearbyint(s / 2.);
     if (s < 1 && (s == -2 * k)) {
         return crandall_gReg_nuequalsdimplus2k(s, zArgument, k, prefactor);
     }

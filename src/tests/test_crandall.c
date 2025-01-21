@@ -83,7 +83,7 @@ int test_crandall_g(void) {
             testsPassed++;
         } else {
             printf("\nWarning! ");
-            { printf("crandall_g: "); }
+            printf("crandall_g: ");
             printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
                    "%.16lf "
                    "%+.16lf I (reference implementation)\n",

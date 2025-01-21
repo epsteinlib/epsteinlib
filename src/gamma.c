@@ -182,8 +182,7 @@ double egf_cf(double a, double x) {
     double rp = 1; // t_k-1
     double rv = 0; // rho_0
     for (int k = 1; k <= 200 && fabs(rp / s) >= EGF_EPS; k++) {
-        double ak =
-            k * (a - k) / (double)((x + 2 * k - 1 - a) * (x + 2 * k + 1 - a));
+        double ak = k * (a - k) / ((x + 2 * k - 1 - a) * (x + 2 * k + 1 - a));
         rv = -ak * (1 + rv) / (1 + ak * (1 + rv));
         rp *= rv;
         s += rp;
@@ -255,7 +254,7 @@ double egf_ua(double a, double x) {
         eta = -eta;
     }
     double ra = egf_ua_r(a, eta);
-    return 0.5 * erfc(eta * sqrt(a / 2.)) + ra;
+    return (0.5 * erfc(eta * sqrt(a / 2.))) + ra;
 }
 
 /**

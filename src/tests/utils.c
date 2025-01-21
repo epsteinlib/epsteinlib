@@ -24,7 +24,7 @@
  */
 double errAbs(double complex ref, double complex comp) {
     double complex diff = ref - comp;
-    double norm = creal(diff) * creal(diff) + cimag(diff) * cimag(diff);
+    double norm = (creal(diff) * creal(diff)) + (cimag(diff) * cimag(diff));
     return sqrt(norm);
 }
 
@@ -35,7 +35,7 @@ double errAbs(double complex ref, double complex comp) {
  * @return errAbs / norm(ref)
  */
 double errRel(double complex ref, double complex comp) {
-    double absRef = sqrt(creal(ref) * creal(ref) + cimag(ref) * cimag(ref));
+    double absRef = sqrt((creal(ref) * creal(ref)) + (cimag(ref) * cimag(ref)));
     if (absRef < EPSILON_REF) {
         return errAbs(ref, comp);
     }
@@ -71,7 +71,7 @@ void printMatrixUnitTest(const char *name, const double *mat, int dim) {
     for (int i = 0; i < dim; ++i) {
         printf("\t\t [");
         for (int j = 0; j < dim; ++j) {
-            matrixEntry = mat[i * dim + j];
+            matrixEntry = mat[(i * dim) + j];
             if (pow(matrixEntry, 2) < 100) {
                 printf("%.16f", matrixEntry);
             } else {

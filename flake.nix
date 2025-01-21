@@ -54,7 +54,7 @@
 
             hooks = let
               mypy_wrapper = pkgs.writeShellScript "mypy" ''
-                MYPYPATH=${self'.packages.epsteinlib_python}/lib/python3.11/site-packages/ ${self'.packages.pythonDevEnv}/bin/mypy "$@"
+                MYPYPATH=${self'.packages.epsteinlib_python}/lib/python3.12/site-packages/ ${self'.packages.pythonDevEnv}/bin/mypy "$@"
               '';
               pylint_wrapper = pkgs.writeShellScript "pylint" ''
                 ${self'.packages.pythonDevEnv}/bin/pylint "$@"
@@ -113,6 +113,8 @@
                       "ba",
                       "ND",
                       'CompressedData\["(.|\n)*"\]',
+                      "auto-optimise-store",
+                      "(?Rm)^.*(#|//)\\s*spellchecker:disable-line$",
                     ]
                   '';
                   locale = "en-us";
@@ -176,8 +178,8 @@
     flake_parts_out;
 
   inputs = {
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.05";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.11";
+    #nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs.follows = "nixpkgs-stable";
 
     flake-parts.url = "github:hercules-ci/flake-parts";

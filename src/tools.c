@@ -44,7 +44,7 @@ void matrix_intVector(unsigned int dim, const double *m, const int *v, double *r
     for (int i = 0; i < dim; i++) {
         res[i] = 0;
         for (int j = 0; j < dim; j++) {
-            res[i] += m[i * dim + j] * v[j];
+            res[i] += m[(i * dim) + j] * v[j];
         }
     }
 }
@@ -58,9 +58,9 @@ void transpose(unsigned int dim, double *m) {
     double swap;
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < i; j++) {
-            swap = m[dim * i + j];
-            m[dim * i + j] = m[dim * j + i];
-            m[dim * j + i] = swap;
+            swap = m[(dim * i) + j];
+            m[(dim * i) + j] = m[(dim * j) + i];
+            m[(dim * j) + i] = swap;
         }
     }
 }
@@ -110,7 +110,7 @@ void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
         // column pivot search
         int r = i;
         for (int j = i + 1; j < dim; j++) {
-            if (fabs(m[i * dim + j]) > fabs(m[i * dim + r])) {
+            if (fabs(m[(i * dim) + j]) > fabs(m[(i * dim) + r])) {
                 r = j;
             }
         }
@@ -121,15 +121,15 @@ void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
         }
         // permute accordingly
         for (int k = 0; k < dim; k++) {
-            double zw = m[i * dim + k];
-            m[i * dim + k] = m[r * dim + k];
-            m[r * dim + k] = zw;
+            double zw = m[(i * dim) + k];
+            m[(i * dim) + k] = m[(r * dim) + k];
+            m[(r * dim) + k] = zw;
         }
         // standard LU-decomposition
         for (int k = i + 1; k < dim; k++) {
-            m[k * dim + i] /= m[i * dim + i]; // l-value
+            m[(k * dim) + i] /= m[(i * dim) + i]; // l-value
             for (int j = i + 1; j < dim; j++) {
-                m[k * dim + j] -= m[k * dim + i] * m[i * dim + j];
+                m[(k * dim) + j] -= m[(k * dim) + i] * m[(i * dim) + j];
             }
         }
     }
@@ -144,16 +144,16 @@ void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
         for (int k = p[i] + 1; k < dim; k++) {
             y[k] = 0;
             for (int j = p[i]; j < k; j++) {
-                y[k] -= m[k * dim + j] * y[j];
+                y[k] -= m[(k * dim) + j] * y[j];
             }
         }
         // Solve Rx=y
         for (int j = (int)dim - 1; j >= 0; j--) {
             r[j * dim + i] = y[j]; // NOLINT every entry of p[i] < dim
             for (int k = j + 1; k < (int)dim; k++) {
-                r[j * dim + i] -= m[j * dim + k] * r[k * dim + i];
+                r[(j * dim) + i] -= m[(j * dim) + k] * r[(k * dim) + i];
             }
-            r[j * dim + i] /= m[j * dim + j];
+            r[(j * dim) + i] /= m[(j * dim) + j];
         }
     }
 }
@@ -171,7 +171,7 @@ double inf_norm(unsigned int dim, const double *m) { // NOLINT
     for (int i = 1; i < dim; i++) {
         double w = 0;
         for (int j = 0; j < dim; j++) {
-            w += fabs(m[i * dim + j]);
+            w += fabs(m[(i * dim) + j]);
         }
         if (w > r) {
             r = w;
