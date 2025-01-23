@@ -11,10 +11,12 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 ## [0.5.0] - unreleased
 ### Breaking Changes
+- Reduced cutoff around zero in `crandall_g` from `src/crandall.c` from $2^{-62}$ to $\pi 10^{-64}$. This ensures the correct evaluation close to the singularity.
 
 ### Added
 
 ### Fixed
+- Increased edge case parameter in `assignzArgBound` in `src/crandall.c` from $10^{16}$ to `DBL_MAX` from `<float.h>` to ensure that the asymptotic method is not used for large $|\nu|$.
 
 ## [0.4.2] - unreleased
 
