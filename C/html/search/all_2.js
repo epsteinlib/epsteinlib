@@ -1,5 +1,9 @@
 var searchData=
 [
-  ['based_20if_20you_20do_20not_20have_20root_20rights_0',['Nix-Portable based - if you do not have root rights',['../index.html#autotoc_md11',1,'']]],
-  ['based_20recommended_1',['Nix based - recommended',['../index.html#autotoc_md10',1,'']]]
+  ['crandall_2ec_0',['crandall.c',['../crandall_8c.html',1,'']]],
+  ['crandall_2eh_1',['crandall.h',['../crandall_8h.html',1,'']]],
+  ['crandall_5fg_2',['crandall_g',['../crandall_8c.html#a36e2886859961d74dcd67893106d9335',1,'crandall_g(unsigned int dim, double nu, const double *z, double prefactor, double zArgBound):&#160;crandall.c'],['../crandall_8h.html#a36e2886859961d74dcd67893106d9335',1,'crandall_g(unsigned int dim, double nu, const double *z, double prefactor, double zArgBound):&#160;crandall.c']]],
+  ['crandall_5fgreg_3',['crandall_gReg',['../crandall_8c.html#a19eb7f9554b517d5a8f10f2dfd44b78a',1,'crandall_gReg(unsigned int dim, double s, const double *z, double prefactor):&#160;crandall.c'],['../crandall_8h.html#adec3c594701f4a37297ed99a5a016202',1,'crandall_gReg(unsigned int dim, double nu, const double *z, double prefactor):&#160;crandall.c']]],
+  ['crandall_5fgreg_5fnuequalsdim_4',['crandall_gReg_nuequalsdim',['../crandall_8h.html#aad749ef8f396e44de09256228fd10a32',1,'crandall.h']]],
+  ['crandall_5fgreg_5fnuequalsdimplus2k_5',['crandall_gReg_nuequalsdimplus2k',['../crandall_8c.html#abb4ca690eaebb15053de49b6015eb34d',1,'crandall.c']]]
 ];

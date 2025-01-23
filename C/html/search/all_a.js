@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['mathematica_0',['in Mathematica',['../index.html#autotoc_md8',1,'']]],
-  ['matrix_5fintvector_1',['matrix_intVector',['../tools_8c.html#a1ceb5734431f141fb42d8282173e4df9',1,'matrix_intVector(unsigned int dim, const double *m, const int *v, double *res):&#160;tools.c'],['../tools_8h.html#a1ceb5734431f141fb42d8282173e4df9',1,'matrix_intVector(unsigned int dim, const double *m, const int *v, double *res):&#160;tools.c']]],
-  ['meson_2',['Installing the C library and the Python wrapper with meson',['../index.html#autotoc_md3',1,'']]]
+  ['tools_2ec_0',['tools.c',['../tools_8c.html',1,'']]],
+  ['tools_2eh_1',['tools.h',['../tools_8h.html',1,'']]],
+  ['transpose_2',['transpose',['../tools_8c.html#a3e4573cdd65e2eaddce316dbd632e48b',1,'transpose(unsigned int dim, double *m):&#160;tools.c'],['../tools_8h.html#a3e4573cdd65e2eaddce316dbd632e48b',1,'transpose(unsigned int dim, double *m):&#160;tools.c']]]
 ];

@@ -11,7 +11,6 @@ name = 'epsteinlib'
 dynamic = ['version']
 dependencies = ["numpy"]
 description = 'Python wrapper for epsteinlib'
-readme = 'README.md'
 requires-python = '>=3.8'
 license = { file = 'LICENSES/AGPL-3.0-only.txt' }
 authors = [

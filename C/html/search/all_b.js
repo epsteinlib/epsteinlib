@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['nix_20based_20recommended_0',['Nix based - recommended',['../index.html#autotoc_md10',1,'']]],
-  ['nix_20portable_20based_20if_20you_20do_20not_20have_20root_20rights_1',['Nix-Portable based - if you do not have root rights',['../index.html#autotoc_md11',1,'']]],
-  ['not_20have_20root_20rights_2',['Nix-Portable based - if you do not have root rights',['../index.html#autotoc_md11',1,'']]]
+  ['validate_5finputs_0',['validate_inputs',['../namespace__epsteinlib.html#a6cfa226625e23ec0b53a91d3dadc6aa0',1,'_epsteinlib']]],
+  ['vectorproj_1',['vectorProj',['../zeta_8c.html#a527140d834111cb62939bb08885cc47b',1,'zeta.c']]]
 ];

@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['only_20the_20python_20wrapper_20with_20pip_0',['Installing only the Python wrapper with pip',['../index.html#autotoc_md2',1,'']]]
+  ['zeta_2ec_0',['zeta.c',['../zeta_8c.html',1,'']]],
+  ['zeta_2eh_1',['zeta.h',['../zeta_8h.html',1,'']]]
 ];
