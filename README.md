@@ -1,3 +1,4 @@
+
 <!--
 SPDX-FileCopyrightText: 2024 Andreas Buchheit <buchheit@num.uni-sb.de>
 SPDX-FileCopyrightText: 2024 Jan Schmitz <schmitz@num.uni-sb.de>
@@ -53,6 +54,14 @@ EpsteinZeta[\[Nu],A,x,y]
 ```
 and evaluates to full precision over the whole parameter range up to ten dimensions.
 
+The Epstein zeta function admits singularities in the lattice $\boldsymbol x\in\Lambda$ and in the reciprocal lattice $\boldsymbol y\in\Lambda^*$.
+To ensure numerical stability when evaluating the Epstein zeta function, we implement the following cutoffs:
+- If $(\boldsymbol x-\boldsymbol z)^2 < 10^{-64}$ for some $\boldsymbol z \in \Lambda$, we numerically set $\boldsymbol x = \boldsymbol z$.
+- Similarly, if $(\boldsymbol y-\boldsymbol k)^2 < 10^{-64}$, for some $\boldsymbol k \in\Lambda^*$, we numerically set $\boldsymbol y = \boldsymbol k$.
+
+When evaluating $\boldsymbol x\in\Lambda$ or $\boldsymbol y \in\Lambda^*$, users should set $\boldsymbol x= \boldsymbol 0$ or $\boldsymbol y = \boldsymbol 0$ and use the quasi-periodicity of the Epstein zeta function.
+
+
 In addition, this library includes the regularized Epstein zeta function, which is analytic around $\boldsymbol y=0$, and is defined via
 
 $$
@@ -92,6 +101,11 @@ and in the Mathematica package as
 ```mathematica
 EpsteinZetaReg[\[Nu],A,x,y]
 ```
+
+To ensure numerical stability when evaluating the regularized Epstein zeta function as a function of $\boldsymbol x$, we again implement the following cutoff:
+- If $(\boldsymbol x-\boldsymbol z)^2 < 10^{-64}$ for some $\boldsymbol z \in \Lambda$, we numerically set $\boldsymbol x = \boldsymbol z$.
+
+
 ## Installation
 Install our required dependencies: meson, ninja, pkg-config, python3 e.g. with
 ```bash
