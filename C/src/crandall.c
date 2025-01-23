@@ -14,12 +14,19 @@
 #include "gamma.h"
 #include "tools.h"
 #include <complex.h>
+#include <float.h>
 #include <math.h>
 
 /*!
  * @brief epsilon for the cutoff around nu = dimension.
  */
 #define EPS ldexp(1, -30)
+
+/*!
+ * @brief epsilon for the cutoff around x = 0 and y = 0
+ */
+#define EPS_ZERO M_PI *pow(10, -64)
+
 /**
  * @brief Calculates the regularization of the zero summand in the second
  * sum in Crandall's formula in the special case of
@@ -80,7 +87,7 @@ double complex crandall_gReg(unsigned int dim, double s, const double *z,
                              double prefactor) {
     double zArgument = dot(dim, z, z);
     zArgument *= M_PI * prefactor * prefactor;
-    double k = -(double)nearbyint(s / 2.);
+    double k = -nearbyint(s / 2.);
     if (s < 1 && (s == -2 * k)) {
         return crandall_gReg_nuequalsdimplus2k(s, zArgument, k, prefactor);
     }
@@ -110,7 +117,7 @@ double assignzArgBound(double nu) {
     if (nu > -600 && nu < 80) {
         return M_PI * 3.5 * 3.5;
     }
-    return pow(10, 16); // do not use expansion if nu is to big
+    return DBL_MAX; // do not use expansion if nu is to big
 }
 
 /**
@@ -129,7 +136,7 @@ double complex crandall_g(unsigned int dim, double nu, const double *z,
     double zArgument = dot(dim, z, z);
     zArgument *= M_PI * prefactor * prefactor;
 
-    if (zArgument < ldexp(1, -62)) {
+    if (zArgument < EPS_ZERO) {
         return -2. / nu;
     }
     if (zArgument > zArgBound) {
