@@ -58,7 +58,7 @@
 \author[1]{Ruben Gutendorf}
 
 \affil[1]{Department of Mathematics, Saarland University, 66123 Saarbrücken, Germany}
-\affil[2]{Department of Mathematics, Saarland University, 66123 Saarbrücken, Germany \\ 
+\affil[2]{Department of Mathematics, Saarland University, 66123 Saarbrücken, Germany \\
 German Aerospace Center (DLR), 51147 Cologne, Germany}
 
 \begin{document}
@@ -68,7 +68,7 @@ German Aerospace Center (DLR), 51147 Cologne, Germany}
 
 
 
-\section{Introduction} 
+\section{Introduction}
 EpsteinLib is a C library designed for the fast and efficient
 computation of the Epstein zeta function for arbitrary multidimensional
 lattices. In addition to the C library, we also offer a Python package,
@@ -137,6 +137,16 @@ EpsteinZeta[§\textbackslash{}§[Nu],A,x,y]
 and evaluates to full precision over the whole parameter range up to ten
 dimensions.
 
+The Epstein zeta function admits singularities in the lattice $\boldsymbol x\in\Lambda$ and in the reciprocal lattice $\boldsymbol y\in\Lambda^*$.
+To ensure numerical stability when evaluating the Epstein zeta function, we implement the following cutoffs:
+\begin{itemize}
+    \item If $(\boldsymbol x-\boldsymbol z)^2 < 10^{-64}$ for some $\boldsymbol z \in \Lambda$, we numerically set $\boldsymbol x = \boldsymbol z$.
+    \item Similarly, if $(\boldsymbol y-\boldsymbol k)^2 < 10^{-64}$, for some $\boldsymbol k \in\Lambda^*$, we numerically set $\boldsymbol y = \boldsymbol k$.
+\end{itemize}
+
+When evaluating $\boldsymbol x\in\Lambda$ or $\boldsymbol y \in\Lambda^*$, users should set $\boldsymbol x= \boldsymbol 0$ or $\boldsymbol y = \boldsymbol 0$ and use the quasi-periodicity of the Epstein zeta function.
+
+
 In addition, this library includes the regularized Epstein zeta
 function, which is analytic around \(\boldsymbol y=0\), and is defined
 via
@@ -167,10 +177,10 @@ In the c library, the regularized Epstein zeta function is included as
 
 \begin{code}{c}
 double complex epsteinZetaReg(
-    double nu, 
-    unsigned int dim, 
-    const double *A, 
-    const double *x, 
+    double nu,
+    unsigned int dim,
+    const double *A,
+    const double *x,
     const double *y);
 \end{code}
 
@@ -192,6 +202,13 @@ and in the Mathematica package as
 \begin{code}{mathematica}
 EpsteinZetaReg[§\textbackslash{}§[Nu],A,x,y]
 \end{code}
+
+To ensure numerical stability when evaluating the regularized Epstein zeta function as a function of $\boldsymbol x$, we again implement the following cutoff:
+\begin{itemize}
+    \item If $(\boldsymbol x-\boldsymbol z)^2 < 10^{-64}$ for some $\boldsymbol z \in \Lambda$, we numerically set $\boldsymbol x = \boldsymbol z$.
+\end{itemize}
+
+
 
 \section{Installation}
 
@@ -222,7 +239,7 @@ Create and activate a virtual environment before installing the Python wrapper, 
 cd C && python3 -m venv .venv && source .venv/bin/activate
 \end{code}
 
-EpsteinLib ist then installed by:
+EpsteinLib is then installed by:
 
 \begin{code}{bash}
 python -m pip install .
@@ -247,7 +264,7 @@ Meson supports a system-wide installation of the compiled library.
 After that, you can use
 \mintinline{c}{#include <epsteinZeta.h>} and
 link the library with
-\mintinline{bash}{gcc -lepsteinZeta}. 
+\mintinline{bash}{gcc -lepsteinZeta}.
 This may require superuser rights.
 
 
@@ -319,11 +336,11 @@ dimensions,
 In C, the Madelung constant is calculated as follows:
 
 \begin{code}{c}
-// If the library is installed, compile with 
+// If the library is installed, compile with
 // `gcc -o lattice_sum lattice_sum.c -lm -lepsteinZeta
-// If the library is not installed, compile with 
-// `gcc -o lattice_sum lattice_sum.c -lm -L/path/to/library -lepsteinZeta \ 
-//      -I/path/to/include` 
+// If the library is not installed, compile with
+// `gcc -o lattice_sum lattice_sum.c -lm -L/path/to/library -lepsteinZeta \
+//      -I/path/to/include`
 
 #include <complex.h>
 #include <math.h>
@@ -372,7 +389,7 @@ print(f"Reference value:\t\t {madelung_ref:.16f}")
 print(f"Relative error:\t\t\t +{abs(madelung_ref - madelung) / abs(madelung_ref):.2e}")
 \end{code}
 
-In the \mintinline{bash}{examples/python/} folder, you can find two more Python
+In the \mintinline{bash}{Python/Examples/} folder, you can find two more Python
 examples:
 
 \begin{enumerate}
@@ -408,7 +425,7 @@ madelung = Re[EpsteinZeta[§\textbackslash{}§[Nu], A, x, y]];
 
 Print["Madelung sum in 3 dimensions: ", NumberForm[madelung, 16]]
 Print["Reference value:              ", NumberForm[madelungRef, 16]]
-Print["Relative error:               ", 
+Print["Relative error:               ",
     ScientificForm[Abs[madelungRef - madelung]/Abs[madelungRef], 2]]
 \end{code}
 
@@ -420,7 +437,7 @@ help mathematica find the package.
 \section{Reproducing Results}
 
 The numerical results presented in our paper can be reproduced as follows.
-To regenerate all figures, evaluate \texttt{Figures.wls} located in \texttt{C/examples/mathematica}. On a standard 12-core laptop, the evaluation completes in under 2 minutes.
+To regenerate all figures, evaluate \texttt{Mathematica/ReplicateResults.wls}. On a standard 12-core laptop, the evaluation completes in under 2 minutes.
 The benchmark data can be regenerated using the following steps:
 \begin{enumerate}
     \item Navigate to the C directory: \mintinline{bash}{cd C}
@@ -430,10 +447,10 @@ The benchmark data can be regenerated using the following steps:
 
 \begin{code}{bash}
 # Regenerates benchmark values in `benchmark/csv` for epsteinZeta and epsteinZetaReg
-./build/benchmark/epsteinlib_benchmark_epstein 
+./build/benchmark/epsteinlib_benchmark_epstein
 
 # Regenerates benchmark values in `benchmark/csv` for the upper gamma function
-./build/benchmark/epsteinlib_benchmark_gamma         
+./build/benchmark/epsteinlib_benchmark_gamma
 \end{code}
 
 
@@ -495,7 +512,7 @@ We offer a Nix-portable solution, which is especially helpful if you do not have
 mkdir -p ~/.local/bin
 cd ~/.local/bin
 
-curl -L https://github.com/DavHau/nix-portable/releases/latest/download/nix-portable\ 
+curl -L https://github.com/DavHau/nix-portable/releases/latest/download/nix-portable\
     -$(uname -m) > ./nix-portable
 chmod +x ./nix-portable
 cat > ./nix <<NIX
