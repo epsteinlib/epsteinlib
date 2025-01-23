@@ -39,7 +39,7 @@ window.MathJax = {
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Epstein Zeta Library<span id="projectnumber">&#160;0.4.1</span>
+   <div id="projectname">Epstein Zeta Library<span id="projectnumber">&#160;0.5.0a</span>
    </div>
    <div id="projectbrief">Calculates the Epstein Zeta function</div>
   </td>
@@ -104,21 +104,24 @@ $(function() {
 <div class="textblock"><code>#include &quot;<a class="el" href="gamma_8h_source.html">gamma.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="tools_8h_source.html">tools.h</a>&quot;</code><br />
 <code>#include &lt;complex.h&gt;</code><br />
+<code>#include &lt;float.h&gt;</code><br />
 <code>#include &lt;math.h&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for crandall.c:</div>
 <div class="dyncontent">
 <div class="center"><img src="crandall_8c__incl.png" border="0" usemap="#asrc_2crandall_8c" alt=""/></div>
 <map name="asrc_2crandall_8c" id="asrc_2crandall_8c">
-<area shape="rect" title="Calculates the summand function G and related functions in Crandall&#39;s formula." alt="" coords="131,5,229,31"/>
+<area shape="rect" title="Calculates the summand function G and related functions in Crandall&#39;s formula." alt="" coords="177,5,276,31"/>
 <area shape="rect" href="gamma_8h.html" title="Gamma functions." alt="" coords="5,79,80,105"/>
-<area shape="poly" title=" " alt="" coords="158,34,81,74,78,69,155,29"/>
+<area shape="poly" title=" " alt="" coords="196,34,89,75,87,71,194,29"/>
 <area shape="rect" href="tools_8h.html" title="Minimal linear algebra for matrix vector operations." alt="" coords="104,79,163,105"/>
-<area shape="poly" title=" " alt="" coords="174,33,152,67,147,64,170,30"/>
+<area shape="poly" title=" " alt="" coords="212,34,162,72,159,67,209,29"/>
 <area shape="rect" title=" " alt="" coords="187,79,266,105"/>
-<area shape="poly" title=" " alt="" coords="190,30,213,64,208,67,185,33"/>
-<area shape="rect" title=" " alt="" coords="290,79,350,105"/>
-<area shape="poly" title=" " alt="" coords="205,29,284,69,281,74,202,34"/>
+<area shape="poly" title=" " alt="" coords="229,31,229,63,224,63,224,31"/>
+<area shape="rect" title=" " alt="" coords="291,79,346,105"/>
+<area shape="poly" title=" " alt="" coords="244,29,293,67,290,72,240,34"/>
+<area shape="rect" title=" " alt="" coords="370,79,430,105"/>
+<area shape="poly" title=" " alt="" coords="257,29,357,70,355,75,255,34"/>
 <area shape="rect" title=" " alt="" coords="97,153,170,178"/>
 <area shape="poly" title=" " alt="" coords="136,105,136,137,131,137,131,105"/>
 </map>
@@ -130,6 +133,10 @@ Macros</h2></td></tr>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>EPS</b>&#160;&#160;&#160;ldexp(1, -30)</td></tr>
 <tr class="memdesc:a6ebf6899d6c1c8b7b9d09be872c05aae"><td class="mdescLeft">&#160;</td><td class="mdescRight">epsilon for the cutoff around nu = dimension. <br /></td></tr>
 <tr class="separator:a6ebf6899d6c1c8b7b9d09be872c05aae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a76d5a0a7b8952eb745b9d0e0db5a373b" id="r_a76d5a0a7b8952eb745b9d0e0db5a373b"><td class="memItemLeft" align="right" valign="top"><a id="a76d5a0a7b8952eb745b9d0e0db5a373b" name="a76d5a0a7b8952eb745b9d0e0db5a373b"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>EPS_ZERO</b>&#160;&#160;&#160;M_PI *pow(10, -64)</td></tr>
+<tr class="memdesc:a76d5a0a7b8952eb745b9d0e0db5a373b"><td class="mdescLeft">&#160;</td><td class="mdescRight">epsilon for the cutoff around x = 0 and y = 0 <br /></td></tr>
+<tr class="separator:a76d5a0a7b8952eb745b9d0e0db5a373b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
