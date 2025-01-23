@@ -20,15 +20,3 @@ benchmark_gamma = executable('epsteinlib_benchmark_gamma',
     override_options: override_options,
     link_with : epsteinlib
 )
-
-
-
-test('benchmark_epstein',
-    benchmark_epstein,
-    workdir: meson.current_source_dir()
-)
-
-test('benchmark_gamma',
-    benchmark_gamma,
-    workdir: meson.current_source_dir()
-)
