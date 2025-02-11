@@ -14,6 +14,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 - Reduced cutoff around zero in `crandall_g` from `src/crandall.c` from $2^{-62}$ to $\pi 10^{-64}$. This ensures the correct evaluation close to the singularity.
 
 ### Added
+- Example notebook `examples/mathematica/EpsteinLibBenchmark.wls` that compares the (regularized) Epstein zeta function to known formulas in special cases.
 
 ### Fixed
 - Increased edge case parameter in `assignzArgBound` in `src/crandall.c` from $10^{16}$ to `DBL_MAX` from `<float.h>` to ensure that the asymptotic method is not used for large $|\nu|$.
