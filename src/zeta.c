@@ -318,6 +318,23 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     }
     free(x_t2);
     free(y_t2);
-    return pow(ms, nu) * res;
+    res *= pow(ms, nu);
+    // apply correction to matrix scaling if nu = d + 2k
+    double k = fmax(0., nearbyint((nu - (double)dim) / 2));
+    if (reg && (nu == (dim + 2 * k))) {
+        if (k == 0) {
+            res += pow(M_PI, (double)dim / 2) / tgamma((double)dim / 2) *
+                   log(ms * ms) / vol;
+        } else {
+            double ySquared = 0;
+            for (int i = 0; i < dim; i++) {
+                ySquared += y[i] * y[i];
+            }
+            res -= pow(M_PI, (2 * k) + ((double)dim / 2)) /
+                   tgamma(k + ((double)dim / 2)) * pow(-1, k + 1) / tgamma(k + 1) *
+                   pow(ySquared, k) * log(ms * ms) / vol;
+        }
+    }
+    return res;
 }
 #undef G_BOUND

@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: CC0-1.0
 
 test_epsteinZeta = executable('epsteinlib_test_epsteinZeta',
-    ['utils.c','test_epsteinZeta.c'],
+    ['../tools.c','utils.c','test_epsteinZeta.c'],
     include_directories : incdir,
     dependencies: deps,
     install: false,
