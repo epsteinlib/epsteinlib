@@ -23,9 +23,10 @@
 #define EPS ldexp(1, -30)
 
 /*!
- * @brief epsilon for the cutoff around x = 0 and y = 0
+ * @brief epsilon for the cutoff around arguments of the crandall function around
+ * zero.
  */
-#define EPS_ZERO M_PI *pow(10, -64)
+#define EPS_ZERO_PIY (M_PI * 1e-64)
 
 /**
  * @brief Calculates the regularization of the zero summand in the second
@@ -136,7 +137,7 @@ double complex crandall_g(unsigned int dim, double nu, const double *z,
     double zArgument = dot(dim, z, z);
     zArgument *= M_PI * prefactor * prefactor;
 
-    if (zArgument < EPS_ZERO) {
+    if (zArgument < EPS_ZERO_PIY) {
         return -2. / nu;
     }
     if (zArgument > zArgBound) {

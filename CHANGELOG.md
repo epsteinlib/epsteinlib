@@ -11,7 +11,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 ## [0.5.0] - unreleased
 ### Breaking Changes
-- Reduced cutoff around zero in `crandall_g` from `src/crandall.c` from $2^{-62}$ to $\pi 10^{-64}$. This ensures the correct evaluation close to the singularity.
+- Reduced cutoff around zero in `crandall_g` from `src/crandall.c` from $2^{-62}$ to $10^{-64}$. This ensures the correct evaluation close to the singularity.
+- Reduced cutoff around $\boldsymbol y^2 = 0$ in `zeta.c` from $2^{-32}$ element wise to $10^{-64}$ for the scalar product. This ensures the correct evaluation close to the singularity.
+
 
 ### Added
 - Tests that ensure that EpsteinZeta can be expressed as EpsteinZetaReg + singularity.

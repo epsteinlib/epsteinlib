@@ -31,6 +31,11 @@
  */
 #define EPS ldexp(1, -30)
 
+/*!
+ * @brief epsilon for the cutoff around x = 0 and y = 0
+ */
+#define EPS_ZERO_Y 1e-64
+
 /**
  * @brief calculates the first sum in Crandall's formula.
  * @param[in] nu: exponent for the Epstein zeta function.
@@ -271,7 +276,8 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         } else {
             res = 0;
         }
-    } else if (fabs(nu - dim) < EPS && equalsZero(dim, y_t2) && reg == 0) {
+    } else if (fabs(nu - dim) < EPS && dot(dim, y_t2, y_t2) < EPS_ZERO_Y &&
+               reg == 0) {
         res = NAN;
     } else {
         double zArgBound = assignzArgBound(nu);

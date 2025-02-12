@@ -24,6 +24,7 @@
  * @return 0 if all tests pass, 1 if any test fails.
  */
 int test_crandall_g(void) {
+    printf("%s ... \n", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/crandall_g_Ref.csv", // NOLINT
                           BASE_PATH);
@@ -55,7 +56,7 @@ int test_crandall_g(void) {
     double *z = malloc(2 * sizeof(double));
     double *refRead = malloc(2 * sizeof(double));
 
-    printf("Processing file: %s ... ", path);
+    printf("\tProcessing file: %s ... ", path);
     while (fgets(line, sizeof(line), data) != NULL) {
         scanResult = sscanf(line, "%lf,%lf,%lf,%lf,%lf", // NOLINT
                             nuRef, z, z + 1, refRead, refRead + 1);
@@ -105,7 +106,6 @@ int test_crandall_g(void) {
     if (fclose(data) != 0) {
         return fprintf(stderr, "Error closing file: %d\n", errno);
     }
-
     return (testsPassed == totalTests) ? 0 : 1;
 }
 
