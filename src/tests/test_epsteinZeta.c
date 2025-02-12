@@ -51,6 +51,7 @@ void freeTestResources(double *a, double *nu, double *x, double *y,
  * @return 0 if all tests pass, 1 if any test fails.
  */
 int test_epsteinZeta_epsteinZetaReg() {
+    printf("%s ... \n", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/epsteinZeta_Ref.csv", // NOLINT
                           BASE_PATH);
@@ -79,7 +80,7 @@ int test_epsteinZeta_epsteinZetaReg() {
     int totalTests = 0;
     int testsPassedOverall = 0;
     int totalTestsOverall = 0;
-    printf("Processing file: %s ... ", path);
+    printf("\tProcessing file: %s ... ", path);
 
     int scanResult;
     char line[256];
@@ -158,7 +159,7 @@ int test_epsteinZeta_epsteinZetaReg() {
         return fprintf(stderr, "Error opening file: %s\n", path);
     }
 
-    printf("Processing file: %s ... ", path);
+    printf("\tProcessing file: %s ... ", path);
     while (fgets(line, sizeof(line), zetaRegRefData) != NULL) {
         scanResult =
             sscanf(line, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf", // NOLINT
@@ -268,6 +269,36 @@ void reportEpsteinZetaError(double complex valZeta, double complex valZetaReg,
     printf("nu:\t\t %.16lf\n", nu);
     printVectorUnitTest("x:\t\t", x, (int)dim);
     printVectorUnitTest("y:\t\t", y, (int)dim);
+}
+
+/*!
+ * @brief Reports an error when the Epstein Zeta function cutoff test fails.
+ *
+ * @param[in] testCase A string describing the specific test case that failed.
+ * @param[in] zeta1 The first computed value of the Epstein Zeta function.
+ * @param[in] zeta2 The second computed value of the Epstein Zeta function for
+ * comparison.
+ * @param[in] nu The parameter nu of the Epstein zeta function.
+ * @param[in] y Pointer to the array of y values.
+ * @param[in] dim The dimension of the lattice.
+ */
+void reportEpsteinZetaCutoffError(const char *testCase, double complex zeta1,
+                                  double complex zeta2, double nu, double *y,
+                                  unsigned int dim) {
+    printf("\nWarning! ");
+    printf("%s:\n", testCase);
+    printf(" %0*.16lf %+.16lf I \n\t\t  != "
+           "%.16lf %+.16lf I\n",
+           4, creal(zeta1), cimag(zeta1), creal(zeta2), cimag(zeta2));
+    printf("nu:\t\t %.16lf\n", nu);
+    printf("y:\t\t");
+    for (unsigned int i = 0; i < dim; i++) {
+        printf("%.32lf", y[i]);
+        if (i < dim - 1) {
+            printf(", ");
+        }
+    }
+    printf("\n\n");
     printf("\n");
 }
 
@@ -280,6 +311,7 @@ void reportEpsteinZetaError(double complex valZeta, double complex valZetaReg,
  * tests pass.
  */
 bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
+    printf("%s ... ", __func__);
     double errorAbs;
     double errorRel;
     double errorMaxAbsRel;
@@ -332,7 +364,66 @@ bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
             return true;
         }
     }
+    printf("passed.\n");
+    return false;
+}
 
+/*!
+ * @brief Test the Epstein Zeta function behavior around the cutoff point for nu <=
+ * dim.
+ *
+ * This function tests the Epstein Zeta function for four cases:
+ * 1. At a reference value (y = {0, 0, 0.5})
+ * 2. Just before the cutoff (y = {0, 0, 1e-31})
+ * 3. Just after the cutoff (y = {0, 0, 1e-33})
+ * 4. At zero (y = {0, 0, 0})
+ *
+ * It then compares these results to check if:
+ * - The result after cutoff is the same as at zero
+ * - In the case that the result just before the cutoff is different from the
+ * reference result: That the result before cutoff is different from after cutoff
+ *
+ * @return true if the test fails, false if it passes.
+ */
+bool test_epsteinZeta_cutoff() {
+    printf("%s ... ", __func__);
+    double nu;
+    unsigned int dim = 3;
+    double m[] = {1, 0, 0, 0, 1, 0, 0, 0, 1}; // Identity matrix 3x3
+    double x[] = {0, 0, 0};
+    double y_ref[] = {0, 0, 0.5};
+    double y_before[] = {0, 0, 1e-31};
+    double y_after[] = {0, 0, 1e-33};
+    double y_zero[] = {0, 0, 0};
+
+    double tol = 1e-15; // Tolerance for comparison
+
+    for (int i = 0; i < 80 + 1; i++) {
+        nu = 3 - (double)i / 4;
+
+        double complex zetaRef = epsteinZeta(nu, dim, m, x, y_ref);
+        double complex zetaBeforeCutoff = epsteinZeta(nu, dim, m, x, y_before);
+        double complex zetaAfterCutoff = epsteinZeta(nu, dim, m, x, y_after);
+        double complex zetaZero = epsteinZeta(nu, dim, m, x, y_zero);
+
+        // Check if after cutoff and zero are the same
+        if (cabs(zetaAfterCutoff - zetaZero) > tol) {
+            reportEpsteinZetaCutoffError(
+                "zetaAfterCutoff and zetaZero are not equal", zetaAfterCutoff,
+                zetaZero, nu, y_after, dim);
+            return true;
+        }
+
+        // Check if before cutoff and after cutoff are different
+        if (cabs(zetaRef - zetaBeforeCutoff) >= tol &&
+            cabs(zetaBeforeCutoff - zetaAfterCutoff) <= tol) {
+            reportEpsteinZetaCutoffError(
+                "zetaBeforeCutoff and zetaAfterCutoff are not different",
+                zetaBeforeCutoff, zetaAfterCutoff, nu, y_before, dim);
+            return true;
+        }
+    }
+    printf("passed.\n");
     return false;
 }
 
@@ -345,5 +436,6 @@ bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
 int main() {
     bool failedQ1 = test_epsteinZeta_epsteinZetaReg();
     bool failedQ2 = test_epsteinZeta_epsteinZetaReg_represent_as_each_other();
-    return failedQ1 + failedQ2;
+    bool failedQ3 = test_epsteinZeta_cutoff();
+    return failedQ1 + failedQ2 + failedQ3;
 }

@@ -81,20 +81,6 @@ bool equals(unsigned int dim, const double *v1, const double *v2) {
 }
 
 /**
- * @brief check if vector is zero.
- * @param[in] dim: dimension of the vectors.
- * @param[in] v: vector.
- * @return true if the vector is zero.
- */
-bool equalsZero(unsigned int dim, const double *v) {
-    bool eq = true;
-    for (int i = 0; i < dim && eq; i++) {
-        eq = eq && fabs(v[i]) < EPS;
-    }
-    return eq;
-}
-
-/**
  * @brief Invert matrix.
  * @param[in] dim: dimension of the vectors.
  * @param[in, out] m: matrix to invert. overwritten bei LU-decomposition.
