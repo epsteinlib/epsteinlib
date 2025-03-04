@@ -2,17 +2,19 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 _: {
-  perSystem = {
-    pkgs,
-    self',
-    ...
-  }: {
+  perSystem = {pkgs, ...}: let
+    enter_project_root_cmd = "pushd $(git rev-parse --show-toplevel)";
+    docs_gen_cmd = "${enter_project_root_cmd} &&
+                  mkdir -p html &&
+                  PROJECT_NUMBER=$__VERSION doxygen Doxyfile &&
+                  popd";
+  in {
     devshells._epstein = {
       devshell.prj_root_fallback.eval = "$(git rev-parse --show-toplevel)";
       commands = [
         {
           name = "tests";
-          command = "pushd $(git rev-parse --show-toplevel) &&
+          command = "${enter_project_root_cmd} &&
                      meson setup --reconfigure build -Db_coverage=true &&
                      meson compile -C build &&
                      meson test -v -C build $@
@@ -31,19 +33,66 @@ _: {
         }
         {
           name = "generate_python_stubs";
-          command = "pushd $(git rev-parse --show-toplevel)/python &&
-                     stubgen epsteinlib.pyx -o .out &&
-                     mv .out/__main__.pyi epsteinlib.pyi &&
-                     rm -r .out &&
-                     nix fmt &&
-                     popd";
+          command = ''
+            ${enter_project_root_cmd}/python &&
+            stubgen epsteinlib.pyx -o .out &&
+            mv .out/__main__.pyi epsteinlib.pyi &&
+            rm -r .out &&
+            format &&
+            popd
+          '';
           help = "regenerate the python stub files";
           category = "Tooling";
         }
         {
           name = "docs";
-          command = "PROJECT_NUMBER=$(cat VERSION) doxygen Doxyfile && (${pkgs.xdg-utils}/bin/xdg-open html/index.html || true)";
+          command = ''
+            ${enter_project_root_cmd} &&
+            __VERSION=$(cat VERSION) &&
+            ${docs_gen_cmd} &&
+            ln -sf $__VERSION html/latest &&
+            (${pkgs.xdg-utils}/bin/xdg-open html/latest/index.html || true)
+            popd
+          '';
           help = "generate and show documentation";
+          category = "Tooling";
+        }
+        {
+          name = "docs_all";
+          command = ''
+            docs
+            for tag in $(git tag -l 'v*'); do
+              git checkout $tag
+              git checkout - Doxyfile # Use latest Doxyfile
+              __VERSION=''${tag:1}
+              ${docs_gen_cmd}
+              git checkout - # Back to original checkout
+            done
+          '';
+          help = "generate latest and documentation for previous releases";
+          category = "Tooling";
+        }
+        {
+          name = "website";
+          command = ''
+            ${enter_project_root_cmd}/website &&
+            ln -sf ../html .
+            hugo server --buildDrafts --disableFastRender --renderToMemory
+            popd
+          '';
+          help = "Show website with live editing";
+          category = "Tooling";
+        }
+        {
+          name = "website_deploy";
+          command = ''
+            ${enter_project_root_cmd}/website &&
+            ln -sf ../html .
+            HUGO_ENVIRONMENT=production hugo --gc --minify
+            find public -type f -name "*.license" -delete
+            popd
+          '';
+          help = "Builds static website in website/public folder";
           category = "Tooling";
         }
         {

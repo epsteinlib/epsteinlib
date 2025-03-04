@@ -68,9 +68,12 @@ pip-install:
   script:
     - python3 -m pip install .
 build-docs:
+  variables:
+    GIT_STRATEGY: clone
+    GIT_DEPTH: "0"
   stage: build
   script:
-    - nix develop -c doxygen
+    - nix develop -c docs_all
   artifacts:
     name: 'docs'
     expose_as: 'Documentation'
@@ -143,11 +146,11 @@ pages:
   #pages:
   #  path_prefix: "$PAGES_PREFIX"
   script:
-    - mv html public
+    - HUGO_BASEURL="${CI_PAGES_URL}/${PAGES_PREFIX}" nix develop -c website_deploy
+    - mv website/public .
     - echo "Pages accessible through ${CI_PAGES_URL}/${PAGES_PREFIX}"
   dependencies:
     - build-docs
-    - tests
   artifacts:
     paths:
       - public
@@ -157,11 +160,14 @@ pages:
       #  variables:
       #    PAGES_PREFIX: '_mr-$CI_MERGE_REQUEST_IID'
   tags:
+    - nix
     - x86_64-linux
 pages-preview:
   stage: deploy
   script:
     - ls -alh html
+    - HUGO_BASEURL="https://gl-pages.num.uni-sb.de/$CI_PROJECT_NAMESPACE/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/public" nix develop -c website_deploy
+    - mv website/public .
   needs:
     - build-docs
     - tests
@@ -170,13 +176,14 @@ pages-preview:
     - tests
   artifacts:
     paths:
-      - html
+      - public
   environment:
     name: preview/$CI_COMMIT_REF_SLUG
-    url: "https://gl-pages.num.uni-sb.de/$CI_PROJECT_NAMESPACE/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/html/index.html"
+    url: "https://gl-pages.num.uni-sb.de/$CI_PROJECT_NAMESPACE/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/public/index.html"
     auto_stop_in: 1 week
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_TAG
   tags:
+    - nix
     - x86_64-linux

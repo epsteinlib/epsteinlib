@@ -254,9 +254,10 @@ Executing this code snipped in the same folder as `EpsteinZeta.wl` and setting `
 ## Development environment
 We provide a nix devshell to have a reproducible development environment with the same dependencies across different operating systems. Once you have installed and configured nix, starting developing is as easy as running `nix develop`.
 
-<details><summary>Nix installation instructions</summary>
+### Nix installation instructions
 
-### Nix based - recommended
+<details><summary>Nix based - recommended</summary>
+
 1. Install [nix](https://nixos.org/download/); Follow the [wiki](https://wiki.archlinux.org/title/Nix)
 2. Configure nix by executing
 ```bash
@@ -274,7 +275,10 @@ CFG
 6. `cd <path/to/repo>`
 7. `nix develop` or `nix run -- <your args>`
 
-### Nix-Portable based - if you do not have root rights
+</details>
+
+<details><summary>Nix-Portable based - if you do not have root rights</summary>
+
 1. Install [nix-portable](https://github.com/DavHau/nix-portable):
 ```bash
 mkdir -p ~/.local/bin
@@ -310,6 +314,7 @@ echo 'export $(envsubst < .env)' | tee -a .bashrc >> .zshrc
 
 4. `cd <path/to/repo>`
 5. `nix develop` or `nix run -- <your args>`
+
 </details>
 
 ## Contributing

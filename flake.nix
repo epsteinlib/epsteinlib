@@ -67,7 +67,7 @@
               };
 
               # Nix
-              alejandra.enable = false;
+              alejandra.enable = true;
               deadnix = {
                 enable = true;
                 settings = {

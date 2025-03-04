@@ -18,6 +18,7 @@ coverage.html
 result
 .cache
 .data
+.direnv
 
 # Python
 .venv
