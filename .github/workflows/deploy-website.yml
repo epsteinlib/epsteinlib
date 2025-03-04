@@ -1,0 +1,22 @@
+name: "Deploy Website"
+on:
+  workflow_run:
+    workflows: ["Nix tests"]
+    #branches:
+    #  - main
+    types:
+      - completed
+jobs:
+  deploy-website:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v30
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          nix develop -c docs_all
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          nix develop -c website_deploy
+
