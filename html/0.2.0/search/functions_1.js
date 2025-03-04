@@ -1,0 +1,5 @@
+var searchData=
+[
+  ['crandall_5fg_0',['crandall_g',['../crandall_8c.html#ad1d491739370644f6c8fcb599ec7cb31',1,'crandall_g(int dim, double nu, const double *z, double prefactor, double zArgBound):&#160;crandall.c'],['../crandall_8h.html#ad1d491739370644f6c8fcb599ec7cb31',1,'crandall_g(int dim, double nu, const double *z, double prefactor, double zArgBound):&#160;crandall.c'],['../epsteinZeta_8h.html#aab27dad9e96c1e9cd48edbd17ac918cb',1,'crandall_g(int dim, double nu, const double *z, double prefactor, double zArgBound):&#160;crandall.c']]],
+  ['crandall_5fgreg_1',['crandall_gReg',['../crandall_8c.html#a6a1f23f35d2c51fc247c891024603aaf',1,'crandall_gReg(int dim, double nu, const double *z, double prefactor):&#160;crandall.c'],['../crandall_8h.html#a6a1f23f35d2c51fc247c891024603aaf',1,'crandall_gReg(int dim, double nu, const double *z, double prefactor):&#160;crandall.c'],['../epsteinZeta_8h.html#af35077ea43c4181a583a5b5bd658b0fb',1,'crandall_gReg(int dim, double nu, const double *z, double prefactor):&#160;crandall.c']]]
+];
