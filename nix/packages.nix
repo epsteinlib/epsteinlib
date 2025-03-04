@@ -56,6 +56,8 @@
         gcovr
         pythonDevEnv
         clang-tools
+        hugo
+        go
       ];
       meta = {
         homepage = "https://github.com/epsteinlib/epsteinlib";
