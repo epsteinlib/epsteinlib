@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Jan Schmitz <schmitz@num.uni-sb.de>
+#
+# SPDX-License-Identifier: CC0-1.0
+
 name: "Deploy Website"
 on:
   workflow_run:
@@ -19,4 +23,3 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
           nix develop -c website_deploy
-
