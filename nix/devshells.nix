@@ -90,13 +90,14 @@ _: {
             ln -sf ../html .
             HUGO_ENVIRONMENT=production hugo --gc --minify &&
             find public -type f -name "*.license" -delete
-            git worktree add gh-pages || true
-            rm -rf gh-pages/* && mv public/* gh-pages/ &&
-            pushd gh-pages
+            GH_PAGES_BRANCH=gh-pages
+            git worktree add $GH_PAGES_BRANCH || true
+            rm -rf $GH_PAGES_BRANCH/* && mv public/* $GH_PAGES_BRANCH/ &&
+            pushd $GH_PAGES_BRANCH
             git add . && git commit -m 'Deploy website' &&
-            git push &&
+            git push origin $GH_PAGES_BRANCH &&
             popd
-            git worktree remove gh-pages
+            git worktree remove $GH_PAGES_BRANCH
             popd
           '';
           help = "Builds static website in website/public folder and pushes it to gh-pages branch for deployment";
