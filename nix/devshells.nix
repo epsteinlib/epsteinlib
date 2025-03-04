@@ -88,11 +88,18 @@ _: {
           command = ''
             ${enter_project_root_cmd}/website &&
             ln -sf ../html .
-            HUGO_ENVIRONMENT=production hugo --gc --minify
+            HUGO_ENVIRONMENT=production hugo --gc --minify &&
             find public -type f -name "*.license" -delete
+            git worktree add gh-pages || true
+            rm -rf gh-pages/* && mv public/* gh-pages/ &&
+            pushd gh-pages
+            git add . && git commit -m 'Deploy website' &&
+            git push &&
+            popd
+            git worktree remove gh-pages
             popd
           '';
-          help = "Builds static website in website/public folder";
+          help = "Builds static website in website/public folder and pushes it to gh-pages branch for deployment";
           category = "Tooling";
         }
         {
