@@ -91,7 +91,7 @@ _: {
             HUGO_ENVIRONMENT=production hugo --gc --minify &&
             find public -type f -name "*.license" -delete
             GH_PAGES_BRANCH=gh-pages
-            git worktree add $GH_PAGES_BRANCH || true
+            git worktree add -b $GH_PAGES_BRANCH $GH_PAGES_BRANCH origin/$GH_PAGES_BRANCH || true
             rm -rf $GH_PAGES_BRANCH/* && mv public/* $GH_PAGES_BRANCH/ &&
             pushd $GH_PAGES_BRANCH
             git add . && git commit -m 'Deploy website' &&
