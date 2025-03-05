@@ -1,26 +1,26 @@
 <map id="src/zeta.c" name="src/zeta.c">
-<area shape="rect" id="Node000001" title="Calculates the (regularized) Epstein zeta function." alt="" coords="358,5,435,31"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="663,153,743,178"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="436,17,513,21,606,30,691,48,723,61,745,77,752,94,749,111,729,143,725,140,744,109,747,94,741,81,721,66,689,53,605,36,513,26,436,23"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="89,79,165,105"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="358,32,181,79,180,74,356,27"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="189,79,249,105"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="367,34,264,75,262,70,365,29"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="125,153,198,178"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="379,34,263,107,197,147,194,142,260,102,376,29"/>
-<area shape="rect" id="Node000006" title=" " alt="" coords="324,79,383,105"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="392,33,371,67,366,64,387,30"/>
-<area shape="rect" id="Node000007" title=" " alt="" coords="408,79,470,105"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="406,30,426,64,422,67,401,33"/>
-<area shape="rect" id="Node000008" title=" " alt="" coords="495,79,551,105"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="419,29,490,69,487,73,417,34"/>
-<area shape="rect" id="Node000009" href="$crandall_8h.html" title="Calculates the summand function G and related functions in Crandall&#39;s formula." alt="" coords="576,79,652,105"/>
-<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="434,29,563,71,561,76,432,34"/>
-<area shape="rect" id="Node000010" href="$tools_8h.html" title="Minimal linear algebra for matrix vector operations." alt="" coords="5,79,65,105"/>
-<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="358,28,237,49,80,81,79,76,236,44,357,23"/>
-<area shape="rect" id="Node000011" href="$zeta_8h.html" title="Calculates the (regularized) Epstein zeta function." alt="" coords="675,79,731,105"/>
-<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="436,25,661,76,660,81,435,30"/>
-<area shape="poly" id="edge9_Node000009_Node000002" title=" " alt="" coords="630,103,678,141,674,145,627,107"/>
-<area shape="poly" id="edge11_Node000010_Node000005" title=" " alt="" coords="58,103,128,142,126,147,55,108"/>
-<area shape="poly" id="edge13_Node000011_Node000002" title=" " alt="" coords="706,105,706,137,700,137,700,105"/>
+<area shape="rect" id="Node000001" title="Calculates the (regularized) Epstein zeta function." alt="" coords="382,5,465,33"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="712,157,801,184"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="466,18,550,21,650,30,743,48,778,62,801,79,809,96,806,114,796,131,784,147,780,144,792,129,801,112,803,97,797,83,775,66,741,53,650,35,549,26,466,23"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="95,81,178,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="382,34,194,82,193,76,380,29"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="203,81,270,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="391,36,285,78,283,73,389,31"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="132,157,213,184"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="405,36,283,111,212,151,209,147,281,106,402,31"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="345,81,411,109"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="417,35,396,69,392,66,413,32"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="435,81,505,109"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="434,32,456,67,451,69,429,35"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="529,81,592,109"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="449,31,524,71,522,76,447,36"/>
+<area shape="rect" id="Node000009" href="$crandall_8h.html" title="Calculates the summand function G and related functions in Crandall&#39;s formula." alt="" coords="617,81,702,109"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="466,31,604,73,602,79,465,36"/>
+<area shape="rect" id="Node000010" href="$tools_8h.html" title="Minimal linear algebra for matrix vector operations." alt="" coords="5,81,71,109"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="382,29,254,50,86,83,85,78,253,45,381,24"/>
+<area shape="rect" id="Node000011" href="$zeta_8h.html" title="Calculates the (regularized) Epstein zeta function." alt="" coords="726,81,787,109"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="466,26,573,47,712,78,710,83,572,52,465,31"/>
+<area shape="poly" id="edge9_Node000009_Node000002" title=" " alt="" coords="678,107,729,145,726,150,675,111"/>
+<area shape="poly" id="edge11_Node000010_Node000005" title=" " alt="" coords="63,107,137,147,135,152,61,112"/>
+<area shape="poly" id="edge13_Node000011_Node000002" title=" " alt="" coords="759,109,759,141,754,141,754,109"/>
 </map>

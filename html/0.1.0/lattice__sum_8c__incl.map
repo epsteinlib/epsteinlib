@@ -1,12 +1,12 @@
 <map id="test/lattice_sum.c" name="test/lattice_sum.c">
-<area shape="rect" id="Node000001" title="Calculates the Madelung constant." alt="" coords="32,5,156,31"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="73,153,152,178"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="67,34,43,47,22,64,9,83,8,93,12,103,33,127,60,144,57,148,30,131,7,106,3,94,4,82,18,60,40,43,64,29"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="22,79,83,105"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="89,33,69,67,65,64,85,30"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="107,79,166,105"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="103,30,124,64,119,67,98,33"/>
-<area shape="rect" id="Node000005" href="$epsteinZeta_8h.html" title="Calculates the (regularized) Epstein zeta function." alt="" coords="191,79,290,105"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="120,29,203,69,201,74,117,34"/>
-<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="220,108,149,147,146,142,217,103"/>
+<area shape="rect" id="Node000001" title="Calculates the Madelung constant." alt="" coords="32,5,169,33"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="76,157,165,184"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="70,36,44,50,22,67,9,87,8,97,12,107,34,132,63,149,60,153,31,136,8,110,3,97,4,85,18,63,41,45,67,31"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="22,81,89,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="95,35,74,69,69,66,90,32"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="113,81,179,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="111,32,132,66,128,69,107,35"/>
+<area shape="rect" id="Node000005" href="$epsteinZeta_8h.html" title="Calculates the (regularized) Epstein zeta function." alt="" coords="202,81,314,109"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="130,31,218,72,215,77,128,36"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="235,112,160,152,157,147,232,107"/>
 </map>
