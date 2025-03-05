@@ -4,7 +4,7 @@
 
 baseURL: https://epsteinlib.github.io/epsteinlib/
 languageCode: en-us
-title: EspsteinLib
+title: EpsteinLib
 module:
   imports:
     - path: github.com/imfing/hextra
