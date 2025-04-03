@@ -103,9 +103,6 @@ double complex crandall_gReg(unsigned int dim, double s, const double *z,
  * calculation of the incomplete upper gamma function upperGamma(nu, z).
  */
 double assignzArgBound(double nu) {
-    if ((nu > 2 - EPS && nu < 2 + EPS) || (nu > 4 - EPS && nu < 4 + EPS)) {
-        return M_PI * 2.6 * 2.6;
-    }
     if (nu > 1.6 && nu < 4.4) {
         return M_PI * 2.99 * 2.99;
     }
