@@ -22,6 +22,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 ### Fixed
 - Increased edge case parameter in `assignzArgBound` in `src/crandall.c` from $10^{16}$ to `DBL_MAX` from `<float.h>` to ensure that the asymptotic method is not used for large $|\nu|$.
 - Added correction term for non-diagonal matrixes in $\nu = d+2 k$ for the regularized Epstein zeta function.
+- Removed special use of asymptotic expansion around $\nu = 2$ and $\nu=4$ which reduces the error from $<10^{-11}$to $<10^{-14}$.
 
 ## [0.4.2] - unreleased
 
