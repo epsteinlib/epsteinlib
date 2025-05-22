@@ -142,7 +142,7 @@ def gaussian_derivative(y: float, sigma: float, order: int) -> float:
             * binomial(order, j)
             * hermite_number(order - j)
             * (np.pi / sigma**2) ** ((order + j) / 2)
-            * (1 if (j == 0) else y**j)
+            * (1 if (j == 0) else y ** j)
             for j in range(order + 1)
         )
     )
