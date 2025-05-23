@@ -36,7 +36,8 @@ from numpy.typing import NDArray
 
 from epsteinlib import epstein_zeta_reg
 
-EPS = 1e-8  # taylor expansion at nu = 1 - 2 EPS in integral and lattice_contribution
+EPS_TAYLOR = 1e-8  # taylor expansion at nu = 1 - 2 EPS in integral and lattice_contribution
+EPS_IS_CLOSE = 1e-12
 
 
 def gaussian(
@@ -151,11 +152,12 @@ def lattice_contribution(
     x_val: float, nu: float, sigma: float, order: int
 ) -> float:
     """Calculate the lattice contribution for given parameters."""
-    if nu == 1.0:
-        nu0 = 1 - 2 * EPS
+    nur = np.round(nu)
+    if abs(nu - nur) < EPS_IS_CLOSE and (nu > 0 or nur % 2 == 0):
+        nu0 = nu - 2 * EPS_TAYLOR
         return lattice_contribution(
             x_val, nu0, sigma, order
-        ) + 2 * EPS * finite_differences(
+        ) + 2 * EPS_TAYLOR * finite_differences(
             lambda nu: lattice_contribution(x_val, nu, sigma, order), nu0
         )
 
@@ -211,9 +213,12 @@ def sum_func(x_val: float, nu: float, sigma: float) -> float:
 
 def integral(x_val: float, nu: float, sigma: float) -> float:
     """Analytic representation of the integral over the summands."""
-    if nu == 1.0:
-        nu0 = 1.0 - 2 * EPS
-        return integral(x_val, nu0, sigma) + 2 * EPS * finite_differences(
+    nur = np.round(nu)
+    if abs(nu - nur) < EPS_IS_CLOSE and (nu > 0 or nur % 2 == 0):
+        nu0 = nu - 2 * EPS_TAYLOR
+        return integral(
+            x_val, nu0, sigma
+        ) + 2 * EPS_TAYLOR * finite_differences(
             lambda nu: integral(x_val, nu, sigma), nu0
         )
     return float(
