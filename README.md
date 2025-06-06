@@ -25,14 +25,14 @@ EpsteinLib is a C library designed for the fast and efficient computation of the
 
 Originally studied by Epstein [1,2], the Epstein zeta function forms the basis for computing general multidimensional lattice sums in classical and quantum physics applications [3]. Together with its regularization, it serves as the central ingredient in the singular Euler-Maclaurin (SEM) expansion, which generalizes the 300-year-old Euler summation formula to lattice sums in higher dimensions with physically relevant power-law interactions [4-5]. An efficiently computable representation of the Epstein zeta function is provided in [6,7,8]. In [8], we discuss in detail the analytical properties of the Epstein zeta function and present an algorithm for its computation, complete with error bounds.
 
-For a $d$-dimensional lattice $\Lambda=A\mathbb Z^d$, with $A\in \mathbb R^{d\times d}$ regular, $\boldsymbol x,\boldsymbol y \in \mathbb R^d$, and $\nu \in \mathbb C$, the Epstein zeta function is defined by the Dirichlet series
+For a $d$-dimensional lattice $\Lambda=A\mathbb Z^d$, with $A\in \mathbb R^{d\times d}$ regular, $\boldmath x,\boldmath y \in \mathbb R^d$, and $\nu \in \mathbb C$, the Epstein zeta function is defined by the Dirichlet series
 
 $$
-Z_{\Lambda,\nu}\begin{vmatrix} \boldsymbol x \newline\boldsymbol y \end{vmatrix}
-= \sum_{z \in \Lambda}{}^{'} \frac{e^{-2\pi i \boldsymbol y \cdot \boldsymbol z}}{\left| \boldsymbol x- \boldsymbol z\right|^\nu},\quad \mathrm{Re}(\nu)>d,
+Z_{\Lambda,\nu}\begin{vmatrix} \boldmath x \newline\boldmath y \end{vmatrix}
+= \sum_{z \in \Lambda}{}^{'} \frac{e^{-2\pi i \boldmath y \cdot \boldmath z}}{\left| \boldmath x- \boldmath z\right|^\nu},\quad \mathrm{Re}(\nu)>d,
 $$
 
-which can be meromorphically continued to $\nu \in \mathbb C$. Here, the primed sum excludes the case $\boldsymbol z = \boldsymbol x.$
+which can be meromorphically continued to $\nu \in \mathbb C$. Here, the primed sum excludes the case $\boldmath z = \boldmath x.$
 
 The Epstein zeta function is implemented in this library as
 
@@ -54,33 +54,33 @@ EpsteinZeta[\[Nu],A,x,y]
 ```
 and evaluates to full precision over the whole parameter range up to ten dimensions.
 
-The Epstein zeta function admits singularities in the lattice $\boldsymbol x\in\Lambda$ and in the reciprocal lattice $\boldsymbol y\in\Lambda^*$.
+The Epstein zeta function admits singularities in the lattice $\boldmath x\in\Lambda$ and in the reciprocal lattice $\boldmath y\in\Lambda^*$.
 To ensure numerical stability when evaluating the Epstein zeta function, we implement the following cutoffs:
-- If $(\boldsymbol x-\boldsymbol z)^2 < 10^{-64}$ for some $\boldsymbol z \in \Lambda$, we numerically set $\boldsymbol x = \boldsymbol z$.
-- Similarly, if $(\boldsymbol y-\boldsymbol k)^2 < 10^{-64}$, for some $\boldsymbol k \in\Lambda^*$, we numerically set $\boldsymbol y = \boldsymbol k$.
+- If $(\boldmath x-\boldmath z)^2 < 10^{-64}$ for some $\boldmath z \in \Lambda$, we numerically set $\boldmath x = \boldmath z$.
+- Similarly, if $(\boldmath y-\boldmath k)^2 < 10^{-64}$, for some $\boldmath k \in\Lambda^*$, we numerically set $\boldmath y = \boldmath k$.
 
-When evaluating $\boldsymbol x\in\Lambda$ or $\boldsymbol y \in\Lambda^*$, users should set $\boldsymbol x= \boldsymbol 0$ or $\boldsymbol y = \boldsymbol 0$ and use the quasi-periodicity of the Epstein zeta function.
+When evaluating $\boldmath x\in\Lambda$ or $\boldmath y \in\Lambda^*$, users should set $\boldmath x= \boldmath 0$ or $\boldmath y = \boldmath 0$ and use the quasi-periodicity of the Epstein zeta function.
 
 
-In addition, this library includes the regularized Epstein zeta function, which is analytic around $\boldsymbol y=0$, and is defined via
+In addition, this library includes the regularized Epstein zeta function, which is analytic around $\boldmath y=0$, and is defined via
 
 $$
-Z_{\Lambda,\nu}^{\mathrm{reg}}\begin{vmatrix} \boldsymbol x \newline\boldsymbol y \end{vmatrix} =
-e^{2\pi i \boldsymbol x\cdot\boldsymbol y}
-Z_{\Lambda,\nu}\left|\begin{aligned} \boldsymbol x \newline\boldsymbol y \end{aligned}\right|
--\frac{\hat{s}(\boldsymbol y)}{V_{\Lambda}},
+Z_{\Lambda,\nu}^{\mathrm{reg}}\begin{vmatrix} \boldmath x \newline\boldmath y \end{vmatrix} =
+e^{2\pi i \boldmath x\cdot\boldmath y}
+Z_{\Lambda,\nu}\left|\begin{aligned} \boldmath x \newline\boldmath y \end{aligned}\right|
+-\frac{\hat{s}(\boldmath y)}{V_{\Lambda}},
 $$
 
 where $V_{\Lambda}=|\det A|$ is the volume of the elementary lattice cell, and
 
 $$
-\hat{s}_\nu(\boldsymbol y) = \frac{\pi^{\nu/2}}{\Gamma(\nu/2)}\Gamma\big((d-\nu)/2\big)  (\pi \boldsymbol y^2)^{(\nu - d)/2},\quad \nu \not\in (d+2\mathbb N_0)
+\hat{s}_\nu(\boldmath y) = \frac{\pi^{\nu/2}}{\Gamma(\nu/2)}\Gamma\big((d-\nu)/2\big)  (\pi \boldmath y^2)^{(\nu - d)/2},\quad \nu \not\in (d+2\mathbb N_0)
 $$
 
-is the distributional Fourier transform of $\vert\boldsymbol z \vert^{-\nu}$, where $\Gamma$ denotes the gamma function and we adopt the choice
+is the distributional Fourier transform of $\vert\boldmath z \vert^{-\nu}$, where $\Gamma$ denotes the gamma function and we adopt the choice
 
 $$
-\hat s_{d+2k}(\boldsymbol y)= \frac{\pi^{k+d/2}}{\Gamma(k+d/2)}\frac{(-1)^{k+1}}{k!} ( \pi \boldsymbol y^2 )^{k} \log (\pi  \boldsymbol y^{2}),\quad k\in \mathbb N_0.
+\hat s_{d+2k}(\boldmath y)= \frac{\pi^{k+d/2}}{\Gamma(k+d/2)}\frac{(-1)^{k+1}}{k!} ( \pi \boldmath y^2 )^{k} \log (\pi  \boldmath y^{2}),\quad k\in \mathbb N_0.
 $$
 
 In the c library, the regularized Epstein zeta function is included as
@@ -102,8 +102,8 @@ and in the Mathematica package as
 EpsteinZetaReg[\[Nu],A,x,y]
 ```
 
-To ensure numerical stability when evaluating the regularized Epstein zeta function as a function of $\boldsymbol x$, we again implement the following cutoff:
-- If $(\boldsymbol x-\boldsymbol z)^2 < 10^{-64}$ for some $\boldsymbol z \in \Lambda$, we numerically set $\boldsymbol x = \boldsymbol z$.
+To ensure numerical stability when evaluating the regularized Epstein zeta function as a function of $\boldmath x$, we again implement the following cutoff:
+- If $(\boldmath x-\boldmath z)^2 < 10^{-64}$ for some $\boldmath z \in \Lambda$, we numerically set $\boldmath x = \boldmath z$.
 
 
 ## Installation
