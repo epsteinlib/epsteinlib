@@ -1,0 +1,19 @@
+<!--
+SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan.busse@dlr.de>
+SPDX-License-Identifier: MIT
+-->
+{/*
+  Original version:
+  <div class="hero-badge hx:flex hx:items-center hx:gap-2">
+    <div class="hx:w-2 hx:h-2 hx:rounded-full hx:bg-primary-400"></div>
+    <span>{{ .Inner | markdownify }}</span>
+  </div>
+
+  The following modifications are made to demonstrate that the Hextra CSS classes (hx:) are not loading correctly.
+  We've added inline styles and exaggerated spacing to make the issue more apparent.
+  If Hextra's CSS was loading properly, you would see the flex layout and other Hextra-specific styles applied.
+*/}}
+<div class="hero-badge hx:flex hx:items-center hx:gap-2 hx:my-24" style="margin-top: 100px; margin-bottom: 100px; padding: 20px; border: 2px dashed blue;">
+  <div class="hx:w-2 hx:h-2 hx:rounded-full hx:bg-primary-400"></div>
+  <span>{{ .Inner | markdownify }}</span>
+</div>

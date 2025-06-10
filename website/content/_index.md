@@ -16,14 +16,11 @@ math: true
   EpsteinLib
 {{< /hextra/hero-headline >}}
 
-<div class="hx:mb-12">
 {{< hextra/hero-subtitle >}}
   High-performance C Library for the computation of the Epstein zeta function
 {{< /hextra/hero-subtitle >}}
-</div>
 
-
-<div class="hx-mt-6"></div>
+{{< testoverride >}}
 
 
 {{< hextra/feature-grid >}}

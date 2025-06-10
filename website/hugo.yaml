@@ -57,3 +57,8 @@ params:
   editURL:
     enable: true
     base: "https://github.com/epsteinlib/epsteinlib/edit/main/website"
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
