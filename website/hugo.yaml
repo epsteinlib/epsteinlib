@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-baseURL: https://epsteinlib.github.io/epsteinlib/
+baseURL: https://epsteinlib.org
 languageCode: en-us
 title: EpsteinLib
 module:
