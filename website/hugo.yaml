@@ -71,6 +71,7 @@ params:
     displayTitle: true
     displayLogo: true
     logo:
+      # TODO: Convert logo to transparent background svg
       path: images/epstein.jpg
       dark: images/epstein.jpg
       width: 40
@@ -84,7 +85,7 @@ params:
 
   theme:
     # light | dark | system
-    default: dark
+    default: light
     displayToggle: false
 
   footer:

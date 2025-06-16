@@ -9,12 +9,16 @@ math: true
 {{< hextra/hero-container
   image="/images/example.png"
   imageTitle="EpsteinLib lattice sum example"
-  imageWidth="853"
+  imageWidth="400"
 >}}
 
-{{< hextra/hero-badge link="/docs/reference/releases/regolith-3.2-release-notes" >}}
+
+{{< hextra/hero-badge
+link="https://github.com/epsteinlib/epsteinlib/blob/main/CHANGELOG.md"
+_comment="Can we Link html page here ?"
+>}}
   <div class="hx-w-2 hx-h-2 hx-rounded-full hx-bg-primary-400"></div>
-  <span>Latest version: v3.2</span>
+  <span>Latest version: v1.0</span>
   {{< icon name="arrow-circle-right" attributes="height=14" >}}
 {{< /hextra/hero-badge >}}
 
@@ -26,16 +30,12 @@ math: true
 
 <div class="hx-mt-6 hx-mb-6">
 {{< hextra/hero-subtitle >}}
-  Productivity focused Ubuntu derivative and desktop environment
+High-performance C Library for the computation of the Epstein zeta function
 {{< /hextra/hero-subtitle >}}
 </div>
 
 <div class="hx-mt-6 hx-mb-6">
 {{< hextra/hero-button text="Get Started" link="docs/" >}}
-{{< hextra/hero-badge style="padding: 13px 12px !important; font-size: .875rem !important;" link="https://opencollective.com/regolith/donate" >}}
-  <span>Support Regolith <img class="not-prose" style="display: inline; height: 22px;" src='https://badgen.net/opencollective/backers/regolith'/></span>
-  {{< icon name="arrow-circle-right" attributes="height=14" >}}
-{{< /hextra/hero-badge >}}
 </div>
 {{< /hextra/hero-container >}}
 
@@ -45,28 +45,62 @@ math: true
 
 {{< hextra/feature-grid cols="2" >}}
   {{< hextra/feature-card
-    title="Productivity First"
-    subtitle="Regolith runs i3 and Sway: popular, fast, and configurable tiling window managers that are great for productive, keyboard-driven workflows. Regolith integrates i3 and Sway with other desktop components such as `i3bar`, `rofication`, `i3status-rs`, and `ilia` to provide a complete desktop experience."
+    title="Full Accuracy"
+    subtitle="Full Accuracy over the whole parameter range."
   >}}
 
   {{< hextra/feature-card
-    title="GNOME System Management"
-    subtitle="By integrating light-weight window managers with `gnome-session`, Regolith sidesteps much of the complexity of a typical `gnome-shell` based environment while providing simple and consistent system management capabilities."
+    title="3D Lattice sums"
+    subtitle="In under $0.1$ milliseconds."
   >}}
 {{< /hextra/feature-grid >}}
 
 <div class="hx-mt-6"></div>
 
-{{< hextra/feature-grid cols="1" >}}
+{{< hextra/feature-grid cols="2" >}}
   {{< hextra/feature-card
-    title="Install Regolith"
-    link="/docs/using-regolith/install/"
-    subtitle="Follow Regolith Desktop Installation instructions <span class=\"regolith-links\">here</span>."
+    title="Accessibility"
+    link="https://pypi.org/project/epsteinlib/"
+    subtitle="EpsteinLib includes a <span class=\"regolith-links\">Python</span> and a Mathematica wrapper. Try it out: `pip install epsteinlib`. "
+  >}}
+  {{< hextra/feature-card
+    title="Install EpsteinLib"
+    link="/html/latest/index.html"
+    subtitle="Follow EpsteinLib instructions <span class=\"regolith-links\">here</span>."
   >}}
 {{< /hextra/feature-grid >}}
 
 <div class="hx-mt-6 hx-mb-6"></div>
 <div class="hx-mt-6 hx-mb-6"></div>
 {{< hextra/hero-section >}}
-  Virtual Tour
+  Examples
 {{< /hextra/hero-section >}}
+
+
+{{< columns cols="2" >}}
+  {{< column
+      title="Anomalous Quantum Dispersion Relation"
+      border="true"
+      image="/images/dispersion.png"
+  >}}
+Works like this.
+{{< /column >}}
+
+{{< column
+    title="Singular Euler--Maclaurin expansion"
+    border="true"
+    image="/images/sem.png"
+>}}
+Works like this.
+{{< /column >}}
+
+{{< column
+    title="Casimir Effect"
+    border="true"
+    image="/images/casimir.png"
+>}}
+Works like this.
+{{< /column >}}
+
+
+{{< /columns >}}
