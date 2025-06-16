@@ -321,17 +321,6 @@ echo 'export $(envsubst < .env)' | tee -a .bashrc >> .zshrc
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 
-## License
-
-This project is licensed under the GNU AGPL-3.0-only license.
-
-The file in the `website/` are derived from the
-[Regolith Linux website](https://github.com/regolith-linux/regolith-desktop.com)
-and are licensed under the Apache License 2.0. These files are clearly marked
-in their headers and retain their original copyright.
-
-Please refer to individual file headers for specific licensing details.
-
 ## References
 
 [1] P. Epstein. “Zur Theorie allgemeiner Zetafunctionen”. Math. Ann. 56 (1903), pp. 615–644.
