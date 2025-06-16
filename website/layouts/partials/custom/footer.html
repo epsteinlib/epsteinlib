@@ -1,3 +1,8 @@
+<!--
+SPDX-License-Identifier: Apache-2.0
+SPDX-FileCopyrightText: 2024 Regolith Linux contributors
+-->
+
 {{- $zoomJS := resources.Get "js/medium-zoom.js" | fingerprint -}}
 {{- if hugo.IsProduction -}}
   {{- $zoomJS = $zoomJS | minify | fingerprint -}}

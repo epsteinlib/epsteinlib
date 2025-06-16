@@ -1,3 +1,8 @@
+<!--
+SPDX-License-Identifier: Apache-2.0
+SPDX-FileCopyrightText: 2024 Regolith Linux contributors
+-->
+
 /*! medium-zoom 1.1.0 | MIT License |
  * https://github.com/francoischalifour/medium-zoom */
 (function(global, factory) {

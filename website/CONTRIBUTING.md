@@ -1,3 +1,8 @@
+<!--
+SPDX-License-Identifier: Apache-2.0
+SPDX-FileCopyrightText: 2024 Regolith Linux contributors
+-->
+
 # How to Contribute
 
 We'd love to accept your patches and contributions to this project. There are

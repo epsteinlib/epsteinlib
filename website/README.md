@@ -1,3 +1,8 @@
+<!--
+SPDX-License-Identifier: Apache-2.0
+SPDX-FileCopyrightText: 2024 Regolith Linux contributors
+-->
+
 # This is the https://regolith-desktop.com website
 
 This site uses the [Hugo static site generator](https://gohugo.io/) and the [Hextra theme](https://themes.gohugo.io/themes/hextra/).

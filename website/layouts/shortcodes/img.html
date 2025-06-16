@@ -1,3 +1,8 @@
+<!--
+SPDX-License-Identifier: Apache-2.0
+SPDX-FileCopyrightText: 2024 Regolith Linux contributors
+-->
+
 {{ $original := .Page.Resources.GetMatch (printf "%s" (.Get "src")) }}
 {{ if $original }}
 	{{/* We need this hash, otherwise we will always trigger the same modal instead of the one specific for the content */}}

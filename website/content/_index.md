@@ -6,14 +6,6 @@ date: 2025-02-10T16:27:07+02:00
 math: true
 ---
 
-<!--
-Modified by Jonathan K. Busse on 2025-06-16
-Original source: https://github.com/regolith-linux/regolith-desktop.com/
-Licensed under the Apache License 2.0
--->
-
-
-
 {{< hextra/hero-container
   image="/images/example.png"
   imageTitle="EpsteinLib lattice sum example"
