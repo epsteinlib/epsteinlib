@@ -3,11 +3,22 @@ SPDX-License-Identifier: Apache-2.0
 SPDX-FileCopyrightText: 2024 Regolith Linux contributors
 -->
 
-/** Custom dark background color **/
+.hextra-feature-card .hx-feature-card-image {
+  max-height: 400px;
+  overflow: hidden;
+}
+
+.hextra-feature-card .hx-feature-card-image img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+}
+
+/** Custom blue background color as the second color in Mathematica scientific theme **/
 :root {
-  --primary-hue: 2deg;
-  --primary-saturation: 70%;
-  --primary-lightness: 60%;
+  --primary-hue: 230deg;
+  --primary-saturation: 47%;
+  --primary-lightness: 56%;
   --primary-background-color: 39 42 49;
 }
 html {

@@ -7,7 +7,7 @@ math: true
 ---
 
 {{< hextra/hero-container
-  image="/images/example.png"
+  image="/images/zeta.svg"
   imageTitle="EpsteinLib lattice sum example"
   imageWidth="400"
 >}}
@@ -39,34 +39,48 @@ High-performance C Library for the computation of the Epstein zeta function
 </div>
 {{< /hextra/hero-container >}}
 
+
 <div class="hx-mt-6"></div>
 <div class="hx-mt-6"></div>
 <div class="hx-mt-6"></div>
 
 {{< hextra/feature-grid cols="2" >}}
-  {{< hextra/feature-card
-    title="Full Accuracy"
-    subtitle="Full Accuracy over the whole parameter range."
-  >}}
 
-  {{< hextra/feature-card
-    title="3D Lattice sums"
-    subtitle="In under $0.1$ milliseconds."
-  >}}
-{{< /hextra/feature-grid >}}
+
+
+
+
+
+{{< hextra/feature-card
+  title="Accurate"
+  subtitle="Full Accuracy over the whole parameter range. <br> <img src=\"images/error.svg\" style=\"max-height:500px; width:auto; display:inline-block; margin-top:20px;\" />"
+  class="max-md:hx-min-h-[500px]"
+  style="background: radial-gradient(ellipse at 50% 80%,rgba(194,97,254,0.15),hsla(0,0%,100%,0));"
+>}}
+
+
+{{< hextra/feature-card
+  title="Fast"
+  subtitle="3D Lattice sums in less than $0.01$ milliseconds. <br> <img src=\"images/timing.svg\" style=\"max-height:500px; width:auto; display:inline-block; margin-top:20px;\" />"
+  class="max-md:hx-min-h-[500px]"
+style="background: radial-gradient(ellipse at 50% 80%,rgba(142,53,74,0.15),hsla(0,0%,100%,0));"
+>}}
+
+
+
+
+{{< /hextra/feature-card >}}
+
 
 <div class="hx-mt-6"></div>
 
-{{< hextra/feature-grid cols="2" >}}
+{{< hextra/feature-grid cols="1" >}}
   {{< hextra/feature-card
-    title="Accessibility"
+    title="Accessible"
     link="https://pypi.org/project/epsteinlib/"
-    subtitle="EpsteinLib includes a <span class=\"regolith-links\">Python</span> and a Mathematica wrapper. Try it out: `pip install epsteinlib`. "
-  >}}
-  {{< hextra/feature-card
-    title="Install EpsteinLib"
-    link="/html/latest/index.html"
-    subtitle="Follow EpsteinLib instructions <span class=\"regolith-links\">here</span>."
+    link="/docs"
+    subtitle="Get the  Python wrapper with `pip install epsteinlib` or follow the <span class=\"regolith-links\">installation</span> instructions."
+style="background: radial-gradient(ellipse at 50% 80%,rgba(221,210,59,0.15),hsla(0,0%,100%,0));"
   >}}
 {{< /hextra/feature-grid >}}
 
