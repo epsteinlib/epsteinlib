@@ -1,0 +1,17 @@
+{{- $zoomJS := resources.Get "js/medium-zoom.js" | fingerprint -}}
+{{- if hugo.IsProduction -}}
+  {{- $zoomJS = $zoomJS | minify | fingerprint -}}
+{{- end -}}
+<script src="{{ $zoomJS.RelPermalink }}" integrity="{{ $zoomJS.Data.Integrity }}"></script>
+
+<script>
+const images = Array.from(document.querySelectorAll(".regolith-columns img"));
+images.forEach(img => {
+  mediumZoom(img, {
+    margin: 0,
+    scrollOffset: 40,
+    container: null,
+    template: null
+  });
+});
+</script>

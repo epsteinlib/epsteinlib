@@ -1,16 +1,8 @@
-<!--
-SPDX-FileCopyrightText: 2024 Xin Fu (https://github.com/imfing/hextra/blob/94624bcac67cf587ec1006a9c2f0d72fbce9f135/layouts/partials/navbar.html)
-
-SPDX-License-Identifier: MIT
--->
-
 {{- $logoPath := .Site.Params.navbar.logo.path | default "images/logo.svg" -}}
 {{- $logoLink := .Site.Params.navbar.logo.link | default .Site.Home.RelPermalink -}}
 {{- $logoWidth := .Site.Params.navbar.logo.width | default "20" -}}
 {{- $logoHeight := .Site.Params.navbar.logo.height | default "20" -}}
 {{- $logoDarkPath := .Site.Params.navbar.logo.dark | default $logoPath -}}
-{{- $cov_path := "html/coverage.html" -}}
-
 
 {{- $navWidth := "hx-max-w-[90rem]" -}}
 {{- with .Site.Params.navbar.width -}}
@@ -48,34 +40,34 @@ SPDX-License-Identifier: MIT
           {{- end -}}
         {{- end -}}
 
-        {{/* Do not display menu entry if file does not exist*/}}
-
-
-          {{/* Display icon menu item */}}
-          {{- if .Params.icon -}}
-            {{- $rel := cond (eq .Params.icon "mastodon") "noreferer me" "noreferer" }}
-            <a class="hx-p-2 hx-text-current" {{ if $external }}target="_blank" rel="{{ $rel }}"{{ end }} href="{{ $link }}" title="{{ or (T .Identifier) .Name | safeHTML }}">
-              {{- partial "utils/icon.html" (dict "name" .Params.icon "attributes" "height=24") -}}
-              <span class="hx-sr-only">{{ or (T .Identifier) .Name | safeHTML }}</span>
-            </a>
-          {{- else -}}
+        {{/* Display icon menu item */}}
+        {{- if .Params.icon -}}
+          {{- $rel := cond (eq .Params.icon "mastodon") "noreferrer me" "noreferrer" }}
+          <a class="hx-p-2 hx-text-current" {{ if $external }}target="_blank" rel="{{ $rel }}"{{ end }} href="{{ $link }}" title="{{ or (T .Identifier) .Name | safeHTML }}">
+            {{- partial "utils/icon.html" (dict "name" .Params.icon "attributes" "height=24") -}}
+            <span class="hx-sr-only">{{ or (T .Identifier) .Name | safeHTML }}</span>
+          </a>
+        {{- else -}}
           {{- $active := or ($currentPage.HasMenuCurrent "main" .) ($currentPage.IsMenuCurrent "main" .) -}}
           {{- $activeClass := cond $active "hx-font-medium" "hx-text-gray-600 hover:hx-text-gray-800 dark:hx-text-gray-400 dark:hover:hx-text-gray-200" -}}
-          {{- $hide := (in .Identifier "coverage") | and (not (fileExists $cov_path)) -}}
-          {{- if not $hide -}}
-            <a
-                title="{{ or (T .Identifier) .Name | safeHTML }}"
-                href="{{ $link }}"
-                {{ if $external }}target="_blank" rel="noreferer"{{ end }}
-                class="hx-text-sm contrast-more:hx-text-gray-700 contrast-more:dark:hx-text-gray-100 hx-relative -hx-ml-2 hx-hidden hx-whitespace-nowrap hx-p-2 md:hx-inline-block {{ $activeClass }}"
-              >
-                <span class="hx-text-center">{{ or (T .Identifier) .Name | safeHTML }}</span>
-              </a>
-            {{- end -}}
-          {{- end -}}
+          <a
+            title="{{ or (T .Identifier) .Name | safeHTML }}"
+            href="{{ $link }}"
+            {{ if $external }}target="_blank" rel="noreferrer"{{ end }}
+            class="hx-text-sm contrast-more:hx-text-gray-700 contrast-more:dark:hx-text-gray-100 hx-relative -hx-ml-2 hx-hidden hx-whitespace-nowrap hx-p-2 md:hx-inline-block {{ $activeClass }}"
+          >
+            <span class="hx-text-center">{{ or (T .Identifier) .Name | safeHTML }}</span>
+          </a>
+        {{- end -}}
       {{- end -}}
     {{- end -}}
 
+    {{- with hugo.IsMultilingual -}}
+      {{- $context := $ -}}
+      <div class="hx-justify-end hx-sticky hx-bottom-0 hx-bg-whitex dark:hx-bg-darkx hx-mx-4x hx-py-4 hx-shadow-[0_-12px_16px_#fff]x hx-flex hx-items-center hx-gap-2 dark:hx-border-neutral-800x dark:hx-shadow-[0_-12px_16px_#111] contrast-more:hx-border-neutral-400x contrast-more:hx-shadow-none contrast-more:dark:hx-shadow-none" data-toggle-animation="show">
+        {{- partial "language-switch" (dict "context" $context "grow" true) -}}
+      </div>
+    {{- end -}}
 
     <button type="button" aria-label="Menu" class="hamburger-menu -hx-mr-2 hx-rounded hx-p-2 active:hx-bg-gray-400/20 md:hx-hidden">
       {{- partial "utils/icon.html" (dict "name" "hamburger-menu" "attributes" "height=24") -}}

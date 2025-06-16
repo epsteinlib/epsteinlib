@@ -1,11 +1,6 @@
-<!--
-SPDX-FileCopyrightText: 2024 Jan Schmitz <schmitz@num.uni-sb.de>
+---
+title: "{{ replace .Name "-" " " | title }}"
+date: {{ .Date }}
+draft: true
+---
 
-SPDX-License-Identifier: CC0-1.0
--->
-
-+++
-title = '{{ replace .File.ContentBaseName "-" " " | title }}'
-date = {{ .Date }}
-draft = true
-+++

@@ -1,0 +1,9 @@
+{{- $delimiter := (.Get 1 | default ",") -}}
+{{- $keys := split (.Get 0) $delimiter -}}
+
+<span class="text-nowrap">
+  {{- range $keys }}
+    <span class="badge badge-warning">{{ . }}</span>
+  {{- end -}}
+</span>
+{{- /* Strip trailing newline. */ -}}

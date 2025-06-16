@@ -1,7 +1,12 @@
-# SPDX-FileCopyrightText: 2024 Jan Schmitz <schmitz@num.uni-sb.de>
-#
-# SPDX-License-Identifier: CC0-1.0
-
-.hugo_build.lock
+/resources
+/_disabled
 public
-html
+package-lock.json
+package.json
+
+# Downloaded dependencies:
+/node_modules
+
+# Hugo ephemeral files:
+.hugo_build.lock
+.vscode
