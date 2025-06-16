@@ -1,6 +1,8 @@
 # Hugo configuration file
-baseURL: "https://regolith-desktop.com/"
-title: Regolith Desktop
+baseURL: "https://epsteinlib.github.io/epsteinlib/"
+languageCode: en-us
+title: EpsteinLib
+
 
 enableRobotsTXT: true
 enableGitInfo: true
@@ -22,7 +24,7 @@ languages:
   en:
     languageName: English
     weight: 1
-    title: Regolith Desktop
+    title: EpsteinLib
 
 markup:
   # allow raw html
@@ -36,33 +38,22 @@ markup:
 
 menu:
   main:
-    - identifier: menu-docs
+    - identifier: documentation
       name: Documentation
-      pageRef: /docs/
+      pageRef: /html/latest/index.html
       weight: 1
-    - identifier: menu-blog
-      name: Blog
-      pageRef: /posts/
+    - identifier: coverage
+      name: Coverage
+      pageRef: /html/coverage.html
       weight: 2
-    - identifier: menu-community
-      name: Community
-      pageRef: "/community/"
+    - identifier: about
+      name: About
+      pageRef: /about
       weight: 3
-    - identifier: menu-help
-      name: "Help & Discussion"
-      url: "https://github.com/orgs/regolith-linux/discussions"
-      weight: 4
-    - identifier: menu-support
-      name: "Support Regolith"
+    - identifier: github
+      name: GitHub
       weight: 5
-      url: "https://opencollective.com/regolith/donate"
-    - name: Search
-      weight: 6
-      params:
-        type: search
-    - name: GitHub
-      weight: 7
-      url: "https://github.com/regolith-linux/"
+      url: "https://github.com/epsteinlib/epsteinlib"
       params:
         icon: github
 
@@ -72,26 +63,18 @@ menu:
       params:
         type: separator
       weight: 1
-    - identifier: menu-help
-      name: "Help & Discussion"
-      url: "https://github.com/orgs/regolith-linux/discussions"
-      weight: 2
-    - identifier: menu-support
-      name: "Support Regolith"
-      weight: 3
-      url: "https://opencollective.com/regolith/donate"
 
 params:
-  description: Productivity focused Ubuntu derivative and desktop environment
+  description: High-performance computation of the Epstein zeta function, including a Python and a Mathematica wrapper
 
   navbar:
     displayTitle: true
     displayLogo: true
     logo:
-      path: images/logo.svg
-      dark: images/logo-dark.svg
-      width: 32
-      height: 32
+      path: images/epstein.jpg
+      dark: images/epstein.jpg
+      width: 40
+      height: 20
       # link: /
     width: wide
 
@@ -115,7 +98,7 @@ params:
 
   editURL:
     enable: true
-    base: "https://github.com/regolith-linux/regolith-desktop-website/edit/main/content"
+    base: "https://github.com/epsteinlib/epsteinlib/main/content"
 
   # Search
   # flexsearch is enabled by default
