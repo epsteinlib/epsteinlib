@@ -22,7 +22,7 @@ $ cd regolith-desktop-website
 Install dependencies and launch Hugo server:
 
 ```console
-$ hugo 
+$ hugo
 $ hugo server
 ```
 

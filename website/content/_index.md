@@ -1,13 +1,25 @@
 ---
-title: "Regolith Desktop Environment"
-layout: "hextra-home"
+title: EpsteinLib
+layout: hextra-home
+toc: false
+date: 2025-02-10T16:27:07+02:00
+math: true
 ---
 
+<!--
+Modified by Jonathan K. Busse on 2025-06-16
+Original source: https://github.com/regolith-linux/regolith-desktop.com/
+Licensed under the Apache License 2.0
+-->
+
+
+
 {{< hextra/hero-container
-  image="/images/v-tour/regolith-empty.png"
-  imageTitle="Regolith Desktop Environment"
+  image="/images/example.png"
+  imageTitle="EpsteinLib lattice sum example"
   imageWidth="853"
 >}}
+
 {{< hextra/hero-badge link="/docs/reference/releases/regolith-3.2-release-notes" >}}
   <div class="hx-w-2 hx-h-2 hx-rounded-full hx-bg-primary-400"></div>
   <span>Latest version: v3.2</span>
@@ -16,7 +28,7 @@ layout: "hextra-home"
 
 <div class="hx-mt-6 hx-mb-6">
 {{< hextra/hero-headline >}}
-  Regolith Desktop Environment
+  EpsteinLib
 {{< /hextra/hero-headline >}}
 </div>
 
@@ -66,101 +78,3 @@ layout: "hextra-home"
 {{< hextra/hero-section >}}
   Virtual Tour
 {{< /hextra/hero-section >}}
-
-{{< columns cols="2" >}}
-  {{< column
-      title="First Login"
-      border="true"
-      image="/images/v-tour/regolith-ilia-keybindings.png"
-  >}}
-    Upon first login, an overlay (toggled anytime via {{< keys "super,?" >}})
-    presents the most important keybindings used with i3-wm.
-  {{< /column >}}
-
-  {{< column
-      title="Terminal"
-      border="true"
-      image="/images/v-tour/regolith-floating-terminal.png"
-  >}}
-    For those that work in the terminal, pressing {{< keys "super,enter" >}}
-    is all it takes to get to business.
-  {{< /column >}}
-
-  {{< column
-      title="App Launcher"
-      border="true"
-      image="/images/v-tour/regolith-ilia-apps.png"
-  >}}
-    A single global app launcher is instantly available from anywhere to run
-    your programs via {{< keys "super,space" >}}.
-  {{< /column >}}
-
-  {{< column
-      title="Manage Layout"
-      border="true"
-      image="/images/v-tour/regolith-desktop-terminals.png"
-  >}}
-    Need more terminals? Create layouts on the fly by toggling between horizontal
-    and vertical modes with {{< keys "super,backspace" >}}, followed by
-    {{< keys "super,enter" >}}. Navigate to windows positionally with
-    {{< keys "super,h,j,k,l" >}}.
-  {{< /column >}}
-
-  {{< column
-    title="Floating Window"
-    border="true"
-    image="/images/v-tour/regolith-floating-windows.png"
-  >}}
-    Toggle floating window mode with {{< keys "super,f" >}}. Resize windows with
-    {{< keys "super,r" >}} and move them around with the mouse by pressing
-    {{< keys "super" >}}.
-  {{< /column >}}
-
-  {{< column
-      title="Gnome System Managament"
-      border="true"
-      image="/images/v-tour/regolith-gnome-flashback.png"
-  >}}
-    Gnome Flashback provides consistent and simple system management. Tweak your
-    UI, auto mount your USB drives, connect to wireless networks. Launch the
-    control panel with {{< keys "super,c" >}}.
-  {{< /column >}}
-
-  {{< column
-      title="Regolith Look"
-      border="true"
-      image="/images/v-tour/regolith-screenshot-look-selector.png"
-  >}}
-    Easily switch to <a href="https://ethanschoonover.com/solarized" class="regolith-links">Solarized</a>
-    or other looks with the <code>regolith-look</code> command. Because **looks**
-    utilize the package manager, you only store theme resources that you're using.
-  {{< /column >}}
-
-  {{< column
-      title="Find and Navigate"
-      border="true"
-      image="/images/v-tour/regolith-ilia-windows.png"
-  >}}
-    Got a lot going on? Quickly find the window you're looking for via
-    {{< keys "super,ctrl,space" >}} or navigate over workspaces with
-    {{< keys "super,[0 - 19]" >}}.
-  {{< /column >}}
-
-  {{< column
-      title="Manage Gaps"
-      border="true"
-      image="/images/v-tour/regolith-many-windows.png"
-  >}}
-    Waste no space on frivolous UI and take advantage of every pixel without
-    micro-managing your window layouts.
-  {{< /column >}}
-
-  {{< column
-      title="Notifications"
-      border="true"
-      image="/images/v-tour/regolith-ilia-notifications.png"
-  >}}
-    Desktop notifications do not compete for your attention, but rather can be
-    managed via an on-screen dialog by pressing {{< keys "super,n" >}}.
-  {{< /column >}}
-{{< /columns >}}
