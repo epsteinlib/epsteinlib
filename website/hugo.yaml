@@ -23,21 +23,6 @@ languages:
     languageName: English
     weight: 1
     title: Regolith Desktop
-  de:
-    languageName: Deutsch
-    languageCode: de
-    weight: 2
-    title: Regolith Desktop
-  fr:
-    languageName: Français
-    languageCode: fr
-    weight: 3
-    title: Regolith Desktop
-  ja:
-    languageName: 日本語
-    languageCode: ja
-    weight: 4
-    title: Regolith Desktop
 
 markup:
   # allow raw html

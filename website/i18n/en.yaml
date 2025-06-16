@@ -1,7 +1,8 @@
-menu-blog: "Blog"
-menu-community: "Community"
-menu-docs: "Documentation"
-menu-help: "Help & Discussion"
-menu-support: "Support Regolith"
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2024 Regolith Linux contributors
+# SPDX-FileCopyrightText: 2025 Jonathan K. Busse <jonathan@jbusse.de>
+# Modified from https://github.com/regolith-linux/regolith-desktop.com/ on 2025-06-16
 
-copyright: "© 2025 The Regolith Desktop Authors."
+menu-docs: "Documentation"
+
+copyright: "© 2025 EpsteinLib Authors."
