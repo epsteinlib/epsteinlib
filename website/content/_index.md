@@ -7,7 +7,10 @@ math: true
 ---
 
 
-<div class="hx-container hx-mx-auto hx-max-w-screen-xl">
+
+
+<div class="hx-container">
+
 
 {{< hextra/hero-container
   image="/images/zeta.svg"
@@ -51,28 +54,17 @@ High-performance C Library for the computation of the Epstein zeta function
 
 {{< hextra/feature-grid cols="2" >}}
 
-
-
-
-
-
 {{< hextra/feature-card
   title="Accurate"
-  subtitle="Full Accuracy over the whole parameter range. <br> <img src=\"images/error.svg\" style=\"max-height:500px; width:auto; display:inline-block; margin-top:20px;\" />"
-  class="max-md:hx-min-h-[500px]"
+  subtitle="Full Accuracy over the whole parameter range. <br> <img src=\"images/error.svg\" style=\"max-height:500px; width:auto; display:block; margin: 20px auto 0;\" />"
   style="background: radial-gradient(ellipse at 50% 80%,rgba(194,97,254,0.15),hsla(0,0%,100%,0));"
 >}}
 
-
 {{< hextra/feature-card
   title="Fast"
-  subtitle="3D Lattice sums in less than $0.01$ milliseconds. <br> <img src=\"images/timing.svg\" style=\"max-height:500px; width:auto; display:inline-block; margin-top:20px;\" />"
-  class="max-md:hx-min-h-[500px]"
-style="background: radial-gradient(ellipse at 50% 80%,rgba(142,53,74,0.15),hsla(0,0%,100%,0));"
+  subtitle="3D Lattice sums in less than $0.01$ milliseconds. <br> <img src=\"images/timing.svg\" style=\"max-height:500px; width:auto; display:block; margin: 20px auto 0;\" />"
+  style="background: radial-gradient(ellipse at 50% 80%,rgba(142,53,74,0.15),hsla(0,0%,100%,0));"
 >}}
-
-
-
 
 {{< /hextra/feature-card >}}
 
