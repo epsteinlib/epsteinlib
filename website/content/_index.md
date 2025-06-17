@@ -6,6 +6,9 @@ date: 2025-02-10T16:27:07+02:00
 math: true
 ---
 
+
+<div class="hx-container hx-mx-auto hx-max-w-screen-xl">
+
 {{< hextra/hero-container
   image="/images/zeta.svg"
   imageTitle="EpsteinLib lattice sum example"
@@ -44,6 +47,8 @@ High-performance C Library for the computation of the Epstein zeta function
 <div class="hx-mt-6"></div>
 <div class="hx-mt-6"></div>
 
+
+
 {{< hextra/feature-grid cols="2" >}}
 
 
@@ -71,7 +76,6 @@ style="background: radial-gradient(ellipse at 50% 80%,rgba(142,53,74,0.15),hsla(
 
 {{< /hextra/feature-card >}}
 
-
 <div class="hx-mt-6"></div>
 
 {{< hextra/feature-grid cols="1" >}}
@@ -92,10 +96,19 @@ style="background: radial-gradient(ellipse at 50% 80%,rgba(221,210,59,0.15),hsla
 
 
 {{< columns cols="2" >}}
+
+  {{< column
+      title="Trivial zeros of the Epstein zeta function"
+      border="true"
+      image="/images/zeros.svg"
+  >}}
+Works like this.
+{{< /column >}}
+
   {{< column
       title="Anomalous Quantum Dispersion Relation"
       border="true"
-      image="/images/dispersion.png"
+      image="/images/dispersion.svg"
   >}}
 Works like this.
 {{< /column >}}
@@ -115,6 +128,9 @@ Works like this.
 >}}
 Works like this.
 {{< /column >}}
+
+
+</div>
 
 
 {{< /columns >}}
