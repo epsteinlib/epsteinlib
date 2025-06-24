@@ -13,9 +13,9 @@ math: true
 
 
 {{< hextra/hero-container
-  image="/images/zeta.svg"
+  image="/images/lattice.svg"
   imageTitle="EpsteinLib lattice sum example"
-  imageWidth="400"
+  imageWidth="600"
 >}}
 
 
@@ -36,12 +36,12 @@ _comment="Can we Link html page here ?"
 
 <div class="hx-mt-6 hx-mb-6">
 {{< hextra/hero-subtitle >}}
-High-performance C Library for the computation of the Epstein zeta function
+Any lattice sum, to machine precision, on your laptop
 {{< /hextra/hero-subtitle >}}
 </div>
 
 <div class="hx-mt-6 hx-mb-6">
-{{< hextra/hero-button text="Get Started" link="docs/" >}}
+{{< hextra/hero-button text="install with: pip install epsteinlib" link="https://pypi.org/project/epsteinlib/" >}}
 </div>
 {{< /hextra/hero-container >}}
 
@@ -52,7 +52,7 @@ High-performance C Library for the computation of the Epstein zeta function
 
 
 
-{{< hextra/feature-grid cols="2" >}}
+{{< hextra/feature-grid cols="3" >}}
 
 {{< hextra/feature-card
   title="Accurate"
@@ -66,18 +66,26 @@ High-performance C Library for the computation of the Epstein zeta function
   style="background: radial-gradient(ellipse at 50% 80%,rgba(142,53,74,0.15),hsla(0,0%,100%,0));"
 >}}
 
-{{< /hextra/feature-card >}}
 
-<div class="hx-mt-6"></div>
 
 {{< hextra/feature-grid cols="1" >}}
+
   {{< hextra/feature-card
     title="Accessible"
     link="https://pypi.org/project/epsteinlib/"
     link="/docs"
-    subtitle="Get the  Python wrapper with `pip install epsteinlib` or follow the <span class=\"regolith-links\">installation</span> instructions."
+    subtitle="Performance in Python Environment: Get the  Python wrapper with `pip install epsteinlib` or follow the <span class=\"regolith-links\">installation</span> instructions."
 style="background: radial-gradient(ellipse at 50% 80%,rgba(221,210,59,0.15),hsla(0,0%,100%,0));"
   >}}
+
+  {{< hextra/feature-card
+    title="General & reliable"
+    subtitle="The library works for every exponent, any shift and wave vector and any lattie in any dimension. Being based on rigorous mathematics, our algorithm is proven to work, so you can use it to obtain reliable results in your research."
+style="background: radial-gradient(ellipse at 50% 80%,rgba(221,210,59,0.15),hsla(0,0%,100%,0));"
+  >}}
+
+{{< /hextra/feature-grid >}}
+
 {{< /hextra/feature-grid >}}
 
 <div class="hx-mt-6 hx-mb-6"></div>
@@ -87,7 +95,7 @@ style="background: radial-gradient(ellipse at 50% 80%,rgba(221,210,59,0.15),hsla
 {{< /hextra/hero-section >}}
 
 
-{{< columns cols="2" >}}
+{{< columns cols="3" >}}
 
   {{< column
       title="Trivial zeros of the Epstein zeta function"
