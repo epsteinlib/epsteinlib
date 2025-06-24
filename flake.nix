@@ -92,6 +92,15 @@
 
               # Misc
               check-added-large-files.enable = true;
+              check-added-large-files.settings = {
+                # Inrease file size for website images in 'website/static/images'
+                paths = [
+                  {
+                    path = "website/static/images";
+                    maxSize = "1MB";
+                  }
+                ];
+              };
               check-case-conflicts.enable = true;
               check-executables-have-shebangs.enable = true;
               check-shebang-scripts-are-executable.enable = true;
