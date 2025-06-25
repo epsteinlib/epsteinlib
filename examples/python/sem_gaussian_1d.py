@@ -21,7 +21,7 @@ The script generates plots comparing the different approximations and their
 errors for the specified nu value.
 """
 
-# SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan.busse@dlr.de>
+# SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
 # SPDX-License-Identifier: AGPL-3.0-only
 
 
