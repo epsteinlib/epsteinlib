@@ -22,11 +22,7 @@ gDer[\[Nu]_,z_,\[Alpha]_]=Derivative[0,\[Alpha]][g][\[Nu],z];
 
 
 randRational := RandomInteger[{-10^(16),10^(16)}]/10^(16)
-<<<<<<< Updated upstream
-randDerivative := RandomInteger[{0,10}]
-=======
-randDerivative := RandomInteger[{0,5}]
->>>>>>> Stashed changes
+randDerivative := RandomInteger[{0,6}]
 
 
 (* ::Text:: *)
@@ -55,20 +51,3 @@ crandallDerTab=ParallelTable[With[{g=gDer[\[Nu]0[i],z0[i],\[Alpha]0[i]]},{N[\[Nu
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/crandall_g_der_Ref.csv",crandallDerTab];
-
-
-(* ::Subsection:: *)
-(*Deleteme*)
-
-
-upperCrand[\[Nu]_,z_]:=Piecewise[{{0,Norm[z]>=4},{ -2/\[Nu],Norm[z]<10^(-64)},{ExpIntegralE[1-\[Nu]/2,Pi z . z],Norm[z]>=10^(-64)&&Norm[z]<4}}];
-upperCrandDer[\[Nu]_,z_,\[Alpha]_]:=Total[
-Table[
-p[\[Alpha],\[Beta],z]
-(*upperCrand[\[Nu]+2multNorm[\[Alpha]]-2multNorm[\[Beta]],z]*)
-,{\[Beta],betaSetMult[\[Alpha]/2]}
-]
-]
-
-
-crandallDerTab=ParallelTable[With[{g=upperCrandDer[\[Nu]0[i],z0[i],\[Alpha]0[i]]},{N[\[Nu]0[i],30], N[z0[i][[1]],30],N[z0[i][[2]],30],\[Alpha]0[i][[1]],\[Alpha]0[i][[2]],N[Re[g],30],N[Im[g],30]}],{i,range}];

@@ -57,7 +57,7 @@ int test_crandall_g_der(void) {
     int totalTests = 0;
     int dim = 3;
     double prefactor = 1.;
-    double tol = pow(10, -12);
+    double tol = 5 * pow(10, -13);
 
     double *nuRef = malloc(sizeof(double));
     double *z = malloc(2 * sizeof(double));

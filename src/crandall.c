@@ -188,10 +188,8 @@ double polynomial_p(unsigned int dim, const double *y, const unsigned int *alpha
 double complex crandall_g_der(unsigned int dim, double nu, const double *z,
                               double prefactor, double zArgBound,
                               const unsigned int *alpha) {
-    double complex res = 0;
     if (mult_abs(dim, alpha) == 0) {
-        res = crandall_g(dim, nu, z, prefactor, zArgBound);
-        return res;
+        return crandall_g(dim, nu, z, prefactor, zArgBound);
     }
 
     unsigned int *beta = malloc(dim * sizeof(unsigned int));
@@ -202,6 +200,10 @@ double complex crandall_g_der(unsigned int dim, double nu, const double *z,
     int done = 0;
     double nuIt = 0;
     double zArgBoundIt = 0;
+    double complex sum = 0.0;
+    double complex epsilon = 0.0;
+    double complex auxt;
+    double complex auxy;
 
     // Iterate over every multi-index beta so that 2 beta <= alpha
     while (1) {
@@ -209,8 +211,13 @@ double complex crandall_g_der(unsigned int dim, double nu, const double *z,
         nuIt = nu + 2 * mult_abs(dim, alpha) - 2 * mult_abs(dim, beta);
         zArgBoundIt = assignzArgBound(nu);
 
-        res += polynomial_p(dim, z, alpha, beta) *
-               crandall_g(dim, nuIt, z, prefactor, zArgBoundIt);
+        // summing using Kahan's method
+        auxy = polynomial_p(dim, z, alpha, beta) *
+                   crandall_g(dim, nuIt, z, prefactor, zArgBoundIt) -
+               epsilon;
+        auxt = sum + auxy;
+        epsilon = (auxt - sum) - auxy;
+        sum = auxt;
 
         done = 1;
         for (unsigned int idx = 0; idx < dim; idx++) {
@@ -228,7 +235,7 @@ double complex crandall_g_der(unsigned int dim, double nu, const double *z,
 
     free(beta);
 
-    return res;
+    return sum;
 }
 #undef EPS
 #undef G_CUTOFF
