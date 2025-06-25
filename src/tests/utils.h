@@ -11,33 +11,41 @@
 
 /*!
  * @brief absolute difference between to complex numbers.
- * @param ref: reference value.
- * @param comp: compparison value.
+ * @param[in] ref: reference value.
+ * @param[in] comp: compparison value.
  * @return sqrt(rev - comp)
  */
 double errAbs(double complex ref, double complex comp);
 
 /*!
  * @brief relative difference between to complex numbers.
- * @param ref: reference value.
- * @param comp: compparison value.
+ * @param[in] ref: reference value.
+ * @param[in] comp: compparison value.
  * @return errAbs / norm(ref)
  */
 double errRel(double complex ref, double complex comp);
 
 /**
- * @brief prints vector to terminal, is used in unitTest.
- * @param name: name of the vector as a string.
- * @param vec: vector.
- * @param dim: size of the vector.
+ * @brief prints double vector to terminal, is used in unitTest.
+ * @param[in] name: name of the vector as a string.
+ * @param[in] vec: vector.
+ * @param[in] dim: size of the vector.
  */
-void printVectorUnitTest(const char *name, double *vec, int dim);
+void printVectorUnitTest(const char *name, const double *vec, int dim);
+
+/**
+ * @brief prints unsigned integer vector to terminal, is used in unitTest.
+ * @param[in] name: name of the vector as a string.
+ * @param[in] vec: vector.
+ * @param[in] dim: size of the vector.
+ */
+void printMultiindexUnitTest(const char *name, const unsigned int *vec, int dim);
 
 /**
  * @brief prints square matrix to terminal, is used in unitTest.
- * @param name: name of the matrix as a string.
- * @param mat: matrix.
- * @param dim: size of the matrix.
+ * @param[in] name: name of the matrix as a string.
+ * @param[in] mat: matrix.
+ * @param[in] dim: size of the matrix.
  */
 void printMatrixUnitTest(const char *name, const double *mat, int dim);
 #endif

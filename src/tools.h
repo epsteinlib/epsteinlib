@@ -21,4 +21,6 @@ bool equalsZero(unsigned int dim, const double *v);
 void invert(unsigned int dim, double *m, int *p, double *r);
 double inf_norm(unsigned int dim, const double *m);
 unsigned int mult_abs(unsigned int dim, const unsigned int *alpha);
+unsigned long long binom(unsigned int n, unsigned int k);
+unsigned long long factorial_fraction(unsigned int n, unsigned int k);
 #endif

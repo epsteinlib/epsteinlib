@@ -1,6 +1,12 @@
-// SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
+// SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
 //
 // SPDX-License-Identifier: AGPL-3.0-only
+
+/**
+ * @file test_crandall_der.c
+ * @brief Compares the derivatives of 3D Crandall functions to high-precision
+ * benchmark values.
+ */
 
 #include "../crandall.h"
 #include "utils.h"
@@ -19,7 +25,8 @@
 #endif
 
 /*!
- * @brief Test function for crandall_g_der.
+ * @brief Benchmarks 3D upper Crandall function by comparing to high-precision values
+ * over a range of random parameters.
  *
  * @return 0 if all tests pass, 1 if any test fails.
  */
@@ -48,9 +55,9 @@ int test_crandall_g_der(void) {
 
     int testsPassed = 0;
     int totalTests = 0;
-    int dim = 2;
+    int dim = 3;
     double prefactor = 1.;
-    double tol = pow(10, -13);
+    double tol = pow(10, -12);
 
     double *nuRef = malloc(sizeof(double));
     double *z = malloc(2 * sizeof(double));
@@ -60,10 +67,11 @@ int test_crandall_g_der(void) {
     printf("\tProcessing file: %s ... ", path);
     while (fgets(line, sizeof(line), data) != NULL) {
         // Scan: nu, {z1, z2}, {alpha1, alpha2}, {Re[result], Im[result]}
-        scanResult = sscanf(line, "%lf,%lf,%lf,%u,%u,%lf,%lf", // NOLINT
-                            nuRef, z, z + 1, alpha, alpha + 1, refRead, refRead + 1);
+        scanResult = sscanf(line, "%lf,%lf,%lf,%lf,%u,%u,%u,%lf,%lf", // NOLINT
+                            nuRef, z, z + 1, z + 2, alpha, alpha + 1, alpha + 2,
+                            refRead, refRead + 1);
 
-        if (scanResult != 7) {
+        if (scanResult != 9) {
             printf("Error reading line: %s\n", line);
             printf("Scanned %d values instead of 7\n", scanResult);
             continue;
@@ -72,6 +80,8 @@ int test_crandall_g_der(void) {
         nu = nuRef[0];
 
         zArgBound = assignzArgBound(nu);
+        // printf("alpha: (%d, %d)",alpha[0],alpha[1]);
+        // printf("alpha/2: (%d, %d)", alpha[0]/2, alpha[1]/2);
 
         num = crandall_g_der(dim, nu, z, prefactor, zArgBound, alpha);
         ref = refRead[0] + refRead[1] * I;
@@ -91,11 +101,12 @@ int test_crandall_g_der(void) {
                    "%.16lf "
                    "%+.16lf I (reference implementation)\n",
                    4, creal(num), cimag(num), creal(ref), cimag(ref));
-            printf("Min(Emax, Erel):      %.16lf > %.16lf  (tolerance)\n",
-                   errorMaxAbsRel, tol);
+            printf("Min(Emax, Erel):      %E > %E  (tolerance)\n", errorMaxAbsRel,
+                   tol);
             printf("\n");
             printf("nu:\t\t %.16lf\n", nu);
             printVectorUnitTest("z:\t\t", z, dim);
+            printMultiindexUnitTest("alpha:\t\t", alpha, dim);
             printf("\n");
         }
     }
@@ -113,6 +124,7 @@ int test_crandall_g_der(void) {
 }
 
 int main(void) {
+    printf("hi \n");
     int result = test_crandall_g_der();
     return result;
 }

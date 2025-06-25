@@ -7,7 +7,8 @@
 
 /**
  * @file tools.c
- * @brief  Minimal linear algebra for matrix vector operations.
+ * @brief  Minimal linear algebra for matrix vector operations, binomials and
+ * factorials.
  */
 
 #include <math.h>
@@ -178,4 +179,39 @@ unsigned int mult_abs(unsigned int dim, const unsigned int *alpha) {
     }
     return n;
 }
+
+/**
+ * @brief Compute the binomial coefficient bionm(n,k).
+ * @param[in] n: non-negative integer greater or equal k.
+ * @param[in] k: non-negative integer smaller or equal n.
+ * @return binom(n)(k).
+ */
+unsigned long long binom(unsigned int n, unsigned int k) {
+    unsigned long long res = 1;
+
+    // Calculate binom(n)(n-k) if n - k is closer to smaller than k
+    if (k > n - k) {
+        k = n - k;
+    }
+
+    for (unsigned int i = 1; i <= k; i++) {
+        res = res * (n - k + i) / i;
+    }
+    return res;
+}
+
+/**
+ * @brief Compute the fraction n!/k! for n >= k.
+ * @param[in] n: non-negative integer greater or equal k.
+ * @param[in] k: non-negative integer smaller or equal n.
+ * @return n!/k!.
+ */
+unsigned long long factorial_fraction(unsigned int n, unsigned int k) {
+    unsigned long long res = 1;
+    for (unsigned int i = k + 1; i <= n; i++) {
+        res *= i;
+    }
+    return res;
+}
+
 #undef EPS

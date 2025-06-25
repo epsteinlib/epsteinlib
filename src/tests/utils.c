@@ -60,6 +60,23 @@ void printVectorUnitTest(const char *name, double *vec, int dim) {
 }
 
 /**
+ * @brief prints vector to terminal, is used in unitTest.
+ * @param name: name of the vector as a string.
+ * @param vec: vector.
+ * @param dim: size of the vector.
+ */
+void printMultiindexUnitTest(const char *name, unsigned int *vec, int dim) {
+    printf("%s[", name);
+    for (int i = 0; i < dim; ++i) {
+        printf("%u", vec[i]);
+        if (i != dim - 1) {
+            printf(", ");
+        }
+    }
+    printf("]\n");
+}
+
+/**
  * @brief prints square matrix to terminal, is used in unitTest.
  * @param name: name of the matrix as a string.
  * @param mat: matrix.

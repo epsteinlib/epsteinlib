@@ -16,6 +16,7 @@
 #include <complex.h>
 #include <float.h>
 #include <math.h>
+#include <stdlib.h>
 
 /*!
  * @brief epsilon for the cutoff around nu = dimension.
@@ -144,6 +145,34 @@ double complex crandall_g(unsigned int dim, double nu, const double *z,
     return egf_ugamma(nu / 2, zArgument) / pow(zArgument, nu / 2);
 }
 
+/** @brief Calculates the polynomial p_(alpha,beta)(y) = (-pi)^(alpha - beta) *
+ * (alpha choose beta) *
+ * ((alpha - beta)! / (alpha - 2*beta)!) * (2*y)^(alpha - 2*beta)
+ * where 2 beta =< alpha
+ * @param[in] dim: dimension of alpha, beta and y.
+ * @param[in] y: vector of the polynomial.
+ * @parma[in] alpha: upper multi-index.
+ * @parma[in] beta: lower multi-index.
+ * @return p(y).
+ */
+double polynomial_p(unsigned int dim, const double *y, const unsigned int *alpha,
+                    const unsigned int *beta) {
+    double res = 1;
+    unsigned int ai = 0;
+    unsigned int bi = 0;
+    double yi = 0;
+    for (int i = 0; i < dim; i++) {
+        ai = alpha[i];
+        bi = beta[i];
+        yi = y[i];
+        res *= pow(-M_PI, ai - bi) * (double)binom(ai, bi) *
+               (double)factorial_fraction(ai - bi, ai - (2 * bi)) *
+               pow(2 * yi, ai - (2 * bi));
+    }
+
+    return res;
+}
+
 /**
  * @brief Calculates the upper Crandall function.
  * @param[in] dim: dimension of the input vectors.
@@ -151,18 +180,55 @@ double complex crandall_g(unsigned int dim, double nu, const double *z,
  * @param[in] z: input vector of the function.
  * @param[in] prefactor: prefactor of the vector, e. g. lambda or 1/lambda in
  *      Crandall's formula
- * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
- * expansion in the calculation of the Crandall function.
- * @return upperGamma(nu / 2,pi prefactor * z**2) / (pi * prefactor z**2)^(nu / 2).
+ * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast
+ * asymptotic expansion in the calculation of the Crandall function.
+ * @return upperGamma(nu / 2,pi prefactor * z**2) / (pi * prefactor z**2)^(nu /
+ * 2).
  */
 double complex crandall_g_der(unsigned int dim, double nu, const double *z,
                               double prefactor, double zArgBound,
                               const unsigned int *alpha) {
-
+    double complex res = 0;
     if (mult_abs(dim, alpha) == 0) {
-        return crandall_g(dim, nu, z, prefactor, zArgBound);
+        res = crandall_g(dim, nu, z, prefactor, zArgBound);
+        return res;
     }
-    return 0;
+
+    unsigned int *beta = malloc(dim * sizeof(unsigned int));
+    for (int i = 0; i < dim; i++) {
+        beta[i] = 0;
+    }
+
+    int done = 0;
+    double nuIt = 0;
+    double zArgBoundIt = 0;
+
+    // Iterate over every multi-index beta so that 2 beta <= alpha
+    while (1) {
+
+        nuIt = nu + 2 * mult_abs(dim, alpha) - 2 * mult_abs(dim, beta);
+        zArgBoundIt = assignzArgBound(nu);
+
+        res += polynomial_p(dim, z, alpha, beta) *
+               crandall_g(dim, nuIt, z, prefactor, zArgBoundIt);
+
+        done = 1;
+        for (unsigned int idx = 0; idx < dim; idx++) {
+            if (beta[idx] + 1 <= alpha[idx] / 2) {
+                beta[idx]++;
+                done = 0;
+                break;
+            }
+            beta[idx] = 0;
+        }
+        if (done) {
+            break;
+        }
+    }
+
+    free(beta);
+
+    return res;
 }
 #undef EPS
 #undef G_CUTOFF
