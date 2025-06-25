@@ -33,11 +33,11 @@
  * sum in Crandall's formula in the special case of
  * nu = dim + 2k for some natural number k.
  * @param[in] s: dimension minus exponent of the regularized Epstein zeta function.
- * @param[in] arg: input of the function
- * @param[in] k: k = - s / 2 = (nu - d) / 2 as an integer
- * @param[in] lambda: scaling parameter of crandalls formula
+ * @param[in] arg: input of the function.
+ * @param[in] k: k = - s / 2 = (nu - d) / 2 as an integer.
+ * @param[in] lambda: scaling parameter of crandalls formula.
  * @return arg ** (- s / 2) * (gamma(s / 2, arg) + ((-1)^k / k! ) * (log(arg) -
- * log(lambda ** 2))
+ * log(lambda ** 2)).
  */
 double complex crandall_gReg_nuequalsdimplus2k(double s, double arg, double k,
                                                double lambda) {
@@ -73,16 +73,16 @@ double complex crandall_gReg_nuequalsdimplus2k(double s, double arg, double k,
 /**
  * @brief Calculates the regularization of the zero summand in the second
  * sum in Crandall's formula.
- * @param[in] dim: dimension of the input vectors
+ * @param[in] dim: dimension of the input vectors.
  * @param[in] s: dimension minus exponent of the regularized Epstein zeta function,
- * that is d - nu
- * @param[in] z: input vector of the function
- * @param[in] prefactor: prefactor of the vector, e. g. lambda
+ * that is d - nu.
+ * @param[in] z: input vector of the function.
+ * @param[in] prefactor: prefactor of the vector, e. g. lambda.
  * @return - gamma(s/2) * gammaStar(s/2, pi * prefactor * z**2),
  * where gammaStar is the twice regularized lower incomplete gamma function if s is
  * not equal to - 2k and (pi * prefactor * y ** 2) ** (- s / 2)
  * (gamma(s / 2, pi * prefactor * z ** 2) + ((-1)^k / k! ) * (log(pi * y ** 2) -
- * log(prefactor ** 2))) if s is  equal to - 2k for non negative natural number k
+ * log(prefactor ** 2))) if s is  equal to - 2k for non negative natural number k.
  */
 double complex crandall_gReg(unsigned int dim, double s, const double *z,
                              double prefactor) {
@@ -122,11 +122,12 @@ double assignzArgBound(double nu) {
  * @brief Calculates the upper Crandall function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] nu: exponent of the regularized Epstein zeta function.
- * @param[in] z: input vector of the function
+ * @param[in] z: input vector of the function.
  * @param[in] prefactor: prefactor of the vector, e. g. lambda or 1/lambda in
  *      Crandall's formula
- * @return upperGamma(nu/2,pi prefactor * z**2)
- *      / (pi * prefactor z**2)^(nu / 2) in
+ * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
+ * expansion in the calculation of the Crandall function.
+ * @return upperGamma(nu / 2,pi prefactor * z**2) / (pi * prefactor z**2)^(nu / 2).
  */
 double complex crandall_g(unsigned int dim, double nu, const double *z,
                           double prefactor, double zArgBound) {
