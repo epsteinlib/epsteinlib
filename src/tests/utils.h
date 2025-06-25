@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan.busse@dlr.de>
+// SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
 // SPDX-FileCopyrightText: 2024 Ruben Gutendorf
 // <ruben.gutendorf@uni-saarland.de>
 //
