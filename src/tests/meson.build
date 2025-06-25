@@ -21,6 +21,15 @@ test_crandall = executable('epsteinlib_test_crandall',
     link_with : epsteinlib
 )
 
+test_crandall_der = executable('epsteinlib_test_crandall_derivatives',
+    ['utils.c','test_crandall_der.c'],
+    include_directories : incdir,
+    dependencies: deps,
+    install: false,
+    override_options: override_options,
+    link_with : epsteinlib
+)
+
 test('test_epsteinZeta',
     test_epsteinZeta,
     workdir: meson.current_source_dir()
@@ -28,5 +37,10 @@ test('test_epsteinZeta',
 
 test('test_crandall',
     test_crandall,
+    workdir: meson.current_source_dir()
+)
+
+test('test_crandall_derivatives',
+    test_crandall_der,
     workdir: meson.current_source_dir()
 )

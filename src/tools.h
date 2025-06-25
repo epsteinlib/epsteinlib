@@ -7,7 +7,7 @@
 
 /**
  * @file tools.h
- * @brief  Minimal linear algebra for matrix vector operations.
+ * @brief  Minimal linear algebra for matrix vector and multi-index operations.
  */
 
 #ifndef EPSTEIN_TOOLS
@@ -20,4 +20,5 @@ bool equals(unsigned int dim, const double *v1, const double *v2);
 bool equalsZero(unsigned int dim, const double *v);
 void invert(unsigned int dim, double *m, int *p, double *r);
 double inf_norm(unsigned int dim, const double *m);
+unsigned int mult_abs(unsigned int dim, const unsigned int *alpha);
 #endif

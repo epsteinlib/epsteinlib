@@ -165,4 +165,17 @@ double inf_norm(unsigned int dim, const double *m) { // NOLINT
     }
     return r;
 }
+
+/**
+ * @brief Compute absolute value of multi-index, that is the sum of its components.
+ * @param[in] alpha: multi-index.
+ * @return absolute values of alpha.
+ */
+unsigned int mult_abs(unsigned int dim, const unsigned int *alpha) {
+    unsigned int n = 0;
+    for (int i = 0; i < dim; i++) {
+        n += alpha[i];
+    }
+    return n;
+}
 #undef EPS

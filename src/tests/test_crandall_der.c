@@ -1,0 +1,118 @@
+// SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+#include "../crandall.h"
+#include "utils.h"
+#include <complex.h>
+#include <errno.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#ifndef MAX_PATH_LENGTH
+#define MAX_PATH_LENGTH 1024
+#endif
+
+#ifndef BASE_PATH
+#define BASE_PATH "csv"
+#endif
+
+/*!
+ * @brief Test function for crandall_g_der.
+ *
+ * @return 0 if all tests pass, 1 if any test fails.
+ */
+int test_crandall_g_der(void) {
+    printf("%s ... \n", __func__);
+    char path[MAX_PATH_LENGTH];
+    int result = snprintf(path, sizeof(path), "%s/crandall_g_der_Ref.csv", // NOLINT
+                          BASE_PATH);
+    if (result < 0 || result >= sizeof(path)) {
+        return fprintf(stderr, "Error creating file path\n");
+    }
+    FILE *data = fopen(path, "r");
+    if (data == NULL) {
+        return fprintf(stderr, "Error opening file: %s\n", path);
+    }
+
+    double nu;
+    double zArgBound;
+    double errorAbs;
+    double errorRel;
+    double errorMaxAbsRel;
+    double complex num;
+    double complex ref;
+    int scanResult;
+    char line[256];
+
+    int testsPassed = 0;
+    int totalTests = 0;
+    int dim = 2;
+    double prefactor = 1.;
+    double tol = pow(10, -13);
+
+    double *nuRef = malloc(sizeof(double));
+    double *z = malloc(2 * sizeof(double));
+    unsigned int *alpha = malloc(2 * sizeof(unsigned int));
+    double *refRead = malloc(2 * sizeof(double));
+
+    printf("\tProcessing file: %s ... ", path);
+    while (fgets(line, sizeof(line), data) != NULL) {
+        // Scan: nu, {z1, z2}, {alpha1, alpha2}, {Re[result], Im[result]}
+        scanResult = sscanf(line, "%lf,%lf,%lf,%u,%u,%lf,%lf", // NOLINT
+                            nuRef, z, z + 1, alpha, alpha + 1, refRead, refRead + 1);
+
+        if (scanResult != 7) {
+            printf("Error reading line: %s\n", line);
+            printf("Scanned %d values instead of 7\n", scanResult);
+            continue;
+        }
+
+        nu = nuRef[0];
+
+        zArgBound = assignzArgBound(nu);
+
+        num = crandall_g_der(dim, nu, z, prefactor, zArgBound, alpha);
+        ref = refRead[0] + refRead[1] * I;
+
+        errorAbs = errAbs(ref, num);
+        errorRel = errRel(ref, num);
+
+        errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+
+        totalTests++;
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
+            printf("\nWarning! ");
+            printf("crandall_g_der: ");
+            printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
+                   "%.16lf "
+                   "%+.16lf I (reference implementation)\n",
+                   4, creal(num), cimag(num), creal(ref), cimag(ref));
+            printf("Min(Emax, Erel):      %.16lf > %.16lf  (tolerance)\n",
+                   errorMaxAbsRel, tol);
+            printf("\n");
+            printf("nu:\t\t %.16lf\n", nu);
+            printVectorUnitTest("z:\t\t", z, dim);
+            printf("\n");
+        }
+    }
+    printf("%d out of %d tests passed.\n", testsPassed, totalTests);
+
+    free(nuRef);
+    free(z);
+    free(alpha);
+    free(refRead);
+
+    if (fclose(data) != 0) {
+        return fprintf(stderr, "Error closing file: %d\n", errno);
+    }
+    return (testsPassed == totalTests) ? 0 : 1;
+}
+
+int main(void) {
+    int result = test_crandall_g_der();
+    return result;
+}

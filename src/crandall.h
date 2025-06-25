@@ -68,4 +68,21 @@ double assignzArgBound(double nu);
  */
 double complex crandall_g(unsigned int dim, double nu, const double *z,
                           double prefactor, double zArgBound);
+
+/**
+ * @brief Calculates the partiall deritavies of the upper Crandall function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] nu: exponent of the regularized Epstein zeta function.
+ * @param[in] z: input vector of the function.
+ * @param[in] prefactor: prefactor of the vector, e. g. lambda or 1/lambda in
+ *      Crandall's formula
+ * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
+ * expansion in the calculation of the upper Crandall function.
+ * @param[in] alpha: multi-index for the partiall derivative.
+ * @return upperGamma(nu / 2,pi prefactor * z**2) / (pi * prefactor z**2)^(nu / 2).
+ */
+double complex crandall_g_der(unsigned int dim, double nu, const double *z,
+                              double prefactor, double zArgBound,
+                              const unsigned int *alpha);
+
 #endif
