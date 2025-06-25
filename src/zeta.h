@@ -27,5 +27,5 @@
  */
 double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
                                    const double *x, const double *y, double lambda,
-                                   int regBool);
+                                   int regBool, const unsigned int *alpha);
 #endif

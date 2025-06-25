@@ -46,6 +46,21 @@ double complex epsteinZeta(double nu, unsigned int dim, const double *a,
 double complex epsteinZetaReg(double nu, unsigned int dim, const double *a,
                               const double *x, const double *y);
 
+/**
+ * @brief calculates the derivatives of the set zeta function for lattices.
+ * @param[in] nu: exponent for the set zeta function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] a: matrix that transforms the lattice in the set zeta
+ * function.
+ * @param[in] x: x vector of the set zeta function.
+ * @param[in] y: y vector of the set zeta function.
+ * @param[in] alpha: multiindex for the derivative of the set zeta function.
+ * @return function value of the set zeta.
+ */
+double complex setZetaDer(double nu, unsigned int dim, const double *a,
+                          const double *x, const double *y,
+                          const unsigned int *alpha);
+
 #ifndef EPSTEIN_CRANDALL
 
 /**

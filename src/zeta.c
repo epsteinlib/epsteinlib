@@ -41,7 +41,7 @@
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] lambda: parameters that decides the weight of each sum.
- * @param[in] m: matrix that transforms the lattice in the Epstein Zeta
+ * @param[in] m: matrix that transforms the lattice in the Epstein zeta
  * function.
  * @param[in] x: projection of x vector to elementary lattice cell.
  * @param[in] y: projection of y vector to elementary lattice cell.
@@ -93,7 +93,7 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] lambda: parameters that decides the weight of each sum.
- * @param[in] m: matrix that transforms the lattice in the Epstein Zeta
+ * @param[in] m: matrix that transforms the lattice in the Epstein zeta
  * function.
  * @param[in] x: projection of x vector to elementary lattice cell.
  * @param[in] y: projection of y vector to elementary lattice cell.
@@ -200,20 +200,26 @@ double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
 }
 
 /**
- * @brief calculates the (regularized) Epstein Zeta function.
+ * @brief calculates the (regularized) Epstein zeta function as well es the
+ * derivatives of the set zeta function.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
- * @param[in] m: matrix that transforms the lattice in the Epstein Zeta
+ * @param[in] m: matrix that transforms the lattice in the Epstein zeta
  * function.
- * @param[in] x: x vector of the Epstein Zeta function.
- * @param[in] y: y vector of the Epstein Zeta function.
+ * @param[in] x: x vector of the Epstein zeta function.
+ * @param[in] y: y vector of the Epstein zeta function.
  * @param[in] lambda: relative weight of the sums in Crandall's formula.
  * @param[in] reg: 0 for no regularization, > 0 for the regularization.
+ * @param[in] alpha: multiindex for the derivatives of the set zeta function. *
  * @return function value of the regularized Epstein zeta.
  */
 double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                    const double *m, const double *x, const double *y,
-                                   double lambda, int reg) {
+                                   double lambda, int reg,
+                                   const unsigned int *alpha) {
+    if (mult_abs(1, alpha) > 0) { // Derivatives not implemented yet
+        return NAN;
+    }
     // 1. Transform: Compute determinant and fourier transformed matrix, scale
     // both of them
     double m_fourier[dim * dim];
@@ -292,7 +298,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         }
         xfactor = cexp(-2 * M_PI * I * dot(dim, vx, y_t1));
         if (reg) {
-            // calculate regularized Epstein Zeta function values.
+            // calculate regularized Epstein zeta function values.
             nc = crandall_gReg(dim, dim - nu, y_t1, lambda);
             rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
             s2 = sum_fourier(nu, dim, lambda, m_fourier, x_t1, y_t2, cutoffsFourier,
@@ -310,7 +316,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                  rot * xfactor;
             xfactor = 1;
         } else {
-            // calculate non regularized Epstein Zeta function values.
+            // calculate non regularized Epstein zeta function values.
             nc = crandall_g(dim, dim - nu, y_t2, lambda, zArgBound) *
                  cexp(-2 * M_PI * I * dot(dim, x_t2, y_t2));
             s1 = sum_real(nu, dim, lambda, m_real, x_t2, y_t2, cutoffsReal,
