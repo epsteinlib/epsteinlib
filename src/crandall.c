@@ -96,7 +96,7 @@ double complex crandall_gReg(unsigned int dim, double s, const double *z,
 }
 
 /**
- * @brief calculates bounds on when to use asymptotic expansion of the
+ * @brief Calculates bounds on when to use asymptotic expansion of the
  * upper incomplete gamma function, depending on the value of nu.
  * @param[in] nu: exponent of the regularized Epstein zeta function.
  * @return minimum value of z, when to use the fast asymptotic expansion in the
@@ -119,8 +119,7 @@ double assignzArgBound(double nu) {
 }
 
 /**
- * @brief Assumes x and y to be in the respective elementary lattice cell.
- * Multiply with exp(2 * PI * i * x * y) to get the second sum in Crandall's
+ * @brief Calculates the upper Crandall function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] nu: exponent of the regularized Epstein zeta function.
  * @param[in] z: input vector of the function
