@@ -220,9 +220,13 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                    const double *m, const double *x, const double *y,
                                    double lambda, unsigned int variant,
                                    const unsigned int *alpha) {
-    if (variant == 3 && mult_abs(dim, alpha) == 0) {
+    if (variant == 2 && mult_abs(dim, alpha) == 0) {
         return cexp(2 * M_PI * I * dot(dim, x, y)) *
-               epsteinZetaInternal(nu, dim, m, x, y, 1, 1, (unsigned int[]){0});
+               epsteinZetaInternal(nu, dim, m, x, y, 1, 0, (unsigned int[]){0});
+    }
+
+    if (variant == 3 && mult_abs(dim, alpha) == 0) {
+        return epsteinZetaInternal(nu, dim, m, x, y, 1, 1, (unsigned int[]){0});
     }
     // 1. Transform: Compute determinant and fourier transformed matrix, scale
     // both of them
