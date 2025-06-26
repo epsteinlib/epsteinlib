@@ -11,8 +11,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <img align="right" src="https://avatars.githubusercontent.com/u/177750891?v=4" width="110">
 
-[![PyPI status](https://img.shields.io/badge/DOI-10.48550%2FarXiv.2412.16317-blue.svg)](https://doi.org/10.48550/arXiv.2412.16317)
-<!-- we want total downloads which is not supported: https://github.com/badges/shields/issues/4319 -->
+[![DOI](https://img.shields.io/badge/DOI-10.48550%2FarXiv.2412.16317-blue.svg)](https://doi.org/10.48550/arXiv.2412.16317)
+<!-- TODO: We want total downloads which is not supported: https://github.com/badges/shields/issues/4319 -->
 <!-- [![PyPI download month](https://img.shields.io/pypi/dm/epsteinlib.svg?label=PyPI%20downloads)](https://pypi.python.org/pypi/epsteinlib/) -->
 <!-- TODO: We want to point to the latest pipeline in main, this is not possible right now -->
 <!-- [![Pipeline status](https://img.shields.io/github/check-runs/epsteinlib/epsteinlib/main)](https://github.com/epsteinlib/epsteinlib/actions/runs/15211465520) -->
