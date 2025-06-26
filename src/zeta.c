@@ -220,6 +220,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                    const double *m, const double *x, const double *y,
                                    double lambda, unsigned int variant,
                                    const unsigned int *alpha) {
+    // Early return for 0th derivative special cases
     if (variant == 2 && mult_abs(dim, alpha) == 0) {
         return cexp(2 * M_PI * I * dot(dim, x, y)) *
                epsteinZetaInternal(nu, dim, m, x, y, 1, 0, (unsigned int[]){0});
@@ -306,7 +307,16 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             vx[i] = x_t1[i] - x_t2[i];
         }
         xfactor = cexp(-2 * M_PI * I * dot(dim, vx, y_t1));
-        if (variant == 1) {
+        if (variant == 0) {
+            // calculate non regularized Epstein zeta function values.
+            nc = crandall_g(dim, dim - nu, y_t2, lambda, zArgBound) *
+                 cexp(-2 * M_PI * I * dot(dim, x_t2, y_t2));
+            s1 = sum_real(nu, dim, lambda, m_real, x_t2, y_t2, cutoffsReal,
+                          zArgBound);
+            s2 = sum_fourier(nu, dim, lambda, m_fourier, x_t2, y_t2, cutoffsFourier,
+                             zArgBound) +
+                 nc;
+        } else if (variant == 1) {
             // calculate regularized Epstein zeta function values.
             nc = crandall_gReg(dim, dim - nu, y_t1, lambda);
             rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
@@ -324,15 +334,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                           zArgBound) *
                  rot * xfactor;
             xfactor = 1;
-        } else if (variant == 2) {
-            // calculate non regularized Epstein zeta function values.
-            nc = crandall_g(dim, dim - nu, y_t2, lambda, zArgBound) *
-                 cexp(-2 * M_PI * I * dot(dim, x_t2, y_t2));
-            s1 = sum_real(nu, dim, lambda, m_real, x_t2, y_t2, cutoffsReal,
-                          zArgBound);
-            s2 = sum_fourier(nu, dim, lambda, m_fourier, x_t2, y_t2, cutoffsFourier,
-                             zArgBound) +
-                 nc;
         }
         res = xfactor * pow(lambda * lambda / M_PI, -nu / 2.) / tgamma(nu / 2.) *
               (s1 + pow(lambda, dim) * s2);
