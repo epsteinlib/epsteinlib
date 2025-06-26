@@ -7,7 +7,8 @@
 
 /**
  * @file zeta.h
- * @brief Calculates the (regularized) Epstein zeta function.
+ * @brief Calculates the (regularized) Epstein zeta function and the deriavtives of
+ * the set zeta function.
  */
 
 #ifndef ZETA_H
@@ -22,10 +23,13 @@
  * @param[in] x: x vector of the Epstein Zeta function.
  * @param[in] y: y vector of the Epstein Zeta function.
  * @param[in] lambda: relative weight of the sums in Crandall's formula.
- * @param[in] regBool: 0 for no regularization, > 0 for the regularization.
+ * @param[in] variant: 0 for no regularization
+ *                    1 for the regularization
+ *                    2 for set Zeta (including derivatives)
+ *                    3 for the regularization (including Derivatives).
  * @return function value of the regularized Epstein zeta.
  */
 double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
                                    const double *x, const double *y, double lambda,
-                                   int regBool, const unsigned int *alpha);
+                                   unsigned int variant, const unsigned int *alpha);
 #endif

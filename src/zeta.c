@@ -209,16 +209,20 @@ double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
  * @param[in] x: x vector of the Epstein zeta function.
  * @param[in] y: y vector of the Epstein zeta function.
  * @param[in] lambda: relative weight of the sums in Crandall's formula.
- * @param[in] reg: 0 for no regularization, > 0 for the regularization.
+ * @param[in] variant: 0 for no regularization
+ *                    1 for the regularization
+ *                    2 for set Zeta (including derivatives)
+ *                    3 for the regularization (including Derivatives).
  * @param[in] alpha: multiindex for the derivatives of the set zeta function. *
  * @return function value of the regularized Epstein zeta.
  */
 double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                    const double *m, const double *x, const double *y,
-                                   double lambda, int reg,
+                                   double lambda, unsigned int variant,
                                    const unsigned int *alpha) {
-    if (mult_abs(1, alpha) > 0) { // Derivatives not implemented yet
-        return NAN;
+    if (variant == 3 && mult_abs(dim, alpha) == 0) {
+        return cexp(2 * M_PI * I * dot(dim, x, y)) *
+               epsteinZetaInternal(nu, dim, m, x, y, 1, 1, (unsigned int[]){0});
     }
     // 1. Transform: Compute determinant and fourier transformed matrix, scale
     // both of them
@@ -283,7 +287,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             res = 0;
         }
     } else if (fabs(nu - dim) < EPS && dot(dim, y_t2, y_t2) < EPS_ZERO_Y &&
-               reg == 0) {
+               variant == 0) {
         res = NAN;
     } else {
         double zArgBound = assignzArgBound(nu);
@@ -297,7 +301,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             vx[i] = x_t1[i] - x_t2[i];
         }
         xfactor = cexp(-2 * M_PI * I * dot(dim, vx, y_t1));
-        if (reg) {
+        if (variant == 1) {
             // calculate regularized Epstein zeta function values.
             nc = crandall_gReg(dim, dim - nu, y_t1, lambda);
             rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
@@ -333,7 +337,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     res *= pow(ms, nu);
     // apply correction to matrix scaling if nu = d + 2k
     double k = fmax(0., nearbyint((nu - (double)dim) / 2));
-    if (reg && (nu == (dim + 2 * k))) {
+    if ((variant == 1) && (nu == (dim + 2 * k))) {
         if (k == 0) {
             res += pow(M_PI, (double)dim / 2) / tgamma((double)dim / 2) *
                    log(ms * ms) / vol;

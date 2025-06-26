@@ -16,11 +16,8 @@
  */
 
 #include <complex.h>
-#include <math.h>
-#include <stdbool.h>
 
 #include "epsteinZeta.h"
-#include "tools.h"
 #include "zeta.h"
 
 /**
@@ -35,7 +32,7 @@
  */
 double complex epsteinZeta(double nu, unsigned int dim, const double *a,
                            const double *x, const double *y) {
-    return epsteinZetaInternal(nu, dim, a, x, y, 1, false, (unsigned int[]){0});
+    return epsteinZetaInternal(nu, dim, a, x, y, 1, 0, (unsigned int[]){0});
 }
 
 /**
@@ -50,7 +47,7 @@ double complex epsteinZeta(double nu, unsigned int dim, const double *a,
  */
 double complex epsteinZetaReg(double nu, unsigned int dim, const double *a,
                               const double *x, const double *y) {
-    return epsteinZetaInternal(nu, dim, a, x, y, 1, true, (unsigned int[]){0});
+    return epsteinZetaInternal(nu, dim, a, x, y, 1, 1, (unsigned int[]){0});
 }
 
 /**
@@ -67,8 +64,6 @@ double complex epsteinZetaReg(double nu, unsigned int dim, const double *a,
 double complex setZetaDer(double nu, unsigned int dim, const double *a,
                           const double *x, const double *y,
                           const unsigned int *alpha) {
-    if (!mult_abs(dim, alpha)) {
-        return cexp(2 * M_PI * I * dot(dim, x, y)) * epsteinZeta(nu, dim, a, x, y);
-    }
-    return epsteinZetaInternal(nu, dim, a, x, y, 1, false, alpha);
+
+    return epsteinZetaInternal(nu, dim, a, x, y, 1, 2, alpha);
 }
