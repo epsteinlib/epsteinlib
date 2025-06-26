@@ -284,7 +284,8 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     }
     // handle special case of non-positive integer values nu.
     double complex res;
-    if (nu < 1 && fabs((nu / 2.) - nearbyint(nu / 2.)) < EPS) {
+    if (nu < 1 && fabs((nu / 2.) - nearbyint(nu / 2.)) < EPS &&
+        (variant == 0 || variant == 1)) {
         if (dot(dim, x_t2, x_t2) == 0 && nu == 0) {
             res = -1 * cexp(-2 * M_PI * I * dot(dim, x_t1, y_t2));
         } else {
@@ -295,9 +296,9 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         res = NAN;
     } else {
         double zArgBound = assignzArgBound(nu);
-        double complex s1;
-        double complex s2;
-        double complex nc;
+        double complex s1 = 0;
+        double complex s2 = 0;
+        double complex nc = 0;
         double complex rot = 1;
         double complex xfactor = 1;
         double vx[dim];
@@ -323,7 +324,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                           zArgBound) *
                  rot * xfactor;
             xfactor = 1;
-        } else {
+        } else if (variant == 2) {
             // calculate non regularized Epstein zeta function values.
             nc = crandall_g(dim, dim - nu, y_t2, lambda, zArgBound) *
                  cexp(-2 * M_PI * I * dot(dim, x_t2, y_t2));
