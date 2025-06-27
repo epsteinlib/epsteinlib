@@ -48,7 +48,7 @@ int test_crandall_g(void) {
 
     int testsPassed = 0;
     int totalTests = 0;
-    int dim = 2;
+    unsigned int dim = 2;
     double prefactor = 1.;
     double tol = pow(10, -13);
 

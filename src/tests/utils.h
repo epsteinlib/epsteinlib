@@ -31,7 +31,7 @@ double errRel(double complex ref, double complex comp);
  * @param[in] vec: vector.
  * @param[in] dim: size of the vector.
  */
-void printVectorUnitTest(const char *name, const double *vec, int dim);
+void printVectorUnitTest(const char *name, const double *vec, unsigned int dim);
 
 /**
  * @brief prints unsigned integer vector to terminal, is used in unitTest.
@@ -39,7 +39,8 @@ void printVectorUnitTest(const char *name, const double *vec, int dim);
  * @param[in] vec: vector.
  * @param[in] dim: size of the vector.
  */
-void printMultiindexUnitTest(const char *name, const unsigned int *vec, int dim);
+void printMultiindexUnitTest(const char *name, const unsigned int *vec,
+                             unsigned int dim);
 
 /**
  * @brief prints square matrix to terminal, is used in unitTest.
@@ -47,5 +48,5 @@ void printMultiindexUnitTest(const char *name, const unsigned int *vec, int dim)
  * @param[in] mat: matrix.
  * @param[in] dim: size of the matrix.
  */
-void printMatrixUnitTest(const char *name, const double *mat, int dim);
+void printMatrixUnitTest(const char *name, const double *mat, unsigned int dim);
 #endif

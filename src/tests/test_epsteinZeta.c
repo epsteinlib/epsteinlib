@@ -63,7 +63,7 @@ int test_epsteinZeta_epsteinZetaReg() {
         return fprintf(stderr, "Error opening file: %s\n", path);
     }
 
-    int dim = 2;
+    unsigned int dim = 2;
     double *a = malloc((int)(dim * dim) * sizeof(double)); // NOLINT
     double *nu = malloc(2 * sizeof(double));
     double *x = malloc(dim * sizeof(double));
