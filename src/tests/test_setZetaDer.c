@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-#include "../tools.h"
 #include "epsteinZeta.h"
 #include "utils.h"
 #include <complex.h>
@@ -68,10 +67,9 @@ int test_setZetaDer_taylor(void) {
         }
 
         // Iterate over every multi-index alpha so that every alpha[] < order
-        while (1) {
+        while (true) {
 
-            valTaylor += mult_pow(dim, alpha, zDiff, 1.) /
-                         (double)mult_fac(dim, alpha) *
+            valTaylor += mult_pow(dim, alpha, zDiff) / (double)mult_fac(dim, alpha) *
                          setZetaDer(nu, dim, m, x, y0, alpha);
 
             done = true;

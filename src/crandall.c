@@ -161,14 +161,23 @@ double polynomial_p(unsigned int dim, const double *y, const unsigned int *alpha
     unsigned int ai = 0;
     unsigned int bi = 0;
     double yi = 0;
+    unsigned int factFrac;
+    unsigned int aMinusb = 0;
     for (int i = 0; i < dim; i++) {
         ai = alpha[i];
         bi = beta[i];
         yi = y[i];
-        res *= pow(-M_PI, ai - bi) * (double)binom(ai, bi) *
-               (double)factorial_fraction(ai - bi, ai - (2 * bi)) *
-               pow(2 * yi, ai - (2 * bi));
+        aMinusb += ai - bi;
+        factFrac =
+            1; // Calculate the factorial fraction (alpha - beta)!/(alpha - 2beta)!
+        for (unsigned int j = ai - (2 * bi) + 1; j <= ai - bi; j++) {
+            factFrac *= j;
+        }
+        res *= (double)binom(ai, bi) * (double)factFrac *
+               int_pow(2 * yi, ai - (2 * bi));
     }
+
+    res *= int_pow(-M_PI, aMinusb);
 
     return res;
 }

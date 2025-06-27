@@ -184,25 +184,6 @@ unsigned int mult_abs(unsigned int dim, const unsigned int *alpha) {
 }
 
 /**
- * @brief Compute a vector to the power of a multi-index.
- * @param[in] dim: dimension of alpha end vec.
- * @param[in] alpha: multi-index.
- * @param[in] vec: base vector.
- * @param[in] prefactor: prefactor of the vector.
- * @return (prefactor * vec) ** alpha.
- */
-double complex mult_pow(unsigned int dim, const unsigned int *alpha,
-                        const double *vec, double complex prefactor) {
-    double res = 1;
-    for (int i = 0; i < dim; i++) {
-        for (int j = 0; j < alpha[i]; j++) {
-            res *= prefactor * vec[i];
-        }
-    }
-    return res;
-}
-
-/**
  * @brief Compute the binomial coefficient bionm(n,k).
  * @param[in] n: non-negative integer greater or equal k.
  * @param[in] k: non-negative integer smaller or equal n.
@@ -223,16 +204,24 @@ unsigned long long binom(unsigned int n, unsigned int k) {
 }
 
 /**
- * @brief Compute the fraction n!/k! for n >= k.
- * @param[in] n: non-negative integer greater or equal k.
- * @param[in] k: non-negative integer smaller or equal n.
- * @return n!/k!.
+ * @brief Compute the integer power of a double by squaring.
+ * @param[in] base: non-negative integer greater or equal k.
+ * @param[in] exp: non-negative integer smaller or equal n.
+ * @return base ** exp.
  */
-unsigned long long factorial_fraction(unsigned int n, unsigned int k) {
-    unsigned long long res = 1;
-    for (unsigned int i = k + 1; i <= n; i++) {
-        res *= i;
+double complex int_pow(double complex base, unsigned int exp) {
+    double res = 1;
+    while (true) {
+        if (exp & 1) {
+            res *= base;
+        }
+        exp >>= 1;
+        if (!exp) {
+            break;
+        }
+        base *= base;
     }
+
     return res;
 }
 
