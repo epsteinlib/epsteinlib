@@ -477,7 +477,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                               zArgBound, alpha) *
                  rot * xfactor;
             xfactor = 1;
-            resDelme = nc;
+            resDelme = nc + s2;
         }
         res = xfactor * pow(lambda * lambda / M_PI, -nu / 2.) / tgamma(nu / 2.) *
               (s1 + pow(lambda, dim) * s2);
