@@ -13,6 +13,7 @@
 #include <complex.h>
 #include <errno.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -123,8 +124,112 @@ int test_crandall_g_der(void) {
     return (testsPassed == totalTests) ? 0 : 1;
 }
 
+/*!
+ * @brief Benchmarks 2D upper Crandall function by computing its taylor series.
+ *
+ * @return 0 if all tests pass, 1 if any test fails.
+ */
+int test_crandall_g_der_taylor(void) {
+    printf("%s ... ", __func__);
+    double errorAbs;
+    double errorRel;
+    double errorMaxAbsRel;
+    double zArgBound;
+    double complex valRef;
+    double complex valTaylor;
+
+    double tol = pow(10, -14);
+    unsigned int dim = 2;
+    unsigned int order = 12;
+    double zDiff[] = {0.005, 0.01};
+
+    double nu;
+    double *z = malloc(dim * sizeof(double));
+    double *zPlus = malloc(dim * sizeof(double));
+
+    int testsPassed = 0;
+    int totalTests = 0;
+
+    bool done;
+    unsigned int *alpha = malloc(dim * sizeof(unsigned int));
+
+    for (int i = 0; i < 100; i++) {
+
+        z[0] = (double)i / 110. + 0.1;
+        z[1] = (double)i / 210.;
+        nu = -0.500000001 + i / 9.;
+
+        for (int i = 0; i < dim; i++) {
+            zPlus[i] = z[i] + zDiff[i];
+        }
+
+        zArgBound = assignzArgBound(nu);
+
+        valRef = crandall_g(dim, nu, zPlus, 1, zArgBound);
+
+        // build taylor series around z
+        valTaylor = 0;
+
+        // Initialize multi-index
+        for (int i = 0; i < dim; i++) {
+            alpha[i] = 0;
+        }
+
+        // Iterate over every multi-index alpha so that every alpha[] < order
+        while (1) {
+
+            zArgBound = assignzArgBound(nu);
+
+            valTaylor += mult_pow(dim, alpha, zDiff) / (double)mult_fac(dim, alpha) *
+                         crandall_g_der(dim, nu, z, 1., zArgBound, alpha);
+
+            done = 1;
+            for (unsigned int idx = 0; idx < dim; idx++) {
+                if (alpha[idx] + 1 <= order) {
+                    alpha[idx]++;
+                    done = 0;
+                    break;
+                }
+                alpha[idx] = 0;
+            }
+            if (done) {
+                break;
+            }
+        }
+
+        errorAbs = errAbs(valRef, valTaylor);
+        errorRel = errRel(valRef, valTaylor);
+        errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+
+        totalTests++;
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
+            printf("\nWarning! ");
+            printf("crandall_g: ");
+            printf(" %0*.16lf %+.16lf I (as a taylor series) \n\t\t!= "
+                   "%.16lf "
+                   "%+.16lf I (reference implementation)\n",
+                   4, creal(valTaylor), cimag(valTaylor), creal(valRef),
+                   cimag(valRef));
+            printf("Min(Emax, Erel):      %E > %E  (tolerance)\n", errorMaxAbsRel,
+                   tol);
+            printf("\n");
+            printf("nu:\t\t %.16lf\n", nu);
+            printVectorUnitTest("z0:\t\t", z, dim);
+            printVectorUnitTest("zPlus:\t\t", zPlus, dim);
+            printVectorUnitTest("zDiff:\t\t", zDiff, dim);
+            printf("\n");
+        }
+    }
+
+    printf("%d out of %d tests passed.\n", testsPassed, totalTests);
+
+    return totalTests - testsPassed;
+}
+
 int main(void) {
-    printf("hi \n");
-    int result = test_crandall_g_der();
-    return result;
+    bool result1 = test_crandall_g_der();
+    bool result2 = test_crandall_g_der_taylor();
+    return result1 + result2;
 }
