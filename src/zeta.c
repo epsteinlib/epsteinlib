@@ -134,10 +134,7 @@ double complex sum_real_der(double nu, unsigned int dim, double lambda,
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] - x[i];
         }
-        double mon = 1;
-        for (int i = 0; i < dim; i++) {
-            mon *= pow(-2 * M_PI * I * lv[i], alpha[i]);
-        }
+        double complex mon = mult_pow(dim, alpha, lv, -2 * M_PI * I);
         // summing using Kahan's method
         auxy =
             rot * mon * crandall_g_der(dim, nu, lv, 1. / lambda, zArgBound, alpha) -
@@ -470,12 +467,12 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             // calculate non set zeta  derivative function values.
             nc = crandall_g_der(dim, dim - nu, y_t1, lambda, zArgBound, alpha);
             rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
-            s1 = sum_real_der(nu, dim, lambda, m_real, x_t2, y_t2, cutoffsReal,
-                              zArgBound, alpha) *
-                 rot * xfactor;
             s2 = sum_fourier_der(nu, dim, lambda, m_fourier, x_t1, y_t2,
                                  cutoffsFourier, zArgBound, alpha);
             s2 = pow(lambda, mult_abs(dim, alpha)) * (s2 * rot + nc);
+            s1 = sum_real_der(nu, dim, lambda, m_real, x_t2, y_t2, cutoffsReal,
+                              zArgBound, alpha) *
+                 rot * xfactor;
             xfactor = 1;
         }
         res = xfactor * pow(lambda * lambda / M_PI, -nu / 2.) / tgamma(nu / 2.) *
