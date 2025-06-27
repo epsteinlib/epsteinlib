@@ -39,8 +39,8 @@ int test_setZetaDer_taylor(void) {
     double nu = 0.5;
     double m[] = {1., 0., 0., 1.};
     double x[] = {0., 0.};
-    double y0[] = {0., 0.1};
-    double yDiff[] = {0., 0.01};
+    double y0[] = {0.1, 0.2};
+    double yDiff[] = {0.005, 0.01};
     unsigned int alpha0[] = {0, 0};
     double *yPlus = malloc(dim * sizeof(double));
 

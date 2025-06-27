@@ -131,10 +131,11 @@ double complex sum_real_der(double nu, unsigned int dim, double lambda,
         }
         matrix_intVector(dim, m, zv, lv);
         double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
+        double complex mon = 1;
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] - x[i];
+            mon *= int_pow(-2 * M_PI * I * lv[i], alpha[i]);
         }
-        double complex mon = mult_pow(dim, alpha, lv, -2 * M_PI * I);
         // summing using Kahan's method
         auxy =
             rot * mon * crandall_g_der(dim, nu, lv, 1. / lambda, zArgBound, alpha) -
@@ -350,10 +351,12 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                    double lambda, unsigned int variant,
                                    const unsigned int *alpha) {
     // Early return for 0th derivative special cases
-    if (variant == 2 && mult_abs(dim, alpha) == 0) {
-        return cexp(2 * M_PI * I * dot(dim, x, y)) *
-               epsteinZetaInternal(nu, dim, m, x, y, 1, 0, (unsigned int[]){0});
-    }
+    double complex resDelme = 0;
+    //    if (variant == 2 && mult_abs(dim, alpha) == 0) {
+    //        return cexp(2 * M_PI * I * dot(dim, x, y)) *
+    //               epsteinZetaInternal(nu, dim, m, x, y, 1, 0, (unsigned
+    //               int[]){0});
+    //    }
 
     if (variant == 3 && mult_abs(dim, alpha) == 0) {
         return epsteinZetaInternal(nu, dim, m, x, y, 1, 1, (unsigned int[]){0});
@@ -474,6 +477,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                               zArgBound, alpha) *
                  rot * xfactor;
             xfactor = 1;
+            resDelme = nc;
         }
         res = xfactor * pow(lambda * lambda / M_PI, -nu / 2.) / tgamma(nu / 2.) *
               (s1 + pow(lambda, dim) * s2);
@@ -497,6 +501,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                    pow(ySquared, k) * log(ms * ms) / vol;
         }
     }
-    return res;
+    return resDelme + (0 * res);
 }
 #undef G_BOUND
