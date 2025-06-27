@@ -12,7 +12,9 @@
 
 #ifndef EPSTEIN_TOOLS
 #define EPSTEIN_TOOLS
+#include <complex.h>
 #include <stdbool.h>
+
 double dot(unsigned int dim, const double *v1, const double *v2);
 void matrix_intVector(unsigned int dim, const double *m, const int *v, double *res);
 void transpose(unsigned int dim, double *m);
@@ -21,6 +23,8 @@ bool equalsZero(unsigned int dim, const double *v);
 void invert(unsigned int dim, double *m, int *p, double *r);
 double inf_norm(unsigned int dim, const double *m);
 unsigned int mult_abs(unsigned int dim, const unsigned int *alpha);
+double complex mult_pow(unsigned int dim, const unsigned int *alpha,
+                        const double *vec, double complex prefactor);
 unsigned long long binom(unsigned int n, unsigned int k);
 unsigned long long factorial_fraction(unsigned int n, unsigned int k);
 #endif

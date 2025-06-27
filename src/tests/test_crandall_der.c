@@ -9,6 +9,7 @@
  */
 
 #include "../crandall.h"
+#include "../tools.h"
 #include "utils.h"
 #include <complex.h>
 #include <errno.h>
@@ -180,7 +181,8 @@ int test_crandall_g_der_taylor(void) {
 
             zArgBound = assignzArgBound(nu);
 
-            valTaylor += mult_pow(dim, alpha, zDiff) / (double)mult_fac(dim, alpha) *
+            valTaylor += mult_pow(dim, alpha, zDiff, 1.) /
+                         (double)mult_fac(dim, alpha) *
                          crandall_g_der(dim, nu, z, 1., zArgBound, alpha);
 
             done = 1;

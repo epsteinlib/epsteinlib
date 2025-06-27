@@ -11,6 +11,7 @@
  * factorials.
  */
 
+#include <complex.h>
 #include <math.h>
 #include <stdbool.h>
 
@@ -169,7 +170,9 @@ double inf_norm(unsigned int dim, const double *m) { // NOLINT
 
 /**
  * @brief Compute absolute value of multi-index, that is the sum of its components.
+ * @param[in] dim: dimension of alpha end vec.
  * @param[in] alpha: multi-index.
+ * @return absolute values of alpha.
  * @return absolute values of alpha.
  */
 unsigned int mult_abs(unsigned int dim, const unsigned int *alpha) {
@@ -178,6 +181,25 @@ unsigned int mult_abs(unsigned int dim, const unsigned int *alpha) {
         n += alpha[i];
     }
     return n;
+}
+
+/**
+ * @brief Compute a vector to the power of a multi-index.
+ * @param[in] dim: dimension of alpha end vec.
+ * @param[in] alpha: multi-index.
+ * @param[in] vec: base vector.
+ * @param[in] prefactor: prefactor of the vector.
+ * @return (prefactor * vec) ** alpha.
+ */
+double complex mult_pow(unsigned int dim, const unsigned int *alpha,
+                        const double *vec, double complex prefactor) {
+    double res = 1;
+    for (int i = 0; i < dim; i++) {
+        for (int j = 0; j < alpha[i]; j++) {
+            res *= prefactor * vec[i];
+        }
+    }
+    return res;
 }
 
 /**

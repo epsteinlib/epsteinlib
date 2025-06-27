@@ -103,21 +103,6 @@ void printMatrixUnitTest(const char *name, const double *mat, unsigned int dim) 
 }
 
 /**
- * @brief Compute a vector to the power of a multi-index.
- * @param[in] alpha: multi-index.
- * @return absolute values of alpha.
- */
-double mult_pow(unsigned int dim, const unsigned int *alpha, const double *y) {
-    double res = 1;
-    for (int i = 0; i < dim; i++) {
-        for (int j = 0; j < alpha[i]; j++) {
-            res *= y[i];
-        }
-    }
-    return res;
-}
-
-/**
  * @brief Compute the factorial of a multi-index.
  * @param[in] alpha: multi-index.
  * @return factorial of alpha.
