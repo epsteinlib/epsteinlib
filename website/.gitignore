@@ -1,7 +1,6 @@
-# SPDX-FileCopyrightText: 2024 Jan Schmitz <schmitz@num.uni-sb.de>
+# SPDX-FileCopyrightText: 2025 Jonathan K. Busse <jonathan@jbusse.de>
 #
 # SPDX-License-Identifier: CC0-1.0
 
+# Hugo ephemeral files:
 .hugo_build.lock
-public
-html
