@@ -24,7 +24,7 @@
  * @return 0 if all tests pass, 1 if any test fails.
  */
 int test_crandall_g(void) {
-    printf("%s ... \n", __func__);
+    printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/crandall_g_Ref.csv", // NOLINT
                           BASE_PATH);
@@ -56,7 +56,8 @@ int test_crandall_g(void) {
     double *z = malloc(2 * sizeof(double));
     double *refRead = malloc(2 * sizeof(double));
 
-    printf("\tProcessing file: %s ... ", path);
+    printf("\n\t ... ");
+    printf("processing file: %s ", path);
     while (fgets(line, sizeof(line), data) != NULL) {
         scanResult = sscanf(line, "%lf,%lf,%lf,%lf,%lf", // NOLINT
                             nuRef, z, z + 1, refRead, refRead + 1);
@@ -79,11 +80,9 @@ int test_crandall_g(void) {
 
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
-        totalTests++;
-        if (errorMaxAbsRel < tol) {
-            testsPassed++;
-        } else {
-            printf("\nWarning! ");
+        if (errorMaxAbsRel > tol) {
+            printf("\n");
+            printf("Warning! ");
             printf("crandall_g: ");
             printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
                    "%.16lf "
@@ -94,11 +93,11 @@ int test_crandall_g(void) {
             printf("\n");
             printf("nu:\t\t %.16lf\n", nu);
             printVectorUnitTest("z:\t\t", z, dim);
-            printf("\n");
+        } else {
+            testsPassed++;
         }
+        totalTests++;
     }
-    printf("%d out of %d tests passed.\n", testsPassed, totalTests);
-
     free(nuRef);
     free(z);
     free(refRead);
@@ -106,7 +105,11 @@ int test_crandall_g(void) {
     if (fclose(data) != 0) {
         return fprintf(stderr, "Error closing file: %d\n", errno);
     }
-    return (testsPassed == totalTests) ? 0 : 1;
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed.\n", testsPassed, totalTests);
+
+    return totalTests - testsPassed;
 }
 
 int main(void) {

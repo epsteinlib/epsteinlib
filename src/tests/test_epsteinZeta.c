@@ -4,11 +4,11 @@
 
 #include "../tools.h"
 #include "epsteinZeta.h"
+#include "stdbool.h"
 #include "utils.h"
 #include <complex.h>
 #include <errno.h>
 #include <math.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -48,10 +48,10 @@ void freeTestResources(double *a, double *nu, double *x, double *y,
  * their outputs with reference values read from data files. It performs multiple
  * test cases for each function and reports the number of passed tests.
  *
- * @return 0 if all tests pass, 1 if any test fails.
+ * @return number of failed tests.
  */
 int test_epsteinZeta_epsteinZetaReg() {
-    printf("%s ... \n", __func__);
+    printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/epsteinZeta_Ref.csv", // NOLINT
                           BASE_PATH);
@@ -80,7 +80,9 @@ int test_epsteinZeta_epsteinZetaReg() {
     int totalTests = 0;
     int testsPassedOverall = 0;
     int totalTestsOverall = 0;
-    printf("\tProcessing file: %s ... ", path);
+
+    printf("\n\t ... ");
+    printf("processing file: %s ", path);
 
     int scanResult;
     char line[256];
@@ -103,11 +105,9 @@ int test_epsteinZeta_epsteinZetaReg() {
         errorRel = errRel(zetaC, zetaM);
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
-        totalTests++;
-        if (errorMaxAbsRel < tol) {
-            testsPassed++;
-        } else {
-            printf("\nWarning! ");
+        if (errorMaxAbsRel > tol) {
+            printf("\n");
+            printf("Warning! ");
             printf("zeta:   ");
             printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
                    "%.16lf "
@@ -120,10 +120,14 @@ int test_epsteinZeta_epsteinZetaReg() {
             printf("nu:\t\t %.16lf + %.16lf I\n", nu[0], nu[1]);
             printVectorUnitTest("x:\t\t", x, dim);
             printVectorUnitTest("y:\t\t", y, dim);
-            printf("\n");
+        } else {
+            testsPassed++;
         }
+        totalTests++;
     }
-    printf("%d out of %d tests passed.\n", testsPassed, totalTests);
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
+           tol);
 
     testsPassedOverall += testsPassed;
     totalTestsOverall += totalTests;
@@ -159,7 +163,9 @@ int test_epsteinZeta_epsteinZetaReg() {
         return fprintf(stderr, "Error opening file: %s\n", path);
     }
 
-    printf("\tProcessing file: %s ... ", path);
+    printf("\n\t ... ");
+    printf("processing file: %s ", path);
+
     while (fgets(line, sizeof(line), zetaRegRefData) != NULL) {
         scanResult =
             sscanf(line, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf", // NOLINT
@@ -179,11 +185,9 @@ int test_epsteinZeta_epsteinZetaReg() {
         errorRel = errRel(zetaC, zetaM);
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
-        totalTests++;
-        if (errorMaxAbsRel < tol) {
-            testsPassed++;
-        } else {
-            printf("\nWarning! ");
+        if (errorMaxAbsRel > tol) {
+            printf("\n");
+            printf("Warning! ");
             printf("zeta reg:");
             printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
                    "%.16lf "
@@ -196,8 +200,10 @@ int test_epsteinZeta_epsteinZetaReg() {
             printf("nu:\t\t %.16lf + %.16lf I\n", nu[0], nu[1]);
             printVectorUnitTest("x:\t\t", x, dim);
             printVectorUnitTest("y:\t\t", y, dim);
-            printf("\n");
+        } else {
+            testsPassed++;
         }
+        totalTests++;
     }
 
     if (fclose(zetaRegRefData) != 0) {
@@ -207,7 +213,9 @@ int test_epsteinZeta_epsteinZetaReg() {
 
     freeTestResources(a, nu, x, y, zetaRef);
 
-    printf("%d out of %d tests passed.\n", testsPassed, totalTests);
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.\n", testsPassed, totalTests,
+           tol);
 
     testsPassedOverall += testsPassed;
     totalTestsOverall += totalTests;
@@ -256,7 +264,8 @@ double sHat(double nu, unsigned int dim, double *y) {
 void reportEpsteinZetaError(double complex valZeta, double complex valZetaReg,
                             double errorMaxAbsRel, double tol, double *m,
                             unsigned int dim, double nu, double *x, double *y) {
-    printf("\nWarning! ");
+    printf("\n");
+    printf("Warning! ");
     printf("epsteinZeta:");
     printf(" %0*.16lf %+.16lf I (epsteinZeta) \n\t\t  != "
            "%.16lf "
@@ -285,7 +294,8 @@ void reportEpsteinZetaError(double complex valZeta, double complex valZetaReg,
 void reportEpsteinZetaCutoffError(const char *testCase, double complex zeta1,
                                   double complex zeta2, double nu, double *y,
                                   unsigned int dim) {
-    printf("\nWarning! ");
+    printf("\n\n");
+    printf("Warning! ");
     printf("%s:\n", testCase);
     printf(" %0*.16lf %+.16lf I \n\t\t  != "
            "%.16lf %+.16lf I\n",
@@ -298,7 +308,6 @@ void reportEpsteinZetaCutoffError(const char *testCase, double complex zeta1,
             printf(", ");
         }
     }
-    printf("\n\n");
     printf("\n");
 }
 
@@ -307,17 +316,20 @@ void reportEpsteinZetaCutoffError(const char *testCase, double complex zeta1,
  * regularized function and the singularity, particularly focusing on cases where nu
  * = dim + 2k, where k is an integer.
  *
- * @return true if any test case fails (difference exceeds tolerance), false if all
+ * @return number of failed tests.
  * tests pass.
  */
 bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
-    printf("%s ... ", __func__);
+    printf("%s ", __func__);
     double errorAbs;
     double errorRel;
     double errorMaxAbsRel;
     double complex valZeta;
     double complex valZetaReg;
     double nu;
+
+    int testsPassed = 0;
+    int totalTests = 0;
 
     double tol = pow(10, -14);
     unsigned int dim = 2;
@@ -339,8 +351,10 @@ bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
         if (errorMaxAbsRel > tol) {
             reportEpsteinZetaError(valZeta, valZetaReg, errorMaxAbsRel, tol, m, dim,
                                    nu, x, y);
-            return true;
+        } else {
+            testsPassed++;
         }
+        totalTests++;
     }
 
     // test identity around zero
@@ -361,11 +375,17 @@ bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
         if (errorMaxAbsRel > tol) {
             reportEpsteinZetaError(valZeta, valZetaReg, errorMaxAbsRel, tol, m, dim,
                                    nu, x, yZetaReg);
-            return true;
+        } else {
+            testsPassed++;
         }
+        totalTests++;
     }
-    printf("passed.\n");
-    return false;
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.\n", testsPassed, totalTests,
+           tol);
+
+    return totalTests - testsPassed;
 }
 
 /*!
@@ -383,10 +403,10 @@ bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
  * - In the case that the result just before the cutoff is different from the
  * reference result: That the result before cutoff is different from after cutoff
  *
- * @return true if the test fails, false if it passes.
+ * @return number of failed tests.
  */
 bool test_epsteinZeta_cutoff() {
-    printf("%s ... ", __func__);
+    printf("%s ", __func__);
     double nu;
     unsigned int dim = 3;
     double m[] = {1, 0, 0, 0, 1, 0, 0, 0, 1}; // Identity matrix 3x3
@@ -395,6 +415,9 @@ bool test_epsteinZeta_cutoff() {
     double y_before[] = {0, 0, 1e-31};
     double y_after[] = {0, 0, 1e-33};
     double y_zero[] = {0, 0, 0};
+
+    int testsPassed = 0;
+    int totalTests = 0;
 
     double tol = 1e-15; // Tolerance for comparison
 
@@ -406,36 +429,42 @@ bool test_epsteinZeta_cutoff() {
         double complex zetaAfterCutoff = epsteinZeta(nu, dim, m, x, y_after);
         double complex zetaZero = epsteinZeta(nu, dim, m, x, y_zero);
 
+        totalTests++;
+
         // Check if after cutoff and zero are the same
         if (cabs(zetaAfterCutoff - zetaZero) > tol) {
             reportEpsteinZetaCutoffError(
                 "zetaAfterCutoff and zetaZero are not equal", zetaAfterCutoff,
                 zetaZero, nu, y_after, dim);
-            return true;
-        }
-
-        // Check if before cutoff and after cutoff are different
-        if (cabs(zetaRef - zetaBeforeCutoff) >= tol &&
-            cabs(zetaBeforeCutoff - zetaAfterCutoff) <= tol) {
+        } else if (cabs(zetaRef - zetaBeforeCutoff) >= tol &&
+                   cabs(zetaBeforeCutoff - zetaAfterCutoff) <= tol) {
+            // Check if before cutoff and after cutoff are different
             reportEpsteinZetaCutoffError(
                 "zetaBeforeCutoff and zetaAfterCutoff are not different",
                 zetaBeforeCutoff, zetaAfterCutoff, nu, y_before, dim);
-            return true;
+        } else {
+            testsPassed++;
         }
     }
-    printf("passed.\n");
-    return false;
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.\n", testsPassed, totalTests,
+           tol);
+
+    return totalTests - testsPassed;
 }
 
 /*!
  * @brief Main function to run all Epstein Zeta function tests.
  *
- * @return 0 if all tests pass, non-zero if any test fails.
+ * @return number of failed tests.
  */
 
 int main() {
-    bool failedQ1 = test_epsteinZeta_epsteinZetaReg();
-    bool failedQ2 = test_epsteinZeta_epsteinZetaReg_represent_as_each_other();
-    bool failedQ3 = test_epsteinZeta_cutoff();
+    int failedQ1 = test_epsteinZeta_epsteinZetaReg();
+    printf("\n");
+    int failedQ2 = test_epsteinZeta_epsteinZetaReg_represent_as_each_other();
+    printf("\n");
+    int failedQ3 = test_epsteinZeta_cutoff();
     return failedQ1 + failedQ2 + failedQ3;
 }
