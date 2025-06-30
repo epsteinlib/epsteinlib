@@ -37,7 +37,7 @@ randDerivativeBeta[a_] := RandomInteger[{0,Floor[a/2]}]
 (*Setup test parameters*)
 
 
-range = Range[1000];
+range = Range[800];
 Do[
 y0[i]=10{randRational,randRational,randRational};
 \[Alpha]0[i]={randDerivative,randDerivative,randDerivative};

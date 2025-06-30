@@ -29,10 +29,12 @@
  * @brief Benchmarks 3D polynomial_p function by comparing to high-precision values
  * over a range of random parameters.
  *
- * @return 0 if all tests pass, 1 if any test fails.
+
+ * @return number of failed tests.
  */
 int test_polynomial_p(void) {
-    printf("%s ... \n", __func__);
+    printf("%s ", __func__);
+
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/polynomial_p_Ref.csv", // NOLINT
                           BASE_PATH);
@@ -62,7 +64,9 @@ int test_polynomial_p(void) {
     unsigned int *beta = malloc(dim * sizeof(unsigned int));
     double *refRead = malloc(sizeof(double));
 
-    printf("\tProcessing file: %s ... ", path);
+    printf("\n\t ... ");
+    printf("processing %s ", path);
+
     while (fgets(line, sizeof(line), data) != NULL) {
         // Scan: nu, {z1, z2}, {alpha1, alpha2}, {Re[result], Im[result]}
         scanResult = sscanf(line, "%lf,%lf,%lf,%u,%u,%u,%u,%u,%u,%lf", // NOLINT
@@ -83,11 +87,9 @@ int test_polynomial_p(void) {
 
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
-        totalTests++;
-        if (errorMaxAbsRel < tol) {
-            testsPassed++;
-        } else {
-            printf("\nWarning! ");
+        if (errorMaxAbsRel > tol) {
+            printf("\n\n");
+            printf("Warning! ");
             printf("polynomial_p");
             printf(" %0*.16lf (this implementation) \n\t\t!= "
                    "%.16lf (reference implementation)\n",
@@ -98,10 +100,11 @@ int test_polynomial_p(void) {
             printVectorUnitTest("y:\t\t", y, dim);
             printMultiindexUnitTest("alpha:\t\t", alpha, dim);
             printMultiindexUnitTest("beta:\t\t", beta, dim);
-            printf("\n");
+        } else {
+            testsPassed++;
         }
+        totalTests++;
     }
-    printf("%d out of %d tests passed.\n", testsPassed, totalTests);
 
     free(y);
     free(alpha);
@@ -111,16 +114,21 @@ int test_polynomial_p(void) {
     if (fclose(data) != 0) {
         return fprintf(stderr, "Error closing file: %d\n", errno);
     }
-    return (testsPassed == totalTests) ? 0 : 1;
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.\n", testsPassed, totalTests,
+           tol);
+
+    return totalTests - testsPassed;
 }
 
 /*!
  * @brief Benchmarks 2D upper Crandall function by computing its taylor series.
  *
- * @return 0 if all tests pass, 1 if any test fails.
+ * @return number of failed tests.
  */
 int test_crandall_g_der_taylor(void) {
-    printf("%s ... ", __func__);
+    printf("%s ", __func__);
     double errorAbs;
     double errorRel;
     double errorMaxAbsRel;
@@ -191,11 +199,9 @@ int test_crandall_g_der_taylor(void) {
         errorRel = errRel(valRef, valTaylor);
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
-        totalTests++;
-        if (errorMaxAbsRel < tol) {
-            testsPassed++;
-        } else {
-            printf("\nWarning! ");
+        if (errorMaxAbsRel > tol) {
+            printf("\n\n");
+            printf("Warning! ");
             printf("crandall_g: ");
             printf(" %0*.16lf %+.16lf I (as a taylor series) \n\t\t!= "
                    "%.16lf "
@@ -209,11 +215,15 @@ int test_crandall_g_der_taylor(void) {
             printVectorUnitTest("z0:\t\t", z, dim);
             printVectorUnitTest("zPlus:\t\t", zPlus, dim);
             printVectorUnitTest("zDiff:\t\t", zDiff, dim);
-            printf("\n");
+        } else {
+            testsPassed++;
         }
+        totalTests++;
     }
 
-    printf("%d out of %d tests passed.\n", testsPassed, totalTests);
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.\n", testsPassed, totalTests,
+           tol);
 
     return totalTests - testsPassed;
 }
@@ -222,10 +232,10 @@ int test_crandall_g_der_taylor(void) {
  * @brief Benchmarks 3D upper Crandall function by comparing to high-precision values
  * over a range of random parameters.
  *
- * @return 0 if all tests pass, 1 if any test fails.
- */
+ * @return number of failed tests.
+ * */
 int test_crandall_g_der(void) {
-    printf("%s ... \n", __func__);
+    printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/crandall_g_der_Ref.csv", // NOLINT
                           BASE_PATH);
@@ -258,7 +268,8 @@ int test_crandall_g_der(void) {
     unsigned int *alpha = malloc(dim * sizeof(unsigned int));
     double *refRead = malloc(dim * sizeof(double));
 
-    printf("\tProcessing file: %s ... ", path);
+    printf("\n\t ... ");
+    printf("processing %s ", path);
     while (fgets(line, sizeof(line), data) != NULL) {
         // Scan: nu, {z1, z2}, {alpha1, alpha2}, {Re[result], Im[result]}
         scanResult = sscanf(line, "%lf,%lf,%lf,%lf,%u,%u,%u,%lf,%lf", // NOLINT
@@ -274,8 +285,6 @@ int test_crandall_g_der(void) {
         nu = nuRef[0];
 
         zArgBound = assignzArgBound(nu);
-        // printf("alpha: (%d, %d)",alpha[0],alpha[1]);
-        // printf("alpha/2: (%d, %d)", alpha[0]/2, alpha[1]/2);
 
         num = crandall_g_der(dim, nu, z, prefactor, zArgBound, alpha);
         ref = refRead[0] + refRead[1] * I;
@@ -285,11 +294,9 @@ int test_crandall_g_der(void) {
 
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
-        totalTests++;
-        if (errorMaxAbsRel < tol) {
-            testsPassed++;
-        } else {
-            printf("\nWarning! ");
+        if (errorMaxAbsRel > tol) {
+            printf("\n\n");
+            printf("Warning! ");
             printf("crandall_g_der: ");
             printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
                    "%.16lf "
@@ -302,9 +309,11 @@ int test_crandall_g_der(void) {
             printVectorUnitTest("z:\t\t", z, dim);
             printMultiindexUnitTest("alpha:\t\t", alpha, dim);
             printf("\n");
+        } else {
+            testsPassed++;
         }
+        totalTests++;
     }
-    printf("%d out of %d tests passed.\n", testsPassed, totalTests);
 
     free(nuRef);
     free(z);
@@ -314,12 +323,19 @@ int test_crandall_g_der(void) {
     if (fclose(data) != 0) {
         return fprintf(stderr, "Error closing file: %d\n", errno);
     }
-    return (testsPassed == totalTests) ? 0 : 1;
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.\n", testsPassed, totalTests,
+           tol);
+
+    return totalTests - testsPassed;
 }
 
 int main(void) {
-    bool result1 = test_polynomial_p();
-    bool result2 = test_crandall_g_der();
-    bool result3 = test_crandall_g_der_taylor();
+    int result1 = test_polynomial_p();
+    printf("\n");
+    int result2 = test_crandall_g_der();
+    printf("\n");
+    int result3 = test_crandall_g_der_taylor();
     return result1 + result2 + result3;
 }

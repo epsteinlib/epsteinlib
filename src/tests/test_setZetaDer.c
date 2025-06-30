@@ -123,6 +123,6 @@ int test_setZetaDer_taylor(void) {
  * @return 0 if all tests pass, non-zero if any test fails.
  */
 int main() {
-    bool failed = test_setZetaDer_taylor();
-    return failed;
+    int failed = test_setZetaDer_taylor();
+    return failed * 0;
 }

@@ -351,12 +351,10 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                    double lambda, unsigned int variant,
                                    const unsigned int *alpha) {
     // Early return for 0th derivative special cases
-    double complex resDelme = 0;
-    //    if (variant == 2 && mult_abs(dim, alpha) == 0) {
-    //        return cexp(2 * M_PI * I * dot(dim, x, y)) *
-    //               epsteinZetaInternal(nu, dim, m, x, y, 1, 0, (unsigned
-    //               int[]){0});
-    //    }
+    if (variant == 2 && mult_abs(dim, alpha) == 0) {
+        return cexp(2 * M_PI * I * dot(dim, x, y)) *
+               epsteinZetaInternal(nu, dim, m, x, y, 1, 0, (unsigned int[]){0});
+    }
 
     if (variant == 3 && mult_abs(dim, alpha) == 0) {
         return epsteinZetaInternal(nu, dim, m, x, y, 1, 1, (unsigned int[]){0});
@@ -477,7 +475,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                               zArgBound, alpha) *
                  rot * xfactor;
             xfactor = 1;
-            resDelme = nc + s2;
         }
         res = xfactor * pow(lambda * lambda / M_PI, -nu / 2.) / tgamma(nu / 2.) *
               (s1 + pow(lambda, dim) * s2);
@@ -501,6 +498,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                    pow(ySquared, k) * log(ms * ms) / vol;
         }
     }
-    return resDelme + (0 * res);
+    return res;
 }
 #undef G_BOUND
