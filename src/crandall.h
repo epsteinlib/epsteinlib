@@ -69,6 +69,19 @@ double assignzArgBound(double nu);
 double complex crandall_g(unsigned int dim, double nu, const double *z,
                           double prefactor, double zArgBound);
 
+/** @brief Calculates the polynomial p_(alpha,beta)(y) = (-pi)^(alpha - beta) *
+ * (alpha choose beta) *
+ * ((alpha - beta)! / (alpha - 2*beta)!) * (2*y)^(alpha - 2*beta)
+ * where 2 beta =< alpha
+ * @param[in] dim: dimension of alpha, beta and y.
+ * @param[in] y: vector of the polynomial.
+ * @parma[in] alpha: upper multi-index.
+ * @parma[in] beta: lower multi-index.
+ * @return p(y).
+ */
+double polynomial_p(unsigned int dim, const double *y, const unsigned int *alpha,
+                    const unsigned int *beta);
+
 /**
  * @brief Calculates the partiall deritavies of the upper Crandall function.
  * @param[in] dim: dimension of the input vectors.

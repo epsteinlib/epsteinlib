@@ -26,15 +26,15 @@
 #endif
 
 /*!
- * @brief Benchmarks 3D upper Crandall function by comparing to high-precision values
+ * @brief Benchmarks 3D polynomial_p function by comparing to high-precision values
  * over a range of random parameters.
  *
  * @return 0 if all tests pass, 1 if any test fails.
  */
-int test_crandall_g_der(void) {
+int test_polynomial_p(void) {
     printf("%s ... \n", __func__);
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/crandall_g_der_Ref.csv", // NOLINT
+    int result = snprintf(path, sizeof(path), "%s/polynomial_p_Ref.csv", // NOLINT
                           BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
@@ -44,48 +44,39 @@ int test_crandall_g_der(void) {
         return fprintf(stderr, "Error opening file: %s\n", path);
     }
 
-    double nu;
-    double zArgBound;
     double errorAbs;
     double errorRel;
     double errorMaxAbsRel;
-    double complex num;
-    double complex ref;
+    double num;
+    double ref;
     int scanResult;
     char line[256];
 
     int testsPassed = 0;
     int totalTests = 0;
     int dim = 3;
-    double prefactor = 1.;
-    double tol = 5 * pow(10, -13);
+    double tol = 5 * pow(10, -15);
 
-    double *nuRef = malloc(sizeof(double));
-    double *z = malloc(2 * sizeof(double));
-    unsigned int *alpha = malloc(2 * sizeof(unsigned int));
-    double *refRead = malloc(2 * sizeof(double));
+    double *y = malloc(dim * sizeof(double));
+    unsigned int *alpha = malloc(dim * sizeof(unsigned int));
+    unsigned int *beta = malloc(dim * sizeof(unsigned int));
+    double *refRead = malloc(sizeof(double));
 
     printf("\tProcessing file: %s ... ", path);
     while (fgets(line, sizeof(line), data) != NULL) {
         // Scan: nu, {z1, z2}, {alpha1, alpha2}, {Re[result], Im[result]}
-        scanResult = sscanf(line, "%lf,%lf,%lf,%lf,%u,%u,%u,%lf,%lf", // NOLINT
-                            nuRef, z, z + 1, z + 2, alpha, alpha + 1, alpha + 2,
-                            refRead, refRead + 1);
+        scanResult = sscanf(line, "%lf,%lf,%lf,%u,%u,%u,%u,%u,%u,%lf", // NOLINT
+                            y, y + 1, y + 2, alpha, alpha + 1, alpha + 2, beta,
+                            beta + 1, beta + 2, refRead);
 
-        if (scanResult != 9) {
+        if (scanResult != 10) {
             printf("Error reading line: %s\n", line);
-            printf("Scanned %d values instead of 7\n", scanResult);
+            printf("Scanned %d values instead of 10\n", scanResult);
             continue;
         }
 
-        nu = nuRef[0];
-
-        zArgBound = assignzArgBound(nu);
-        // printf("alpha: (%d, %d)",alpha[0],alpha[1]);
-        // printf("alpha/2: (%d, %d)", alpha[0]/2, alpha[1]/2);
-
-        num = crandall_g_der(dim, nu, z, prefactor, zArgBound, alpha);
-        ref = refRead[0] + refRead[1] * I;
+        ref = refRead[0];
+        num = polynomial_p(dim, y, alpha, beta);
 
         errorAbs = errAbs(ref, num);
         errorRel = errRel(ref, num);
@@ -97,25 +88,24 @@ int test_crandall_g_der(void) {
             testsPassed++;
         } else {
             printf("\nWarning! ");
-            printf("crandall_g_der: ");
-            printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
-                   "%.16lf "
-                   "%+.16lf I (reference implementation)\n",
-                   4, creal(num), cimag(num), creal(ref), cimag(ref));
+            printf("polynomial_p");
+            printf(" %0*.16lf (this implementation) \n\t\t!= "
+                   "%.16lf (reference implementation)\n",
+                   4, num, ref);
             printf("Min(Emax, Erel):      %E > %E  (tolerance)\n", errorMaxAbsRel,
                    tol);
             printf("\n");
-            printf("nu:\t\t %.16lf\n", nu);
-            printVectorUnitTest("z:\t\t", z, dim);
+            printVectorUnitTest("y:\t\t", y, dim);
             printMultiindexUnitTest("alpha:\t\t", alpha, dim);
+            printMultiindexUnitTest("beta:\t\t", beta, dim);
             printf("\n");
         }
     }
     printf("%d out of %d tests passed.\n", testsPassed, totalTests);
 
-    free(nuRef);
-    free(z);
+    free(y);
     free(alpha);
+    free(beta);
     free(refRead);
 
     if (fclose(data) != 0) {
@@ -228,8 +218,108 @@ int test_crandall_g_der_taylor(void) {
     return totalTests - testsPassed;
 }
 
+/*!
+ * @brief Benchmarks 3D upper Crandall function by comparing to high-precision values
+ * over a range of random parameters.
+ *
+ * @return 0 if all tests pass, 1 if any test fails.
+ */
+int test_crandall_g_der(void) {
+    printf("%s ... \n", __func__);
+    char path[MAX_PATH_LENGTH];
+    int result = snprintf(path, sizeof(path), "%s/crandall_g_der_Ref.csv", // NOLINT
+                          BASE_PATH);
+    if (result < 0 || result >= sizeof(path)) {
+        return fprintf(stderr, "Error creating file path\n");
+    }
+    FILE *data = fopen(path, "r");
+    if (data == NULL) {
+        return fprintf(stderr, "Error opening file: %s\n", path);
+    }
+
+    double nu;
+    double zArgBound;
+    double errorAbs;
+    double errorRel;
+    double errorMaxAbsRel;
+    double complex num;
+    double complex ref;
+    int scanResult;
+    char line[256];
+
+    int testsPassed = 0;
+    int totalTests = 0;
+    int dim = 3;
+    double prefactor = 1.;
+    double tol = 5 * pow(10, -13);
+
+    double *nuRef = malloc(sizeof(double));
+    double *z = malloc(dim * sizeof(double));
+    unsigned int *alpha = malloc(dim * sizeof(unsigned int));
+    double *refRead = malloc(dim * sizeof(double));
+
+    printf("\tProcessing file: %s ... ", path);
+    while (fgets(line, sizeof(line), data) != NULL) {
+        // Scan: nu, {z1, z2}, {alpha1, alpha2}, {Re[result], Im[result]}
+        scanResult = sscanf(line, "%lf,%lf,%lf,%lf,%u,%u,%u,%lf,%lf", // NOLINT
+                            nuRef, z, z + 1, z + 2, alpha, alpha + 1, alpha + 2,
+                            refRead, refRead + 1);
+
+        if (scanResult != 9) {
+            printf("Error reading line: %s\n", line);
+            printf("Scanned %d values instead of 9\n", scanResult);
+            continue;
+        }
+
+        nu = nuRef[0];
+
+        zArgBound = assignzArgBound(nu);
+        // printf("alpha: (%d, %d)",alpha[0],alpha[1]);
+        // printf("alpha/2: (%d, %d)", alpha[0]/2, alpha[1]/2);
+
+        num = crandall_g_der(dim, nu, z, prefactor, zArgBound, alpha);
+        ref = refRead[0] + refRead[1] * I;
+
+        errorAbs = errAbs(ref, num);
+        errorRel = errRel(ref, num);
+
+        errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+
+        totalTests++;
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
+            printf("\nWarning! ");
+            printf("crandall_g_der: ");
+            printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
+                   "%.16lf "
+                   "%+.16lf I (reference implementation)\n",
+                   4, creal(num), cimag(num), creal(ref), cimag(ref));
+            printf("Min(Emax, Erel):      %E > %E  (tolerance)\n", errorMaxAbsRel,
+                   tol);
+            printf("\n");
+            printf("nu:\t\t %.16lf\n", nu);
+            printVectorUnitTest("z:\t\t", z, dim);
+            printMultiindexUnitTest("alpha:\t\t", alpha, dim);
+            printf("\n");
+        }
+    }
+    printf("%d out of %d tests passed.\n", testsPassed, totalTests);
+
+    free(nuRef);
+    free(z);
+    free(alpha);
+    free(refRead);
+
+    if (fclose(data) != 0) {
+        return fprintf(stderr, "Error closing file: %d\n", errno);
+    }
+    return (testsPassed == totalTests) ? 0 : 1;
+}
+
 int main(void) {
-    bool result1 = test_crandall_g_der();
-    bool result2 = test_crandall_g_der_taylor();
-    return result1 + result2;
+    bool result1 = test_polynomial_p();
+    bool result2 = test_crandall_g_der();
+    bool result3 = test_crandall_g_der_taylor();
+    return result1 + result2 + result3;
 }
