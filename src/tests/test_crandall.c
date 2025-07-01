@@ -95,8 +95,8 @@ int test_crandall_g(void) {
                    "%.16lf "
                    "%+.16lf I (reference implementation)\n",
                    4, creal(num), cimag(num), creal(ref), cimag(ref));
-            printf("Min(Emax, Erel):      %.16lf !< %.16lf  (tolerance)\n",
-                   errorMaxAbsRel, tol);
+            printf("Min(Emax, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
+                   tol);
             printf("\n");
             printf("nu:\t\t %.16lf\n", nu);
             printVectorUnitTest("z:\t\t", z, dim);

@@ -120,8 +120,8 @@ int test_epsteinZeta_epsteinZetaReg() {
                    "%.16lf "
                    "%+.16lf I (reference implementation)\n",
                    4, creal(zetaC), cimag(zetaC), creal(zetaM), cimag(zetaM));
-            printf("Min(Emax, Erel):      %.16lf !< %.16lf  (tolerance)\n",
-                   errorMaxAbsRel, tol);
+            printf("Min(Emax, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
+                   tol);
             printf("\n");
             printMatrixUnitTest("a:", a, dim);
             printf("nu:\t\t %.16lf + %.16lf I\n", nu[0], nu[1]);
@@ -200,8 +200,8 @@ int test_epsteinZeta_epsteinZetaReg() {
                    "%.16lf "
                    "%+.16lf I (reference implementation)\n",
                    4, creal(zetaC), cimag(zetaC), creal(zetaM), cimag(zetaM));
-            printf("Min(Emax, Erel):      %.16lf !< %.16lf  (tolerance)\n",
-                   errorMaxAbsRel, tol);
+            printf("Min(Emax, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
+                   tol);
             printf("\n");
             printMatrixUnitTest("a:", a, dim);
             printf("nu:\t\t %.16lf + %.16lf I\n", nu[0], nu[1]);
@@ -276,8 +276,7 @@ void reportEpsteinZetaError(double complex valZeta, double complex valZetaReg,
            "%.16lf "
            "%+.16lf I (epsteinZetaReg representation)\n",
            4, creal(valZeta), cimag(valZeta), creal(valZetaReg), cimag(valZetaReg));
-    printf("Min(Emax, Erel):      %.16lf !< %.16lf  (tolerance)\n", errorMaxAbsRel,
-           tol);
+    printf("Min(Emax, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel, tol);
     printf("\n");
     printMatrixUnitTest("m:", m, (int)dim);
     printf("nu:\t\t %.16lf\n", nu);
