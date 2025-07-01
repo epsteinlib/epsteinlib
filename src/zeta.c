@@ -68,6 +68,7 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
     double complex epsilon = 0.0;
     double complex auxt;
     double complex auxy;
+    double complex rot;
     // First Sum (in real space)
     for (long n = 0; n < totalSummands; n++) {
         for (int k = 0; k < dim; k++) {
@@ -75,7 +76,7 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
                 (((int)(n / totalCutoffs[k])) % (2 * cutoffs[k] + 1)) - cutoffs[k];
         }
         matrix_intVector(dim, m, zv, lv);
-        double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
+        rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] - x[i];
         }
@@ -123,26 +124,34 @@ double complex sum_real_der(double nu, unsigned int dim, double lambda,
     double complex epsilon = 0.0;
     double complex auxt;
     double complex auxy;
+    double complex rot;
+    double complex mon;
     // First Sum (in real space)
+    // printf("total summands: %ld \n",  totalSummands);
     for (long n = 0; n < totalSummands; n++) {
         for (int k = 0; k < dim; k++) {
             zv[k] =
                 (((int)(n / totalCutoffs[k])) % (2 * cutoffs[k] + 1)) - cutoffs[k];
         }
         matrix_intVector(dim, m, zv, lv);
-        double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
-        double complex mon = 1;
+        rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] - x[i];
-            mon *= int_pow(-2 * M_PI * I * lv[i], alpha[i]);
+        }
+        // Calculate (- 2 PI I (z - x)) ** alpha
+        mon = 1.;
+        for (int i = 0; i < dim; i++) {
+            if (alpha[i]) {
+                mon *= int_pow(-2 * M_PI * I * lv[i], alpha[i]);
+            }
         }
         // summing using Kahan's method
-        auxy =
-            rot * mon * crandall_g_der(dim, nu, lv, 1. / lambda, zArgBound, alpha) -
-            epsilon;
+        auxy = rot * mon * crandall_g(dim, nu, lv, 1. / lambda, zArgBound) - epsilon;
         auxt = sum + auxy;
         epsilon = (auxt - sum) - auxy;
         sum = auxt;
+        //        printf("lv: %.16lf, %.16lf", lv[0], lv[1]);
+        //        printf("potato: %.16lf \n", creal(auxy));
     }
     return sum;
 }
@@ -350,11 +359,12 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                    const double *m, const double *x, const double *y,
                                    double lambda, unsigned int variant,
                                    const unsigned int *alpha) {
-    // Early return for 0th derivative special cases
-    if (variant == 2 && mult_abs(dim, alpha) == 0) {
-        return cexp(2 * M_PI * I * dot(dim, x, y)) *
-               epsteinZetaInternal(nu, dim, m, x, y, 1, 0, (unsigned int[]){0});
-    }
+    //    // Early return for 0th derivative special cases
+    //    if (variant == 2 && mult_abs(dim, alpha) == 0) {
+    //        return cexp(2 * M_PI * I * dot(dim, x, y)) *
+    //               epsteinZetaInternal(nu, dim, m, x, y, 1, 0, (unsigned
+    //               int[]){0});
+    //    }
 
     if (variant == 3 && mult_abs(dim, alpha) == 0) {
         return epsteinZetaInternal(nu, dim, m, x, y, 1, 1, (unsigned int[]){0});
@@ -470,7 +480,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
             s2 = sum_fourier_der(nu, dim, lambda, m_fourier, x_t1, y_t2,
                                  cutoffsFourier, zArgBound, alpha);
-            s2 = pow(lambda, mult_abs(dim, alpha)) * (s2 * rot + nc);
+            s2 = int_pow(lambda, mult_abs(dim, alpha)) * (s2 * rot + nc);
             s1 = sum_real_der(nu, dim, lambda, m_real, x_t2, y_t2, cutoffsReal,
                               zArgBound, alpha) *
                  rot * xfactor;

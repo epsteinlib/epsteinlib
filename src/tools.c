@@ -210,7 +210,7 @@ unsigned long long binom(unsigned int n, unsigned int k) {
  * @return base ** exp.
  */
 double complex int_pow(double complex base, unsigned int exp) {
-    double res = 1;
+    double complex res = 1.;
     while (true) {
         if (exp & 1) {
             res *= base;

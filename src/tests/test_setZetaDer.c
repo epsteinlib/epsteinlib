@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
+// SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
@@ -21,7 +21,7 @@
 /*!
  * @brief Benchmarks 2D set zeta derivatives by computing its taylor series.
  *
- * @return 0 if all tests pass, 1 if any test fails.
+ * @return number of failed tests.
  */
 int test_setZetaDer_taylor(void) {
     printf("%s ... ", __func__);
@@ -34,7 +34,6 @@ int test_setZetaDer_taylor(void) {
     double tol = pow(10, -14);
     unsigned int dim = 2;
     unsigned int order = 12;
-    double zDiff[] = {0.005, 0.01};
 
     double nu = 0.5;
     double m[] = {1., 0., 0., 1.};
@@ -50,7 +49,11 @@ int test_setZetaDer_taylor(void) {
     bool done;
     unsigned int *alpha = malloc(dim * sizeof(unsigned int));
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 100; i++) {
+
+        y0[0] = 0.1 + 0.001 * i;
+        y0[1] = 0.2 + 0.0005 * i;
+        nu = 0.5 + 0.333333 * i;
 
         for (int i = 0; i < dim; i++) {
             yPlus[i] = y0[i] + yDiff[i];
@@ -69,7 +72,7 @@ int test_setZetaDer_taylor(void) {
         // Iterate over every multi-index alpha so that every alpha[] < order
         while (true) {
 
-            valTaylor += mult_pow(dim, alpha, zDiff) / (double)mult_fac(dim, alpha) *
+            valTaylor += mult_pow(dim, alpha, yDiff) / (double)mult_fac(dim, alpha) *
                          setZetaDer(nu, dim, m, x, y0, alpha);
 
             done = true;
@@ -90,11 +93,9 @@ int test_setZetaDer_taylor(void) {
         errorRel = errRel(valRef, valTaylor);
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
-        totalTests++;
-        if (errorMaxAbsRel < tol) {
-            testsPassed++;
-        } else {
-            printf("\nWarning! ");
+        if (errorMaxAbsRel > tol) {
+            printf("\n");
+            printf("Warning! ");
             printf("setZetaDer: ");
             printf(" %0*.16lf %+.16lf I (as a taylor series) \n\t\t!= "
                    "%.16lf "
@@ -105,14 +106,19 @@ int test_setZetaDer_taylor(void) {
                    tol);
             printf("\n");
             printf("nu:\t\t %.16lf\n", nu);
+            printVectorUnitTest("x:\t\t", x, dim);
             printVectorUnitTest("y0:\t\t", y0, dim);
             printVectorUnitTest("yPlus:\t\t", yPlus, dim);
             printVectorUnitTest("yDiff:\t\t", yDiff, dim);
-            printf("\n");
+        } else {
+            testsPassed++;
         }
+        totalTests++;
     }
 
-    printf("%d out of %d tests passed.\n", testsPassed, totalTests);
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.\n", testsPassed, totalTests,
+           tol);
 
     return totalTests - testsPassed;
 }
@@ -120,9 +126,9 @@ int test_setZetaDer_taylor(void) {
 /*!
  * @brief Main function to run all set zeta derivatives function tests.
  *
- * @return 0 if all tests pass, non-zero if any test fails.
+ * @return number of failed tests.
  */
 int main() {
     int failed = test_setZetaDer_taylor();
-    return failed * 0;
+    return failed;
 }
