@@ -87,7 +87,7 @@ int test_epsteinZeta_epsteinZetaReg() {
     int totalTestsOverall = 0;
 
     printf("\n\t ... ");
-    printf("processing file: %s ", path);
+    printf("processing %s ", path);
 
     int scanResult;
     char line[256];
