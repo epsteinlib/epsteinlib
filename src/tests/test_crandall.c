@@ -62,7 +62,7 @@ int test_crandall_g(void) {
     double *refRead = malloc(2 * sizeof(double));
 
     printf("\n\t ... ");
-    printf("processing file: %s ", path);
+    printf("processing %s ", path);
     while (fgets(line, sizeof(line), data) != NULL) {
         scanResult = sscanf(line, "%lf,%lf,%lf,%lf,%lf", // NOLINT
                             nuRef, z, z + 1, refRead, refRead + 1);
