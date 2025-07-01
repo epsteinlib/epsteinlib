@@ -127,7 +127,6 @@ double complex sum_real_der(double nu, unsigned int dim, double lambda,
     double complex rot;
     double complex mon;
     // First Sum (in real space)
-    // printf("total summands: %ld \n",  totalSummands);
     for (long n = 0; n < totalSummands; n++) {
         for (int k = 0; k < dim; k++) {
             zv[k] =
@@ -150,8 +149,6 @@ double complex sum_real_der(double nu, unsigned int dim, double lambda,
         auxt = sum + auxy;
         epsilon = (auxt - sum) - auxy;
         sum = auxt;
-        //        printf("lv: %.16lf, %.16lf", lv[0], lv[1]);
-        //        printf("potato: %.16lf \n", creal(auxy));
     }
     return sum;
 }
@@ -363,11 +360,11 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     // Early return for 0th derivative special cases
     if (variant == 2 && !alphaAbs) {
         return cexp(2 * M_PI * I * dot(dim, x, y)) *
-               epsteinZetaInternal(nu, dim, m, x, y, 1, 0, (unsigned int[]){0});
+               epsteinZetaInternal(nu, dim, m, x, y, 1, 0, alpha);
     }
 
     if (variant == 3 && !alphaAbs) {
-        return epsteinZetaInternal(nu, dim, m, x, y, 1, 1, (unsigned int[]){0});
+        return epsteinZetaInternal(nu, dim, m, x, y, 1, 1, alpha);
     }
     // 1. Transform: Compute determinant and fourier transformed matrix, scale
     // both of them
