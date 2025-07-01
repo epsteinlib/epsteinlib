@@ -37,10 +37,10 @@ int test_setZetaDer_taylor(void) {
 
     double nu = 0.5;
     double m[] = {1., 0., 0., 1.};
-    double x[] = {0., 0.};
-    double y0[] = {0.1, 0.2};
     double yDiff[] = {0.005, 0.01};
     unsigned int alpha0[] = {0, 0};
+    double *x = malloc(dim * sizeof(double));
+    double *y0 = malloc(dim * sizeof(double));
     double *yPlus = malloc(dim * sizeof(double));
 
     int testsPassed = 0;
@@ -51,9 +51,13 @@ int test_setZetaDer_taylor(void) {
 
     for (int i = 0; i < 100; i++) {
 
+        nu = 0.5 + 0.333333 * i;
+
+        x[0] = 0.0005 * i;
+        x[1] = -0.02 * i;
+
         y0[0] = 0.1 + 0.001 * i;
         y0[1] = 0.2 + 0.0005 * i;
-        nu = 0.5 + 0.333333 * i;
 
         for (int i = 0; i < dim; i++) {
             yPlus[i] = y0[i] + yDiff[i];
