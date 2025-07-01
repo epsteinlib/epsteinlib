@@ -97,7 +97,9 @@ int test_setZetaDer_taylor(void) {
         errorRel = errRel(valRef, valTaylor);
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
-        if (errorMaxAbsRel > tol) {
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
             printf("\n");
             printf("Warning! ");
             printf("setZetaDer: ");
@@ -106,7 +108,7 @@ int test_setZetaDer_taylor(void) {
                    "%+.16lf I (reference implementation)\n",
                    4, creal(valTaylor), cimag(valTaylor), creal(valRef),
                    cimag(valRef));
-            printf("Min(Emax, Erel):      %E > %E  (tolerance)\n", errorMaxAbsRel,
+            printf("Min(Emax, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
                    tol);
             printf("\n");
             printf("nu:\t\t %.16lf\n", nu);
@@ -114,8 +116,6 @@ int test_setZetaDer_taylor(void) {
             printVectorUnitTest("y0:\t\t", y0, dim);
             printVectorUnitTest("yPlus:\t\t", yPlus, dim);
             printVectorUnitTest("yDiff:\t\t", yDiff, dim);
-        } else {
-            testsPassed++;
         }
         totalTests++;
     }
