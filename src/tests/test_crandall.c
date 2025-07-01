@@ -1,6 +1,11 @@
-// SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan.busse@dlr.de>
+// SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan.busse@dlr.de>
 //
 // SPDX-License-Identifier: AGPL-3.0-only
+
+/**
+ * @file test_crandall.c
+ * @brief Benchmarking of the upper Crandall function.
+ */
 
 #include "../crandall.h"
 #include "utils.h"
@@ -21,7 +26,7 @@
 /*!
  * @brief Test function for crandall_g.
  *
- * @return 0 if all tests pass, 1 if any test fails.
+ * @return number of failed tests.
  */
 int test_crandall_g(void) {
     printf("%s ", __func__);
@@ -80,7 +85,9 @@ int test_crandall_g(void) {
 
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
-        if (errorMaxAbsRel > tol) {
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
             printf("\n");
             printf("Warning! ");
             printf("crandall_g: ");
@@ -88,13 +95,11 @@ int test_crandall_g(void) {
                    "%.16lf "
                    "%+.16lf I (reference implementation)\n",
                    4, creal(num), cimag(num), creal(ref), cimag(ref));
-            printf("Min(Emax, Erel):      %.16lf > %.16lf  (tolerance)\n",
+            printf("Min(Emax, Erel):      %.16lf !< %.16lf  (tolerance)\n",
                    errorMaxAbsRel, tol);
             printf("\n");
             printf("nu:\t\t %.16lf\n", nu);
             printVectorUnitTest("z:\t\t", z, dim);
-        } else {
-            testsPassed++;
         }
         totalTests++;
     }
@@ -112,7 +117,12 @@ int test_crandall_g(void) {
     return totalTests - testsPassed;
 }
 
+/*!
+ * @brief Main function to run all Crandall function tests.
+ *
+ * @return number of failed tests.
+ */
 int main(void) {
-    int result = test_crandall_g();
-    return result;
+    int failed = test_crandall_g();
+    return failed;
 }

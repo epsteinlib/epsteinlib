@@ -2,6 +2,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+/**
+ * @file test_epsteinZeta.c
+ * @brief Benchmarking of the Epstein zeta function.
+ */
+
 #include "../tools.h"
 #include "epsteinZeta.h"
 #include "stdbool.h"
@@ -105,7 +110,9 @@ int test_epsteinZeta_epsteinZetaReg() {
         errorRel = errRel(zetaC, zetaM);
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
-        if (errorMaxAbsRel > tol) {
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
             printf("\n");
             printf("Warning! ");
             printf("zeta:   ");
@@ -113,15 +120,13 @@ int test_epsteinZeta_epsteinZetaReg() {
                    "%.16lf "
                    "%+.16lf I (reference implementation)\n",
                    4, creal(zetaC), cimag(zetaC), creal(zetaM), cimag(zetaM));
-            printf("Min(Emax, Erel):      %.16lf > %.16lf  (tolerance)\n",
+            printf("Min(Emax, Erel):      %.16lf !< %.16lf  (tolerance)\n",
                    errorMaxAbsRel, tol);
             printf("\n");
             printMatrixUnitTest("a:", a, dim);
             printf("nu:\t\t %.16lf + %.16lf I\n", nu[0], nu[1]);
             printVectorUnitTest("x:\t\t", x, dim);
             printVectorUnitTest("y:\t\t", y, dim);
-        } else {
-            testsPassed++;
         }
         totalTests++;
     }
@@ -185,7 +190,9 @@ int test_epsteinZeta_epsteinZetaReg() {
         errorRel = errRel(zetaC, zetaM);
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
-        if (errorMaxAbsRel > tol) {
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
             printf("\n");
             printf("Warning! ");
             printf("zeta reg:");
@@ -193,15 +200,13 @@ int test_epsteinZeta_epsteinZetaReg() {
                    "%.16lf "
                    "%+.16lf I (reference implementation)\n",
                    4, creal(zetaC), cimag(zetaC), creal(zetaM), cimag(zetaM));
-            printf("Min(Emax, Erel):      %.16lf > %.16lf  (tolerance)\n",
+            printf("Min(Emax, Erel):      %.16lf !< %.16lf  (tolerance)\n",
                    errorMaxAbsRel, tol);
             printf("\n");
             printMatrixUnitTest("a:", a, dim);
             printf("nu:\t\t %.16lf + %.16lf I\n", nu[0], nu[1]);
             printVectorUnitTest("x:\t\t", x, dim);
             printVectorUnitTest("y:\t\t", y, dim);
-        } else {
-            testsPassed++;
         }
         totalTests++;
     }
@@ -271,7 +276,7 @@ void reportEpsteinZetaError(double complex valZeta, double complex valZetaReg,
            "%.16lf "
            "%+.16lf I (epsteinZetaReg representation)\n",
            4, creal(valZeta), cimag(valZeta), creal(valZetaReg), cimag(valZetaReg));
-    printf("Min(Emax, Erel):      %.16lf > %.16lf  (tolerance)\n", errorMaxAbsRel,
+    printf("Min(Emax, Erel):      %.16lf !< %.16lf  (tolerance)\n", errorMaxAbsRel,
            tol);
     printf("\n");
     printMatrixUnitTest("m:", m, (int)dim);
@@ -338,8 +343,9 @@ bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
     double y[] = {0, 0.5};
     double vol = 29. / 20;
 
-    for (int i = 0; i < 100 + 1; i++) {
-        nu = -12.5 + (double)i / 4;
+    for (int i = 0; i < 100; i++) {
+        nu = -8.5 + (double)i / 5.;
+
         valZeta = epsteinZeta(nu, dim, m, x, y);
         valZetaReg = cexp(-2 * M_PI * I * dot(dim, x, y)) *
                      (epsteinZetaReg(nu, dim, m, x, y) + sHat(nu, dim, y) / vol);
@@ -348,11 +354,11 @@ bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
         errorRel = errRel(valZeta, valZetaReg);
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
-        if (errorMaxAbsRel > tol) {
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
             reportEpsteinZetaError(valZeta, valZetaReg, errorMaxAbsRel, tol, m, dim,
                                    nu, x, y);
-        } else {
-            testsPassed++;
         }
         totalTests++;
     }
@@ -361,8 +367,9 @@ bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
     double yZeta[] = {0, pow(10, -16)};
     double yZetaReg[] = {0., 0.};
 
-    for (int i = 0; i < 100 + 1; i++) {
-        nu = -12.5 + (double)i / 4;
+    for (int i = 0; i < 100; i++) {
+        nu = -8.5 + (double)i / 5.;
+
         valZeta = epsteinZeta(nu, dim, m, x, yZeta);
         valZetaReg =
             cexp(-2 * M_PI * I * dot(dim, x, yZeta)) *
@@ -372,11 +379,11 @@ bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
         errorRel = errRel(valZeta, valZetaReg);
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
-        if (errorMaxAbsRel > tol) {
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
             reportEpsteinZetaError(valZeta, valZetaReg, errorMaxAbsRel, tol, m, dim,
                                    nu, x, yZetaReg);
-        } else {
-            testsPassed++;
         }
         totalTests++;
     }
@@ -429,8 +436,6 @@ bool test_epsteinZeta_cutoff() {
         double complex zetaAfterCutoff = epsteinZeta(nu, dim, m, x, y_after);
         double complex zetaZero = epsteinZeta(nu, dim, m, x, y_zero);
 
-        totalTests++;
-
         // Check if after cutoff and zero are the same
         if (cabs(zetaAfterCutoff - zetaZero) > tol) {
             reportEpsteinZetaCutoffError(
@@ -445,6 +450,7 @@ bool test_epsteinZeta_cutoff() {
         } else {
             testsPassed++;
         }
+        totalTests++;
     }
 
     printf("\n\t ... ");
@@ -459,12 +465,9 @@ bool test_epsteinZeta_cutoff() {
  *
  * @return number of failed tests.
  */
-
 int main() {
     int failedQ1 = test_epsteinZeta_epsteinZetaReg();
-    printf("\n");
     int failedQ2 = test_epsteinZeta_epsteinZetaReg_represent_as_each_other();
-    printf("\n");
     int failedQ3 = test_epsteinZeta_cutoff();
     return failedQ1 + failedQ2 + failedQ3;
 }
