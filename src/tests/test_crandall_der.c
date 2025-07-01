@@ -87,21 +87,21 @@ int test_polynomial_p(void) {
 
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
-        if (errorMaxAbsRel > tol) {
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
             printf("\n\n");
             printf("Warning! ");
             printf("polynomial_p");
             printf(" %0*.16lf (this implementation) \n\t\t!= "
                    "%.16lf (reference implementation)\n",
                    4, num, ref);
-            printf("Min(Emax, Erel):      %E > %E  (tolerance)\n", errorMaxAbsRel,
+            printf("Min(Emax, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
                    tol);
             printf("\n");
             printVectorUnitTest("y:\t\t", y, dim);
             printMultiindexUnitTest("alpha:\t\t", alpha, dim);
             printMultiindexUnitTest("beta:\t\t", beta, dim);
-        } else {
-            testsPassed++;
         }
         totalTests++;
     }
@@ -199,7 +199,9 @@ int test_crandall_g_der_taylor(void) {
         errorRel = errRel(valRef, valTaylor);
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
-        if (errorMaxAbsRel > tol) {
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
             printf("\n\n");
             printf("Warning! ");
             printf("crandall_g: ");
@@ -208,15 +210,13 @@ int test_crandall_g_der_taylor(void) {
                    "%+.16lf I (reference implementation)\n",
                    4, creal(valTaylor), cimag(valTaylor), creal(valRef),
                    cimag(valRef));
-            printf("Min(Emax, Erel):      %E > %E  (tolerance)\n", errorMaxAbsRel,
+            printf("Min(Emax, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
                    tol);
             printf("\n");
             printf("nu:\t\t %.16lf\n", nu);
             printVectorUnitTest("z0:\t\t", z, dim);
             printVectorUnitTest("zPlus:\t\t", zPlus, dim);
             printVectorUnitTest("zDiff:\t\t", zDiff, dim);
-        } else {
-            testsPassed++;
         }
         totalTests++;
     }
@@ -294,7 +294,9 @@ int test_crandall_g_der(void) {
 
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
-        if (errorMaxAbsRel > tol) {
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
             printf("\n\n");
             printf("Warning! ");
             printf("crandall_g_der: ");
@@ -302,15 +304,13 @@ int test_crandall_g_der(void) {
                    "%.16lf "
                    "%+.16lf I (reference implementation)\n",
                    4, creal(num), cimag(num), creal(ref), cimag(ref));
-            printf("Min(Emax, Erel):      %E > %E  (tolerance)\n", errorMaxAbsRel,
+            printf("Min(Emax, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
                    tol);
             printf("\n");
             printf("nu:\t\t %.16lf\n", nu);
             printVectorUnitTest("z:\t\t", z, dim);
             printMultiindexUnitTest("alpha:\t\t", alpha, dim);
             printf("\n");
-        } else {
-            testsPassed++;
         }
         totalTests++;
     }
@@ -333,9 +333,7 @@ int test_crandall_g_der(void) {
 
 int main(void) {
     int result1 = test_polynomial_p();
-    printf("\n");
     int result2 = test_crandall_g_der();
-    printf("\n");
     int result3 = test_crandall_g_der_taylor();
     return result1 + result2 + result3;
 }
