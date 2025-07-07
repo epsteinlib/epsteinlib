@@ -13,7 +13,7 @@
 (*Setup reference functions*)
 
 
-p[y_,\[Alpha]_,\[Beta]_]:=Apply[Times,(-\[Pi])^(\[Alpha]-\[Beta])Apply[Binomial,Transpose[{\[Alpha],\[Beta]}],{1}](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2y)^(\[Alpha]-2\[Beta])]
+p[y_,\[Alpha]_,\[Beta]_]:=Apply[Times,(-\[Pi])^(\[Alpha]-\[Beta])Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2y)^(\[Alpha]-2\[Beta])]
 
 
 g[\[Nu]_,z_]=Piecewise[{{-2/\[Nu],PossibleZeroQ[Norm[z]]},{ExpIntegralE[1-\[Nu]/2,Pi z . z],Not[PossibleZeroQ[Norm[z]]]}}];
