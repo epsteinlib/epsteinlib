@@ -38,7 +38,7 @@ gDer[\[Nu]_,y_,\[Alpha]_]:=Total[Flatten[Table[p[y,\[Alpha],\[Beta]]g[\[Nu]+2Tot
 (*Derivatives of sums in real and reciprocal space.*)
 
 
-sumRealDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[Apply[Times,(-2Pi I z)^\[Alpha]]g[\[Nu],z]Exp[-2Pi I y . z],{z,(A . #)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}]
+sumRealDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[Apply[Times,(-2Pi I z)^\[Alpha]]g[\[Nu],z]Exp[-2Pi I y . z],{z,(A . #-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}]
 sumFourierDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[gDer[Length[\[Alpha]]-\[Nu],k+y,\[Alpha]]Exp[-2Pi I x . k],{k,(Inverse[Transpose[A]] . #)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}]
 
 
@@ -46,9 +46,9 @@ sumFourierDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[gDer[Length[\[Alph
 (*Prototype for epsteinZetaDer without special cases such non-positive even integers nu.*)
 
 
-setZetaDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:5]:=Module[
+setZetaDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:3]:=Module[
 	{prec,\[Nu]N,AN,xN,yN,\[Mu],sumReal,sumReci,res}
-	,prec=30
+	,prec=60
 	;\[Nu]N=N[\[Nu]Ext,prec]
 	;AN=N[AExt,prec]
 	;\[Mu]=Abs[Det[AN]]^(1/Length[AN])
@@ -85,7 +85,7 @@ range = Range[100];
 Do[
 	\[Nu]0[i]=10 randRational
 	;a0[i]={{1,0},{0,1}}
-	;x0[i]={0,0}
+	;x0[i]=If[i<10,{0,0},{randRational,randRational}/2]
 	;y0[i]={randRational,randRational}/2
 	;\[Alpha]0[i]={randDerivative,randDerivative}
 	,{i,range}

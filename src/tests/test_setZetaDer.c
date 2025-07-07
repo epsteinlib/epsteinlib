@@ -50,7 +50,7 @@ int test_setZetaDer_prototype(void) {
     int testsPassed = 0;
     int totalTests = 0;
     unsigned int dim = 2;
-    double tol = pow(10, -12);
+    double tol = 5 * pow(10, -13);
 
     double *nuRef = malloc(sizeof(double));
     double *a = malloc((unsigned long)dim * (unsigned long)dim * sizeof(double));
