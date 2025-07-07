@@ -15,6 +15,14 @@ Power[z_,0]/;Abs[z]==0:=1;
 Protect[Power];
 
 
+ParallelEvaluate[
+Unprotect[Power];
+Power[0|0.|0*I|0.*I,0|0.|0*I|0.*I]:=1;
+Power[z_,0]/;Abs[z]==0:=1;
+Protect[Power];
+];
+
+
 (* ::Subsection:: *)
 (*Setup reference functions*)
 
@@ -40,7 +48,7 @@ sumFourierDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[gDer[Length[\[Alph
 
 setZetaDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:5]:=Module[
 	{prec,\[Nu]N,AN,xN,yN,\[Mu],sumReal,sumReci,res}
-	,prec=200
+	,prec=30
 	;\[Nu]N=N[\[Nu]Ext,prec]
 	;AN=N[AExt,prec]
 	;\[Mu]=Abs[Det[AN]]^(1/Length[AN])
@@ -51,7 +59,7 @@ setZetaDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:5]:=Module[
 	,Print["No early return"];res = None
 	,sumReal=SetPrecision[sumRealDer[\[Nu]N,AN,xN,yN,\[Alpha],sumLim],prec]
 	;sumReci=SetPrecision[sumFourierDer[\[Nu]N,AN,xN,yN,\[Alpha],sumLim],prec]
-	;res=SetPrecision[\[Mu]^(Total[\[Alpha]]-\[Nu]N)\[Pi]^(\[Nu]N/2)(sumReal+1/Abs[Det[AN]]sumReci),prec]
+	;res=SetPrecision[\[Mu]^(Total[\[Alpha]]-\[Nu]N)\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci),prec]
 	]
 	;Return[res]
 ]
@@ -73,9 +81,9 @@ randDerivative := RandomInteger[{0,6}]
 (*Setup test parameters*)
 
 
-range = Range[10];
+range = Range[100];
 Do[
-	\[Nu]0[i]=2
+	\[Nu]0[i]=10 randRational
 	;a0[i]={{1,0},{0,1}}
 	;x0[i]={0,0}
 	;y0[i]={randRational,randRational}/2

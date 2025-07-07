@@ -25,7 +25,7 @@
  *
  * @return number of failed tests.
  * */
-int test_setZetaDer(void) {
+int test_setZetaDer_prototype(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/setZetaDer_Ref.csv", // NOLINT
@@ -50,7 +50,7 @@ int test_setZetaDer(void) {
     int testsPassed = 0;
     int totalTests = 0;
     unsigned int dim = 2;
-    double tol = 5 * pow(10, -13);
+    double tol = pow(10, -12);
 
     double *nuRef = malloc(sizeof(double));
     double *a = malloc((unsigned long)dim * (unsigned long)dim * sizeof(double));
@@ -243,7 +243,7 @@ int test_setZetaDer_taylor(void) {
  * @return number of failed tests.
  */
 int main() {
-    int failed1 = test_setZetaDer();
+    int failed1 = test_setZetaDer_prototype();
     int failed2 = test_setZetaDer_taylor();
     return failed1 + failed2;
 }
