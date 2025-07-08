@@ -54,8 +54,8 @@ int test_polynomial_p(void) {
     int scanResult;
     char line[256];
 
-    double errMin = 0.;
-    double errMax = 0.;
+    double errMin = NAN;
+    double errMax = NAN;
     double errSum = 0.;
 
     int testsPassed = 0;
@@ -269,8 +269,8 @@ int test_crandall_g_der(void) {
     int scanResult;
     char line[256];
 
-    double errMin = 0.;
-    double errMax = 0.;
+    double errMin = NAN;
+    double errMax = NAN;
     double errSum = 0.;
 
     int testsPassed = 0;

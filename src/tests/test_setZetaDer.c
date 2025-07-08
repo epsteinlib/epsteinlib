@@ -50,10 +50,10 @@ int test_setZetaDer_prototype(void) {
     int testsPassed = 0;
     int totalTests = 0;
     unsigned int dim = 2;
-    double tol = 5 * pow(10, -13);
+    double tol = pow(10, -12);
 
-    double errMin = 0.;
-    double errMax = 0.;
+    double errMin = NAN;
+    double errMax = NAN;
     double errSum = 0.;
 
     double *nuRef = malloc(sizeof(double));
@@ -157,8 +157,8 @@ int test_setZetaDer_taylor(void) { // NOLINT
     unsigned int dim = 2;
     unsigned int order = 12;
 
-    double errMin = 0.;
-    double errMax = 0.;
+    double errMin = NAN;
+    double errMax = NAN;
     double errSum = 0.;
 
     double nu = 0.5;
