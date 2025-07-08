@@ -67,6 +67,7 @@ void sort(double *arr, int size) {
  * @param zetaDataString Filename for storing Epstein Zeta function data.
  * @param zetaRegDataString Filename for storing regularized Epstein Zeta function
  * data.
+ * @return  0 on successful execution.
  */
 int benchmark(int dim, double a[], double x[], double y[], char zetaDataString[],
               char zetaRegDataString[]) {
@@ -132,6 +133,7 @@ int benchmark(int dim, double a[], double x[], double y[], char zetaDataString[]
 /*!
  * @brief Example of evaluating the Epstein Zeta function for values where
  * analytic representations exist for benchmarking.
+ * @return  0 on successful execution.
  */
 int s1() {
     int dim = 1;
@@ -157,6 +159,7 @@ int s1() {
 /*!
  * @brief Example of evaluating the Epstein Zeta function for values where
  * analytic representations exist for benchmarking.
+ * @return  0 on successful execution.
  */
 int s21() {
     int dim = 2;
@@ -182,6 +185,7 @@ int s21() {
 /**
  * @brief Benchmarks the Epstein Zeta function for a 2D lattice with specific
  * parameters.
+ * @return  0 on successful execution.
  */
 int s22() {
     int dim = 2;
@@ -207,6 +211,7 @@ int s22() {
 /**
  * @brief Benchmarks the Epstein Zeta function for a 3D lattice with specific
  * parameters.
+ * @return  0 on successful execution.
  */
 int s31() {
     int dim = 3;
@@ -231,6 +236,7 @@ int s31() {
 
 /**
  * @brief Benchmarks the Epstein Zeta function for another 3D lattice configuration.
+ * @return  0 on successful execution.
  */
 int s32() {
     int dim = 3;
@@ -256,6 +262,7 @@ int s32() {
 
 /**
  * @brief Benchmarks the Epstein Zeta function for a third 3D lattice configuration.
+ * @return  0 on successful execution.
  */
 int s33() {
     int dim = 3;
@@ -281,6 +288,7 @@ int s33() {
 /**
  * @brief Benchmarks the Epstein Zeta function for a 4D lattice with specific
  * parameters.
+ * @return  0 on successful execution.
  */
 int s4() {
     int dim = 4;
@@ -306,6 +314,7 @@ int s4() {
 /**
  * @brief Benchmarks the Epstein Zeta function for a 6D lattice with specific
  * parameters.
+ * @return  0 on successful execution.
  */
 int s6() {
     int dim = 6;
@@ -336,6 +345,7 @@ int s6() {
 /**
  * @brief Benchmarks the Epstein Zeta function for an 8D lattice with specific
  * parameters.
+ * @return  0 on successful execution.
  */
 int s8() {
     int dim = 8;

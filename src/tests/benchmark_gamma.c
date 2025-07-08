@@ -43,14 +43,12 @@ FILE *open(char *path, char *mode) {
 
 /**
  * @brief Computes and prints reference values of the upper gamma function to a CSV
- * file.
- * @param numin Minimum value for nu.
- * @param numax Maximum value for nu.
- * @param nustep Step size for nu.
- * @param xmin Minimum value for x.
- * @param xmax Maximum value for x.
- * @param xstep Step size for x.
+ * file. Nu is restricted to values between -12.5 and 12.5.
+ * @param xinc Step size for x.
+ * @param nuinc Step size for nu.
+ * @param xbound Maximum value for x.
  * @param filename Name of the output CSV file (without extension).
+ * @return  0 on successful execution.
  */
 int benchmark_gamma(double xinc, double nuinc, double xbound, const char *filename) {
     char gammaString[MAX_PATH_LENGTH];
