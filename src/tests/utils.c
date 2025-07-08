@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan.busse@dlr.de>
+// SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
@@ -18,8 +18,8 @@
 
 /*!
  * @brief absolute difference between to complex numbers.
- * @param ref: reference value.
- * @param comp: compparison value.
+ * @param[in] ref: reference value.
+ * @param[in] comp: compparison value.
  * @return sqrt(rev - comp)
  */
 double errAbs(double complex ref, double complex comp) {
@@ -30,8 +30,8 @@ double errAbs(double complex ref, double complex comp) {
 
 /*!
  * @brief relative difference between to complex numbers.
- * @param ref: reference value.
- * @param comp: compparison value.
+ * @param[in] ref: reference value.
+ * @param[in] comp: compparison value.
  * @return errAbs / norm(ref)
  */
 double errRel(double complex ref, double complex comp) {
@@ -44,11 +44,11 @@ double errRel(double complex ref, double complex comp) {
 
 /**
  * @brief prints vector to terminal, is used in unitTest.
- * @param name: name of the vector as a string.
- * @param vec: vector.
- * @param dim: size of the vector.
+ * @param[in] name: name of the vector as a string.
+ * @param[in] vec: vector.
+ * @param[in] dim: size of the vector.
  */
-void printVectorUnitTest(const char *name, double *vec, int dim) {
+void printVectorUnitTest(const char *name, double *vec, unsigned int dim) {
     printf("%s[", name);
     for (int i = 0; i < dim; ++i) {
         printf("%.16lf", vec[i]);
@@ -60,12 +60,29 @@ void printVectorUnitTest(const char *name, double *vec, int dim) {
 }
 
 /**
- * @brief prints square matrix to terminal, is used in unitTest.
- * @param name: name of the matrix as a string.
- * @param mat: matrix.
- * @param dim: size of the matrix.
+ * @brief prints vector to terminal, is used in unitTest.
+ * @param[in] name: name of the vector as a string.
+ * @param[in] vec: vector.
+ * @param[in] dim: size of the vector.
  */
-void printMatrixUnitTest(const char *name, const double *mat, int dim) {
+void printMultiindexUnitTest(const char *name, unsigned int *vec, unsigned int dim) {
+    printf("%s[", name);
+    for (int i = 0; i < dim; ++i) {
+        printf("%u", vec[i]);
+        if (i != dim - 1) {
+            printf(", ");
+        }
+    }
+    printf("]\n");
+}
+
+/**
+ * @brief prints square matrix to terminal, is used in unitTest.
+ * @param[in] name: name of the matrix as a string.
+ * @param[in] mat: matrix.
+ * @param[in] dim: size of the matrix.
+ */
+void printMatrixUnitTest(const char *name, const double *mat, unsigned int dim) {
     printf("%s", name);
     double matrixEntry;
     for (int i = 0; i < dim; ++i) {
