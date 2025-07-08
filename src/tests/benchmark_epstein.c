@@ -19,7 +19,7 @@
 
 #include "epsteinZeta.h"
 
-#define BASE_PATH "benchmark/csv"
+#define BASE_PATH "src/tests/csv"
 
 #ifndef MAX_PATH_LENGTH
 #define MAX_PATH_LENGTH 1024
