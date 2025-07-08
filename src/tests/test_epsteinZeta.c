@@ -466,7 +466,7 @@ bool test_epsteinZeta_cutoff() {
 
     double tol = 1e-15; // Tolerance for comparison
 
-    for (int i = 0; i < 80 + 1; i++) {
+    for (int i = 0; i < 100; i++) {
         nu = 3 - (double)i / 4;
 
         double complex zetaRef = epsteinZeta(nu, dim, m, x, y_ref);
