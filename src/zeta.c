@@ -482,7 +482,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             s1 = sum_real_der(nu, dim, lambda, m_real, x_t2, y_t2, cutoffsReal,
                               zArgBound, alpha) *
                  rot * xfactor;
-            xfactor = 1;
+            xfactor = 1. / int_pow(ms, alphaAbs);
         }
         res = xfactor * pow(lambda * lambda / M_PI, -nu / 2.) / tgamma(nu / 2.) *
               (s1 + pow(lambda, dim) * s2);
