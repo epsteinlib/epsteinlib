@@ -52,7 +52,7 @@ FILE *open(char *path, char *mode) {
  * @param xstep Step size for x.
  * @param filename Name of the output CSV file (without extension).
  */
-int benchmark_gamma(double xinc, double xbound, const char *filename) {
+int benchmark_gamma(double xinc, double nuinc, double xbound, const char *filename) {
     char gammaString[MAX_PATH_LENGTH];
 
     if (snprintf(gammaString, MAX_PATH_LENGTH, "%s/%s.csv", BASE_PATH, filename) >=
@@ -68,7 +68,6 @@ int benchmark_gamma(double xinc, double xbound, const char *filename) {
 
     double nu = 0;
     double numin = -12.5;
-    double nuinc = ldexp(1, -4);
     double x = 0;
     double xmin = ldexp(1, -12);
     double complex upper_gamma_val;
@@ -85,6 +84,9 @@ int benchmark_gamma(double xinc, double xbound, const char *filename) {
             printf("nu: %.16lf, x: %.16lf, upper gamma: %.16lf + %.16lfi\n", nu, x,
                    creal(upper_gamma_val), cimag(upper_gamma_val));
         }
+        if (nu >= -numin) {
+            break;
+        }
     }
     if (fclose(gammaData) != 0) {
         return fprintf(stderr, "Error closing file: %d\n", errno);
@@ -99,12 +101,15 @@ int benchmark_gamma(double xinc, double xbound, const char *filename) {
  * @return  0 on successful execution.
  */
 int gamma_big() {
-    // Parameters from "Computation and Properties of the Epstein Zeta Function"
-    // Using larger stepsize to reduce evaluation time and file size
-    //    double xinc = ldexp(1, -4);
-    double xinc = 20. * ldexp(1, -4);
+    double xinc = ldexp(1, -4);
+    double nuinc = ldexp(1, -4);
     double xbound = 20.1;
-    return benchmark_gamma(xinc, xbound, __func__);
+    // Using larger stepsize to reduce evaluation time and file size
+    // For parameters from "Computation and Properties of the Epstein Zeta Function",
+    // delete these lines
+    xinc *= 5.;
+    nuinc *= 5.;
+    return benchmark_gamma(xinc, nuinc, xbound, __func__);
 }
 
 /**
@@ -115,11 +120,15 @@ int gamma_big() {
  */
 int gamma_small() {
     // Parameters from "Computation and Properties of the Epstein Zeta Function"
-    // Using larger stepsize to reduce evaluation time and file size
-    //    double xinc = ldexp(1, -7);
-    double xinc = 20. * ldexp(1, -7);
+    double xinc = ldexp(1, -7);
+    double nuinc = ldexp(1, -4);
     double xbound = 2.01;
-    return benchmark_gamma(xinc, xbound, __func__);
+    // Using larger stepsize to reduce evaluation time and file size
+    // For parameters from "Computation and Properties of the Epstein Zeta Function",
+    // delete these lines
+    xinc *= 5.;
+    nuinc *= 5.;
+    return benchmark_gamma(xinc, nuinc, xbound, __func__);
 }
 
 /**
