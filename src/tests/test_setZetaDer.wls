@@ -46,7 +46,7 @@ sumFourierDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[gDer[Length[\[Alph
 (*Prototype for epsteinZetaDer without special cases such non-positive even integers nu.*)
 
 
-setZetaDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:3]:=Module[
+setZetaDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:10]:=Module[
 	{prec,\[Nu]N,AN,xN,yN,\[Mu],sumReal,sumReci,res}
 	,prec=60
 	;\[Nu]N=N[\[Nu]Ext,prec]
@@ -84,9 +84,9 @@ randDerivative := RandomInteger[{0,6}]
 range = Range[100];
 Do[
 	\[Nu]0[i]=10 randRational
-	;a0[i]={{1,0},{0,1}}
+	;a0[i]={{1,1/2},{0,Sqrt@3/2}}
 	;x0[i]=If[i<10,{0,0},{randRational,randRational}/2]
-	;y0[i]={randRational,randRational}/2
+	;y0[i]={0.1,0.2}
 	;\[Alpha]0[i]={randDerivative,randDerivative}
 	,{i,range}
 ]
