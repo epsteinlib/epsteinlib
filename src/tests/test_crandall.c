@@ -57,8 +57,8 @@ int test_crandall_g(void) {
     double prefactor = 1.;
     double tol = pow(10, -13);
 
-    double errMin = 0.;
-    double errMax = 0.;
+    double errMin = NAN;
+    double errMax = NAN;
     double errSum = 0.;
 
     double *nuRef = malloc(sizeof(double));

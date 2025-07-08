@@ -173,8 +173,8 @@ int test_epsteinZeta_epsteinZetaReg() { // NOLINT
     int testsPassedOverall = 0;
     int totalTestsOverall = 0;
 
-    double errMin = 1.;
-    double errMax = 0.;
+    double errMin = NAN;
+    double errMax = NAN;
     double errSum = 0.;
 
     printf("\n\t ... ");
@@ -358,8 +358,8 @@ bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
     int testsPassed = 0;
     int totalTests = 0;
 
-    double errMin = 1.;
-    double errMax = 0.;
+    double errMin = NAN;
+    double errMax = NAN;
     double errSum = 0.;
 
     double tol = pow(10, -14);
