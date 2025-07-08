@@ -52,6 +52,10 @@ int test_setZetaDer_prototype(void) {
     unsigned int dim = 2;
     double tol = 5 * pow(10, -13);
 
+    double errMin = 0.;
+    double errMax = 0.;
+    double errSum = 0.;
+
     double *nuRef = malloc(sizeof(double));
     double *a = malloc((unsigned long)dim * (unsigned long)dim * sizeof(double));
     double *x = malloc(dim * sizeof(double));
@@ -86,6 +90,10 @@ int test_setZetaDer_prototype(void) {
         errorRel = errRel(ref, num);
 
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
 
         if (errorMaxAbsRel < tol) {
             testsPassed++;
@@ -122,8 +130,12 @@ int test_setZetaDer_prototype(void) {
     }
 
     printf("\n\t ... ");
-    printf("%d out of %d tests passed with tolerance %E.\n", testsPassed, totalTests,
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
            tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
 
     return totalTests - testsPassed;
 }
@@ -133,7 +145,7 @@ int test_setZetaDer_prototype(void) {
  *
  * @return number of failed tests.
  */
-int test_setZetaDer_taylor(void) {
+int test_setZetaDer_taylor(void) { // NOLINT
     printf("%s ... ", __func__);
     double errorAbs;
     double errorRel;
@@ -144,6 +156,10 @@ int test_setZetaDer_taylor(void) {
     double tol = pow(10, -14);
     unsigned int dim = 2;
     unsigned int order = 12;
+
+    double errMin = 0.;
+    double errMax = 0.;
+    double errSum = 0.;
 
     double nu = 0.5;
     double m[] = {1., 0., 0., 1.};
@@ -207,6 +223,10 @@ int test_setZetaDer_taylor(void) {
         errorRel = errRel(valRef, valTaylor);
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
+
         if (errorMaxAbsRel < tol) {
             testsPassed++;
         } else {
@@ -231,8 +251,12 @@ int test_setZetaDer_taylor(void) {
     }
 
     printf("\n\t ... ");
-    printf("%d out of %d tests passed with tolerance %E.\n", testsPassed, totalTests,
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
            tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
 
     return totalTests - testsPassed;
 }

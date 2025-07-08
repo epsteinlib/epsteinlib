@@ -54,6 +54,10 @@ int test_polynomial_p(void) {
     int scanResult;
     char line[256];
 
+    double errMin = 0.;
+    double errMax = 0.;
+    double errSum = 0.;
+
     int testsPassed = 0;
     int totalTests = 0;
     int dim = 3;
@@ -87,6 +91,10 @@ int test_polynomial_p(void) {
 
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
+
         if (errorMaxAbsRel < tol) {
             testsPassed++;
         } else {
@@ -116,8 +124,12 @@ int test_polynomial_p(void) {
     }
 
     printf("\n\t ... ");
-    printf("%d out of %d tests passed with tolerance %E.\n", testsPassed, totalTests,
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
            tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
 
     return totalTests - testsPassed;
 }
@@ -257,6 +269,10 @@ int test_crandall_g_der(void) {
     int scanResult;
     char line[256];
 
+    double errMin = 0.;
+    double errMax = 0.;
+    double errSum = 0.;
+
     int testsPassed = 0;
     int totalTests = 0;
     int dim = 3;
@@ -294,6 +310,10 @@ int test_crandall_g_der(void) {
 
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
+
         if (errorMaxAbsRel < tol) {
             testsPassed++;
         } else {
@@ -325,8 +345,12 @@ int test_crandall_g_der(void) {
     }
 
     printf("\n\t ... ");
-    printf("%d out of %d tests passed with tolerance %E.\n", testsPassed, totalTests,
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
            tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
 
     return totalTests - testsPassed;
 }
