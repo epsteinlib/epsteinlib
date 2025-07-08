@@ -254,6 +254,12 @@ Print["Relative error:               +", ScientificForm[Abs[madelungRef - madelu
 
 Executing this code snipped in the same folder as `EpsteinZeta.wl` and setting `SetDirectory[NotebookDirectory[]]` is the easiest way to help mathematica find the package.
 
+
+In the `examples/mathematica/` folder, you can find two more mathematica examples:
+
+1. `BenchmarkQuick.wls`: Standalone script that compares the (regularized) Epstein zeta function to known formulas in special cases.
+2. `BenchmarkAndPaperFigures.wls`: Script  that reproduces every figure in [8].
+
 ## Development environment
 We provide a nix devshell to have a reproducible development environment with the same dependencies across different operating systems. Once you have installed and configured nix, starting developing is as easy as running `nix develop`.
 
