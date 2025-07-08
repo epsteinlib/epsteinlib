@@ -343,6 +343,6 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 [6] R. Crandall. “Unified algorithms for polylogarithm, L-series, and zeta variants”. Algorithmic Reflections: Selected Works. PSIpress, 2012
 
-[7] Andreas A. Buchheit, Torsten Keßler, and Kirill Serkh. "On the computation of lattice sums without translational invariance". Mathematics of Computation (Oct. 2024)
+[7] Andreas A. Buchheit, Torsten Keßler, and Kirill Serkh. "On the computation of lattice sums without translational invariance". Mathematics of Computation 94 (2025), pp. 2533-2574.
 
 [8] Andreas A. Buchheit, Jonathan Busse, and Ruben Gutendorf. "Computation and properties of the Epstein zeta function with high-performance implementation in EpsteinLib". arXiv preprint arXiv:2412.16317 (2024).
