@@ -57,6 +57,12 @@ int test_crandall_g(void) {
     double prefactor = 1.;
     double tol = pow(10, -13);
 
+    double errMin = 0.;
+    double errMax = 0.;
+    double errSum = 0.;
+
+    int maxIt = 0;
+
     double *nuRef = malloc(sizeof(double));
     double *z = malloc(2 * sizeof(double));
     double *refRead = malloc(2 * sizeof(double));
@@ -85,6 +91,10 @@ int test_crandall_g(void) {
 
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
+
         if (errorMaxAbsRel < tol) {
             testsPassed++;
         } else {
@@ -102,6 +112,7 @@ int test_crandall_g(void) {
             printVectorUnitTest("z:\t\t", z, dim);
         }
         totalTests++;
+        maxIt++;
     }
     free(nuRef);
     free(z);
@@ -112,7 +123,12 @@ int test_crandall_g(void) {
     }
 
     printf("\n\t ... ");
-    printf("%d out of %d tests passed.\n", testsPassed, totalTests);
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
+           tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / maxIt);
+    printf("\n");
 
     return totalTests - testsPassed;
 }
