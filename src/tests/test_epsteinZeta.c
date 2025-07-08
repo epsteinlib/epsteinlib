@@ -177,8 +177,6 @@ int test_epsteinZeta_epsteinZetaReg() { // NOLINT
     double errMax = 0.;
     double errSum = 0.;
 
-    int maxIt = 0;
-
     printf("\n\t ... ");
     printf("processing %s ", path);
 
@@ -226,14 +224,13 @@ int test_epsteinZeta_epsteinZetaReg() { // NOLINT
             printVectorUnitTest("y:\t\t", y, dim);
         }
         totalTests++;
-        maxIt++;
     }
     printf("\n\t ... ");
     printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
            tol);
     printf("\t    ");
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
-           errSum / maxIt);
+           errSum / totalTests);
 
     errMin = 0.;
     errMax = 0.;
@@ -318,7 +315,6 @@ int test_epsteinZeta_epsteinZetaReg() { // NOLINT
             printVectorUnitTest("y:\t\t", y, dim);
         }
         totalTests++;
-        maxIt++;
     }
 
     if (fclose(zetaRegRefData) != 0) {
@@ -333,7 +329,7 @@ int test_epsteinZeta_epsteinZetaReg() { // NOLINT
            tol);
     printf("\t    ");
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
-           errSum / maxIt);
+           errSum / totalTests);
     printf("\n");
 
     testsPassedOverall += testsPassed;
@@ -366,8 +362,6 @@ bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
     double errMax = 0.;
     double errSum = 0.;
 
-    int maxIt = 200;
-
     double tol = pow(10, -14);
     unsigned int dim = 2;
     double m[] = {3. / 2, 1. / 5, 1. / 4, 1.};
@@ -375,7 +369,7 @@ bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
     double y[] = {0, 0.5};
     double vol = 29. / 20;
 
-    for (int i = 0; i < maxIt / 2; i++) {
+    for (int i = 0; i < 100; i++) {
         nu = -8.5 + (double)i / 5.;
 
         valZeta = epsteinZeta(nu, dim, m, x, y);
@@ -403,7 +397,7 @@ bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
     double yZeta[] = {0, pow(10, -16)};
     double yZetaReg[] = {0., 0.};
 
-    for (int i = 0; i < maxIt / 2; i++) {
+    for (int i = 0; i < 100; i++) {
         nu = -8.5 + (double)i / 5.;
 
         valZeta = epsteinZeta(nu, dim, m, x, yZeta);
@@ -433,7 +427,7 @@ bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
            tol);
     printf("\t    ");
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
-           errSum / maxIt);
+           errSum / totalTests);
     printf("\n");
 
     return totalTests - testsPassed;
