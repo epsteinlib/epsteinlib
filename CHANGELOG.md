@@ -19,12 +19,14 @@ SPDX-License-Identifier: AGPL-3.0-only
 - Standalone example notebook `examples/mathematica/BenchmarkQuick.wls` that compares the (regularized) Epstein zeta function to known formulas in special cases.
 - Extensive example notebook `examples/mathematica/BenchmarkAndPaperFigures.wls` that reproduces every figure from "Computation and Properties of the Epstein zeta function".
 - Executables `./build/src/tests/epsteinlib_benchmark_gamma` and `./build/src/tests/epsteinlib_benchmark_epstein` that generate benchmark values for the above notebook.
+- Improved unit test terminal output formatting and expressive test result reporting.
 
 ### Fixed
 - Increased edge case parameter in `assignzArgBound` in `src/crandall.c` from $10^{16}$ to `DBL_MAX` from `<float.h>` to ensure that the asymptotic method is not used for large $|\nu|$.
 - Added correction term for non-diagonal matrixes in $\nu = d+2 k$ for the regularized Epstein zeta function.
 - Removed special use of asymptotic expansion around $\nu = 2$ and $\nu=4$ which reduces the error from $<10^{-11}$to $<10^{-14}$.
 - Fixed special cases `NU` element of $\{\ldots,-4,-2,0,2,3,4,\ldots\}$ for evaluation of `python examples/python/sem_gaussian_1d.py --nu [NU]`.
+- Introduced variable `zArgBoundReci` analogous to `zArgBound` for arguments `dim - NU` instead of `NU` in reciprocal sums in `zeta.c`.
 
 ## [0.4.2] - unreleased
 
