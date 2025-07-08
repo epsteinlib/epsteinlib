@@ -173,7 +173,7 @@ int test_epsteinZeta_epsteinZetaReg() { // NOLINT
     int testsPassedOverall = 0;
     int totalTestsOverall = 0;
 
-    double errMin = 0.;
+    double errMin = 1.;
     double errMax = 0.;
     double errSum = 0.;
 
@@ -358,7 +358,7 @@ bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
     int testsPassed = 0;
     int totalTests = 0;
 
-    double errMin = 0.;
+    double errMin = 1.;
     double errMax = 0.;
     double errSum = 0.;
 
