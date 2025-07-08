@@ -74,6 +74,7 @@ int benchmark(int dim, double a[], double x[], double y[], char zetaDataString[]
     FILE *zetaRegData = open(zetaRegDataString, "w");
     if (zetaData == NULL) {
         printf("%s\n", strerror(errno)); // NOLINT
+        return 1;
     }
     double nu;
     double complex zetaReg;
@@ -140,13 +141,12 @@ int s1() {
     char zetaDataString[MAX_PATH_LENGTH];
     char zetaRegDataString[MAX_PATH_LENGTH];
 
-    if (snprintf(zetaDataString, sizeof(zetaDataString), "%s/epsteinZeta_%s.csv",
-                 BASE_PATH, __func__) >= sizeof(zetaDataString)) {
+    if (snprintf(zetaDataString, MAX_PATH_LENGTH, "%s/epsteinZeta_%s.csv", BASE_PATH,
+                 __func__) >= MAX_PATH_LENGTH) {
         return fprintf(stderr, "Error: filename too long\n");
     }
-    if (snprintf(zetaRegDataString, sizeof(zetaRegDataString),
-                 "%s/epsteinZetaReg_%s.csv", BASE_PATH,
-                 __func__) >= sizeof(zetaRegDataString)) {
+    if (snprintf(zetaRegDataString, MAX_PATH_LENGTH, "%s/epsteinZetaReg_%s.csv",
+                 BASE_PATH, __func__) >= MAX_PATH_LENGTH) {
         return fprintf(stderr, "Error: filename too long\n");
     }
 
@@ -166,13 +166,12 @@ int s21() {
     char zetaDataString[MAX_PATH_LENGTH];
     char zetaRegDataString[MAX_PATH_LENGTH];
 
-    if (snprintf(zetaDataString, sizeof(zetaDataString), "%s/epsteinZeta_%s.csv",
-                 BASE_PATH, __func__) >= sizeof(zetaDataString)) {
+    if (snprintf(zetaDataString, MAX_PATH_LENGTH, "%s/epsteinZeta_%s.csv", BASE_PATH,
+                 __func__) >= MAX_PATH_LENGTH) {
         return fprintf(stderr, "Error: filename too long\n");
     }
-    if (snprintf(zetaRegDataString, sizeof(zetaRegDataString),
-                 "%s/epsteinZetaReg_%s.csv", BASE_PATH,
-                 __func__) >= sizeof(zetaRegDataString)) {
+    if (snprintf(zetaRegDataString, MAX_PATH_LENGTH, "%s/epsteinZetaReg_%s.csv",
+                 BASE_PATH, __func__) >= MAX_PATH_LENGTH) {
         return fprintf(stderr, "Error: filename too long\n");
     }
 
@@ -192,13 +191,12 @@ int s22() {
     char zetaDataString[MAX_PATH_LENGTH];
     char zetaRegDataString[MAX_PATH_LENGTH];
 
-    if (snprintf(zetaDataString, sizeof(zetaDataString), "%s/epsteinZeta_%s.csv",
-                 BASE_PATH, __func__) >= sizeof(zetaDataString)) {
+    if (snprintf(zetaDataString, MAX_PATH_LENGTH, "%s/epsteinZeta_%s.csv", BASE_PATH,
+                 __func__) >= MAX_PATH_LENGTH) {
         return fprintf(stderr, "Error: filename too long\n");
     }
-    if (snprintf(zetaRegDataString, sizeof(zetaRegDataString),
-                 "%s/epsteinZetaReg_%s.csv", BASE_PATH,
-                 __func__) >= sizeof(zetaRegDataString)) {
+    if (snprintf(zetaRegDataString, MAX_PATH_LENGTH, "%s/epsteinZetaReg_%s.csv",
+                 BASE_PATH, __func__) >= MAX_PATH_LENGTH) {
         return fprintf(stderr, "Error: filename too long\n");
     }
 
@@ -218,13 +216,12 @@ int s31() {
     char zetaDataString[MAX_PATH_LENGTH];
     char zetaRegDataString[MAX_PATH_LENGTH];
 
-    if (snprintf(zetaDataString, sizeof(zetaDataString), "%s/epsteinZeta_%s.csv",
-                 BASE_PATH, __func__) >= sizeof(zetaDataString)) {
+    if (snprintf(zetaDataString, MAX_PATH_LENGTH, "%s/epsteinZeta_%s.csv", BASE_PATH,
+                 __func__) >= MAX_PATH_LENGTH) {
         return fprintf(stderr, "Error: filename too long\n");
     }
-    if (snprintf(zetaRegDataString, sizeof(zetaRegDataString),
-                 "%s/epsteinZetaReg_%s.csv", BASE_PATH,
-                 __func__) >= sizeof(zetaRegDataString)) {
+    if (snprintf(zetaRegDataString, MAX_PATH_LENGTH, "%s/epsteinZetaReg_%s.csv",
+                 BASE_PATH, __func__) >= MAX_PATH_LENGTH) {
         return fprintf(stderr, "Error: filename too long\n");
     }
 
@@ -243,13 +240,12 @@ int s32() {
     char zetaDataString[MAX_PATH_LENGTH];
     char zetaRegDataString[MAX_PATH_LENGTH];
 
-    if (snprintf(zetaDataString, sizeof(zetaDataString), "%s/epsteinZeta_%s.csv",
-                 BASE_PATH, __func__) >= sizeof(zetaDataString)) {
+    if (snprintf(zetaDataString, MAX_PATH_LENGTH, "%s/epsteinZeta_%s.csv", BASE_PATH,
+                 __func__) >= MAX_PATH_LENGTH) {
         return fprintf(stderr, "Error: filename too long\n");
     }
-    if (snprintf(zetaRegDataString, sizeof(zetaRegDataString),
-                 "%s/epsteinZetaReg_%s.csv", BASE_PATH,
-                 __func__) >= sizeof(zetaRegDataString)) {
+    if (snprintf(zetaRegDataString, MAX_PATH_LENGTH, "%s/epsteinZetaReg_%s.csv",
+                 BASE_PATH, __func__) >= MAX_PATH_LENGTH) {
         return fprintf(stderr, "Error: filename too long\n");
     }
 
@@ -269,13 +265,12 @@ int s33() {
     char zetaDataString[MAX_PATH_LENGTH];
     char zetaRegDataString[MAX_PATH_LENGTH];
 
-    if (snprintf(zetaDataString, sizeof(zetaDataString), "%s/epsteinZeta_%s.csv",
-                 BASE_PATH, __func__) >= sizeof(zetaDataString)) {
+    if (snprintf(zetaDataString, MAX_PATH_LENGTH, "%s/epsteinZeta_%s.csv", BASE_PATH,
+                 __func__) >= MAX_PATH_LENGTH) {
         return fprintf(stderr, "Error: filename too long\n");
     }
-    if (snprintf(zetaRegDataString, sizeof(zetaRegDataString),
-                 "%s/epsteinZetaReg_%s.csv", BASE_PATH,
-                 __func__) >= sizeof(zetaRegDataString)) {
+    if (snprintf(zetaRegDataString, MAX_PATH_LENGTH, "%s/epsteinZetaReg_%s.csv",
+                 BASE_PATH, __func__) >= MAX_PATH_LENGTH) {
         return fprintf(stderr, "Error: filename too long\n");
     }
 
@@ -295,13 +290,12 @@ int s4() {
     char zetaDataString[MAX_PATH_LENGTH];
     char zetaRegDataString[MAX_PATH_LENGTH];
 
-    if (snprintf(zetaDataString, sizeof(zetaDataString), "%s/epsteinZeta_%s.csv",
-                 BASE_PATH, __func__) >= sizeof(zetaDataString)) {
+    if (snprintf(zetaDataString, MAX_PATH_LENGTH, "%s/epsteinZeta_%s.csv", BASE_PATH,
+                 __func__) >= MAX_PATH_LENGTH) {
         return fprintf(stderr, "Error: filename too long\n");
     }
-    if (snprintf(zetaRegDataString, sizeof(zetaRegDataString),
-                 "%s/epsteinZetaReg_%s.csv", BASE_PATH,
-                 __func__) >= sizeof(zetaRegDataString)) {
+    if (snprintf(zetaRegDataString, MAX_PATH_LENGTH, "%s/epsteinZetaReg_%s.csv",
+                 BASE_PATH, __func__) >= MAX_PATH_LENGTH) {
         return fprintf(stderr, "Error: filename too long\n");
     }
 
@@ -326,13 +320,12 @@ int s6() {
     char zetaDataString[MAX_PATH_LENGTH];
     char zetaRegDataString[MAX_PATH_LENGTH];
 
-    if (snprintf(zetaDataString, sizeof(zetaDataString), "%s/epsteinZeta_%s.csv",
-                 BASE_PATH, __func__) >= sizeof(zetaDataString)) {
+    if (snprintf(zetaDataString, MAX_PATH_LENGTH, "%s/epsteinZeta_%s.csv", BASE_PATH,
+                 __func__) >= MAX_PATH_LENGTH) {
         return fprintf(stderr, "Error: filename too long\n");
     }
-    if (snprintf(zetaRegDataString, sizeof(zetaRegDataString),
-                 "%s/epsteinZetaReg_%s.csv", BASE_PATH,
-                 __func__) >= sizeof(zetaRegDataString)) {
+    if (snprintf(zetaRegDataString, MAX_PATH_LENGTH, "%s/epsteinZetaReg_%s.csv",
+                 BASE_PATH, __func__) >= MAX_PATH_LENGTH) {
         return fprintf(stderr, "Error: filename too long\n");
     }
 
@@ -357,13 +350,12 @@ int s8() {
     char zetaDataString[MAX_PATH_LENGTH];
     char zetaRegDataString[MAX_PATH_LENGTH];
 
-    if (snprintf(zetaDataString, sizeof(zetaDataString), "%s/epsteinZeta_%s.csv",
-                 BASE_PATH, __func__) >= sizeof(zetaDataString)) {
+    if (snprintf(zetaDataString, MAX_PATH_LENGTH, "%s/epsteinZeta_%s.csv", BASE_PATH,
+                 __func__) >= MAX_PATH_LENGTH) {
         return fprintf(stderr, "Error: filename too long\n");
     }
-    if (snprintf(zetaRegDataString, sizeof(zetaRegDataString),
-                 "%s/epsteinZetaReg_%s.csv", BASE_PATH,
-                 __func__) >= sizeof(zetaRegDataString)) {
+    if (snprintf(zetaRegDataString, MAX_PATH_LENGTH, "%s/epsteinZetaReg_%s.csv",
+                 BASE_PATH, __func__) >= MAX_PATH_LENGTH) {
         return fprintf(stderr, "Error: filename too long\n");
     }
 
