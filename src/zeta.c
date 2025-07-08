@@ -434,6 +434,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         res = NAN;
     } else {
         double zArgBound = assignzArgBound(nu);
+        double zArgBoundReci = assignzArgBound(dim - nu);
         double complex s1 = 0;
         double complex s2 = 0;
         double complex nc = 0;
@@ -451,19 +452,19 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             s1 = sum_real(nu, dim, lambda, m_real, x_t2, y_t2, cutoffsReal,
                           zArgBound);
             s2 = sum_fourier(nu, dim, lambda, m_fourier, x_t2, y_t2, cutoffsFourier,
-                             zArgBound) +
+                             zArgBoundReci) +
                  nc;
         } else if (variant == 1) {
             // calculate regularized Epstein zeta function values.
             nc = crandall_gReg(dim, dim - nu, y_t1, lambda);
             rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
             s2 = sum_fourier(nu, dim, lambda, m_fourier, x_t1, y_t2, cutoffsFourier,
-                             zArgBound);
+                             zArgBoundReci);
             // correct wrong zero summand in regularized fourier sum.
             if (!equals(dim, y_t1, y_t2)) {
-                s2 += crandall_g(dim, dim - nu, y_t2, lambda, zArgBound) *
+                s2 += crandall_g(dim, dim - nu, y_t2, lambda, zArgBoundReci) *
                           cexp(-2 * M_PI * I * dot(dim, x_t1, y_t2)) -
-                      crandall_g(dim, dim - nu, y_t1, lambda, zArgBound) *
+                      crandall_g(dim, dim - nu, y_t1, lambda, zArgBoundReci) *
                           cexp(-2 * M_PI * I * dot(dim, x_t1, y_t1));
             }
             s2 = s2 * rot + nc;
@@ -473,10 +474,10 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             xfactor = 1;
         } else if (variant == 2) {
             // calculate non set zeta  derivative function values.
-            nc = crandall_g_der(dim, dim - nu, y_t1, lambda, zArgBound, alpha);
+            nc = crandall_g_der(dim, dim - nu, y_t1, lambda, zArgBoundReci, alpha);
             rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
             s2 = sum_fourier_der(nu, dim, lambda, m_fourier, x_t1, y_t2,
-                                 cutoffsFourier, zArgBound, alpha);
+                                 cutoffsFourier, zArgBoundReci, alpha);
             s2 = int_pow(lambda, alphaAbs) * (s2 * rot + nc);
             s1 = sum_real_der(nu, dim, lambda, m_real, x_t2, y_t2, cutoffsReal,
                               zArgBound, alpha) *
