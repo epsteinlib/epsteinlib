@@ -7,7 +7,7 @@
 
 /*
  * @file zeta_mathematica.c
- * @brief Epstein Zeta function call for Mathematica interface
+ * @brief Epstein zeta function call for Mathematica interface
  */
 
 #include "zeta_mathematica.h"
@@ -15,38 +15,42 @@
 #include <complex.h>
 
 /*
- * @brief Saves real and imaginary parts of the Epstein Zeta function and
+ * @brief Saves real and imaginary parts of the Epstein zeta function and
  * in an array.
- * @param[in, out] out: 2D array, where real and imaginary parts of the Epstein Zeta
+ * @param[in, out] out: 2D array, where real and imaginary parts of the Epstein zeta
  * function will be stored.
- *  @param[in] nu: Exponent for the Epstein zeta function.
- *  @param[in] dim: Dimension of the input vectors.
- *  @param[in] a: Matrix the transforms the lattice in the Epstein Zeta function.
- *  @param[in] x: x vector of the Epstein Zeta function.
- *  @param[in] y: y vector of the Epstein Zeta function.
+ * @param[in] nu: exponent for the Epstein zeta function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] a: matrix that transforms the lattice in the Epstein zeta
+ * function.
+ * @param[in] x: x vector of the Epstein zeta function.
+ * @param[in] y: y vector of the Epstein zeta function.
  *  @return 0
  */
-int epstein_zeta_mathematica_call(double *out, double nu, int dim, double *a,
-                                  double *x, double *y) {
+int epstein_zeta_mathematica_call(double *out, double nu, int dim, const double *a,
+                                  const double *x, const double *y) {
     double complex asg = epsteinZeta(nu, dim, a, x, y);
     out[0] = creal(asg);
     out[1] = cimag(asg);
     return 0;
 }
+
 /*
- * @brief Saves real and imaginary parts of the regularized Epstein Zeta function
+ * @brief Saves real and imaginary parts of the regularized Epstein zeta function
  * in an array.
  * @param[in, out] out: 2D array, where real and imaginary parts of the regularized
- * Epstein Zeta function will be stored.
- * @param[in] nu: Exponent for the regularized Epstein zeta function.
- * @param[in] dim: Dimension of the input vectors.
- * @param[in] a: Matrix that transforms the lattice in the Epstein Zeta function.
- * @param[in] x: x vector of the Epstein Zeta function.
- * @param[in] y: y vector of the Epstein Zeta function.
- * @return 0
+ * Epstein zeta function will be stored.
+ * @param[in] nu: exponent for the Epstein zeta function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] a: matrix that transforms the lattice in the Epstein zeta
+ * function.
+ * @param[in] x: x vector of the Epstein zeta function.
+ * @param[in] y: y vector of the Epstein zeta function.
+ *  @return 0
  */
-int epstein_zeta_reg_mathematica_call(double *out, double nu, int dim, double *a,
-                                      double *x, double *y) {
+int epstein_zeta_reg_mathematica_call(double *out, double nu, int dim,
+                                      const double *a, const double *x,
+                                      const double *y) {
     double complex asg = epsteinZetaReg(nu, dim, a, x, y);
     out[0] = creal(asg);
     out[1] = cimag(asg);
