@@ -25,6 +25,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 - Removed special use of asymptotic expansion around $\nu = 2$ and $\nu=4$ which reduces the error from $<10^{-11}$to $<10^{-14}$.
 - Fixed special cases `NU` element of $\{\ldots,-4,-2,0,2,3,4,\ldots\}$ for evaluation of `python examples/python/sem_gaussian_1d.py --nu [NU]`.
 - Introduced variable `zArgBoundReci` analogous to `zArgBound` for arguments `dim - NU` instead of `NU` in reciprocal sums in `zeta.c`.
+- Bounds for asymptotic expansion changed to guarantee precision of $10^{-18}$ instead of $10^{-16}$.
 
 ## [0.4.2] - unreleased
 
