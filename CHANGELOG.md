@@ -18,6 +18,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 ### Added
 - Tests that ensure that EpsteinZeta can be expressed as EpsteinZetaReg + singularity.
 - Example notebook `examples/mathematica/EpsteinLibBenchmark.wls` that compares the (regularized) Epstein zeta function to known formulas in special cases.
+- Improved unit test terminal output formatting and enhanced test result reporting.
 
 ### Fixed
 - Increased edge case parameter in `assignzArgBound` in `src/crandall.c` from $10^{16}$ to `DBL_MAX` from `<float.h>` to ensure that the asymptotic method is not used for large $|\nu|$.

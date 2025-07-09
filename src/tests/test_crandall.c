@@ -1,6 +1,11 @@
-// SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan.busse@dlr.de>
+// SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan.busse@dlr.de>
 //
 // SPDX-License-Identifier: AGPL-3.0-only
+
+/**
+ * @file test_crandall.c
+ * @brief Benchmarking of the upper Crandall function.
+ */
 
 #include "../crandall.h"
 #include "utils.h"
@@ -21,10 +26,10 @@
 /*!
  * @brief Test function for crandall_g.
  *
- * @return 0 if all tests pass, 1 if any test fails.
+ * @return number of failed tests.
  */
 int test_crandall_g(void) {
-    printf("%s ... \n", __func__);
+    printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/crandall_g_Ref.csv", // NOLINT
                           BASE_PATH);
@@ -48,15 +53,20 @@ int test_crandall_g(void) {
 
     int testsPassed = 0;
     int totalTests = 0;
-    int dim = 2;
+    unsigned int dim = 2;
     double prefactor = 1.;
     double tol = pow(10, -13);
+
+    double errMin = NAN;
+    double errMax = NAN;
+    double errSum = 0.;
 
     double *nuRef = malloc(sizeof(double));
     double *z = malloc(2 * sizeof(double));
     double *refRead = malloc(2 * sizeof(double));
 
-    printf("\tProcessing file: %s ... ", path);
+    printf("\n\t ... ");
+    printf("processing %s ", path);
     while (fgets(line, sizeof(line), data) != NULL) {
         scanResult = sscanf(line, "%lf,%lf,%lf,%lf,%lf", // NOLINT
                             nuRef, z, z + 1, refRead, refRead + 1);
@@ -79,26 +89,28 @@ int test_crandall_g(void) {
 
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
-        totalTests++;
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
+
         if (errorMaxAbsRel < tol) {
             testsPassed++;
         } else {
-            printf("\nWarning! ");
+            printf("\n");
+            printf("Warning! ");
             printf("crandall_g: ");
             printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
                    "%.16lf "
                    "%+.16lf I (reference implementation)\n",
                    4, creal(num), cimag(num), creal(ref), cimag(ref));
-            printf("Min(Emax, Erel):      %.16lf > %.16lf  (tolerance)\n",
-                   errorMaxAbsRel, tol);
+            printf("Min(Emax, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
+                   tol);
             printf("\n");
             printf("nu:\t\t %.16lf\n", nu);
             printVectorUnitTest("z:\t\t", z, dim);
-            printf("\n");
         }
+        totalTests++;
     }
-    printf("%d out of %d tests passed.\n", testsPassed, totalTests);
-
     free(nuRef);
     free(z);
     free(refRead);
@@ -106,10 +118,24 @@ int test_crandall_g(void) {
     if (fclose(data) != 0) {
         return fprintf(stderr, "Error closing file: %d\n", errno);
     }
-    return (testsPassed == totalTests) ? 0 : 1;
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
+           tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
+
+    return totalTests - testsPassed;
 }
 
+/*!
+ * @brief Main function to run all Crandall function tests.
+ *
+ * @return number of failed tests.
+ */
 int main(void) {
-    int result = test_crandall_g();
-    return result;
+    int failed = test_crandall_g();
+    return failed;
 }
