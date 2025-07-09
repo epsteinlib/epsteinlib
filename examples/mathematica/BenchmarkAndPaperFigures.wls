@@ -115,7 +115,7 @@ Show[RegionPlot[regionssmall,{\[Nu],\[Nu]minsmall,\[Nu]maxsmall},{x,xminsmall,xm
 (* ::Text:: *)
 (*Loads reference data for the upper incomplete gamma function from CSV files.  Each line contains: nu, x, Re(Gamma), Im(Gamma). *)
 (**)
-(*Uses larger stepsize than paper values to reduce filesize. Original stepsizes are commented in gamma_big() and gamma_small() functions in src/tests/benchmark_gamma.c.*)
+(*Uses larger stepsize than paper values to reduce filesize. Original stepsizes are commented in gamma_big() and gamma_small()  in src/tests/benchmark_gamma.c.*)
 (**)
 (*To regenerate reference values after compiling with meson:*)
 (**)
