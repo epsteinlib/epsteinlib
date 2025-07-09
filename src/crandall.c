@@ -104,17 +104,17 @@ double complex crandall_gReg(unsigned int dim, double s, const double *z,
  * calculation of the incomplete upper gamma function upperGamma(nu, z).
  */
 double assignzArgBound(double nu) {
-    if (nu > 1.6 && nu < 4.4) {
-        return M_PI * 2.99 * 2.99;
-    }
-    if (nu > -3 && nu < 8) {
+    if (nu > -1 && nu < 5) {
         return M_PI * 3.15 * 3.15;
     }
-    if (nu > -70 && nu < 40) {
+    if (nu > -20 && nu < 20) {
         return M_PI * 3.35 * 3.35;
     }
-    if (nu > -600 && nu < 80) {
+    if (nu > -150 && nu < 60) {
         return M_PI * 3.5 * 3.5;
+    }
+    if (nu > -400 && nu < 100) {
+        return M_PI * 3.65 * 3.65;
     }
     return DBL_MAX; // do not use expansion if nu is to big
 }
