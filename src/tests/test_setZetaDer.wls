@@ -85,8 +85,8 @@ range = Range[100];
 Do[
 	\[Nu]0[i]=10 randRational
 	;a0[i]={{1,1/2},{0,Sqrt@3/2}}
-	;x0[i]=If[i<10,{0,0},{randRational,randRational}/2]
-	;y0[i]={0.1,0.2}
+	;x0[i]=If[i<10,{0,0},{randRational,randRational}]
+	;y0[i]={randRational,randRational}
 	;\[Alpha]0[i]={randDerivative,randDerivative}
 	,{i,range}
 ]

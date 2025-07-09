@@ -474,8 +474,15 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             xfactor = 1;
         } else if (variant == 2) {
             // calculate non set zeta  derivative function values.
-            nc = crandall_g_der(dim, dim - nu, y_t1, lambda, zArgBoundReci, alpha);
             rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
+            if (equals(dim, y_t1, y_t2)) {
+                nc = crandall_g_der(dim, dim - nu, y_t1, lambda, zArgBoundReci,
+                                    alpha);
+            } else {
+                nc = crandall_g_der(dim, dim - nu, y_t2, lambda, zArgBoundReci,
+                                    alpha) *
+                     cexp(-2 * M_PI * I * dot(dim, y_t2, x_t1)) * rot;
+            }
             s2 = sum_fourier_der(nu, dim, lambda, m_fourier, x_t1, y_t2,
                                  cutoffsFourier, zArgBoundReci, alpha);
             s2 = int_pow(lambda, alphaAbs) * (s2 * rot + nc);
