@@ -10,7 +10,7 @@
 
 
 (* ::Subsection:: *)
-(*Setup Epstein Zeta reference equations*)
+(*Setup Epstein zeta reference equations*)
 
 
 (* ::Text:: *)
@@ -33,7 +33,7 @@ epsteinZeta[\[Nu]_,IdentityMatrix[2],{-1,-1}, {1/2,0}] := 2^(2-\[Nu]) (-2+2^(\[N
 
 
 (* ::Text:: *)
-(*Epstein Zeta regularized as a difference*)
+(*Epstein zeta regularized as a difference*)
 
 
 shat[\[Nu]_,A_, y_] := With[{d=Length@A},If[IntegerQ[(\[Nu]-d)/2]\[And]\[Nu]>(d-1/2),With[{k=Round[(\[Nu]-d)/2]},Pi^(k+d/2)/Gamma[k+d/2] (-1)^(k+1)/k! (Pi y . y)^k Log[Pi y . y]],Pi^(\[Nu]-d/2)*(y . y)^((\[Nu]-d)/2)*Gamma[(d-\[Nu])/2]/Gamma[\[Nu]/2]]];
