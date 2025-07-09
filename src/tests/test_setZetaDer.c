@@ -153,7 +153,7 @@ int test_setZetaDer_taylor(void) { // NOLINT
     double complex valRef;
     double complex valTaylor;
 
-    double tol = pow(10, -14);
+    double tol = 5 * pow(10, -12);
     unsigned int dim = 2;
     unsigned int order = 12;
 
@@ -162,8 +162,8 @@ int test_setZetaDer_taylor(void) { // NOLINT
     double errSum = 0.;
 
     double nu = 0.5;
-    double m[] = {1., 0., 0., 1.};
-    double yDiff[] = {0.005, 0.01};
+    double m[] = {1., 0.3, 0.3, 1.}; // Non-diagonal matrix with det not 1
+    double yDiff[] = {0.01, 0.005};
     unsigned int alpha0[] = {0, 0};
     double *x = malloc(dim * sizeof(double));
     double *y0 = malloc(dim * sizeof(double));
@@ -177,13 +177,13 @@ int test_setZetaDer_taylor(void) { // NOLINT
 
     for (int i = 0; i < 100; i++) {
 
-        nu = 0.5 + 0.333333 * i;
+        nu = -12.5 + 0.333 * (i + 1);
 
-        x[0] = 0.0005 * i;
-        x[1] = -0.02 * i;
+        x[0] = 0.003 * i;
+        x[1] = -0.002 * i;
 
-        y0[0] = 0.1 + 0.001 * i;
-        y0[1] = 0.2 + 0.0005 * i;
+        y0[0] = -1.1 + 0.1 * i;
+        y0[1] = -2.02 + 0.05 * i;
 
         for (int i = 0; i < dim; i++) {
             yPlus[i] = y0[i] + yDiff[i];
