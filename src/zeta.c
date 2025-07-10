@@ -7,7 +7,8 @@
 
 /**
  * @file zeta.c
- * @brief Calculates the (regularized) Epstein zeta function.
+ * @brief Calculates the (regularized) Epstein zeta function and derivavies of the
+ * set zeta function.
  */
 
 #include <complex.h>
@@ -356,13 +357,12 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                    const double *m, const double *x, const double *y,
                                    double lambda, unsigned int variant,
                                    const unsigned int *alpha) {
-    unsigned int alphaAbs = mult_abs(dim, alpha);
     // Early return for 0th derivative special cases
+    unsigned int alphaAbs = (variant > 1) ? mult_abs(dim, alpha) : 0;
     if (variant == 2 && !alphaAbs) {
         return cexp(2 * M_PI * I * dot(dim, x, y)) *
                epsteinZetaInternal(nu, dim, m, x, y, 1, 0, alpha);
     }
-
     if (variant == 3 && !alphaAbs) {
         return epsteinZetaInternal(nu, dim, m, x, y, 1, 1, alpha);
     }
