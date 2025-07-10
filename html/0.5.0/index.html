@@ -264,6 +264,11 @@ in Mathematica</h3>
 <div class="line">Print[&quot;Reference value:              &quot;, NumberForm[madelungRef, 16]];</div>
 <div class="line">Print[&quot;Relative error:               +&quot;, ScientificForm[Abs[madelungRef - madelung]/Abs[madelungRef], 2]];</div>
 </div><!-- fragment --><p>Executing this code snipped in the same folder as <code>EpsteinZeta.wl</code> and setting <code>SetDirectory[NotebookDirectory[]]</code> is the easiest way to help mathematica find the package.</p>
+<p>In the <code>examples/mathematica/</code> folder, you can find two more mathematica examples:</p>
+<ol type="1">
+<li><code>BenchmarkQuick.wls</code>: Standalone script that compares the (regularized) Epstein zeta function to known formulas in special cases.</li>
+<li><code>BenchmarkAndPaperFigures.wls</code>: Script that reproduces every figure in [8].</li>
+</ol>
 <h2><a class="anchor" id="autotoc_md9"></a>
 Development environment</h2>
 <p>We provide a nix devshell to have a reproducible development environment with the same dependencies across different operating systems. Once you have installed and configured nix, starting developing is as easy as running <code>nix develop</code>.</p>
@@ -337,7 +342,7 @@ References</h2>
 <p>[4] Andreas A Buchheit and Torsten Keßler. “On the Efficient Computation of Large Scale Singular Sums with Applications to Long-Range Forces in Crystal Lattices”. J. Sci. Comput. 90.1 (2022), pp. 1–20</p>
 <p>[5] Andreas A Buchheit and Torsten Keßler. “Singular Euler–Maclaurin expansion on multidimensional lattices”. Nonlinearity 35.7 (2022), p. 3706</p>
 <p>[6] R. Crandall. “Unified algorithms for polylogarithm, L-series, and zeta variants”. Algorithmic Reflections: Selected Works. PSIpress, 2012</p>
-<p>[7] Andreas A. Buchheit, Torsten Keßler, and Kirill Serkh. "On the computation of lattice sums without translational invariance". Mathematics of Computation (Oct. 2024)</p>
+<p>[7] Andreas A. Buchheit, Torsten Keßler, and Kirill Serkh. "On the computation of lattice sums without translational invariance". Mathematics of Computation 94 (2025), pp. 2533-2574.</p>
 <p>[8] Andreas A. Buchheit, Jonathan Busse, and Ruben Gutendorf. "Computation and properties of the Epstein zeta function with high-performance implementation in EpsteinLib". arXiv preprint arXiv:2412.16317 (2024). </p>
 </div></div><!-- PageDoc -->
 <a href="doxygen_crawl.html"/>
