@@ -144,8 +144,9 @@ int test_setZetaDer1D(void) {
 int test_setZetaDer_prototype(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/setZetaDer_Ref.csv", // NOLINT
-                          BASE_PATH);
+    int result =
+        snprintf(path, sizeof(path), "%s/setZetaDer_prototype_Ref.csv", // NOLINT
+                 BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
@@ -166,7 +167,7 @@ int test_setZetaDer_prototype(void) {
     int testsPassed = 0;
     int totalTests = 0;
     unsigned int dim = 2;
-    double tol = 5 * pow(10, -12);
+    double tol = pow(10, -12);
 
     double errMin = NAN;
     double errMax = NAN;
