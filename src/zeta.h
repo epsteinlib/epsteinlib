@@ -16,12 +16,12 @@
 #include <complex.h>
 
 /**
- * @brief calculates the (regularized) Epstein Zeta function.
+ * @brief calculates the (regularized) Epstein zeta function.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
- * @param[in] m: matrix that transforms the lattice in the Epstein Zeta function.
- * @param[in] x: x vector of the Epstein Zeta function.
- * @param[in] y: y vector of the Epstein Zeta function.
+ * @param[in] m: matrix that transforms the lattice in the Epstein zeta function.
+ * @param[in] x: x vector of the Epstein zeta function.
+ * @param[in] y: y vector of the Epstein zeta function.
  * @param[in] lambda: relative weight of the sums in Crandall's formula.
  * @param[in] variant: 0 for no regularization
  *                    1 for the regularization

@@ -8,10 +8,11 @@
 BeginPackage["EpsteinZeta`"];
 
 
-EpsteinZeta::usage="epsteinZeta[\[Nu],A,x,y] computes the Epstein zeta function sum_{z in Lambda} exp(- 2 Pi I y.z)/|z - x|^\[Nu]
+EpsteinZeta::usage="EpsteinZeta[\[Nu],A,x,y] computes the Epstein zeta function sum_{z in Lambda} exp(- 2 Pi I y.z)/|z - x|^\[Nu]
 using the algorithm in Crandall, R., Unified algorithms for polylogarithm, L-series, and zeta variants. Algorithmic Reflections: Selected Works. PSIpress (2012).";
-EpsteinZetaReg::usage="epsteinZetaReg[\[Nu],A,x,y] computes the regularized Epstein zeta function exp(2 Pi I x.y) sum_{z in Lambda} exp(- 2 Pi I y.(z - x))/|z - x|^\[Nu]  - s\:0302(y)/|det(\[CapitalLambda])|
+EpsteinZetaReg::usage="EpsteinZetaReg[\[Nu],A,x,y] computes the regularized Epstein zeta function exp(2 Pi I x.y) sum_{z in Lambda} exp(- 2 Pi I y.(z - x))/|z - x|^\[Nu]  - s\:0302(y)/|det(\[CapitalLambda])|
 as in Andreas A. Buchheit et al., Exact continuum representation of long-range interacting systems and emerging exotic phases in unconventional superconductors. Phys. Rev. Res. 5 (4 Oct. 2023), p. 043065.  using a modification of the algorithm in Crandall, R., Unified algorithms for polylogarithm, L-series, and zeta variants. Algorithmic Reflections: Selected Works. PSIpress (2012).";
+SetZetaDer::usage="SetZetaDer[\[Nu],A,x,y,\[Alpha]] computes the partiall derivatives of the set zeta function sum_{z in (Lambda - x)} exp(- 2 Pi I y.z)/|z|^\[Nu] with respect to y and some multi-index \[Alpha] as in [TODO]";
 
 
 Begin["Private`"];
@@ -47,6 +48,7 @@ If[libPath === $Failed,
   ]]
 ]
 
+
 (* Interface to C functions *)
 foreignFunctionEpsteinZeta = ForeignFunctionLoad[libPath, "epstein_zeta_mathematica_call", {"RawPointer"::["CDouble"], "CDouble", "CInt", "RawPointer"::["CDouble"], "RawPointer"::["CDouble"], "RawPointer"::["CDouble"]} -> "CInt"]
 If[Head[foreignFunctionEpsteinZeta] =!= ForeignFunction,
@@ -58,10 +60,15 @@ If[Head[foreignFunctionEpsteinZetaReg] =!= ForeignFunction,
   Print["ForeignFunctionLoad for epstein_zeta_reg_mathematica_call failed."]
 ]
 
+foreignFunctionSetZetaDer = ForeignFunctionLoad[libPath, "set_zeta_der_mathematica_call", {"RawPointer"::["CDouble"], "CDouble", "CInt", "RawPointer"::["CDouble"], "RawPointer"::["CDouble"], "RawPointer"::["CDouble"], "RawPointer"::["CUnsignedInt"]} -> "CInt"]
+If[Head[foreignFunctionEpsteinZetaReg] =!= ForeignFunction,
+  Print["ForeignFunctionLoad for set_zeta_der_mathematica_call failed."]
+]
+
 (* For checking nan output of C function *)
 NaNQ = ResourceFunction["NaNQ"];
 
-(* Internal routine for C function access *)
+(* Internal routines for C function access *)
 epsteinZetaInternal[\[Nu]_, A_, x_, y_, function_, foreignFunction_] :=
 Module[
   {d = Length[A], failed = False, aMemory, xMemory, yMemory, zetaMemory, epsteinZetaObject, realPart, imagPart},
@@ -98,18 +105,60 @@ Module[
   ]
 ]
 
+epsteinZetaDerivativesInternal[\[Nu]_, A_, x_, y_, \[Alpha]_, function_, foreignFunction_] :=
+Module[
+  {d = Length[A], failed = False, aMemory, xMemory, yMemory, \[Alpha]Memory, zetaMemory, epsteinZetaObject, realPart, imagPart},
+
+  (* Dimensional error handling *)
+  If[Length[x] != d, Message[function::dimerrx, d, Length[x], x, y, A, \[Alpha]]; failed = True];
+  If[Length[y] != d, Message[function::dimerry, d, Length[y], x, y, A, \[Alpha]]; failed = True];
+  If[Length[\[Alpha]] != d, Message[function::dimerr\[Alpha], d, Length[\[Alpha]], x, y, A, \[Alpha]]; failed = True];
+  If[failed, Return[$Failed]];
+
+  aMemory = RawMemoryAllocate["CDouble", d * d];
+  xMemory = RawMemoryAllocate["CDouble", d];
+  yMemory = RawMemoryAllocate["CDouble", d];
+  \[Alpha]Memory = RawMemoryAllocate["CUnsignedInt", d];
+
+  Table[RawMemoryWrite[xMemory, N[x[[i]]], i-1], {i, 1, d}];
+  Table[RawMemoryWrite[yMemory, N[y[[i]]], i-1], {i, 1, d}];
+  Table[RawMemoryWrite[aMemory, N[A[[i,j]]], d*(i-1)+(j-1)], {i, 1, d}, {j, 1, d}];
+  Table[RawMemoryWrite[\[Alpha]Memory, \[Alpha][[i]], i-1], {i, 1, d}];
+
+  zetaMemory = RawMemoryAllocate["CDouble", 2];
+  epsteinZetaObject = foreignFunction[zetaMemory, N[\[Nu]], d, aMemory, xMemory, yMemory, \[Alpha]Memory];
+
+  realPart = RawMemoryRead[zetaMemory, 0];
+  imagPart = RawMemoryRead[zetaMemory, 1];
+
+  If[PossibleZeroQ@epsteinZetaObject,
+    If[!NaNQ[N@realPart] && !NaNQ[N@imagPart],
+      realPart + I*imagPart,
+      ComplexInfinity
+    ],
+    Print["Error: Calculation failed"];
+    Print["Input parameters: \[Nu] = ", \[Nu], ", A = ", A, ", x = ", x, ", y = ", y, ", \[Alpha] = ", \[Alpha]];
+    Print["Dimension: ", d];
+    "An Error occurred.";
+    epsteinZetaObject
+  ]
+]
+
 
 (* Dimensional error handling messages *)
-EpsteinZeta::dimerrx = "Input vector x = `3` has incorrect dimension. Expected dimension `1` (matching `1`×`1` matrix A = `5`), but got `2`."
-EpsteinZeta::dimerry = "Input vector y = `4` has incorrect dimension. Expected dimension `1` (matching `1`×`1` matrix A = `5`), but got `2`."
-EpsteinZetaReg::dimerrx = "Input vector x = `3` has incorrect dimension. Expected dimension `1` (matching `1`×`1` matrix A = `5`), but got `2`."
-EpsteinZetaReg::dimerry = "Input vector y = `4` has incorrect dimension. Expected dimension `1` (matching `1`×`1` matrix A = `5`), but got `2`."
+EpsteinZeta::dimerrx = "Input vector x = `3` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
+EpsteinZeta::dimerry = "Input vector y = `4` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
+EpsteinZetaReg::dimerrx = "Input vector x = `3` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
+EpsteinZetaReg::dimerry = "Input vector y = `4` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
+SetZetaDer::dimerrx = "Input vector x = `3` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
+SetZetaDer::dimerry = "Input vector y = `4` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
+SetZetaDer::dimerr\[Alpha] = "Input vector \[Alpha] = `6` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
 
 
-(* Define the public Epstein zeta functions *)
+(* Define the public Epstein and set zeta functions *)
 EpsteinZeta[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ], x_/;VectorQ[x] && AllTrue[x, NumericQ], y_/;VectorQ[y] && AllTrue[y, NumericQ]] := epsteinZetaInternal[\[Nu], A, x, y, EpsteinZeta, foreignFunctionEpsteinZeta]
-
 EpsteinZetaReg[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ], x_/;VectorQ[x] && AllTrue[x, NumericQ], y_/;VectorQ[y] && AllTrue[y, NumericQ]] := epsteinZetaInternal[\[Nu], A, x, y, EpsteinZetaReg, foreignFunctionEpsteinZetaReg]
+SetZetaDer[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ], x_/;VectorQ[x] && AllTrue[x, NumericQ], y_/;VectorQ[y] && AllTrue[y, NumericQ],  \[Alpha]_/;VectorQ[\[Alpha]] && AllTrue[\[Alpha], Element[#, NonNegativeIntegers]&]] := epsteinZetaDerivativesInternal[\[Nu], A, x, y, \[Alpha], SetZetaDer, foreignFunctionSetZetaDer]
 
 
 (* Check if package loaded successfully *)
@@ -118,16 +167,21 @@ If[libPath =!= $Failed &&
    Head[foreignFunctionEpsteinZeta] === ForeignFunction &&
    Head[foreignFunctionEpsteinZetaReg] === ForeignFunction &&
    PossibleZeroQ[EpsteinZeta[-2, {{1}}, {1}, {0}]] &&
-   PossibleZeroQ[EpsteinZetaReg[-2, {{1}}, {1}, {0}]],
+   PossibleZeroQ[EpsteinZetaReg[-2, {{1}}, {1}, {0}]]&&
+   PossibleZeroQ[SetZetaDer[-2, {{1}}, {1}, {0}, {0}]],
   Message[epsteinLoad::info,
-   "The (regularized) Epstein zeta function can be called using:
-  EpsteinZeta[\[Nu], A, x, y]
-  EpsteinZetaReg[\[Nu], A, x, y]
-Where:
-  \[Nu] is a real number
-  A is a square matrix
-  x and y are vectors of the same dimension as A"]
+   "The (regularized) Epstein zeta and the derivatives of the set zeta function can be called using:
+	EpsteinZeta[\[Nu], A, x, y]
+	EpsteinZetaReg[\[Nu], A, x, y]
+	SetZetaDer[\[Nu], A, x, y, \[Alpha]]
+
+	\[Nu] is a real number
+	A is a square matrix
+	x and y are vectors of the same dimension as A
+	\[Alpha] is a non-negative multi-index of the same dimension as A
+"]
 ]
+
 
 End[];
 

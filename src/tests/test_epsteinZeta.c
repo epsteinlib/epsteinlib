@@ -51,7 +51,7 @@ double sHat(double nu, unsigned int dim, double *y) {
  * @brief Free memory allocated for test resources.
  *
  * This function deallocates memory that was dynamically allocated for various
- * arrays used in the Epstein Zeta function tests.
+ * arrays used in the Epstein zeta function tests.
  *
  * @param[in] a Pointer to the matrix of coefficients.
  * @param[in] nu Pointer to the array of nu values.
@@ -69,7 +69,7 @@ void freeTestResources(double *a, double *nu, double *x, double *y,
 }
 
 /*!
- * @brief Reports an error when the Epstein Zeta function representation test fails.
+ * @brief Reports an error when the Epstein zeta function representation test fails.
  *
  * This function prints detailed information about the test case that failed,
  * including the computed values, error margins, and input parameters.
@@ -103,11 +103,11 @@ void reportEpsteinZetaError(double complex valZeta, double complex valZetaReg,
 }
 
 /*!
- * @brief Reports an error when the Epstein Zeta function cutoff test fails.
+ * @brief Reports an error when the Epstein zeta function cutoff test fails.
  *
  * @param[in] testCase A string describing the specific test case that failed.
- * @param[in] zeta1 The first computed value of the Epstein Zeta function.
- * @param[in] zeta2 The second computed value of the Epstein Zeta function for
+ * @param[in] zeta1 The first computed value of the Epstein zeta function.
+ * @param[in] zeta2 The second computed value of the Epstein zeta function for
  * comparison.
  * @param[in] nu The parameter nu of the Epstein zeta function.
  * @param[in] y Pointer to the array of y values.
@@ -134,7 +134,7 @@ void reportEpsteinZetaCutoffError(const char *testCase, double complex zeta1,
 }
 
 /*!
- * @brief Test function for Epstein Zeta and Regularized Epstein Zeta functions.
+ * @brief Test function for Epstein zeta and Regularized Epstein zeta functions.
  *
  * This function tests both the epsteinZeta and epsteinZetaReg functions by comparing
  * their outputs with reference values read from data files. It performs multiple
@@ -339,7 +339,7 @@ int test_epsteinZeta_epsteinZetaReg() { // NOLINT
 }
 
 /*!
- * @brief Test if the Epstein Zeta function can be represented in terms of the
+ * @brief Test if the Epstein zeta function can be represented in terms of the
  * regularized function and the singularity, particularly focusing on cases where nu
  * = dim + 2k, where k is an integer.
  *
@@ -434,10 +434,10 @@ bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
 }
 
 /*!
- * @brief Test the Epstein Zeta function behavior around the cutoff point for nu <=
+ * @brief Test the Epstein zeta function behavior around the cutoff point for nu <=
  * dim.
  *
- * This function tests the Epstein Zeta function for four cases:
+ * This function tests the Epstein zeta function for four cases:
  * 1. At a reference value (y = {0, 0, 0.5})
  * 2. Just before the cutoff (y = {0, 0, 1e-31})
  * 3. Just after the cutoff (y = {0, 0, 1e-33})
@@ -499,7 +499,7 @@ bool test_epsteinZeta_cutoff() {
 }
 
 /*!
- * @brief Main function to run all Epstein Zeta function tests.
+ * @brief Main function to run all Epstein zeta function tests.
  *
  * @return number of failed tests.
  */
