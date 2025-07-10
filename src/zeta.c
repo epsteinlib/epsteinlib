@@ -358,7 +358,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                    double lambda, unsigned int variant,
                                    const unsigned int *alpha) {
     // Early return for 0th derivative special cases
-    unsigned int alphaAbs = (variant > 2) ? mult_abs(dim, alpha) : 0;
+    unsigned int alphaAbs = (variant > 1) ? mult_abs(dim, alpha) : 0;
     if (variant == 2 && !alphaAbs) {
         return cexp(2 * M_PI * I * dot(dim, x, y)) *
                epsteinZetaInternal(nu, dim, m, x, y, 1, 0, alpha);
