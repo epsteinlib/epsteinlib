@@ -176,7 +176,7 @@ If[libPath =!= $Failed &&
 	SetZetaDer[\[Nu], A, x, y, \[Alpha]]
 
 	\[Nu] is a real number
-	is a square matrix
+	A is a square matrix
 	x and y are vectors of the same dimension as A
 	\[Alpha] is a non-negative multi-index of the same dimension as A
 "]
