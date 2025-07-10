@@ -27,9 +27,18 @@ Protect[Power];
 (*Setup reference functions*)
 
 
+(* ::Text:: *)
+(*Analytic derivatives in 1D. Note the correction factor 2, as Mathematica seems to not double count the sum from zero to infinity for non-zero derivatives.*)
+
+
+SetZetaDerAnalytic1D[\[Nu]_,y_,n_]:=Re@Derivative[n][2 LerchPhi[Exp[-2 Pi I #],\[Nu],0]&][y]
+
+
+(* ::Text:: *)
+(*Derivatives of the upper Crandall function*)
+
+
 p[y_,\[Alpha]_,\[Beta]_]:=Apply[Times,(-\[Pi])^(\[Alpha]-\[Beta])Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2y)^(\[Alpha]-2\[Beta])]
-
-
 g[\[Nu]_,y_]=Piecewise[{{0,Norm[y]>=4},{ -2/\[Nu],Norm[y]<10^(-64)},{ExpIntegralE[1-\[Nu]/2,Pi y . y],Norm[y]>=10^(-64)&&Norm[y]<4}}];
 gDer[\[Nu]_,y_,\[Alpha]_]:=Total[Flatten[Table[p[y,\[Alpha],\[Beta]]g[\[Nu]+2Total[\[Alpha]-\[Beta]],y],{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}]]]
 
@@ -74,7 +83,47 @@ randDerivative := RandomInteger[{0,6}]
 
 
 (* ::Subsection:: *)
-(*Create polynomial p reference values*)
+(*Create Epstein zeta 1D analytic reference values in x = 0*)
+
+
+(* ::Text:: *)
+(*Setup test parameters*)
+
+
+range = Range[100];
+Do[
+	\[Nu]1D[i]=10 randRational
+	;y1D[i]=randRational
+	;n1D[i]=randDerivative
+	,{i,range}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values*)
+
+
+zDerTab1D=ParallelTable[
+	With[{result=SetPrecision[SetZetaDerAnalytic1D[\[Nu]1D[i],y1D[i],n1D[i]],60]}
+	,{N[\[Nu]1D[i],30]
+	,N[y1D[i],30]
+	,n1D[i]
+	,Re[result]
+	,Im[result]
+	}],{i,range}
+];
+
+
+(* ::Text:: *)
+(*Save reference values to file*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/setZetaDer1D_Ref.csv",zDerTab1D];
+
+
+(* ::Subsection:: *)
+(*Create Epstein zeta prototype reference values*)
 
 
 (* ::Text:: *)
