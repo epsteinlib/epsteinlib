@@ -1,9 +1,8 @@
-
 <!--
-SPDX-FileCopyrightText: 2024 Andreas Buchheit <buchheit@num.uni-sb.de>
-SPDX-FileCopyrightText: 2024 Jan Schmitz <schmitz@num.uni-sb.de>
-SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
-SPDX-FileCopyrightText: 2024 Ruben Gutendorf <ruben.gutendorf@uni-saarland.de>
+SPDX-FileCopyrightText: 2025 Andreas Buchheit <buchheit@num.uni-sb.de>
+SPDX-FileCopyrightText: 2025 Jan Schmitz <schmitz@num.uni-sb.de>
+SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
+SPDX-FileCopyrightText: 2025 Ruben Gutendorf <ruben.gutendorf@uni-saarland.de>
 
 SPDX-License-Identifier: AGPL-3.0-only
 -->
@@ -11,9 +10,12 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <img align="right" src="https://avatars.githubusercontent.com/u/177750891?v=4" width="110">
 
-[![PyPI download month](https://img.shields.io/pypi/dm/epsteinlib.svg?label=PyPI%20downloads)](https://pypi.python.org/pypi/epsteinlib/)
-[![Pipeline status](https://img.shields.io/github/check-runs/epsteinlib/epsteinlib/main)](https://github.com/epsteinlib/epsteinlib/actions)
-[![PyPI status](https://img.shields.io/badge/DOI-10.48550%2FarXiv.2412.16317-blue.svg)](https://doi.org/10.48550/arXiv.2412.16317)
+[![DOI](https://img.shields.io/badge/DOI-10.48550%2FarXiv.2412.16317-blue.svg)](https://doi.org/10.48550/arXiv.2412.16317)
+[![PyPI package](https://badge.fury.io/py/epsteinlib.svg)](https://badge.fury.io/py/epsteinlib)
+<!-- [![Pipeline status](https://img.shields.io/github/check-runs/epsteinlib/epsteinlib/main)](https://github.com/epsteinlib/epsteinlib/actions/runs/15211465520) -->
+<!-- TODO: We want to point to the latest pipeline in main, this is not possible right now -->
+
+
 
 # EpsteinLib
 
@@ -251,6 +253,12 @@ Print["Relative error:               +", ScientificForm[Abs[madelungRef - madelu
 
 Executing this code snipped in the same folder as `EpsteinZeta.wl` and setting `SetDirectory[NotebookDirectory[]]` is the easiest way to help mathematica find the package.
 
+
+In the `examples/mathematica/` folder, you can find two more mathematica examples:
+
+1. `BenchmarkQuick.wls`: Standalone script that compares the (regularized) Epstein zeta function to known formulas in special cases.
+2. `BenchmarkAndPaperFigures.wls`: Script  that reproduces every figure in [8].
+
 ## Development environment
 We provide a nix devshell to have a reproducible development environment with the same dependencies across different operating systems. Once you have installed and configured nix, starting developing is as easy as running `nix develop`.
 
@@ -334,6 +342,6 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 [6] R. Crandall. “Unified algorithms for polylogarithm, L-series, and zeta variants”. Algorithmic Reflections: Selected Works. PSIpress, 2012
 
-[7] Andreas A. Buchheit, Torsten Keßler, and Kirill Serkh. "On the computation of lattice sums without translational invariance". Mathematics of Computation (Oct. 2024)
+[7] Andreas A. Buchheit, Torsten Keßler, and Kirill Serkh. "On the computation of lattice sums without translational invariance". Mathematics of Computation 94 (2025), pp. 2533-2574.
 
 [8] Andreas A. Buchheit, Jonathan Busse, and Ruben Gutendorf. "Computation and properties of the Epstein zeta function with high-performance implementation in EpsteinLib". arXiv preprint arXiv:2412.16317 (2024).
