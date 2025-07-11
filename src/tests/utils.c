@@ -5,6 +5,7 @@
 #include <complex.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define EPSILON_REF (double)pow(10, -62)
 
@@ -133,4 +134,37 @@ double mult_pow(unsigned int dim, const unsigned int *alpha, const double *vec) 
         }
     }
     return res;
+}
+
+/**
+ * @brief Opens a file.
+ * @param path Path to the file.
+ * @param mode 'r' to read or 'w' to write.
+ * @return FILE* Pointer to the opened file.
+ * @note Exits the program if the file cannot be opened.
+ */
+FILE *open(char *path, char *mode) {
+    FILE *file = fopen(path, mode);
+    if (file) {
+        return file;
+    }
+    printf("File '%s' does not exist.\n", path);
+    exit(1); // NOLINT
+}
+
+/**
+ * @brief Sorts an array of doubles in ascending order using bubble sort.
+ * @param arr: The array to be sorted.
+ * @param size: The size of the array.
+ */
+void sort(double *arr, int size) {
+    for (int i = 0; i < size - 1; i++) {
+        for (int j = 0; j < size - i - 1; j++) {
+            if (*(arr + j) > *(arr + j + 1)) {
+                double temp = *(arr + j);
+                *(arr + j) = *(arr + j + 1);
+                *(arr + j + 1) = temp;
+            }
+        }
+    }
 }

@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 #include <complex.h>
+#include <stdio.h>
 
 #ifndef UTILS_H
 #define UTILS_H
@@ -66,5 +67,21 @@ unsigned int mult_fac(unsigned int dim, const unsigned int *alpha);
  * @return (prefactor * vec) ** alpha.
  */
 double mult_pow(unsigned int dim, const unsigned int *alpha, const double *vec);
+
+/**
+ * @brief Opens a file.
+ * @param path Path to the file.
+ * @param mode 'r' to read or 'w' to write.
+ * @return FILE* Pointer to the opened file.
+ * @note Exits the program if the file cannot be opened.
+ */
+FILE *open(char *path, char *mode);
+
+/**
+ * @brief Sorts an array of doubles in ascending order using bubble sort.
+ * @param arr: The array to be sorted.
+ * @param size: The size of the array.
+ */
+void sort(double *arr, int size);
 
 #endif
