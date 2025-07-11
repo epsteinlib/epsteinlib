@@ -503,6 +503,136 @@ int test_setZetaDer_laplace(void) {
 }
 
 /*!
+ * @brief Benchmarks 2D setZetaDer function by comparing to reference values of the
+ * squared laplacian of set zeta function obtained by finite differences.
+ *
+ * @return number of failed tests.
+ * */
+int test_setZetaDer_laplace2(void) {
+    printf("%s ", __func__);
+    char path[MAX_PATH_LENGTH];
+    int result =
+        snprintf(path, sizeof(path), "%s/setZetaDer_laplace2_Ref.csv", // NOLINT
+                 BASE_PATH);
+    if (result < 0 || result >= sizeof(path)) {
+        return fprintf(stderr, "Error creating file path\n");
+    }
+    FILE *data = fopen(path, "r");
+    if (data == NULL) {
+        return fprintf(stderr, "Error opening file: %s\n", path);
+    }
+
+    double nu;
+    double errorAbs;
+    double errorRel;
+    double errorMaxAbsRel;
+    double complex num;
+    double complex ref;
+    int scanResult;
+    char line[256];
+
+    int testsPassed = 0;
+    int totalTests = 0;
+    unsigned int dim = 2;
+    double tol = pow(10, -2);
+
+    double errMin = NAN;
+    double errMax = NAN;
+    double errSum = 0.;
+
+    double *nuRef = malloc(sizeof(double));
+    double *a = malloc((unsigned long)dim * (unsigned long)dim * sizeof(double));
+    double *x = malloc(dim * sizeof(double));
+    double *y = malloc(dim * sizeof(double));
+    double *refRead = malloc(2 * sizeof(double));
+
+    unsigned int alpha40[] = {4, 0};
+    unsigned int alpha31[] = {3, 1};
+    unsigned int alpha22[] = {2, 2};
+    unsigned int alpha13[] = {1, 3};
+    unsigned int alpha04[] = {0, 4};
+
+    printf("\n\t ... ");
+    printf("processing %s ", path);
+    while (fgets(line, sizeof(line), data) != NULL) {
+        // Scan: nu, {a11, a12, a21, a22}, {x1, x2}, {y1, y2}, {Re[result],
+        // Im[result]}
+        scanResult = sscanf( // NOLINT
+            line, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf", nuRef, a, a + 1,
+            a + 2, a + 3, x, x + 1, y, y + 1, refRead, refRead + 1);
+
+        if (scanResult != 11) {
+            printf("\n\t ");
+            printf("Error reading line: %s", line);
+            printf("\t ");
+            printf("Scanned %d values instead of 11", scanResult);
+            continue;
+        }
+
+        nu = nuRef[0];
+
+        num = setZetaDer(nu, dim, a, x, y, alpha40) +
+              4 * setZetaDer(nu, dim, a, x, y, alpha31) +
+              6 * setZetaDer(nu, dim, a, x, y, alpha22) +
+              4 * setZetaDer(nu, dim, a, x, y, alpha13) +
+              setZetaDer(nu, dim, a, x, y, alpha04);
+
+        ref = refRead[0] + refRead[1] * I;
+
+        errorAbs = errAbs(ref, num);
+        errorRel = errRel(ref, num);
+
+        errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
+
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
+            printf("\n\n");
+            printf("err nb %u\n", totalTests);
+            printf("Warning! ");
+            printf("setZetaDer: ");
+            printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
+                   "%.16lf "
+                   "%+.16lf I (reference implementation)\n",
+                   4, creal(num), cimag(num), creal(ref), cimag(ref));
+            printf("Min(Emax, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
+                   tol);
+            printf("\n");
+            printf("nu:\t\t %.16lf\n", nu);
+            printMatrixUnitTest("a:", a, dim);
+            printVectorUnitTest("x:\t\t", x, dim);
+            printVectorUnitTest("y:\t\t", y, dim);
+            printf("\n");
+        }
+        totalTests++;
+    }
+
+    free(nuRef);
+    free(a);
+    free(x);
+    free(y);
+    free(refRead);
+
+    if (fclose(data) != 0) {
+        return fprintf(stderr, "Error closing file: %d", errno);
+    }
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
+           tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
+
+    return totalTests - testsPassed;
+}
+
+/*!
  * @brief Main function to run all set zeta derivatives function tests.
  *
  * @return number of failed tests.
@@ -512,5 +642,6 @@ int main() {
     int failed2 = test_setZetaDer_prototype();
     int failed3 = test_setZetaDer_taylor();
     int failed4 = test_setZetaDer_laplace();
-    return failed1 + failed2 + failed3 + failed4;
+    int failed5 = test_setZetaDer_laplace2();
+    return failed1 + failed2 + failed3 + failed4 + failed5;
 }

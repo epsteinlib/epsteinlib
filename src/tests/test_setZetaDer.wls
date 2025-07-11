@@ -14,7 +14,7 @@
 
 
 (* ::Text:: *)
-(*Load Mathematica wrapper in every kernel. Remove the "Quiet" if unsure about the parallel evaluation.*)
+(*Load Mathematica wrapper in every kernel. Remove the "Quiet" if unsure about the parallel evaluation*)
 
 
 baseDir=FileNameJoin[{NotebookDirectory[], "..", "..", "mathematica"}];
@@ -23,7 +23,7 @@ ParallelEvaluate[SetDirectory[baseDir];Quiet[<<EpsteinZeta.wl]];
 
 
 (* ::Text:: *)
-(*Set 0^0 in every kernel.*)
+(*Set 0^0 in every kernel*)
 
 
 Unprotect[Power];
@@ -45,10 +45,14 @@ Protect[Power];
 
 
 (* ::Text:: *)
-(*Generate random rational numbers between -1 and 1 and random integers between 0 and 6.*)
+(*Generate random rational numbers between -1 and 1 and random integers between 0 and 6*)
+
+
+RandomChoice[{-1,1}]
 
 
 randRational := RandomInteger[{-10^(16),10^(16)}]/10^(16)
+randRationalStable := RandomChoice[{-1,1}](1/10+8/10 RandomInteger[{0,10^(16)}]/10^(16))
 randDerivative := RandomInteger[{0,6}]
 
 
@@ -60,7 +64,7 @@ DirDerTaylorCoeffs[n_,size_]:=LinearSolve[
 	Table[(1/(i-1)!)*(j-((size+1)/2))^(i-1),{i,size},{j,size}]
 	,n(size+1)Map[KroneckerDelta[#,n+1]&,Range[size]]
 ]
-DirectionalDerivative[f_,x_,v_,n_,size_,h_]:=If[PossibleZeroQ[n]
+DirectionalDerivative[v_,n_,size_:15,h_:1/1000][f_][x_]:=If[PossibleZeroQ[n]
 	,f[x]
 	,Total[DirDerTaylorCoeffs[n,size] Map[f[x+h v #]&,Range[size]-(size+1)/2]]/((h^n)*n(size+1))
 ]
@@ -78,7 +82,7 @@ SetZeta[\[Nu]_,a_,x_,y_]:=Exp[2 Pi I x . y]EpsteinZeta[\[Nu],a,x,y]
 
 
 (* ::Text:: *)
-(*Analytic derivatives in 1D. Note the correction factor 2, as Mathematica seems to not double count the sum from zero to infinity for non-zero derivatives.*)
+(*Analytic derivatives in 1D. Note the correction factor 2, as Mathematica seems to not double count the sum from zero to infinity for non-zero derivatives*)
 
 
 SetZetaDerAnalytic1D[\[Nu]_,y_,n_]:=Re@Derivative[n][2 LerchPhi[Exp[-2 Pi I #],\[Nu],0]&][y]
@@ -94,7 +98,7 @@ gDer[\[Nu]_,y_,\[Alpha]_]:=Total[Flatten[Table[p[y,\[Alpha],\[Beta]]g[\[Nu]+2Tot
 
 
 (* ::Text:: *)
-(*Derivatives of sums in real and reciprocal space.*)
+(*Derivatives of sums in real and reciprocal space*)
 
 
 sumRealDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[Apply[Times,(-2Pi I z)^\[Alpha]]g[\[Nu],z]Exp[-2Pi I y . z],{z,(A . #-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}]
@@ -102,7 +106,7 @@ sumFourierDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[gDer[Length[\[Alph
 
 
 (* ::Text:: *)
-(*Prototype for epsteinZetaDer without special cases such non-positive even integers nu.*)
+(*Prototype for epsteinZetaDer without special cases such non-positive even integers nu*)
 
 
 setZetaDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:10]:=Module[
@@ -227,7 +231,7 @@ Do[
 	\[Nu]L[i]=10 randRational
 	;aL[i]={{1,1/2},{0,Sqrt@3/2}}
 	;xL[i]=If[i<10,{0,0},{randRational,randRational}]
-	;yL[i]=If[i<10,(*unstable near x = y = (0,0)*){0.1+Abs[randRational/2],0.1+Abs[randRational/2]}, {randRational,randRational}]
+	;yL[i]={randRationalStable,randRationalStable}
 	,{i,range}
 ]
 
@@ -238,7 +242,7 @@ Do[
 
 zLaplaceTab=ParallelTable[
 	(* big stencil width and size works best for "low" precision reference values *)
-	With[{result=DirectionalDerivative[SetZeta[\[Nu]L[i],aL[i],xL[i],#]&,yL[i],{1,1},2,(*stencil size: *)25,(*stencil width: *)1/250]}
+	With[{result=DirectionalDerivative[{1,1},2,(*stencil size: *)25,(*stencil width: *)1/250][SetZeta[\[Nu]L[i],aL[i],xL[i],#]&][yL[i]]}
 	,{N[\[Nu]L[i]]
 	,N[aL[i][[1,1]]]
 	,N[aL[i][[1,2]]]
@@ -260,3 +264,51 @@ zLaplaceTab=ParallelTable[
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_laplace_Ref.csv",zLaplaceTab];
+
+
+(* ::Subsection:: *)
+(*Create Laplacian set zeta reference values by finite differences*)
+
+
+(* ::Text:: *)
+(*Setup test parameters*)
+
+
+range = Range[100];
+Do[
+	\[Nu]L2[i]=10 randRational
+	;aL2[i]={{1,1/2},{0,Sqrt@3/2}}
+	;xL2[i]=If[i<10,{0,0},{randRationalStable,randRationalStable}]
+	;yL2[i]={randRationalStable,randRationalStable}
+	,{i,range}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values*)
+
+
+zLaplace2Tab=ParallelTable[
+	(* big stencil width and size works best for "low" precision reference values *)
+	With[{result=DirectionalDerivative[{1,1},4,(*stencil size: *)55,(*stencil width: *)1/250][SetZeta[\[Nu]L2[i],aL2[i],xL2[i],#]&][yL2[i]]}
+	,{N[\[Nu]L2[i]]
+	,N[aL2[i][[1,1]]]
+	,N[aL2[i][[1,2]]]
+	,N[aL2[i][[2,1]]]
+	,N[aL2[i][[2,2]]]
+	,N[xL2[i][[1]]]
+	,N[xL2[i][[2]]]
+	,N[yL2[i][[1]]]
+	,N[yL2[i][[2]]]
+	,Re[result]
+	,Im[result]
+	}],{i,range}
+];
+
+
+(* ::Text:: *)
+(*Save reference values to file*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/setZetaDer_laplace2_Ref.csv",zLaplace2Tab];
