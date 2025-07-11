@@ -28,7 +28,7 @@
 int test_setZetaDer1D(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/setZetaDer1D_Ref.csv", // NOLINT
+    int result = snprintf(path, sizeof(path), "%s/setZetaDer_1D_Ref.csv", // NOLINT
                           BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
@@ -57,8 +57,8 @@ int test_setZetaDer1D(void) {
     double errSum = 0.;
 
     double *nuRef = malloc(sizeof(double));
-    double a[] = {1.};
-    double x[] = {0.};
+    double *a = malloc((unsigned long)dim * (unsigned long)dim * sizeof(double));
+    double *x = malloc(dim * sizeof(double));
     double *y = malloc(dim * sizeof(double));
     unsigned int *alpha = malloc(dim * sizeof(unsigned int));
     double *refRead = malloc(2 * sizeof(double));
@@ -66,15 +66,16 @@ int test_setZetaDer1D(void) {
     printf("\n\t ... ");
     printf("processing %s ", path);
     while (fgets(line, sizeof(line), data) != NULL) {
-        // Scan: nu, y, alpha, {Re[result], Im[result]}
+        // Scan: nu, a, x, y, alpha, {Re[result], Im[result]}
         scanResult = sscanf( // NOLINT
-            line, "%lf,%lf,%u,%lf,%lf", nuRef, y, alpha, refRead, refRead + 1);
+            line, "%lf,%lf,%lf,%lf,%u,%lf,%lf", nuRef, a, x, y, alpha, refRead,
+            refRead + 1);
 
-        if (scanResult != 5) {
+        if (scanResult != 7) {
             printf("\n\t ");
             printf("Error reading line: %s", line);
             printf("\t ");
-            printf("Scanned %d values instead of 5", scanResult);
+            printf("Scanned %d values instead of 7", scanResult);
             continue;
         }
 
@@ -116,6 +117,8 @@ int test_setZetaDer1D(void) {
     }
 
     free(nuRef);
+    free(a);
+    free(x);
     free(y);
     free(alpha);
     free(refRead);

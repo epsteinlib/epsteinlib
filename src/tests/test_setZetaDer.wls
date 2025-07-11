@@ -14,7 +14,7 @@
 
 
 (* ::Text:: *)
-(*Load Mathematica wrapper in every kernel. Remove the "Quiet" if unsure about the parallel evaluation*)
+(*Load Mathematica wrapper in every kernel. Remove the "Quiet" if unsure about the parallel evaluation.*)
 
 
 baseDir=FileNameJoin[{NotebookDirectory[], "..", "..", "mathematica"}];
@@ -23,7 +23,7 @@ ParallelEvaluate[SetDirectory[baseDir];Quiet[<<EpsteinZeta.wl]];
 
 
 (* ::Text:: *)
-(*Set 0^0 in every kernel*)
+(*Set 0^0 in every kernel.*)
 
 
 Unprotect[Power];
@@ -45,7 +45,7 @@ Protect[Power];
 
 
 (* ::Text:: *)
-(*Generate random rational numbers and random integers between 0 and 6*)
+(*Generate random rational numbers and random integers between 0 and 6.*)
 
 
 randRational := RandomInteger[{-10^(16),10^(16)}]/10^(16)
@@ -54,7 +54,7 @@ randDerivative := RandomInteger[{0,6}]
 
 
 (* ::Text:: *)
-(*Calculates the directional derivative (\[Del]\:22c5 v)\:207f f[x] with finite differences by Taylors method given a stencil size "size" and stencil width "h"*)
+(*Calculates the directional derivative (\[Del]\:22c5 v)\:207f f[x] with finite differences by Taylors method given a stencil size "size" and stencil width "h".*)
 
 
 DirDerTaylorCoeffs[n_,size_]:=LinearSolve[
@@ -79,14 +79,21 @@ SetZeta[\[Nu]_,a_,x_,y_]:=Exp[2 Pi I x . y]EpsteinZeta[\[Nu],a,x,y]
 
 
 (* ::Text:: *)
-(*Analytic derivatives in 1D. Note the correction factor 2, as Mathematica seems to not double count the sum from zero to infinity for non-zero derivatives*)
+(*(Stable) analytic derivatives in 1D in x = y = 0.*)
 
 
-SetZetaDerAnalytic1D[\[Nu]_,y_,n_]:=Re@Derivative[n][2 LerchPhi[Exp[-2 Pi I #],\[Nu],0]&][y]
+SetZetaDerAnalytic[\[Nu]_,{{a_}},{0},{0},{n_}]:=Piecewise[{{Abs[1/a]^(\[Nu]-n)(-2Pi I)^n 2 Zeta[\[Nu]-n],EvenQ[n]},{0,OddQ[n]}}]
 
 
 (* ::Text:: *)
-(*Derivatives of the upper Crandall function*)
+(*(Unstable) analytic derivatives in 1D for x = 0.*)
+
+
+SetZetaDerAnalytic[\[Nu]_,{{a_}},{0},{y_},{n_}]:=Abs[1/a]^(\[Nu]-n)Re@Derivative[n][2 LerchPhi[Exp[-2 Pi I #],\[Nu],0]&][a y]
+
+
+(* ::Text:: *)
+(*Derivatives of the upper Crandall function.*)
 
 
 p[y_,\[Alpha]_,\[Beta]_]:=Apply[Times,(-\[Pi])^(\[Alpha]-\[Beta])Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2y)^(\[Alpha]-2\[Beta])]
@@ -95,7 +102,7 @@ gDer[\[Nu]_,y_,\[Alpha]_]:=Total[Flatten[Table[p[y,\[Alpha],\[Beta]]g[\[Nu]+2Tot
 
 
 (* ::Text:: *)
-(*Derivatives of sums in real and reciprocal space*)
+(*Derivatives of sums in real and reciprocal space.*)
 
 
 sumRealDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[Apply[Times,(-2Pi I z)^\[Alpha]]g[\[Nu],z]Exp[-2Pi I y . z],{z,(A . #-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}]
@@ -103,7 +110,7 @@ sumFourierDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[gDer[Length[\[Alph
 
 
 (* ::Text:: *)
-(*Prototype for epsteinZetaDer without special cases such non-positive even integers nu*)
+(*Prototype for epsteinZetaDer without special cases such non-positive even integers nu.*)
 
 
 setZetaDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:10]:=Module[
@@ -130,39 +137,43 @@ setZetaDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:10]:=Module[
 
 
 (* ::Text:: *)
-(*Setup test parameters*)
+(*Setup test parameters.*)
 
 
 range = Range[100];
 Do[
 	\[Nu]1D[i]=10 randRational
-	;y1D[i]=randRational
-	;n1D[i]=randDerivative
+	;a1D[i]={{1/2+i/100}}
+	;x1D[i]={0}
+	;y1D[i]=If[i<50,{0},{randRational}]
+	;n1D[i]={randDerivative}
 	,{i,range}
 ]
 
 
 (* ::Text:: *)
-(*Generate reference values*)
+(*Generate reference values.*)
 
 
 zDerTab1D=ParallelTable[
-	With[{result=SetPrecision[SetZetaDerAnalytic1D[\[Nu]1D[i],y1D[i],n1D[i]],60]}
-	,{N[\[Nu]1D[i],30]
+	With[{result=SetPrecision[SetZetaDerAnalytic[\[Nu]1D[i],a1D[i],x1D[i],y1D[i],n1D[i]],60]}
+	,Flatten[{N[\[Nu]1D[i],30]
+	,N[a1D[i],30]
+	,N[x1D[i],30]
 	,N[y1D[i],30]
 	,n1D[i]
 	,Re[result]
 	,Im[result]
-	}],{i,range}
+	}]],{i,range}
 ];
 
 
 (* ::Text:: *)
-(*Save reference values to file*)
+(*Save reference values to file.*)
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/setZetaDer1D_Ref.csv",zDerTab1D];
+Export["csv/setZetaDer_1D_Ref.csv",zDerTab1D];
 
 
 (* ::Subsection:: *)
@@ -170,7 +181,7 @@ Export["csv/setZetaDer1D_Ref.csv",zDerTab1D];
 
 
 (* ::Text:: *)
-(*Setup test parameters*)
+(*Setup test parameters.*)
 
 
 range = Range[100];
@@ -185,7 +196,7 @@ Do[
 
 
 (* ::Text:: *)
-(*Generate reference values*)
+(*Generate reference values.*)
 
 
 zDerTab=ParallelTable[
@@ -208,11 +219,11 @@ zDerTab=ParallelTable[
 
 
 (* ::Text:: *)
-(*Save reference values to file*)
+(*Save reference values to file.*)
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/setZetaDer_Ref.csv",zDerTab];
+Export["csv/setZetaDer_prototype_Ref.csv",zDerTab];
 
 
 (* ::Subsection:: *)
@@ -220,7 +231,7 @@ Export["csv/setZetaDer_Ref.csv",zDerTab];
 
 
 (* ::Text:: *)
-(*Setup test parameters*)
+(*Setup test parameters.*)
 
 
 range = Range[100];
@@ -234,7 +245,7 @@ Do[
 
 
 (* ::Text:: *)
-(*Generate reference values*)
+(*Generate reference values.*)
 
 
 zLaplaceTab=ParallelTable[
@@ -256,7 +267,7 @@ zLaplaceTab=ParallelTable[
 
 
 (* ::Text:: *)
-(*Save reference values to file*)
+(*Save reference values to file.*)
 
 
 SetDirectory[NotebookDirectory[]];
@@ -268,7 +279,7 @@ Export["csv/setZetaDer_laplace_Ref.csv",zLaplaceTab];
 
 
 (* ::Text:: *)
-(*Setup test parameters*)
+(*Setup test parameters.*)
 
 
 range = Range[100];
@@ -282,7 +293,7 @@ Do[
 
 
 (* ::Text:: *)
-(*Generate reference values for bounded derivatives*)
+(*Generate reference values for bounded derivatives.*)
 
 
 zLaplace2Tab={};
@@ -313,7 +324,7 @@ Do[
 
 
 (* ::Text:: *)
-(*Save reference values to file*)
+(*Save reference values to file.*)
 
 
 SetDirectory[NotebookDirectory[]];
