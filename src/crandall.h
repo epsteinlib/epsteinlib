@@ -56,15 +56,15 @@ double complex crandall_gReg(unsigned int dim, double nu, const double *z,
 double assignzArgBound(double nu);
 
 /**
- * @brief Assumes x and y to be in the respective elementary lattice cell.
- * Multiply with exp(2 * PI * i * x * y) to get the second sum in Crandall's
+ * @brief Calculates the upper Crandall function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] nu: exponent of the regularized Epstein zeta function.
- * @param[in] z: input vector of the function
+ * @param[in] z: input vector of the function.
  * @param[in] prefactor: prefactor of the vector, e. g. lambda or 1/lambda in
  *      Crandall's formula
- * @return upperGamma(nu/2,pi prefactor * z**2)
- *      / (pi * prefactor z**2)^(nu / 2) in
+ * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
+ * expansion in the calculation of the Crandall function.
+ * @return upperGamma(nu / 2,pi prefactor * z**2) / (pi * prefactor z**2)^(nu / 2).
  */
 double complex crandall_g(unsigned int dim, double nu, const double *z,
                           double prefactor, double zArgBound);
