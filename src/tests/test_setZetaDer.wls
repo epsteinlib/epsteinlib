@@ -45,10 +45,7 @@ Protect[Power];
 
 
 (* ::Text:: *)
-(*Generate random rational numbers between -1 and 1 and random integers between 0 and 6*)
-
-
-RandomChoice[{-1,1}]
+(*Generate random rational numbers and random integers between 0 and 6*)
 
 
 randRational := RandomInteger[{-10^(16),10^(16)}]/10^(16)
@@ -267,7 +264,7 @@ Export["csv/setZetaDer_laplace_Ref.csv",zLaplaceTab];
 
 
 (* ::Subsection:: *)
-(*Create Laplacian set zeta reference values by finite differences*)
+(*Create Laplacian squared set zeta reference values by finite differences*)
 
 
 (* ::Text:: *)
@@ -285,25 +282,34 @@ Do[
 
 
 (* ::Text:: *)
-(*Generate reference values*)
+(*Generate reference values for bounded derivatives*)
 
 
-zLaplace2Tab=ParallelTable[
-	(* big stencil width and size works best for "low" precision reference values *)
-	With[{result=DirectionalDerivative[{1,1},4,(*stencil size: *)55,(*stencil width: *)1/250][SetZeta[\[Nu]L2[i],aL2[i],xL2[i],#]&][yL2[i]]}
-	,{N[\[Nu]L2[i]]
-	,N[aL2[i][[1,1]]]
-	,N[aL2[i][[1,2]]]
-	,N[aL2[i][[2,1]]]
-	,N[aL2[i][[2,2]]]
-	,N[xL2[i][[1]]]
-	,N[xL2[i][[2]]]
-	,N[yL2[i][[1]]]
-	,N[yL2[i][[2]]]
-	,Re[result]
-	,Im[result]
-	}],{i,range}
-];
+zLaplace2Tab={};
+totalVals = 0;
+Do[
+	\[Nu]L2[i]=10 randRational
+	;aL2[i]={{1,1/2},{0,Sqrt@3/2}}
+	;xL2[i]=If[i<10,{0,0},{randRationalStable,randRationalStable}]
+	;yL2[i]={randRationalStable,randRationalStable}
+	;result=DirectionalDerivative[{1,1},4,(*stencil size: *)25,(*stencil width: *)1/250][SetZeta[\[Nu]L2[i],aL2[i],xL2[i],#]&][yL2[i]]
+	;If[Abs[result]<1000
+	,totalVals+=1
+	;AppendTo[zLaplace2Tab,{
+		 N[\[Nu]L2[i]]
+		,N[aL2[i][[1,1]]]
+		,N[aL2[i][[1,2]]]
+		,N[aL2[i][[2,1]]]
+		,N[aL2[i][[2,2]]]
+		,N[xL2[i][[1]]]
+		,N[xL2[i][[2]]]
+		,N[yL2[i][[1]]]
+		,N[yL2[i][[2]]]
+		,Re[result]
+		,Im[result]
+	}]
+	;If[totalVals>99,Break[]]
+],{i,1000}]
 
 
 (* ::Text:: *)
