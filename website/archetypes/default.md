@@ -1,11 +1,10 @@
 <!--
-SPDX-FileCopyrightText: 2024 Jan Schmitz <schmitz@num.uni-sb.de>
-
-SPDX-License-Identifier: CC0-1.0
+SPDX-License-Identifier: Apache-2.0
+SPDX-FileCopyrightText: 2024 Regolith Linux contributors
 -->
 
-+++
-title = '{{ replace .File.ContentBaseName "-" " " | title }}'
-date = {{ .Date }}
-draft = true
-+++
+---
+title: "{{ replace .Name "-" " " | title }}"
+date: {{ .Date }}
+draft: true
+---

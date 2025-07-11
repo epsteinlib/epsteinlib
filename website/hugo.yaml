@@ -1,18 +1,33 @@
-# SPDX-FileCopyrightText: 2024 Jan Schmitz <schmitz@num.uni-sb.de>
-#
-# SPDX-License-Identifier: CC0-1.0
-
-baseURL: https://epsteinlib.github.io/epsteinlib/
+# Hugo configuration file
+baseURL: "https://epsteinlib.github.io/epsteinlib/"
 languageCode: en-us
 title: EpsteinLib
+enableRobotsTXT: true
+enableGitInfo: true
+enableEmoji: false
+hasCJKLanguage: true
+# import hextra as module
 module:
   imports:
     - path: github.com/imfing/hextra
-  mounts:
-    - source: static
-      target: static
-    - source: ../html/
-      target: static/html
+outputs:
+  home: [HTML]
+  page: [HTML]
+  section: [HTML, RSS]
+defaultContentLanguage: en
+languages:
+  en:
+    languageName: English
+    weight: 1
+    title: EpsteinLib
+markup:
+  # allow raw html
+  goldmark:
+    renderer:
+      unsafe: true
+  # enable hextra syntax highlight
+  highlight:
+    noClasses: false
 menu:
   main:
     - identifier: documentation
@@ -33,27 +48,63 @@ menu:
       url: "https://github.com/epsteinlib/epsteinlib"
       params:
         icon: github
+  sidebar:
+    - identifier: menu-more
+      name: More
+      params:
+        type: separator
+      weight: 1
 params:
+  description: High-performance computation of the Epstein zeta function, including a Python and a Mathematica wrapper
   navbar:
     displayTitle: true
     displayLogo: true
     logo:
       # TODO: Convert logo to transparent background svg
-      #path: images/logo.svg
-      #dark: images/logo-dark.svg
       path: images/epstein.jpg
       dark: images/epstein.jpg
       width: 40
       height: 20
+      # link: /
+    width: wide
+  page:
+    # full (100%), wide (90rem), normal (1280px)
+    width: wide
   theme:
     # light | dark | system
     default: light
     displayToggle: false
   footer:
-    displayCopyright: false
-    displayPoweredBy: false
-  search:
-    enable: false
+    enable: true
+    displayCopyright: true
+    displayPoweredBy: true
+    width: wide
+  displayUpdatedDate: true
+  dateFormat: "January 2, 2006"
   editURL:
     enable: true
-    base: "https://github.com/epsteinlib/epsteinlib/edit/main/website"
+    base: "https://github.com/epsteinlib/epsteinlib/main/content"
+  # Search
+  # flexsearch is enabled by default
+  search:
+    enable: true
+    type: flexsearch
+    flexsearch:
+      # index page by: content | summary | heading | title
+      index: content
+      # full | forward | reverse | strict
+      # https://github.com/nextapps-de/flexsearch/#tokenizer-prefix-search
+      tokenize: forward
+  blog:
+    list:
+      displayTags: true
+      # date | lastmod | publishDate | title | weight
+      sortBy: date
+      sortOrder: desc # or "asc"
+  highlight:
+    copy:
+      enable: true
+      # hover | always
+      display: hover
+  comments:
+    enable: false

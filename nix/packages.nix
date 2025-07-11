@@ -57,6 +57,7 @@
         pythonDevEnv
         clang-tools
         hugo
+        nodejs_20
         go
       ];
       meta = {

@@ -1,0 +1,11 @@
+<!--
+SPDX-License-Identifier: Apache-2.0
+SPDX-FileCopyrightText: 2024 Regolith Linux contributors
+-->
+
+{{- $cols := .Get "cols" | default 3 -}}
+
+<div class="regolith-columns hextra-cards hx-mt-4 hx-gap-4 hx-grid not-prose" style="--hextra-cards-grid-cols: {{ $cols }};">
+  {{- .Inner -}}
+</div>
+{{- /* Drop trailing newlines */ -}}

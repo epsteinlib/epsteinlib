@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2024 Regolith Linux contributors
+# SPDX-FileCopyrightText: 2025 Jonathan K. Busse <jonathan@jbusse.de>
+# Modified from https://github.com/regolith-linux/regolith-desktop.com/ on 2025-06-16
+
+menu-docs: "Documentation"
+copyright: "© 2025 EpsteinLib Authors."

@@ -91,7 +91,19 @@
               pyupgrade.enable = true;
 
               # Misc
-              check-added-large-files.enable = true;
+              check-added-large-files = {
+                enable = true;
+                excludes = ["^website/static/images/"]; # Exclude from global 500KB check
+              };
+              # Check that website images have 1MB limit
+              check-website-images = {
+                enable = true;
+                name = "check-website-image-sizes";
+                entry = "${pkgs.findutils}/bin/find website/static/images -type f -size +1M -exec echo 'Website image too large (>1MB): {}' \\; -exec false \\;";
+                language = "system";
+                files = "^website/static/images/";
+                pass_filenames = false;
+              };
               check-case-conflicts.enable = true;
               check-executables-have-shebangs.enable = true;
               check-shebang-scripts-are-executable.enable = true;
