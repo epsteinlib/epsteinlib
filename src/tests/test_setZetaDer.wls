@@ -9,6 +9,23 @@
 (*Unit tests for epsteinZetaDer in epsteinZeta.c*)
 
 
+(* ::Subsection:: *)
+(*Setup*)
+
+
+(* ::Text:: *)
+(*Load Mathematica wrapper in every kernel. Remove the "Quiet" if unsure about the parallel evaluation.*)
+
+
+baseDir=FileNameJoin[{NotebookDirectory[], "..", "..", "mathematica"}];
+SetDirectory[baseDir];<<EpsteinZeta.wl
+ParallelEvaluate[SetDirectory[baseDir];Quiet[<<EpsteinZeta.wl]];
+
+
+(* ::Text:: *)
+(*Set 0^0 in every kernel.*)
+
+
 Unprotect[Power];
 Power[0|0.|0*I|0.*I,0|0.|0*I|0.*I]:=1;
 Power[z_,0]/;Abs[z]==0:=1;
@@ -24,12 +41,62 @@ Protect[Power];
 
 
 (* ::Subsection:: *)
-(*Setup reference functions*)
+(*Auxiliary functions*)
+
+
+(* ::Text:: *)
+(*Generate random rational numbers and random integers between 0 and 6.*)
+
+
+randRational := RandomInteger[{-10^(16),10^(16)}]/10^(16)
+randRationalStable := RandomChoice[{-1,1}](1/10+8/10 RandomInteger[{0,10^(16)}]/10^(16))
+randDerivative := RandomInteger[{0,6}]
+
+
+(* ::Text:: *)
+(*Calculates the directional derivative (\[Del]\:22c5 v)\:207f f[x] with finite differences by Taylors method given a stencil size "size" and stencil width "h".*)
+
+
+DirDerTaylorCoeffs[n_,size_]:=LinearSolve[
+	Table[(1/(i-1)!)*(j-((size+1)/2))^(i-1),{i,size},{j,size}]
+	,n(size+1)Map[KroneckerDelta[#,n+1]&,Range[size]]
+]
+DirectionalDerivative[v_,n_,size_:15,h_:1/1000][f_][x_]:=If[PossibleZeroQ[n]
+	,f[x]
+	,Total[DirDerTaylorCoeffs[n,size] Map[f[x+h v #]&,Range[size]-(size+1)/2]]/((h^n)*n(size+1))
+]
+
+
+(* ::Text:: *)
+(*Set Zeta without derivatives.*)
+
+
+SetZeta[\[Nu]_,a_,x_,y_]:=Exp[2 Pi I x . y]EpsteinZeta[\[Nu],a,x,y]
+
+
+(* ::Subsection:: *)
+(*Reference functions*)
+
+
+(* ::Text:: *)
+(*(Stable) analytic derivatives in 1D in x = y = 0.*)
+
+
+SetZetaDerAnalytic[\[Nu]_,{{a_}},{0},{0},{n_}]:=Piecewise[{{Abs[1/a]^(\[Nu]-n)(-2Pi I)^n 2 Zeta[\[Nu]-n],EvenQ[n]},{0,OddQ[n]}}]
+
+
+(* ::Text:: *)
+(*(Unstable) analytic derivatives in 1D for x = 0.*)
+
+
+SetZetaDerAnalytic[\[Nu]_,{{a_}},{0},{y_},{n_}]:=Abs[1/a]^(\[Nu]-n)Re@Derivative[n][2 LerchPhi[Exp[-2 Pi I #],\[Nu],0]&][a y]
+
+
+(* ::Text:: *)
+(*Derivatives of the upper Crandall function.*)
 
 
 p[y_,\[Alpha]_,\[Beta]_]:=Apply[Times,(-\[Pi])^(\[Alpha]-\[Beta])Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2y)^(\[Alpha]-2\[Beta])]
-
-
 g[\[Nu]_,y_]=Piecewise[{{0,Norm[y]>=4},{ -2/\[Nu],Norm[y]<10^(-64)},{ExpIntegralE[1-\[Nu]/2,Pi y . y],Norm[y]>=10^(-64)&&Norm[y]<4}}];
 gDer[\[Nu]_,y_,\[Alpha]_]:=Total[Flatten[Table[p[y,\[Alpha],\[Beta]]g[\[Nu]+2Total[\[Alpha]-\[Beta]],y],{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}]]]
 
@@ -66,19 +133,55 @@ setZetaDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:10]:=Module[
 
 
 (* ::Subsection:: *)
-(*Random Values*)
-
-
-randRational := RandomInteger[{-10^(16),10^(16)}]/10^(16)
-randDerivative := RandomInteger[{0,6}]
-
-
-(* ::Subsection:: *)
-(*Create polynomial p reference values*)
+(*Create Epstein zeta 1D analytic reference values in x = 0*)
 
 
 (* ::Text:: *)
-(*Setup test parameters*)
+(*Setup test parameters.*)
+
+
+range = Range[100];
+Do[
+	\[Nu]1D[i]=10 randRational
+	;a1D[i]={{1/2+i/100}}
+	;x1D[i]={0}
+	;y1D[i]=If[i<50,{0},{randRational}]
+	;n1D[i]={randDerivative}
+	,{i,range}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+zDerTab1D=ParallelTable[
+	With[{result=SetPrecision[SetZetaDerAnalytic[\[Nu]1D[i],a1D[i],x1D[i],y1D[i],n1D[i]],60]}
+	,Flatten[{N[\[Nu]1D[i],30]
+	,N[a1D[i],30]
+	,N[x1D[i],30]
+	,N[y1D[i],30]
+	,n1D[i]
+	,Re[result]
+	,Im[result]
+	}]],{i,range}
+];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/setZetaDer_1D_Ref.csv",zDerTab1D];
+
+
+(* ::Subsection:: *)
+(*Create set zeta prototype reference values*)
+
+
+(* ::Text:: *)
+(*Setup test parameters.*)
 
 
 range = Range[100];
@@ -93,7 +196,7 @@ Do[
 
 
 (* ::Text:: *)
-(*Generate reference values*)
+(*Generate reference values.*)
 
 
 zDerTab=ParallelTable[
@@ -116,8 +219,113 @@ zDerTab=ParallelTable[
 
 
 (* ::Text:: *)
-(*Save reference values to file*)
+(*Save reference values to file.*)
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/setZetaDer_Ref.csv",zDerTab];
+Export["csv/setZetaDer_prototype_Ref.csv",zDerTab];
+
+
+(* ::Subsection:: *)
+(*Create Laplacian set zeta reference values by finite differences*)
+
+
+(* ::Text:: *)
+(*Setup test parameters.*)
+
+
+range = Range[100];
+Do[
+	\[Nu]L[i]=10 randRational
+	;aL[i]={{1,1/2},{0,Sqrt@3/2}}
+	;xL[i]=If[i<10,{0,0},{randRational,randRational}]
+	;yL[i]={randRationalStable,randRationalStable}
+	,{i,range}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+zLaplaceTab=ParallelTable[
+	(* big stencil width and size works best for "low" precision reference values *)
+	With[{result=DirectionalDerivative[{1,1},2,(*stencil size: *)25,(*stencil width: *)1/250][SetZeta[\[Nu]L[i],aL[i],xL[i],#]&][yL[i]]}
+	,{N[\[Nu]L[i]]
+	,N[aL[i][[1,1]]]
+	,N[aL[i][[1,2]]]
+	,N[aL[i][[2,1]]]
+	,N[aL[i][[2,2]]]
+	,N[xL[i][[1]]]
+	,N[xL[i][[2]]]
+	,N[yL[i][[1]]]
+	,N[yL[i][[2]]]
+	,Re[result]
+	,Im[result]
+	}],{i,range}
+];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/setZetaDer_laplace_Ref.csv",zLaplaceTab];
+
+
+(* ::Subsection:: *)
+(*Create Laplacian squared set zeta reference values by finite differences*)
+
+
+(* ::Text:: *)
+(*Setup test parameters.*)
+
+
+range = Range[100];
+Do[
+	\[Nu]L2[i]=10 randRational
+	;aL2[i]={{1,1/2},{0,Sqrt@3/2}}
+	;xL2[i]=If[i<10,{0,0},{randRationalStable,randRationalStable}]
+	;yL2[i]={randRationalStable,randRationalStable}
+	,{i,range}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values for bounded derivatives.*)
+
+
+zLaplace2Tab={};
+totalVals = 0;
+Do[
+	\[Nu]L2[i]=10 randRational
+	;aL2[i]={{1,1/2},{0,Sqrt@3/2}}
+	;xL2[i]=If[i<10,{0,0},{randRationalStable,randRationalStable}]
+	;yL2[i]={randRationalStable,randRationalStable}
+	;result=DirectionalDerivative[{1,1},4,(*stencil size: *)25,(*stencil width: *)1/250][SetZeta[\[Nu]L2[i],aL2[i],xL2[i],#]&][yL2[i]]
+	;If[Abs[result]<1000
+	,totalVals+=1
+	;AppendTo[zLaplace2Tab,{
+		 N[\[Nu]L2[i]]
+		,N[aL2[i][[1,1]]]
+		,N[aL2[i][[1,2]]]
+		,N[aL2[i][[2,1]]]
+		,N[aL2[i][[2,2]]]
+		,N[xL2[i][[1]]]
+		,N[xL2[i][[2]]]
+		,N[yL2[i][[1]]]
+		,N[yL2[i][[2]]]
+		,Re[result]
+		,Im[result]
+	}]
+	;If[totalVals>99,Break[]]
+],{i,1000}]
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/setZetaDer_laplace2_Ref.csv",zLaplace2Tab];
