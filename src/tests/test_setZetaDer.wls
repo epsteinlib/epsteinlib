@@ -272,3 +272,38 @@ zLaplaceTab=ParallelTable[
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_laplace_Ref.csv",zLaplaceTab];
+
+
+(* ::Subsection:: *)
+(*Create set zeta derivative reference values for odd derivatives*)
+
+
+(* ::Text:: *)
+(*We employ, that SetZetaDer[\[Nu],A,x,y,\[Alpha]] should be 0 for x\:1d62 = y\:1d62 = 0 and \[Alpha]\:1d62 is odd for some 1 <= i <= d.*)
+
+
+(* does not yet work for {{1,1,0},{1,0,1},{0,1,1}} (here |Det(a)|=2) or derivatives > 5*)
+range = Range[100];
+Do[
+	\[Nu]Odd[i]=10 randRational
+	;aOdd[i]=IdentityMatrix@3
+	;{xOdd[i],yOdd[i],\[Alpha]Odd[i]}=Transpose[RandomSample[{{0,0,2 RandomInteger[{0,2}]+1},{randRational,randRational,RandomInteger[{0,2}]},{randRational,randRational,RandomInteger[{0,2}]}}]]
+	,{i,range}
+]
+
+
+zOddTab=ParallelTable[
+	Flatten[{
+	N[\[Nu]Odd[i]]
+	,N[aOdd[i]]
+	,N[xOdd[i]]
+	,N[yOdd[i]]
+	,\[Alpha]Odd[i]
+	,0.
+	,0.
+	}],{i,range}
+];
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/setZetaDer_odd_Ref.csv",zOddTab];
