@@ -507,16 +507,15 @@ int test_setZetaDer_laplace(void) {
 
 /*!
  * @brief Benchmarks 2D setZetaDer function by comparing to reference values of the
- * squared laplacian of set zeta function obtained by finite differences.
+ * laplacian of set zeta function obtained by finite differences.
  *
  * @return number of failed tests.
  * */
-int test_setZetaDer_laplace2(void) {
+int test_setZetaDer_odd(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
-    int result =
-        snprintf(path, sizeof(path), "%s/setZetaDer_laplace2_Ref.csv", // NOLINT
-                 BASE_PATH);
+    int result = snprintf(path, sizeof(path), "%s/setZetaDer_odd_Ref.csv", // NOLINT
+                          BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
@@ -536,8 +535,8 @@ int test_setZetaDer_laplace2(void) {
 
     int testsPassed = 0;
     int totalTests = 0;
-    unsigned int dim = 2;
-    double tol = pow(10, -2);
+    unsigned int dim = 3;
+    double tol = pow(10, -10);
 
     double errMin = NAN;
     double errMax = NAN;
@@ -547,39 +546,33 @@ int test_setZetaDer_laplace2(void) {
     double *a = malloc((unsigned long)dim * (unsigned long)dim * sizeof(double));
     double *x = malloc(dim * sizeof(double));
     double *y = malloc(dim * sizeof(double));
+    unsigned int *alpha = malloc(dim * sizeof(unsigned int));
     double *refRead = malloc(2 * sizeof(double));
-
-    unsigned int alpha40[] = {4, 0};
-    unsigned int alpha31[] = {3, 1};
-    unsigned int alpha22[] = {2, 2};
-    unsigned int alpha13[] = {1, 3};
-    unsigned int alpha04[] = {0, 4};
 
     printf("\n\t ... ");
     printf("processing %s ", path);
     while (fgets(line, sizeof(line), data) != NULL) {
-        // Scan: nu, {a11, a12, a21, a22}, {x1, x2}, {y1, y2}, {Re[result],
-        // Im[result]}
+        // Scan: nu, {a11, a12, a13, a21, a22, a23, a21, a32, a33}, {x1, x2, x3},
+        // {y1, y2, y3}, {alpha1, alpha2, alpha3}, {Re[result], Im[result]}
         scanResult = sscanf( // NOLINT
-            line, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf", nuRef, a, a + 1,
-            a + 2, a + 3, x, x + 1, y, y + 1, refRead, refRead + 1);
+            line,
+            "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%u,%u,%"
+            "u,%lf,%lf",
+            nuRef, a, a + 1, a + 2, a + 3, a + 4, a + 5, a + 6, a + 7, a + 8, x,
+            x + 1, x + 2, y, y + 1, y + 2, alpha, alpha + 1, alpha + 2, refRead,
+            refRead + 1);
 
-        if (scanResult != 11) {
+        if (scanResult != 21) {
             printf("\n\t ");
             printf("Error reading line: %s", line);
             printf("\t ");
-            printf("Scanned %d values instead of 11", scanResult);
+            printf("Scanned %d values instead of 17", scanResult);
             continue;
         }
 
         nu = nuRef[0];
 
-        num = setZetaDer(nu, dim, a, x, y, alpha40) +
-              4 * setZetaDer(nu, dim, a, x, y, alpha31) +
-              6 * setZetaDer(nu, dim, a, x, y, alpha22) +
-              4 * setZetaDer(nu, dim, a, x, y, alpha13) +
-              setZetaDer(nu, dim, a, x, y, alpha04);
-
+        num = setZetaDer(nu, dim, a, x, y, alpha);
         ref = refRead[0] + refRead[1] * I;
 
         errorAbs = errAbs(ref, num);
@@ -595,7 +588,6 @@ int test_setZetaDer_laplace2(void) {
             testsPassed++;
         } else {
             printf("\n\n");
-            printf("err nb %u\n", totalTests);
             printf("Warning! ");
             printf("setZetaDer: ");
             printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
@@ -609,6 +601,7 @@ int test_setZetaDer_laplace2(void) {
             printMatrixUnitTest("a:", a, dim);
             printVectorUnitTest("x:\t\t", x, dim);
             printVectorUnitTest("y:\t\t", y, dim);
+            printMultiindexUnitTest("alpha:\t\t", alpha, dim);
             printf("\n");
         }
         totalTests++;
@@ -618,6 +611,7 @@ int test_setZetaDer_laplace2(void) {
     free(a);
     free(x);
     free(y);
+    free(alpha);
     free(refRead);
 
     if (fclose(data) != 0) {
@@ -645,6 +639,6 @@ int main() {
     int failed2 = test_setZetaDer_prototype();
     int failed3 = test_setZetaDer_taylor();
     int failed4 = test_setZetaDer_laplace();
-    int failed5 = test_setZetaDer_laplace2();
+    int failed5 = test_setZetaDer_odd();
     return failed1 + failed2 + failed3 + failed4 + failed5;
 }

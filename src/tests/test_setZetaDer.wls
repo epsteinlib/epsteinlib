@@ -275,57 +275,35 @@ Export["csv/setZetaDer_laplace_Ref.csv",zLaplaceTab];
 
 
 (* ::Subsection:: *)
-(*Create Laplacian squared set zeta reference values by finite differences*)
+(*Create set zeta derivative reference values for odd derivatives*)
 
 
 (* ::Text:: *)
-(*Setup test parameters.*)
+(*We employ, that SetZetaDer[\[Nu],A,x,y,\[Alpha]] should be 0 for x\:1d62 = y\:1d62 = 0 and \[Alpha]\:1d62 is odd for some 1 <= i <= d.*)
 
 
+(* does not yet work for {{1,1,0},{1,0,1},{0,1,1}} (here |Det(a)|=2) or derivatives > 5*)
 range = Range[100];
 Do[
-	\[Nu]L2[i]=10 randRational
-	;aL2[i]={{1,1/2},{0,Sqrt@3/2}}
-	;xL2[i]=If[i<10,{0,0},{randRationalStable,randRationalStable}]
-	;yL2[i]={randRationalStable,randRationalStable}
+	\[Nu]Odd[i]=10 randRational
+	;aOdd[i]=IdentityMatrix@3
+	;{xOdd[i],yOdd[i],\[Alpha]Odd[i]}=Transpose[RandomSample[{{0,0,2 RandomInteger[{0,2}]+1},{randRational,randRational,RandomInteger[{0,2}]},{randRational,randRational,RandomInteger[{0,2}]}}]]
 	,{i,range}
 ]
 
 
-(* ::Text:: *)
-(*Generate reference values for bounded derivatives.*)
-
-
-zLaplace2Tab={};
-totalVals = 0;
-Do[
-	\[Nu]L2[i]=10 randRational
-	;aL2[i]={{1,1/2},{0,Sqrt@3/2}}
-	;xL2[i]=If[i<10,{0,0},{randRationalStable,randRationalStable}]
-	;yL2[i]={randRationalStable,randRationalStable}
-	;result=DirectionalDerivative[{1,1},4,(*stencil size: *)25,(*stencil width: *)1/250][SetZeta[\[Nu]L2[i],aL2[i],xL2[i],#]&][yL2[i]]
-	;If[Abs[result]<1000
-	,totalVals+=1
-	;AppendTo[zLaplace2Tab,{
-		 N[\[Nu]L2[i]]
-		,N[aL2[i][[1,1]]]
-		,N[aL2[i][[1,2]]]
-		,N[aL2[i][[2,1]]]
-		,N[aL2[i][[2,2]]]
-		,N[xL2[i][[1]]]
-		,N[xL2[i][[2]]]
-		,N[yL2[i][[1]]]
-		,N[yL2[i][[2]]]
-		,Re[result]
-		,Im[result]
-	}]
-	;If[totalVals>99,Break[]]
-],{i,1000}]
-
-
-(* ::Text:: *)
-(*Save reference values to file.*)
+zOddTab=ParallelTable[
+	Flatten[{
+	N[\[Nu]Odd[i]]
+	,N[aOdd[i]]
+	,N[xOdd[i]]
+	,N[yOdd[i]]
+	,\[Alpha]Odd[i]
+	,0.
+	,0.
+	}],{i,range}
+];
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/setZetaDer_laplace2_Ref.csv",zLaplace2Tab];
+Export["csv/setZetaDer_odd_Ref.csv",zOddTab];
