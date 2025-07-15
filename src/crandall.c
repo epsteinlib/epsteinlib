@@ -196,7 +196,7 @@ double polynomial_p(unsigned int dim, const double *y, const unsigned int *alpha
  */
 double complex crandall_g_der(unsigned int dim, double nu, const double *z,
                               double prefactor, double zArgBound,
-                              const unsigned int *alpha) {
+                              const unsigned int *alpha, unsigned int alphaAbs) {
     if (mult_abs(dim, alpha) == 0) {
         return crandall_g(dim, nu, z, prefactor, zArgBound);
     }
@@ -217,7 +217,7 @@ double complex crandall_g_der(unsigned int dim, double nu, const double *z,
     // Iterate over every multi-index beta so that 2 beta <= alpha
     while (1) {
 
-        nuIt = nu + 2 * mult_abs(dim, alpha) - 2 * mult_abs(dim, beta);
+        nuIt = nu + 2 * alphaAbs - 2 * mult_abs(dim, beta);
         zArgBoundIt = assignzArgBound(nu);
 
         // summing using Kahan's method

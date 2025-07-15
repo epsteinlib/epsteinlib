@@ -96,6 +96,6 @@ double polynomial_p(unsigned int dim, const double *y, const unsigned int *alpha
  */
 double complex crandall_g_der(unsigned int dim, double nu, const double *z,
                               double prefactor, double zArgBound,
-                              const unsigned int *alpha);
+                              const unsigned int *alpha, unsigned int alphaAbs);
 
 #endif

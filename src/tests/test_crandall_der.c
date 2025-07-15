@@ -9,6 +9,7 @@
  */
 
 #include "../crandall.h"
+#include "../tools.h"
 #include "utils.h"
 #include <complex.h>
 #include <errno.h>
@@ -147,7 +148,6 @@ int test_crandall_g_der_taylor(void) {
     double zArgBound;
     double complex valRef;
     double complex valTaylor;
-
     double tol = pow(10, -14);
     unsigned int dim = 2;
     unsigned int order = 12;
@@ -191,7 +191,8 @@ int test_crandall_g_der_taylor(void) {
             zArgBound = assignzArgBound(nu);
 
             valTaylor += mult_pow(dim, alpha, zDiff) / (double)mult_fac(dim, alpha) *
-                         crandall_g_der(dim, nu, z, 1., zArgBound, alpha);
+                         crandall_g_der(dim, nu, z, 1., zArgBound, alpha,
+                                        mult_abs(dim, alpha));
 
             done = 1;
             for (unsigned int idx = 0; idx < dim; idx++) {
@@ -302,7 +303,8 @@ int test_crandall_g_der(void) {
 
         zArgBound = assignzArgBound(nu);
 
-        num = crandall_g_der(dim, nu, z, prefactor, zArgBound, alpha);
+        num = crandall_g_der(dim, nu, z, prefactor, zArgBound, alpha,
+                             mult_abs(dim, alpha));
         ref = refRead[0] + refRead[1] * I;
 
         errorAbs = errAbs(ref, num);
