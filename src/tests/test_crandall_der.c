@@ -185,22 +185,26 @@ int test_crandall_g_der_taylor(void) {
             alpha[i] = 0;
         }
 
+        // initialize alphaAbs
+        unsigned int alphaAbs = 0;
+
         // Iterate over every multi-index alpha so that every alpha[] < order
         while (true) {
 
             zArgBound = assignzArgBound(nu);
 
             valTaylor += mult_pow(dim, alpha, zDiff) / (double)mult_fac(dim, alpha) *
-                         crandall_g_der(dim, nu, z, 1., zArgBound, alpha,
-                                        mult_abs(dim, alpha));
+                         crandall_g_der(dim, nu, z, 1., zArgBound, alpha, alphaAbs);
 
             done = 1;
             for (unsigned int idx = 0; idx < dim; idx++) {
                 if (alpha[idx] + 1 <= order) {
                     alpha[idx]++;
+                    alphaAbs++;
                     done = 0;
                     break;
                 }
+                alphaAbs -= alpha[idx];
                 alpha[idx] = 0;
             }
             if (done) {
