@@ -227,7 +227,7 @@ Export["csv/setZetaDer_prototype_Ref.csv",zDerTab];
 
 
 (* ::Subsection:: *)
-(*Create Laplacian set zeta reference values by finite differences*)
+(*Create directional derivative set zeta reference values by finite differences*)
 
 
 (* ::Text:: *)
@@ -248,7 +248,7 @@ Do[
 (*Generate reference values.*)
 
 
-zLaplaceTab=ParallelTable[
+zDirectionalTab=ParallelTable[
 	(* big stencil width and size works best for "low" precision reference values *)
 	With[{result=DirectionalDerivative[{1,1},2,(*stencil size: *)25,(*stencil width: *)1/250][SetZeta[\[Nu]L[i],aL[i],xL[i],#]&][yL[i]]}
 	,{N[\[Nu]L[i]]
@@ -271,7 +271,7 @@ zLaplaceTab=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/setZetaDer_laplace_Ref.csv",zLaplaceTab];
+Export["csv/setZetaDer_directional_Ref.csv",zDirectionalTab];
 
 
 (* ::Subsection:: *)
