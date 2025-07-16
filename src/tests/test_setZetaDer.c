@@ -387,11 +387,11 @@ int test_setZetaDer_taylor(void) { // NOLINT
  *
  * @return number of failed tests.
  * */
-int test_setZetaDer_laplace(void) {
+int test_setZetaDer_directional(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result =
-        snprintf(path, sizeof(path), "%s/setZetaDer_laplace_Ref.csv", // NOLINT
+        snprintf(path, sizeof(path), "%s/setZetaDer_directional_Ref.csv", // NOLINT
                  BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
@@ -638,7 +638,7 @@ int main() {
     int failed1 = test_setZetaDer1D();
     int failed2 = test_setZetaDer_prototype();
     int failed3 = test_setZetaDer_taylor();
-    int failed4 = test_setZetaDer_laplace();
+    int failed4 = test_setZetaDer_directional();
     int failed5 = test_setZetaDer_odd();
     return failed1 + failed2 + failed3 + failed4 + failed5;
 }
