@@ -236,10 +236,10 @@ Export["csv/setZetaDer_prototype_Ref.csv",zDerTab];
 
 range = Range[100];
 Do[
-	\[Nu]L[i]=10 randRational
-	;aL[i]={{1,1/2},{0,Sqrt@3/2}}
-	;xL[i]=If[i<10,{0,0},{randRational,randRational}]
-	;yL[i]={randRationalStable,randRationalStable}
+	\[Nu]D[i]=10 randRational
+	;aD[i]={{1,1/2},{0,Sqrt@3/2}}
+	;xD[i]=If[i<10,{0,0},{randRational,randRational}]
+	;yD[i]={randRationalStable,randRationalStable}
 	,{i,range}
 ]
 
@@ -250,16 +250,16 @@ Do[
 
 zDirectionalTab=ParallelTable[
 	(* big stencil width and size works best for "low" precision reference values *)
-	With[{result=DirectionalDerivative[{1,1},2,(*stencil size: *)25,(*stencil width: *)1/250][SetZeta[\[Nu]L[i],aL[i],xL[i],#]&][yL[i]]}
-	,{N[\[Nu]L[i]]
-	,N[aL[i][[1,1]]]
-	,N[aL[i][[1,2]]]
-	,N[aL[i][[2,1]]]
-	,N[aL[i][[2,2]]]
-	,N[xL[i][[1]]]
-	,N[xL[i][[2]]]
-	,N[yL[i][[1]]]
-	,N[yL[i][[2]]]
+	With[{result=DirectionalDerivative[{1,1},2,(*stencil size: *)25,(*stencil width: *)1/250][SetZeta[\[Nu]D[i],aD[i],xD[i],#]&][yD[i]]}
+	,{N[\[Nu]D[i]]
+	,N[aD[i][[1,1]]]
+	,N[aD[i][[1,2]]]
+	,N[aD[i][[2,1]]]
+	,N[aD[i][[2,2]]]
+	,N[xD[i][[1]]]
+	,N[xD[i][[2]]]
+	,N[yD[i][[1]]]
+	,N[yD[i][[2]]]
 	,Re[result]
 	,Im[result]
 	}],{i,range}
@@ -307,3 +307,50 @@ zOddTab=ParallelTable[
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_odd_Ref.csv",zOddTab];
+
+
+(* ::Subsection:: *)
+(*Create laplacian derivative set zeta reference values by finite differences*)
+
+
+(* ::Text:: *)
+(*Setup test parameters.*)
+
+
+range = Range[100];
+Do[
+	\[Nu]L[i]=10 randRational
+	;aL[i]={{1,1/2},{0,Sqrt@3/2}}
+	;xL[i]=If[i<10,{0,0},{randRational,randRational}]
+	;yL[i]=aL[i] . {randRationalStable,randRationalStable}
+	,{i,range}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+zLaplaceTab=ParallelTable[
+	With[{result=(-2 Pi I)^2 SetZeta[\[Nu]L[i]-2,aL[i],xL[i],yL[i]]}
+	,{N[\[Nu]L[i]]
+	,N[aL[i][[1,1]]]
+	,N[aL[i][[1,2]]]
+	,N[aL[i][[2,1]]]
+	,N[aL[i][[2,2]]]
+	,N[xL[i][[1]]]
+	,N[xL[i][[2]]]
+	,N[yL[i][[1]]]
+	,N[yL[i][[2]]]
+	,Re[result]
+	,Im[result]
+	}],{i,range}
+];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/setZetaDer_laplace_Ref.csv",zLaplaceTab];
