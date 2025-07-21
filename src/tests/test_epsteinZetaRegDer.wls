@@ -17,6 +17,9 @@
 (*Load Mathematica wrapper in every kernel. Remove the "Quiet" if unsure about the parallel evaluation.*)
 
 
+1+1
+
+
 baseDir=FileNameJoin[{NotebookDirectory[], "..", "..", "mathematica"}];
 SetDirectory[baseDir];<<EpsteinZeta.wl
 ParallelEvaluate[SetDirectory[baseDir];Quiet[<<EpsteinZeta.wl]];
@@ -98,7 +101,7 @@ sumFourierNonZeroDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[GDer[Length
 
 
 epsteinZetaRegDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:10]:=Module[
-	{prec,\[Nu]N,AN,xN,yN,\[Mu],sumReal,sumReci,zeroReci,res}
+	{prec,\[Nu]N,AN,xN,yN,\[Mu],sumReal,sumReci,res}
 	,prec=60
 	;\[Nu]N=N[\[Nu]Ext,prec]
 	;AN=N[AExt,prec]
@@ -109,11 +112,7 @@ epsteinZetaRegDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:10]:=Module[
 	;If[\[Nu]N<0.5&&PossibleZeroQ[\[Nu]N/2-Round[\[Nu]N/2]]
 	,Print["No early return"];res = None
 	,sumReal=SetPrecision[sumRealDer[\[Nu]N,AN,xN,yN,\[Alpha],sumLim],prec]
-	;sumReci=SetPrecision[sumFourierNonZeroDer[\[Nu]N,AN,xN,yN,\[Alpha],sumLim],prec]
-	;zeroReci=SetPrecision[GRegDer[Length[AN]-\[Nu]N,yN,\[Alpha]],prec]
-	;Print["s2: ",sumReci]
-	;sumReci+=zeroReci
-	;Print["nc: ",zeroReci]
+	;sumReci=SetPrecision[sumFourierNonZeroDer[\[Nu]N,AN,xN,yN,\[Alpha],sumLim]+GRegDer[Length[AN]-\[Nu]N,yN,\[Alpha]],prec]
 	;res=SetPrecision[\[Mu]^(Total[\[Alpha]]-\[Nu]N)\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci),prec]
 	]
 	;Return[res]
