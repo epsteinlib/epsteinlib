@@ -97,5 +97,24 @@ double polynomial_p(unsigned int dim, const double *y, const unsigned int *alpha
 double complex crandall_g_der(unsigned int dim, double nu, const double *z,
                               double prefactor, double zArgBound,
                               const unsigned int *alpha, unsigned int alphaAbs);
+/**
+ * @brief Calculates the derivatives of the regularization of the zero summand in the
+ * second sum in Crandall's formula.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] s: dimension minus exponent of the regularized Epstein zeta function,
+ * that is d - nu.
+ * @param[in] z: input vector of the function.
+ * @param[in] prefactor: prefactor of the vector, e. g. lambda.
+ * @param[in] alpha: multi-index of the partial derivatives
+ * @param[in] alphaAbs: sum of the elements of alpha
+ * @return partial derivatives of - gamma(s/2) * gammaStar(s/2, pi * prefactor *
+ * z**2), where gammaStar is the twice regularized lower incomplete gamma function if
+ * s is not equal to - 2k and partial derivatives of (pi * prefactor * y ** 2) ** (-
+ * s / 2) (gamma(s / 2, pi * prefactor * z ** 2) + ((-1)^k / k! ) * (log(pi * y ** 2)
+ * - log(prefactor ** 2))) if s is  equal to - 2k for non negative natural number k.
+ */
+double complex crandall_gReg_der(unsigned int dim, double s, const double *z,
+                                 double prefactor, const unsigned int *alpha,
+                                 unsigned int alphaAbs);
 
 #endif

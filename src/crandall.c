@@ -190,8 +190,9 @@ double polynomial_p(unsigned int dim, const double *y, const unsigned int *alpha
  * @param[in] prefactor: prefactor of the vector, e. g. lambda or 1/lambda in
  *      Crandall's formula
  * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast
- * asymptotic expansion in the calculation of the Crandall function.
- * @return upperGamma(nu / 2,pi prefactor * z**2) / (pi * prefactor z**2)^(nu /
+ * @param[in] alpha: multi-index of the partial derivatives
+ * @param[in] alphaAbs: sum of the elements of alpha
+ * * @return upperGamma(nu / 2,pi prefactor * z**2) / (pi * prefactor z**2)^(nu /
  * 2).
  */
 double complex crandall_g_der(unsigned int dim, double nu, const double *z,
@@ -258,5 +259,81 @@ double complex crandall_g_der(unsigned int dim, double nu, const double *z,
 
     return sum;
 }
+
+/**
+ * @brief Calculates the derivatives of the regularization of the zero summand in the
+ * second sum in Crandall's formula.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] s: dimension minus exponent of the regularized Epstein zeta function,
+ * that is d - nu.
+ * @param[in] z: input vector of the function.
+ * @param[in] prefactor: prefactor of the vector, e. g. lambda.
+ * @param[in] alpha: multi-index of the partial derivatives
+ * @param[in] alphaAbs: sum of the elements of alpha
+ * @return partial derivatives of - gamma(s/2) * gammaStar(s/2, pi * prefactor *
+ * z**2), where gammaStar is the twice regularized lower incomplete gamma function if
+ * s is not equal to - 2k and partial derivatives of (pi * prefactor * y ** 2) ** (-
+ * s / 2) (gamma(s / 2, pi * prefactor * z ** 2) + ((-1)^k / k! ) * (log(pi * y ** 2)
+ * - log(prefactor ** 2))) if s is  equal to - 2k for non negative natural number k.
+ */
+double complex crandall_gReg_der(unsigned int dim, double s, const double *z,
+                                 double prefactor, const unsigned int *alpha,
+                                 unsigned int alphaAbs) {
+    double zArgument = dot(dim, z, z);
+    zArgument *= M_PI * prefactor * prefactor;
+    double k = -nearbyint(s / 2.);
+    if (s < 1 && (s == -2 * k)) {
+        return crandall_gReg_nuequalsdimplus2k(s, zArgument, k, prefactor);
+    }
+
+    unsigned int *beta = malloc(dim * sizeof(unsigned int));
+    for (int i = 0; i < dim; i++) {
+        beta[i] = 0;
+    }
+
+    double sIt;
+
+    int done = 0;
+    unsigned int betaAbs = 0;
+
+    double complex sum = 0.0;
+    double complex epsilon = 0.0;
+    double complex auxt;
+    double complex auxy;
+
+    // Iterate over every multi-index beta so that 2 beta <= alpha
+    while (1) {
+
+        sIt = s + 2 * alphaAbs - 2 * betaAbs;
+
+        // summing using Kahan's method
+        auxy = -polynomial_p(dim, z, alpha, beta) * tgamma(sIt / 2) *
+                   egf_gammaStar(sIt / 2, zArgument) -
+               epsilon;
+        auxt = sum + auxy;
+        epsilon = (auxt - sum) - auxy;
+        sum = auxt;
+
+        done = 1;
+        for (unsigned int idx = 0; idx < dim; idx++) {
+            if (beta[idx] + 1 <= alpha[idx] / 2) {
+                beta[idx]++;
+                betaAbs++;
+                done = 0;
+                break;
+            }
+            betaAbs -= beta[idx];
+            beta[idx] = 0;
+        }
+        if (done) {
+            break;
+        }
+    }
+
+    free(beta);
+
+    return sum;
+}
+
 #undef EPS
 #undef G_CUTOFF
