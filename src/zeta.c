@@ -495,16 +495,19 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             xfactor = 1. / int_pow(ms, alphaAbs);
         } else if (variant == 3) {
             // calculate Epstein zeta reg derivative function values.
+            nc = crandall_gReg_der(dim, dim - nu, y_t1, lambda, alpha, alphaAbs);
             rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
-            if (equals(dim, y_t1, y_t2)) {
-                nc = crandall_gReg_der(dim, dim - nu, y_t1, lambda, alpha, alphaAbs);
-            } else {
-                nc =
-                    crandall_gReg_der(dim, dim - nu, y_t2, lambda, alpha, alphaAbs) *
-                    cexp(-2 * M_PI * I * dot(dim, y_t2, x_t1)) * rot;
-            }
             s2 = sum_fourier_der(nu, dim, lambda, m_fourier, x_t1, y_t2,
                                  cutoffsFourier, zArgBoundReci, alpha, alphaAbs);
+            // correct wrong zero summand in regularized fourier sum.
+            if (!equals(dim, y_t1, y_t2)) {
+                s2 += crandall_g_der(dim, dim - nu, y_t2, lambda, zArgBoundReci,
+                                     alpha, alphaAbs) *
+                          cexp(-2 * M_PI * I * dot(dim, x_t1, y_t2)) -
+                      crandall_g_der(dim, dim - nu, y_t1, lambda, zArgBoundReci,
+                                     alpha, alphaAbs) *
+                          cexp(-2 * M_PI * I * dot(dim, x_t1, y_t1));
+            }
             s2 = int_pow(lambda, alphaAbs) * (s2 * rot + nc);
             s1 = sum_real_der(nu, dim, lambda, m_real, x_t2, y_t2, cutoffsReal,
                               zArgBound, alpha) *
