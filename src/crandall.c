@@ -152,40 +152,36 @@ double complex crandall_g(unsigned int dim, double nu, const double *z,
  * @parma[in] alpha: multi-index for the derivative.
  * @return partial derivative of Y_k(y).
  */
-double polynomial_y_der(unsigned int k, unsigned int dim, const double *z,
+double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NOLINT
                         const unsigned int *alpha) {
 
     unsigned int *beta = malloc(dim * sizeof(unsigned int));
+    unsigned int betaAbs = 0;
+    unsigned int betaFact = 1;
+
     for (int i = 0; i < dim; i++) {
         beta[i] = (alpha[i] + 1) / 2;
+        betaAbs += beta[i];
+        for (int j = 1; j < beta[i] + 1; j++) {
+            betaFact *= j;
+        }
     }
-
-    int done = 0;
-    unsigned int betaAbs = mult_abs(dim, beta);
-
-    unsigned int betaFact;
 
     if (betaAbs > k) {
         free(beta);
         return 0;
     }
 
-    double sum = 0.0;
-    double epsilon = 0.0;
+    double sum = 0.;
+    double epsilon = 0.;
     double auxt;
     double auxy;
 
     double summand;
     double res;
 
-    // Iterate over every multi-index beta so that 2 beta >= alpha and |beta| = k
+    int done = 0;
     while (1) {
-        betaFact = 1;
-        for (unsigned int i = 0; i < dim; i++) {
-            for (int j = 1; j < beta[i] + 1; j++) {
-                betaFact *= j;
-            }
-        }
 
         if (!(betaAbs - k)) {
             summand = 1.;
@@ -204,15 +200,24 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z,
         }
 
         done = 1;
+        // Loop over multi-indexes beta so that 2 beta >= alpha and beta <= {k, ... ,
+        // k}
         for (unsigned int idx = 0; idx < dim; idx++) {
             if (beta[idx] + 1 <= k) {
                 beta[idx]++;
                 betaAbs++;
+                betaFact *= beta[idx];
                 done = 0;
                 break;
             }
             betaAbs -= beta[idx] - (alpha[idx] + 1) / 2;
             beta[idx] = (alpha[idx] + 1) / 2;
+            betaFact = 1;
+            for (unsigned int i = 0; i < dim; i++) {
+                for (int j = 1; j < beta[i] + 1; j++) {
+                    betaFact *= j;
+                }
+            }
         }
         if (done) {
             break;
