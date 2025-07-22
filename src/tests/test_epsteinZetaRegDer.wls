@@ -17,12 +17,9 @@
 (*Load Mathematica wrapper in every kernel. Remove the "Quiet" if unsure about the parallel evaluation.*)
 
 
-1+1
-
-
-baseDir=FileNameJoin[{NotebookDirectory[], "..", "..", "mathematica"}];
-SetDirectory[baseDir];<<EpsteinZeta.wl
-ParallelEvaluate[SetDirectory[baseDir];Quiet[<<EpsteinZeta.wl]];
+BaseDirectory=FileNameJoin[{NotebookDirectory[], "..", "..", "mathematica"}];
+SetDirectory[BaseDirectory];<<EpsteinZeta.wl
+ParallelEvaluate[SetDirectory[BaseDirectory];Quiet[<<EpsteinZeta.wl]];
 
 
 (* ::Text:: *)
@@ -75,10 +72,27 @@ DirectionalDerivative[v_,n_,size_:15,h_:1/1000][f_][x_]:=If[PossibleZeroQ[n]
 
 
 (* ::Text:: *)
-(*Derivatives of the upper Crandall function.*)
+(*Helper functions for the derivatives.*)
 
 
 p[y_,\[Alpha]_,\[Beta]_]:=Apply[Times,(-\[Pi])^(\[Alpha]-\[Beta])Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2y)^(\[Alpha]-2\[Beta])]
+
+
+Y[k_,y_,\[Alpha]_]:=k!Pi^k Total@Table[
+	Piecewise[{
+		{Apply[Times,\[Alpha]!/\[Beta]! Binomial[2\[Beta],\[Alpha]]y^(2\[Beta]-\[Alpha])],Total[\[Beta]]==k}
+		,{0,Total[\[Beta]]!=k}
+	}],{\[Beta],Tuples[Range[Ceiling[\[Alpha]/2],ConstantArray[k,Length[y]]]]}
+]
+
+Expand@Derivative[0,{1,2}][Y][3,{y1,y2}]
+Expand@Y[3,{y1,y2},{1,2}]
+
+
+(* ::Text:: *)
+(*Derivatives of the upper Crandall function.*)
+
+
 GReg[\[Nu]_,z_]=Piecewise[{
 	{-2/\[Nu],Norm[z]<10^(-64)&&Not[Element[-\[Nu]/2,NonNegativeIntegers]]}
 	,{-Gamma[\[Nu]/2,0,Pi z . z]/(Pi z . z)^(\[Nu]/2),Norm[z]>=10^(-64)&&Not[Element[-\[Nu]/2,NonNegativeIntegers]]}}

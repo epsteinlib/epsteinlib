@@ -145,6 +145,98 @@ double complex crandall_g(unsigned int dim, double nu, const double *z,
     return egf_ugamma(nu / 2, zArgument) / pow(zArgument, nu / 2);
 }
 
+/** @brief Calculates the derivatives of Y_k(y) = (pi * y**2)**k
+ * @param[in] k: integer power.
+ * @param[in] dim: dimension of y.
+ * @param[in] y: vector of the polynomial.
+ * @parma[in] alpha: multi-index for the derivative.
+ * @return partial derivative of Y_k(y).
+ */
+double polynomial_y_der(unsigned int k, unsigned int dim, const double *z,
+                        const unsigned int *alpha) {
+
+    unsigned int *beta = malloc(dim * sizeof(unsigned int));
+    for (int i = 0; i < dim; i++) {
+        beta[i] = (alpha[i] + 1) / 2;
+    }
+
+    int done = 0;
+    unsigned int betaAbs = mult_abs(dim, beta);
+
+    unsigned int betaFact;
+
+    if (betaAbs > k) {
+        free(beta);
+        return 0;
+    }
+
+    double sum = 0.0;
+    double epsilon = 0.0;
+    double auxt;
+    double auxy;
+
+    double summand;
+    double res;
+
+    // Iterate over every multi-index beta so that 2 beta >= alpha and |beta| = k
+    while (1) {
+        betaFact = 1;
+        for (unsigned int i = 0; i < dim; i++) {
+            for (int j = 1; j < beta[i] + 1; j++) {
+                betaFact *= j;
+            }
+        }
+
+        if (!(betaAbs - k)) {
+            summand = 1.;
+            for (int i = 0; i < dim; i++) {
+                summand *= (double)binom(2 * beta[i], alpha[i]) *
+                           int_pow(z[i], (2 * beta[i]) - alpha[i]);
+            }
+
+            summand = summand / (double)betaFact;
+
+            // summing using Kahan's method
+            auxy = summand - epsilon;
+            auxt = sum + auxy;
+            epsilon = (auxt - sum) - auxy;
+            sum = auxt;
+        }
+
+        done = 1;
+        for (unsigned int idx = 0; idx < dim; idx++) {
+            if (beta[idx] + 1 <= k) {
+                beta[idx]++;
+                betaAbs++;
+                done = 0;
+                break;
+            }
+            betaAbs -= beta[idx] - (alpha[idx] + 1) / 2;
+            beta[idx] = (alpha[idx] + 1) / 2;
+        }
+        if (done) {
+            break;
+        }
+    }
+
+    free(beta);
+
+    // factorial = alpha! k!
+    unsigned long factorial = 1;
+    for (unsigned int j = 1; j < k + 1; j++) {
+        factorial *= j;
+    }
+    for (unsigned int i = 0; i < dim; i++) {
+        for (int j = 1; j < alpha[i] + 1; j++) {
+            factorial *= j;
+        }
+    }
+
+    res = (double)factorial * int_pow(M_PI, k) * sum;
+
+    return res;
+}
+
 /** @brief Calculates the polynomial p_(alpha,beta)(y) = (-pi)^(alpha - beta) *
  * (alpha choose beta) *
  * ((alpha - beta)! / (alpha - 2*beta)!) * (2*y)^(alpha - 2*beta)
@@ -155,26 +247,23 @@ double complex crandall_g(unsigned int dim, double nu, const double *z,
  * @parma[in] beta: lower multi-index.
  * @return p(y).
  */
-double polynomial_p(unsigned int dim, const double *y, const unsigned int *alpha,
+double polynomial_p(unsigned int dim, const double *z, const unsigned int *alpha,
                     const unsigned int *beta) {
     double res = 1;
     unsigned int ai = 0;
     unsigned int bi = 0;
-    double yi = 0;
     unsigned int factFrac;
     unsigned int aMinusb = 0;
     for (int i = 0; i < dim; i++) {
         ai = alpha[i];
         bi = beta[i];
-        yi = y[i];
         aMinusb += ai - bi;
-        factFrac =
-            1; // Calculate the factorial fraction (alpha - beta)!/(alpha - 2beta)!
+        factFrac = 1; // Calculate (alpha - beta)!/(alpha - 2beta)!
         for (unsigned int j = ai - (2 * bi) + 1; j <= ai - bi; j++) {
             factFrac *= j;
         }
         res *= (double)binom(ai, bi) * (double)factFrac *
-               int_pow(2 * yi, ai - (2 * bi));
+               int_pow(2 * z[i], ai - (2 * bi));
     }
 
     res *= int_pow(-M_PI, aMinusb);
