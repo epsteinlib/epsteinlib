@@ -156,21 +156,29 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
                         const unsigned int *alpha) {
 
     unsigned int *beta = malloc(dim * sizeof(unsigned int));
-    unsigned int betaAbs = 0;
-    unsigned int betaFact = 1;
-
     for (int i = 0; i < dim; i++) {
         beta[i] = (alpha[i] + 1) / 2;
-        betaAbs += beta[i];
-        for (int j = 1; j < beta[i] + 1; j++) {
-            betaFact *= j;
-        }
     }
 
-    if (betaAbs > k) {
+    unsigned int absMin = 0;
+    for (int i = 0; i < dim; i++) {
+        absMin += beta[i];
+    }
+
+    if (absMin > k) {
         free(beta);
         return 0;
     }
+
+    unsigned int factMin = 1;
+    for (int i = 0; i < dim; i++) {
+        for (int j = 1; j < beta[i] + 1; j++) {
+            factMin *= j;
+        }
+    }
+
+    unsigned int betaAbs = absMin;
+    unsigned int betaFact = factMin;
 
     double sum = 0.;
     double epsilon = 0.;
