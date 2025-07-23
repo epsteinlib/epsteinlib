@@ -212,17 +212,23 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
         // k}
         for (unsigned int idx = 0; idx < dim; idx++) {
             if (beta[idx] + 1 <= k) {
+                // Fast path: increment current dimension
                 beta[idx]++;
                 betaAbs++;
                 betaFact *= beta[idx];
                 done = 0;
                 break;
             }
+
+            // Slow path: reset this dimension and continue
             betaAbs -= beta[idx] - (alpha[idx] + 1) / 2;
             beta[idx] = (alpha[idx] + 1) / 2;
-            betaFact = 1;
+
+            // Recalculate factorial (expensive but stable)
+            betaFact = factMin;
             for (unsigned int i = 0; i < dim; i++) {
-                for (int j = 1; j < beta[i] + 1; j++) {
+                for (unsigned int j = ((alpha[i] + 1) / 2) + 1; j < beta[i] + 1;
+                     j++) {
                     betaFact *= j;
                 }
             }
