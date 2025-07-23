@@ -176,6 +176,8 @@ int test_epsteinZetaRegDer_taylor(void) { // NOLINT
     bool done;
     unsigned int *alpha = malloc(dim * sizeof(unsigned int));
 
+    printf("\n\t ... ");
+    printf("generating test values");
     for (int i = 0; i < 100; i++) {
 
         nu = -12.5 + 0.333 * (i + 1);
