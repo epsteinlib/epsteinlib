@@ -265,11 +265,13 @@ double complex crandall_g_der(unsigned int dim, double nu, const double *z,
  */
 double polynomial_l(unsigned int dim, const double *z, const unsigned int *alpha,
                     const unsigned int *beta) {
+
     double res = 1;
     unsigned int ai = 0;
     unsigned int bi = 0;
     unsigned int factFrac;
     unsigned int aMinusb = 0;
+
     for (int i = 0; i < dim; i++) {
         ai = alpha[i];
         bi = beta[i];
@@ -279,10 +281,10 @@ double polynomial_l(unsigned int dim, const double *z, const unsigned int *alpha
             factFrac *= j;
         }
         res *= (double)binom(ai, bi) * (double)factFrac *
-               int_pow(2 * z[i], ai - (2 * bi));
+               (double)int_pow(2 * z[i], ai - (2 * bi));
     }
 
-    unsigned int factorial = 1;
+    unsigned long factorial = 1;
     for (int j = 1; j < aMinusb; j++) {
         factorial *= j;
     }
