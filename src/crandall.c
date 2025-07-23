@@ -16,7 +16,6 @@
 #include <complex.h>
 #include <float.h>
 #include <math.h>
-#include <stdlib.h>
 
 /*!
  * @brief epsilon for the cutoff around nu = dimension.
@@ -155,26 +154,30 @@ double complex crandall_g(unsigned int dim, double nu, const double *z,
 double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NOLINT
                         const unsigned int *alpha) {
 
-    unsigned int *beta = malloc(dim * sizeof(unsigned int));
+    unsigned int betaMin[dim];
     for (int i = 0; i < dim; i++) {
-        beta[i] = (alpha[i] + 1) / 2;
+        betaMin[i] = (alpha[i] + 1) / 2;
     }
 
     unsigned int absMin = 0;
     for (int i = 0; i < dim; i++) {
-        absMin += beta[i];
+        absMin += betaMin[i];
     }
 
     if (absMin > k) {
-        free(beta);
         return 0;
     }
 
     unsigned int factMin = 1;
     for (int i = 0; i < dim; i++) {
-        for (int j = 1; j < beta[i] + 1; j++) {
+        for (int j = 1; j < betaMin[i] + 1; j++) {
             factMin *= j;
         }
+    }
+
+    unsigned int beta[dim];
+    for (int i = 0; i < dim; i++) {
+        beta[i] = betaMin[i];
     }
 
     unsigned int betaAbs = absMin;
@@ -211,7 +214,7 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
         // Loop over multi-indexes beta so that 2 beta >= alpha and beta <= {k, ... ,
         // k}
         for (unsigned int idx = 0; idx < dim; idx++) {
-            if (beta[idx] + 1 <= k) {
+            if (beta[idx] < k) {
                 // Fast path: increment current dimension
                 beta[idx]++;
                 betaAbs++;
@@ -237,8 +240,6 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
             break;
         }
     }
-
-    free(beta);
 
     // factorial = alpha! k!
     unsigned long factorial = 1;
@@ -310,7 +311,7 @@ double complex crandall_g_der(unsigned int dim, double nu, const double *z,
         return crandall_g(dim, nu, z, prefactor, zArgBound);
     }
 
-    unsigned int *beta = malloc(dim * sizeof(unsigned int));
+    unsigned int beta[dim];
     for (int i = 0; i < dim; i++) {
         beta[i] = 0;
     }
@@ -363,8 +364,6 @@ double complex crandall_g_der(unsigned int dim, double nu, const double *z,
         }
     }
 
-    free(beta);
-
     return sum;
 }
 
@@ -394,7 +393,7 @@ double complex crandall_gReg_der(unsigned int dim, double s, const double *z,
         return crandall_gReg_nuequalsdimplus2k(s, zArgument, k, prefactor);
     }
 
-    unsigned int *beta = malloc(dim * sizeof(unsigned int));
+    unsigned int beta[dim];
     for (int i = 0; i < dim; i++) {
         beta[i] = 0;
     }
@@ -437,8 +436,6 @@ double complex crandall_gReg_der(unsigned int dim, double s, const double *z,
             break;
         }
     }
-
-    free(beta);
 
     return sum;
 }
