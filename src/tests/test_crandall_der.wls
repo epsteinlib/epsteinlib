@@ -56,8 +56,8 @@ Expand@Derivative[{1,3}][Log[Pi # . #]&][{y1,y2}]
 Expand[LDer[{y1,y2},{1,3}]]
 Expand@Derivative[{3,1}][Log[Pi # . #]&][{y1,y2}]
 Expand[LDer[{y1,y2},{3,1}]]
-Expand@Derivative[{2,2}][Log[Pi # . #]&][{y1,y2}]
-Expand[LDer[{y1,y2},{2,2}]]
+N@Expand@Derivative[{4,2}][Log[Pi # . #]&][{1/10,0}]
+N@Expand[LDer[{1/10,0},{4,2}]]
 
 
 (* ::Text:: *)
@@ -161,7 +161,7 @@ Export["csv/crandall_g_der_Ref.csv",crandallDerTab];
 range = Range[1000];
 Do[
 	z0[i]=10{randRational,randRational,randRational};
-	\[Alpha]0[i]={randDerivative,randDerivative,randDerivative};
+	\[Alpha]0[i]={Max[randDerivative,1],randDerivative,randDerivative};
 	\[Beta]0[i]={randDerivativeBeta[\[Alpha]0[i][[1]]],randDerivativeBeta[\[Alpha]0[i][[2]]],randDerivativeBeta[\[Alpha]0[i][[3]]]};
 	,{i,range}
 ]

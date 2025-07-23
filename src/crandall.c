@@ -159,7 +159,7 @@ double polynomial_p(unsigned int dim, const double *z, const unsigned int *alpha
     double res = 1;
     unsigned int ai = 0;
     unsigned int bi = 0;
-    unsigned int factFrac;
+    unsigned long factFrac;
     unsigned int aMinusb = 0;
     for (int i = 0; i < dim; i++) {
         ai = alpha[i];
@@ -269,7 +269,7 @@ double polynomial_l(unsigned int dim, const double *z, const unsigned int *alpha
     double res = 1;
     unsigned int ai = 0;
     unsigned int bi = 0;
-    unsigned int factFrac;
+    unsigned long factFrac;
     unsigned int aMinusb = 0;
 
     for (int i = 0; i < dim; i++) {
@@ -322,7 +322,7 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
         return 0;
     }
 
-    unsigned int factMin = 1;
+    unsigned long factMin = 1;
     for (int i = 0; i < dim; i++) {
         for (int j = 1; j < betaMin[i] + 1; j++) {
             factMin *= j;
@@ -335,7 +335,7 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
     }
 
     unsigned int betaAbs = absMin;
-    unsigned int betaFact = factMin;
+    unsigned long betaFact = factMin;
 
     double sum = 0.;
     double epsilon = 0.;
