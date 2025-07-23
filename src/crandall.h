@@ -69,16 +69,6 @@ double assignzArgBound(double nu);
 double complex crandall_g(unsigned int dim, double nu, const double *z,
                           double prefactor, double zArgBound);
 
-/** @brief Calculates the derivatives of Y_k(y) = (pi * y**2)**k
- * @param[in] k: integer power.
- * @param[in] dim: dimension of y.
- * @param[in] z: vector of the polynomial.
- * @parma[in] alpha: multi-index for the derivative.
- * @return partial derivative of Y_k(y).
- */
-double polynomial_y_der(unsigned int k, unsigned int dim, const double *z,
-                        const unsigned int *alpha);
-
 /** @brief Calculates the polynomial p_(alpha,beta)(y) = (-pi)^(alpha - beta) *
  * (alpha choose beta) *
  * ((alpha - beta)! / (alpha - 2*beta)!) * (2*y)^(alpha - 2*beta)
@@ -107,6 +97,29 @@ double polynomial_p(unsigned int dim, const double *z, const unsigned int *alpha
 double complex crandall_g_der(unsigned int dim, double nu, const double *z,
                               double prefactor, double zArgBound,
                               const unsigned int *alpha, unsigned int alphaAbs);
+
+/** @brief Calculates the polynomial l_(alpha,beta)(y) = - (-1)**|alpha - beta| *
+ * binom(alpha,beta) * (alpha-beta)! / (alpha - 2 beta)! |alpha - beta|! / |alpha -
+ * beta| * (2 * y)**(alpha - 2 beta) where 2 beta =< alpha
+ * @param[in] dim: dimension of alpha, beta and y.
+ * @param[in] y: vector of the polynomial.
+ * @parma[in] alpha: upper multi-index.
+ * @parma[in] beta: lower multi-index.
+ * @return p(y).
+ */
+double polynomial_l(unsigned int dim, const double *z, const unsigned int *alpha,
+                    const unsigned int *beta);
+
+/** @brief Calculates the derivatives of Y_k(y) = (pi * y**2)**k
+ * @param[in] k: integer power.
+ * @param[in] dim: dimension of y.
+ * @param[in] z: vector of the polynomial.
+ * @parma[in] alpha: multi-index for the derivative.
+ * @return partial derivative of Y_k(y).
+ */
+double polynomial_y_der(unsigned int k, unsigned int dim, const double *z,
+                        const unsigned int *alpha);
+
 /**
  * @brief Calculates the derivatives of the regularization of the zero summand in the
  * second sum in Crandall's formula.
