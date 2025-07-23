@@ -39,6 +39,41 @@ p[z_,\[Alpha]_,\[Beta]_]:=Apply[Times,(-\[Pi])^(\[Alpha]-\[Beta])Binomial[\[Alph
 l[z_,\[Alpha]_,\[Beta]_]:=-(-1)^Total[\[Alpha]-\[Beta]]Total[\[Alpha]-\[Beta]]!/Total[\[Alpha]-\[Beta]]Apply[Times,Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2z)^(\[Alpha]-2\[Beta])]
 
 
+s[k_/;Element[k,NonNegativeIntegers],z_]:=\[Pi]^(k+Length[z]/2)/Gamma[k+Length[z]/2](-1)^(k+1)/k!(\[Pi] z . z)^k Log[Pi z . z]
+sDerAnalytic[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=Derivative[0,\[Alpha]][s][k,z]
+
+
+YDer[k_,z_,\[Alpha]_]:=Piecewise[{
+	{(\[Pi] z . z)^k,Total[\[Alpha]]==0}
+	,{k!Pi^k Apply[Times,\[Alpha]!] Total@Table[
+			Piecewise[{
+			{Apply[Times,Binomial[2\[Beta],\[Alpha]]z^(2\[Beta]-\[Alpha])/\[Beta]!],Total[\[Beta]]==k}
+			,{0,Total[\[Beta]]!=k}
+			}],{\[Beta],Tuples[Range[Ceiling[\[Alpha]/2],ConstantArray[k,Length[z]]]]}
+		],True
+	}
+}]
+LDer[z_,\[Alpha]_]:=Piecewise[{
+	{Log[\[Pi] z . z],Total[\[Alpha]]==0}
+	,{Total[Flatten[Table[
+			l[z,\[Alpha],\[Beta]]/(z . z)^(Total[\[Alpha]-\[Beta]])
+			,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}
+		]]],True
+	}
+}]
+
+
+sDer[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=\[Pi]^(k+Length[z]/2+Total[\[Alpha]])/Gamma[k+Length[z]/2](-1)^(k+1)/k!Total[Table[
+	Apply[Times,Binomial[ConstantArray[Total[\[Alpha]],Length[z]],\[Beta]]]YDer[k,z,\[Beta]]LDer[z,\[Alpha]-\[Beta]]
+	,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]]]}
+	]]
+
+
+sDer[0,{1/2},{1}]
+
+sDerAnalytic[0,{1/2},{1}]
+
+
 (* ::Text:: *)
 (*Derivatives of Crandall functions*)
 
@@ -173,7 +208,7 @@ range = Range[100];
 Do[
 	k0[i]=RandomInteger[{0,10}];
 	z0[i]={randRational,randRational,randRational};
-	\[Alpha]0[i]={randDerivative,randDerivative,randDerivative};
+	\[Alpha]0[i]=If[i<10,{0,0,i-1},{randDerivative,randDerivative,randDerivative}];
 	,{i,range}
 ]
 
@@ -204,7 +239,7 @@ Export["csv/polynomial_y_der_Ref.csv",YDerTab];
 range = Range[100];
 Do[
 	z0[i]={randRational,randRational,randRational};
-	\[Alpha]0[i]={randDerivative,randDerivative,randDerivative};
+	\[Alpha]0[i]=If[i<10,{0,0,i-1},{randDerivative,randDerivative,randDerivative}];
 	,{i,range}
 ]
 

@@ -309,6 +309,11 @@ double complex log_l_der(unsigned int dim, const double *z,
 
     double zArg = dot(dim, z, z);
 
+    // Return function if there is no derivative
+    if (!alphaAbs) {
+        return log(M_PI * zArg);
+    }
+
     unsigned int beta[dim];
     for (int i = 0; i < dim; i++) {
         beta[i] = 0;
@@ -372,6 +377,12 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
         absMin += betaMin[i];
     }
 
+    // Return function if there is no derivative
+    if (!absMin) {
+        return int_pow(M_PI * dot(dim, z, z), k);
+    }
+
+    // Higher derivatives vanish
     if (absMin > k) {
         return 0;
     }
