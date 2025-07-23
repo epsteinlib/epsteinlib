@@ -211,10 +211,9 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
         }
 
         done = 1;
-        // Loop over multi-indexes beta so that 2 beta >= alpha and beta <= {k, ... ,
-        // k}
+        // Loop over multi-indexes beta so that 2 beta >= alpha and |beta| <= k
         for (unsigned int idx = 0; idx < dim; idx++) {
-            if (beta[idx] < k) {
+            if (beta[idx] < k - absMin + betaMin[idx]) {
                 // Fast path: increment current dimension
                 beta[idx]++;
                 betaAbs++;
@@ -224,14 +223,13 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
             }
 
             // Slow path: reset this dimension and continue
-            betaAbs -= beta[idx] - (alpha[idx] + 1) / 2;
-            beta[idx] = (alpha[idx] + 1) / 2;
+            betaAbs -= beta[idx] - betaMin[idx];
+            beta[idx] = betaMin[idx];
 
             // Recalculate factorial (expensive but stable)
             betaFact = factMin;
             for (unsigned int i = 0; i < dim; i++) {
-                for (unsigned int j = ((alpha[i] + 1) / 2) + 1; j < beta[i] + 1;
-                     j++) {
+                for (unsigned int j = betaMin[i] + 1; j < beta[i] + 1; j++) {
                     betaFact *= j;
                 }
             }
