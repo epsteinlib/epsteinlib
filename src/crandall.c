@@ -291,19 +291,73 @@ double polynomial_l(unsigned int dim, const double *z, const unsigned int *alpha
 
     res *= (double)factorial;
 
-    if (aMinusb % 2) {
+    if (!(aMinusb % 2)) {
         res *= -1.;
     }
 
     return res;
 }
 
-/** @brief Calculates the derivatives of Y_k(y) = (pi * y**2)**k
+/** @brief Calculates the derivatives of L(z) = log(pi * z**2)
+ * @param[in] dim: dimension of z.
+ * @param[in] z: vector of the polynomial.
+ * @parma[in] alpha: multi-index for the derivative.
+ * @return partial derivative of L(z).
+ */
+double complex log_l_der(unsigned int dim, const double *z,
+                         const unsigned int *alpha, unsigned int alphaAbs) {
+
+    double zArg = dot(dim, z, z);
+
+    unsigned int beta[dim];
+    for (int i = 0; i < dim; i++) {
+        beta[i] = 0;
+    }
+
+    unsigned int aMinusb = alphaAbs;
+
+    double complex sum = 0.0;
+    double complex epsilon = 0.0;
+    double complex auxt;
+    double complex auxy;
+
+    int done = 0;
+
+    // Iterate over every multi-index beta so that 2 beta <= alpha
+    while (1) {
+
+        // summing using Kahan's method
+        auxy = polynomial_l(dim, z, alpha, beta) / (double)int_pow(zArg, aMinusb) -
+               epsilon;
+        auxt = sum + auxy;
+        epsilon = (auxt - sum) - auxy;
+        sum = auxt;
+
+        done = 1;
+        for (unsigned int idx = 0; idx < dim; idx++) {
+            if (beta[idx] + 1 <= alpha[idx] / 2) {
+                beta[idx]++;
+                aMinusb--;
+                done = 0;
+                break;
+            }
+            aMinusb += beta[idx];
+            beta[idx] = 0;
+        }
+        if (done) {
+            break;
+        }
+    }
+
+    return sum;
+}
+
+/** @brief Calculates the derivatives of Y_k(z) = (pi * z**2)**k
  * @param[in] k: integer power.
- * @param[in] dim: dimension of y.
+ * @param[in] dim: dimension of z.
  * @param[in] y: vector of the polynomial.
  * @parma[in] alpha: multi-index for the derivative.
- * @return partial derivative of Y_k(y).
+ * @return partial derivative of Y_k(z).
  */
 double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NOLINT
                         const unsigned int *alpha) {

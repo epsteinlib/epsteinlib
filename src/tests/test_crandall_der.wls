@@ -36,28 +36,7 @@ Protect[Power];
 
 
 p[z_,\[Alpha]_,\[Beta]_]:=Apply[Times,(-\[Pi])^(\[Alpha]-\[Beta])Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2z)^(\[Alpha]-2\[Beta])]
-l[z_,\[Alpha]_,\[Beta]_]:=(-1)^Total[\[Alpha]-\[Beta]]Total[\[Alpha]-\[Beta]]!/Total[\[Alpha]-\[Beta]]Apply[Times,Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2z)^(\[Alpha]-2\[Beta])]
-
-
-YDer[k_,z_,\[Alpha]_]:=k!Pi^k Apply[Times,\[Alpha]!] Total@Table[
-	Piecewise[{
-		{Apply[Times,Binomial[2\[Beta],\[Alpha]]z^(2\[Beta]-\[Alpha])/\[Beta]!],Total[\[Beta]]==k}
-		,{0,Total[\[Beta]]!=k}
-	}],{\[Beta],Tuples[Range[Ceiling[\[Alpha]/2],ConstantArray[k,Length[z]]]]}
-]
-
-LDer[z_,\[Alpha]_]:=-Total[Flatten[Table[
-	l[z,\[Alpha],\[Beta]]/(z . z)^(Total[\[Alpha]-\[Beta]])
-	,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}]
-]]
-
-
-Expand@Derivative[{1,3}][Log[Pi # . #]&][{y1,y2}]
-Expand[LDer[{y1,y2},{1,3}]]
-Expand@Derivative[{3,1}][Log[Pi # . #]&][{y1,y2}]
-Expand[LDer[{y1,y2},{3,1}]]
-N@Expand@Derivative[{4,2}][Log[Pi # . #]&][{1/10,0}]
-N@Expand[LDer[{1/10,0},{4,2}]]
+l[z_,\[Alpha]_,\[Beta]_]:=-(-1)^Total[\[Alpha]-\[Beta]]Total[\[Alpha]-\[Beta]]!/Total[\[Alpha]-\[Beta]]Apply[Times,Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2z)^(\[Alpha]-2\[Beta])]
 
 
 (* ::Text:: *)
@@ -126,7 +105,7 @@ randDerivative := RandomInteger[{0,6}]
 (*Setup test parameters*)
 
 
-range = Range[200];
+range = Range[100];
 Do[
 	\[Nu]0[i]=With[{\[Nu]=10 randRational},If[PossibleZeroQ@(\[Nu]-2),1/2,\[Nu]]];
 	z0[i]={randRational,randRational,randRational};
@@ -158,7 +137,7 @@ Export["csv/crandall_g_der_Ref.csv",crandallDerTab];
 (*Setup test parameters*)
 
 
-range = Range[1000];
+range = Range[100];
 Do[
 	z0[i]=10{randRational,randRational,randRational};
 	\[Alpha]0[i]={Max[randDerivative,1],randDerivative,randDerivative};
@@ -212,6 +191,37 @@ YDerTab=ParallelTable[Flatten[{k0[i],N[z0[i],30],\[Alpha]0[i],N[SetPrecision[Der
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/polynomial_y_der_Ref.csv",YDerTab];
+
+
+(* ::Subsection:: *)
+(*Create Log[\[Pi] y\.b2] derivatives reference values*)
+
+
+(* ::Text:: *)
+(*Setup test parameters*)
+
+
+range = Range[100];
+Do[
+	z0[i]={randRational,randRational,randRational};
+	\[Alpha]0[i]={randDerivative,randDerivative,randDerivative};
+	,{i,range}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values*)
+
+
+LDerTab=ParallelTable[Flatten[{N[z0[i],30],\[Alpha]0[i],N[SetPrecision[Derivative[\[Alpha]0[i]][Log[Pi # . #]&][z0[i]],200],30]}],{i,range}];
+
+
+(* ::Text:: *)
+(*Save reference values to file*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/log_l_der_Ref.csv",LDerTab];
 
 
 (* ::Subsection:: *)

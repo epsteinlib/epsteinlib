@@ -75,18 +75,20 @@ DirectionalDerivative[v_,n_,size_:15,h_:1/1000][f_][x_]:=If[PossibleZeroQ[n]
 (*Helper functions for the derivatives.*)
 
 
-p[y_,\[Alpha]_,\[Beta]_]:=Apply[Times,(-\[Pi])^(\[Alpha]-\[Beta])Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2y)^(\[Alpha]-2\[Beta])]
+p[z_,\[Alpha]_,\[Beta]_]:=Apply[Times,(-\[Pi])^(\[Alpha]-\[Beta])Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2z)^(\[Alpha]-2\[Beta])]
+l[z_,\[Alpha]_,\[Beta]_]:=-(-1)^Total[\[Alpha]-\[Beta]]Total[\[Alpha]-\[Beta]]!/Total[\[Alpha]-\[Beta]]Apply[Times,Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2z)^(\[Alpha]-2\[Beta])]
 
 
-Y[k_,y_,\[Alpha]_]:=k!Pi^k Total@Table[
+YDer[k_,z_,\[Alpha]_]:=k!Pi^k Apply[Times,\[Alpha]!] Total@Table[
 	Piecewise[{
-		{Apply[Times,\[Alpha]!/\[Beta]! Binomial[2\[Beta],\[Alpha]]y^(2\[Beta]-\[Alpha])],Total[\[Beta]]==k}
+		{Apply[Times,Binomial[2\[Beta],\[Alpha]]z^(2\[Beta]-\[Alpha])/\[Beta]!],Total[\[Beta]]==k}
 		,{0,Total[\[Beta]]!=k}
-	}],{\[Beta],Tuples[Range[Ceiling[\[Alpha]/2],ConstantArray[k,Length[y]]]]}
+	}],{\[Beta],Tuples[Range[Ceiling[\[Alpha]/2],ConstantArray[k,Length[z]]]]}
 ]
-
-Expand@Derivative[0,{1,2}][Y][3,{y1,y2}]
-Expand@Y[3,{y1,y2},{1,2}]
+LDer[z_,\[Alpha]_]:=Total[Flatten[Table[
+	l[z,\[Alpha],\[Beta]]/(z . z)^(Total[\[Alpha]-\[Beta]])
+	,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}]
+]]
 
 
 (* ::Text:: *)

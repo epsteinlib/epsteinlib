@@ -98,24 +98,33 @@ double complex crandall_g_der(unsigned int dim, double nu, const double *z,
                               double prefactor, double zArgBound,
                               const unsigned int *alpha, unsigned int alphaAbs);
 
-/** @brief Calculates the polynomial l_(alpha,beta)(y) = - (-1)**|alpha - beta| *
+/** @brief Calculates the polynomial l_(alpha,beta)(z) = - (-1)**|alpha - beta| *
  * binom(alpha,beta) * (alpha-beta)! / (alpha - 2 beta)! |alpha - beta|! / |alpha -
- * beta| * (2 * y)**(alpha - 2 beta) where 2 beta =< alpha
- * @param[in] dim: dimension of alpha, beta and y.
- * @param[in] y: vector of the polynomial.
+ * beta| * (2 * z)**(alpha - 2 beta) where 2 beta =< alpha
+ * @param[in] dim: dimension of alpha, beta and z.
+ * @param[in] z: vector of the polynomial.
  * @parma[in] alpha: upper multi-index.
  * @parma[in] beta: lower multi-index.
- * @return p(y).
+ * @return l(z).
  */
 double polynomial_l(unsigned int dim, const double *z, const unsigned int *alpha,
                     const unsigned int *beta);
 
-/** @brief Calculates the derivatives of Y_k(y) = (pi * y**2)**k
+/** @brief Calculates the derivatives of L(z) = log(pi * z**2)
+ * @param[in] dim: dimension of z.
+ * @param[in] z: vector of the polynomial.
+ * @parma[in] alpha: multi-index for the derivative.
+ * @return partial derivative of L(z).
+ */
+double complex log_l_der(unsigned int dim, const double *z,
+                         const unsigned int *alpha, unsigned int alphaAbs);
+
+/** @brief Calculates the derivatives of Y_k(z) = (pi * z**2)**k
  * @param[in] k: integer power.
  * @param[in] dim: dimension of y.
  * @param[in] z: vector of the polynomial.
  * @parma[in] alpha: multi-index for the derivative.
- * @return partial derivative of Y_k(y).
+ * @return partial derivative of Y_k(z).
  */
 double polynomial_y_der(unsigned int k, unsigned int dim, const double *z,
                         const unsigned int *alpha);

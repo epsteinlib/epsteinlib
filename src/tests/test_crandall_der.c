@@ -274,6 +274,8 @@ int test_crandall_g_der_taylor(void) { // NOLINT
     bool done;
     unsigned int *alpha = malloc(dim * sizeof(unsigned int));
 
+    printf("\n\t ... ");
+    printf("generating test values");
     for (int i = 0; i < 100; i++) {
 
         z[0] = (double)i / 110. + 0.1;
@@ -396,6 +398,8 @@ int test_crandall_gReg_der_taylor(void) { // NOLINT
     bool done;
     unsigned int *alpha = malloc(dim * sizeof(unsigned int));
 
+    printf("\n\t ... ");
+    printf("generating test values");
     for (int i = 0; i < 100; i++) {
 
         z[0] = (double)i / 110. + 0.1;
@@ -567,6 +571,117 @@ int test_polynomial_y_der(void) {
                    tol);
             printf("\n");
             printf("k:\t\t %u\n", k);
+            printVectorUnitTest("z:\t\t", z, dim);
+            printMultiindexUnitTest("alpha:\t\t", alpha, dim);
+            printf("\n");
+        }
+        totalTests++;
+    }
+
+    free(kRef);
+    free(z);
+    free(alpha);
+    free(refRead);
+
+    if (fclose(data) != 0) {
+        return fprintf(stderr, "Error closing file: %d\n", errno);
+    }
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
+           tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
+
+    return totalTests - testsPassed;
+}
+
+/*!
+ * @brief Benchmarks 3D polynomial Y derivatives by comparing to high-precision
+ * values over a range of random parameters.
+ *
+ * @return number of failed tests.
+ * */
+int test_log_l_der(void) {
+    printf("%s ", __func__);
+
+    char path[MAX_PATH_LENGTH];
+    int result = snprintf(path, sizeof(path), "%s/log_l_der_Ref.csv", // NOLINT
+                          BASE_PATH);
+    if (result < 0 || result >= sizeof(path)) {
+        return fprintf(stderr, "Error creating file path\n");
+    }
+
+    FILE *data = fopen(path, "r");
+    if (data == NULL) {
+        return fprintf(stderr, "Error opening file: %s\n", path);
+    }
+
+    unsigned int alphaAbs;
+    double errorAbs;
+    double errorRel;
+    double errorMaxAbsRel;
+    double complex num;
+    double complex ref;
+    int scanResult;
+    char line[256];
+
+    double errMin = NAN;
+    double errMax = NAN;
+    double errSum = 0.;
+
+    int testsPassed = 0;
+    int totalTests = 0;
+    int dim = 3;
+    double tol = 5 * pow(10, -12);
+
+    unsigned int *kRef = malloc(sizeof(unsigned int));
+    double *z = malloc(dim * sizeof(double));
+    unsigned int *alpha = malloc(dim * sizeof(unsigned int));
+    double *refRead = malloc(sizeof(double));
+
+    printf("\n\t ... ");
+    printf("processing %s ", path);
+    while (fgets(line, sizeof(line), data) != NULL) {
+        // Scan: k, {z1, z2, z3}, {alpha1, alpha2i, alpha3}, result
+        scanResult = sscanf(line, "%lf,%lf,%lf,%u,%u,%u,%lf", // NOLINT
+                            z, z + 1, z + 2, alpha, alpha + 1, alpha + 2, refRead);
+
+        if (scanResult != 7) {
+            printf("Error reading line: %s\n", line);
+            printf("Scanned %d values instead of 7\n", scanResult);
+            continue;
+        }
+
+        alphaAbs = mult_abs(dim, alpha);
+
+        num = log_l_der(dim, z, alpha, alphaAbs);
+        ref = refRead[0] + 0 * I;
+
+        errorAbs = errAbs(ref, num);
+        errorRel = errRel(ref, num);
+
+        errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
+
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
+            printf("\n\n");
+            printf("Warning! ");
+            printf("log_l_der: ");
+            printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
+                   "%.16lf "
+                   "%+.16lf I (reference implementation)\n",
+                   4, creal(num), cimag(num), creal(ref), cimag(ref));
+            printf("Min(Emax, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
+                   tol);
+            printf("\n");
             printVectorUnitTest("z:\t\t", z, dim);
             printMultiindexUnitTest("alpha:\t\t", alpha, dim);
             printf("\n");
@@ -828,6 +943,7 @@ int main(void) {
     failed += test_polynomial_p();
     failed += test_polynomial_l();
     failed += test_polynomial_y_der();
+    failed += test_log_l_der();
     failed += test_crandall_g_der();
     failed += test_crandall_gReg_der();
     failed += test_crandall_g_der_taylor();
