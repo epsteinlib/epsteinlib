@@ -114,6 +114,7 @@ double polynomial_l(unsigned int dim, const double *z, const unsigned int *alpha
  * @param[in] dim: dimension of z.
  * @param[in] z: vector of the polynomial.
  * @parma[in] alpha: multi-index for the derivative.
+ * @parma[in] alphaAbs: absolute value of the multi-index alpha.
  * @return partial derivative of L(z).
  */
 double complex log_l_der(unsigned int dim, const double *z,
@@ -124,10 +125,11 @@ double complex log_l_der(unsigned int dim, const double *z,
  * @param[in] dim: dimension of y.
  * @param[in] z: vector of the polynomial.
  * @parma[in] alpha: multi-index for the derivative.
+ * @parma[in] alphaAbs: absolute value of the multi-index alpha.
  * @return partial derivative of Y_k(z).
  */
 double polynomial_y_der(unsigned int k, unsigned int dim, const double *z,
-                        const unsigned int *alpha);
+                        const unsigned int *alpha, unsigned int alphaAbs);
 
 /**
  * @brief Calculates the derivatives of the regularization of the zero summand in the

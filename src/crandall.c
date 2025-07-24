@@ -302,6 +302,7 @@ double polynomial_l(unsigned int dim, const double *z, const unsigned int *alpha
  * @param[in] dim: dimension of z.
  * @param[in] z: vector of the polynomial.
  * @parma[in] alpha: multi-index for the derivative.
+ * @parma[in] alphaAbs: absolute value of the multi-index alpha.
  * @return partial derivative of L(z).
  */
 double complex log_l_der(unsigned int dim, const double *z,
@@ -365,7 +366,12 @@ double complex log_l_der(unsigned int dim, const double *z,
  * @return partial derivative of Y_k(z).
  */
 double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NOLINT
-                        const unsigned int *alpha) {
+                        const unsigned int *alpha, unsigned int alphaAbs) {
+
+    // Return function if there is no derivative
+    if (!alphaAbs) {
+        return int_pow(M_PI * dot(dim, z, z), k);
+    }
 
     unsigned int betaMin[dim];
     for (int i = 0; i < dim; i++) {
@@ -377,14 +383,9 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
         absMin += betaMin[i];
     }
 
-    // Return function if there is no derivative
-    if (!absMin) {
-        return int_pow(M_PI * dot(dim, z, z), k);
-    }
-
     // Higher derivatives vanish
     if (absMin > k) {
-        return 0;
+        return 0.;
     }
 
     unsigned long factMin = 1;

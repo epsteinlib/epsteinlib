@@ -507,6 +507,7 @@ int test_polynomial_y_der(void) {
     }
 
     unsigned int k;
+    unsigned int alphaAbs;
     double errorAbs;
     double errorRel;
     double errorMaxAbsRel;
@@ -545,7 +546,9 @@ int test_polynomial_y_der(void) {
 
         k = kRef[0];
 
-        num = polynomial_y_der(k, dim, z, alpha);
+        alphaAbs = mult_abs(dim, alpha);
+
+        num = polynomial_y_der(k, dim, z, alpha, alphaAbs);
         ref = refRead[0] + 0 * I;
 
         errorAbs = errAbs(ref, num);
