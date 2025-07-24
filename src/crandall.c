@@ -410,10 +410,23 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
     double summand;
     double res;
 
-    int done = 0;
+    unsigned int redoFact = 0;
+    unsigned int done = 0;
     while (1) {
 
         if (!(betaAbs - k)) {
+
+            // Recalculate factorial (expensive but stable)
+            if (redoFact) {
+                betaFact = factMin;
+                for (unsigned int i = 0; i < dim; i++) {
+                    for (unsigned int j = betaMin[i] + 1; j < beta[i] + 1; j++) {
+                        betaFact *= j;
+                    }
+                }
+                redoFact = 0;
+            }
+
             summand = 1.;
             for (int i = 0; i < dim; i++) {
                 summand *= (double)binom(2 * beta[i], alpha[i]) *
@@ -444,14 +457,7 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
             // Slow path: reset this dimension and continue
             betaAbs -= beta[idx] - betaMin[idx];
             beta[idx] = betaMin[idx];
-
-            // Recalculate factorial (expensive but stable)
-            betaFact = factMin;
-            for (unsigned int i = 0; i < dim; i++) {
-                for (unsigned int j = betaMin[i] + 1; j < beta[i] + 1; j++) {
-                    betaFact *= j;
-                }
-            }
+            redoFact = 1;
         }
         if (done) {
             break;
