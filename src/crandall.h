@@ -131,6 +131,18 @@ double complex log_l_der(unsigned int dim, const double *z,
 double polynomial_y_der(unsigned int k, unsigned int dim, const double *z,
                         const unsigned int *alpha, unsigned int alphaAbs);
 
+/** @brief Calculates the singularity s_{d+2k}(z) = pi**(k + d / 2) / gamma(k + d /
+ * 2) * (-1)**(k+1) / k! * (pi * z**2)**k * log(pi * z**2)
+ * @param[in] k: non-negative integer so that d + 2k is the argument of s.
+ * @param[in] dim: dimension of z.
+ * @param[in] z: vector of the singularity.
+ * @parma[in] alpha: multi-index for the derivative.
+ * @parma[in] alphaAbs: absolute value of the multi-index alpha.
+ * @return partial derivative of s_{d+2k}(z).
+ */
+double complex singularity_s_der(unsigned int k, unsigned int dim, const double *z,
+                                 const unsigned int *alpha, unsigned int alphaAbs);
+
 /**
  * @brief Calculates the derivatives of the regularization of the zero summand in the
  * second sum in Crandall's formula.

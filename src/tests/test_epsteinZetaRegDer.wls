@@ -79,16 +79,34 @@ p[z_,\[Alpha]_,\[Beta]_]:=Apply[Times,(-\[Pi])^(\[Alpha]-\[Beta])Binomial[\[Alph
 l[z_,\[Alpha]_,\[Beta]_]:=-(-1)^Total[\[Alpha]-\[Beta]]Total[\[Alpha]-\[Beta]]!/Total[\[Alpha]-\[Beta]]Apply[Times,Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2z)^(\[Alpha]-2\[Beta])]
 
 
-YDer[k_,z_,\[Alpha]_]:=k!Pi^k Apply[Times,\[Alpha]!] Total@Table[
-	Piecewise[{
-		{Apply[Times,Binomial[2\[Beta],\[Alpha]]z^(2\[Beta]-\[Alpha])/\[Beta]!],Total[\[Beta]]==k}
-		,{0,Total[\[Beta]]!=k}
-	}],{\[Beta],Tuples[Range[Ceiling[\[Alpha]/2],ConstantArray[k,Length[z]]]]}
-]
-LDer[z_,\[Alpha]_]:=Total[Flatten[Table[
-	l[z,\[Alpha],\[Beta]]/(z . z)^(Total[\[Alpha]-\[Beta]])
-	,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}]
-]]
+(* ::Text:: *)
+(*Derivatives of singularity for arguments nu = dim + 2k.*)
+
+
+YDer[k_,z_,\[Alpha]_]:=Piecewise[{
+	{(\[Pi] z . z)^k,Total[\[Alpha]]==0}
+	,{k!Pi^k Apply[Times,\[Alpha]!] Total@Table[
+			Piecewise[{
+			{Apply[Times,Binomial[2\[Beta],\[Alpha]]z^(2\[Beta]-\[Alpha])/\[Beta]!],Total[\[Beta]]==k}
+			,{0,Total[\[Beta]]!=k}
+			}],{\[Beta],Tuples[Range[Ceiling[\[Alpha]/2],ConstantArray[k,Length[z]]]]}
+		],True
+	}
+}]
+LDer[z_,\[Alpha]_]:=Piecewise[{
+	{Log[\[Pi] z . z],Total[\[Alpha]]==0}
+	,{Total[Flatten[Table[
+			l[z,\[Alpha],\[Beta]]/(z . z)^(Total[\[Alpha]-\[Beta]])
+			,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}
+		]]],True
+	}
+}]
+sDer[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=(
+	\[Pi]^(k+Length[z]/2)/Gamma[k+Length[z]/2](-1)^(k+1)/k!Total@Table[
+			Apply[Times,Binomial[\[Alpha],\[Beta]]]YDer[k,z,\[Beta]]LDer[z,\[Alpha]-\[Beta]]
+			,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]]]}
+	]
+)
 
 
 (* ::Text:: *)

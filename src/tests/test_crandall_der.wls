@@ -32,50 +32,22 @@ Protect[Power];
 
 
 (* ::Text:: *)
-(*Helper functions for  derivatives for \[Nu] \[Element] d - 2k*)
+(*Helper functions for  derivatives for \[Nu] \[Element] d - 2k.*)
 
 
 p[z_,\[Alpha]_,\[Beta]_]:=Apply[Times,(-\[Pi])^(\[Alpha]-\[Beta])Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2z)^(\[Alpha]-2\[Beta])]
 l[z_,\[Alpha]_,\[Beta]_]:=-(-1)^Total[\[Alpha]-\[Beta]]Total[\[Alpha]-\[Beta]]!/Total[\[Alpha]-\[Beta]]Apply[Times,Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2z)^(\[Alpha]-2\[Beta])]
 
 
-s[k_/;Element[k,NonNegativeIntegers],z_]:=\[Pi]^(k+Length[z]/2)/Gamma[k+Length[z]/2](-1)^(k+1)/k!(\[Pi] z . z)^k Log[Pi z . z]
-sDerAnalytic[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=Derivative[0,\[Alpha]][s][k,z]
+(* ::Text:: *)
+(*Singularity for arguments nu = dim + 2k in 3D.*)
 
 
-YDer[k_,z_,\[Alpha]_]:=Piecewise[{
-	{(\[Pi] z . z)^k,Total[\[Alpha]]==0}
-	,{k!Pi^k Apply[Times,\[Alpha]!] Total@Table[
-			Piecewise[{
-			{Apply[Times,Binomial[2\[Beta],\[Alpha]]z^(2\[Beta]-\[Alpha])/\[Beta]!],Total[\[Beta]]==k}
-			,{0,Total[\[Beta]]!=k}
-			}],{\[Beta],Tuples[Range[Ceiling[\[Alpha]/2],ConstantArray[k,Length[z]]]]}
-		],True
-	}
-}]
-LDer[z_,\[Alpha]_]:=Piecewise[{
-	{Log[\[Pi] z . z],Total[\[Alpha]]==0}
-	,{Total[Flatten[Table[
-			l[z,\[Alpha],\[Beta]]/(z . z)^(Total[\[Alpha]-\[Beta]])
-			,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}
-		]]],True
-	}
-}]
-
-
-sDer[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=\[Pi]^(k+Length[z]/2+Total[\[Alpha]])/Gamma[k+Length[z]/2](-1)^(k+1)/k!Total[Table[
-	Apply[Times,Binomial[ConstantArray[Total[\[Alpha]],Length[z]],\[Beta]]]YDer[k,z,\[Beta]]LDer[z,\[Alpha]-\[Beta]]
-	,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]]]}
-	]]
-
-
-sDer[0,{1/2},{1}]
-
-sDerAnalytic[0,{1/2},{1}]
+s[k_,{z1_,z2_,z3_}]=\[Pi]^(k+Length[{z1,z2,z3}]/2)/Gamma[k+Length[{z1,z2,z3}]/2](-1)^(k+1)/k!(\[Pi] {z1,z2,z3} . {z1,z2,z3})^k Log[Pi {z1,z2,z3} . {z1,z2,z3}]
 
 
 (* ::Text:: *)
-(*Derivatives of Crandall functions*)
+(*Derivatives of Crandall functions.*)
 
 
 G[\[Nu]_,z_]=Piecewise[{{-2/\[Nu],Norm[z]<10^(-64)},{ExpIntegralE[1-\[Nu]/2,Pi z . z],Norm[z]>=10^(-64)}}];
@@ -101,7 +73,7 @@ randDerivativeBeta[a_] := RandomInteger[{0,Floor[a/2]}]
 
 
 (* ::Text:: *)
-(*Setup test parameters*)
+(*Setup test parameters.*)
 
 
 range = Range[100];
@@ -114,14 +86,14 @@ Do[
 
 
 (* ::Text:: *)
-(*Generate reference values*)
+(*Generate reference values.*)
 
 
 pTab=ParallelTable[Flatten[Join[N[z0[i],30],\[Alpha]0[i],\[Beta]0[i],{N[SetPrecision[p[z0[i],\[Alpha]0[i],\[Beta]0[i]],200],30]}]],{i,range}];
 
 
 (* ::Text:: *)
-(*Save reference values to file*)
+(*Save reference values to file.*)
 
 
 SetDirectory[NotebookDirectory[]];
@@ -137,7 +109,7 @@ randDerivative := RandomInteger[{0,6}]
 
 
 (* ::Text:: *)
-(*Setup test parameters*)
+(*Setup test parameters.*)
 
 
 range = Range[100];
@@ -150,14 +122,14 @@ Do[
 
 
 (* ::Text:: *)
-(*Generate reference values*)
+(*Generate reference values.*)
 
 
 crandallDerTab=ParallelTable[With[{g=GDerAnalytic[\[Nu]0[i],z0[i],\[Alpha]0[i]]},{N[\[Nu]0[i],30], N[z0[i][[1]],30],N[z0[i][[2]],30],N[z0[i][[3]],30],\[Alpha]0[i][[1]],\[Alpha]0[i][[2]],\[Alpha]0[i][[3]],N[Re[g],30],N[Im[g],30]}],{i,range}];
 
 
 (* ::Text:: *)
-(*Save reference values to file*)
+(*Save reference values to file.*)
 
 
 SetDirectory[NotebookDirectory[]];
@@ -169,7 +141,7 @@ Export["csv/crandall_g_der_Ref.csv",crandallDerTab];
 
 
 (* ::Text:: *)
-(*Setup test parameters*)
+(*Setup test parameters.*)
 
 
 range = Range[100];
@@ -182,14 +154,14 @@ Do[
 
 
 (* ::Text:: *)
-(*Generate reference values*)
+(*Generate reference values.*)
 
 
 lTab=ParallelTable[Flatten[Join[N[z0[i],30],\[Alpha]0[i],\[Beta]0[i],{N[SetPrecision[l[z0[i],\[Alpha]0[i],\[Beta]0[i]],200],30]}]],{i,range}];
 
 
 (* ::Text:: *)
-(*Save reference values to file*)
+(*Save reference values to file.*)
 
 
 SetDirectory[NotebookDirectory[]];
@@ -201,7 +173,7 @@ Export["csv/polynomial_l_Ref.csv",lTab];
 
 
 (* ::Text:: *)
-(*Setup test parameters*)
+(*Setup test parameters.*)
 
 
 range = Range[100];
@@ -214,14 +186,14 @@ Do[
 
 
 (* ::Text:: *)
-(*Generate reference values*)
+(*Generate reference values.*)
 
 
 YDerTab=ParallelTable[Flatten[{k0[i],N[z0[i],30],\[Alpha]0[i],N[SetPrecision[Derivative[\[Alpha]0[i]][(Pi # . #)^k0[i]&][z0[i]],200],30]}],{i,range}];
 
 
 (* ::Text:: *)
-(*Save reference values to file*)
+(*Save reference values to file.*)
 
 
 SetDirectory[NotebookDirectory[]];
@@ -233,7 +205,7 @@ Export["csv/polynomial_y_der_Ref.csv",YDerTab];
 
 
 (* ::Text:: *)
-(*Setup test parameters*)
+(*Setup test parameters.*)
 
 
 range = Range[100];
@@ -245,18 +217,50 @@ Do[
 
 
 (* ::Text:: *)
-(*Generate reference values*)
+(*Generate reference values.*)
 
 
 LDerTab=ParallelTable[Flatten[{N[z0[i],30],\[Alpha]0[i],N[SetPrecision[Derivative[\[Alpha]0[i]][Log[Pi # . #]&][z0[i]],200],30]}],{i,range}];
 
 
 (* ::Text:: *)
-(*Save reference values to file*)
+(*Save reference values to file.*)
 
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/log_l_der_Ref.csv",LDerTab];
+
+
+(* ::Subsection:: *)
+(*Create singularity derivatives reference values*)
+
+
+(* ::Text:: *)
+(*Setup test parameters.*)
+
+
+range = Range[100];
+Do[
+	k0[i]=RandomInteger[{0,10}];
+	z0[i]={randRational,randRational,randRational};
+	\[Alpha]0[i]=If[i<10,{0,0,i-1},{RandomInteger[{0,4}],RandomInteger[{0,4}],RandomInteger[{0,4}]}];
+	,{i,range}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+sDerTab=ParallelTable[Flatten[{k0[i],N[z0[i],30],\[Alpha]0[i],N[SetPrecision[Derivative[\[Alpha]0[i]][s[k0[i], #]&][z0[i]],200],30]}],{i,range}];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/singularity_s_der_Ref.csv",sDerTab];
 
 
 (* ::Subsection:: *)
@@ -268,7 +272,7 @@ randDerivative := RandomInteger[{0,6}]
 
 
 (* ::Text:: *)
-(*Setup test parameters*)
+(*Setup test parameters.*)
 
 
 range = Range[100];
@@ -281,14 +285,14 @@ Do[
 
 
 (* ::Text:: *)
-(*Generate reference values*)
+(*Generate reference values.*)
 
 
 crandallgRegDerTab=ParallelTable[With[{g=GRegDer[\[Nu]0[i],z0[i],\[Alpha]0[i]]},{N[\[Nu]0[i],30], N[z0[i][[1]],30],N[z0[i][[2]],30],N[z0[i][[3]],30],\[Alpha]0[i][[1]],\[Alpha]0[i][[2]],\[Alpha]0[i][[3]],N[Re[g],30],N[Im[g],30]}],{i,range}];
 
 
 (* ::Text:: *)
-(*Save reference values to file*)
+(*Save reference values to file.*)
 
 
 SetDirectory[NotebookDirectory[]];

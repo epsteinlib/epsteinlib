@@ -481,6 +481,98 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
     return res;
 }
 
+/** @brief Calculates the singularity s_{d+2k}(z) = pi**(k + d / 2) / gamma(k + d /
+ * 2) * (-1)**(k+1) / k! * (pi * z**2)**k * log(pi * z**2)
+ * @param[in] k: non-negative integer so that d + 2k is the argument of s.
+ * @param[in] dim: dimension of z.
+ * @param[in] z: vector of the singularity.
+ * @parma[in] alpha: multi-index for the derivative.
+ * @parma[in] alphaAbs: absolute value of the multi-index alpha.
+ * @return partial derivative of s_{d+2k}(z).
+ */
+double complex singularity_s_der(unsigned int k, unsigned int dim, const double *z,
+                                 const unsigned int *alpha, unsigned int alphaAbs) {
+
+    double res;
+
+    unsigned long long kFact = 1;
+    for (int j = 1; j < k + 1; j++) {
+        kFact *= j;
+    }
+
+    double prefactor = pow(M_PI, (double)k + ((double)dim / 2.)) /
+                       tgamma((double)k + ((double)dim / 2.)) *
+                       ((k % 2) ? 1. : -1.) / (double)kFact;
+
+    unsigned int beta[dim];
+    unsigned int gamma[dim]; // gamma = alpha - beta
+    for (int i = 0; i < dim; i++) {
+        beta[i] = 0;
+        gamma[i] = alpha[i];
+    }
+
+    // Return function if there is no derivative
+    if (!alphaAbs) {
+        double zArg = M_PI * dot(dim, z, z);
+        res = prefactor * int_pow(zArg, k) * log(zArg);
+        return res;
+    }
+
+    unsigned int betaAbs = 0;
+    unsigned int gammaAbs = alphaAbs;
+
+    double complex sum = 0.0;
+    double complex epsilon = 0.0;
+    double complex auxt;
+    double complex auxy;
+
+    unsigned int multBinom;
+
+    int done = 0;
+    // Iterate over every multi-index beta so that beta + gamma = alpha
+    while (1) {
+
+        if (betaAbs / 2 < k + dim) {
+            multBinom = 1;
+            for (int i = 0; i < dim; i++) {
+                multBinom *= binom(alpha[i], beta[i]);
+            }
+
+            // summing using Kahan's method
+            auxy = (double)multBinom * polynomial_y_der(k, dim, z, beta, betaAbs) *
+                       log_l_der(dim, z, gamma, gammaAbs) -
+                   epsilon;
+            auxt = sum + auxy;
+            epsilon = (auxt - sum) - auxy;
+            sum = auxt;
+        }
+
+        done = 1;
+        for (unsigned int idx = 0; idx < dim; idx++) {
+            if (beta[idx] < alpha[idx]) {
+                betaAbs++;
+                gammaAbs--;
+                beta[idx]++;
+                gamma[idx]--;
+                done = 0;
+                break;
+            }
+            betaAbs -= beta[idx];
+            gammaAbs += beta[idx];
+            gamma[idx] += beta[idx];
+            beta[idx] = 0;
+            done = 1;
+        }
+        if (done) {
+            break;
+        }
+    }
+
+    res = prefactor * sum;
+
+    return res;
+}
+
 /**
  * @brief Calculates the derivatives of the regularization of the zero summand in the
  * second sum in Crandall's formula.
