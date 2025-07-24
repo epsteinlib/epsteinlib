@@ -574,6 +574,61 @@ double complex singularity_s_der(unsigned int k, unsigned int dim, const double 
 }
 
 /**
+ * @brief Calculates the derivatives of regularization of the zero summand in the
+ * second sum in Crandall's formula in the special case of nu = dim + 2k for some
+ * natural number k.
+ * @param[in] k: k = (nu - d) / 2 as an integer.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] z: input vector of the function.
+ * @param[in] lambda: scaling parameter of crandalls formula.
+ * @return arg ** (- s / 2) * (gamma(s / 2, arg) + ((-1)^k / k! ) * (log(arg) -
+ * log(lambda ** 2)).
+ */
+double complex crandall_gReg_nuequalsdimplus2k_der(unsigned int k, unsigned int dim,
+                                                   const double *z, double lambda,
+                                                   const unsigned int *alpha,
+                                                   unsigned int alphaAbs) {
+    double res = 0;
+    double argBound = 10 * 10;
+    unsigned int taylorBound = 20;
+    // Taylor expansion if arg close to zero.
+    if (dot(dim, z, z) < argBound) {
+        double eulerGamma = 0.57721566490153286555;
+        double harmonic = 0;
+        for (int i = 1; i < k + 1; i++) {
+            harmonic += 1. / (double)i;
+        }
+        unsigned long long kFact = 1;
+        for (int j = 1; j < k + 1; j++) {
+            kFact *= j;
+        }
+
+        res = ((k % 2) ? -1. : 1.) / (double)kFact *
+              (harmonic - eulerGamma -
+               (double)int_pow(lambda, 2 * k) * log(lambda * lambda)) *
+              polynomial_y_der(k, dim, z, alpha, alphaAbs);
+
+        // summand n = 0
+        if (k) {
+            res -= polynomial_y_der(0, dim, z, alpha, alphaAbs) / (double)(-k);
+        }
+
+        // summands 0 < n < k
+        unsigned long long nFact = 1;
+        for (int n = 1; n < taylorBound + 1; n++) {
+            nFact *= (unsigned int)n;
+            if (n - k) {
+                res -= ((n % 2) ? -1. : 1.) *
+                       polynomial_y_der(n, dim, z, alpha, alphaAbs) /
+                       (double)(n - (int)k) / (double)nFact;
+            }
+        }
+    }
+
+    return res;
+}
+
+/**
  * @brief Calculates the derivatives of the regularization of the zero summand in the
  * second sum in Crandall's formula.
  * @param[in] dim: dimension of the input vectors.
@@ -594,9 +649,10 @@ double complex crandall_gReg_der(unsigned int dim, double s, const double *z,
                                  unsigned int alphaAbs) {
     double zArgument = dot(dim, z, z);
     zArgument *= M_PI * prefactor * prefactor;
-    double k = -nearbyint(s / 2.);
-    if (s < 1 && (s == -2 * k)) {
-        return crandall_gReg_nuequalsdimplus2k(s, zArgument, k, prefactor);
+    unsigned int k = (unsigned int)(-nearbyint(s / 2.));
+    if (s < 1 && (-s == 2 * k)) {
+        return crandall_gReg_nuequalsdimplus2k_der(k, dim, z, prefactor, alpha,
+                                                   alphaAbs);
     }
 
     unsigned int beta[dim];

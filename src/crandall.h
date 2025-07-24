@@ -142,6 +142,21 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z,
  */
 double complex singularity_s_der(unsigned int k, unsigned int dim, const double *z,
                                  const unsigned int *alpha, unsigned int alphaAbs);
+/**
+ * @brief Calculates the derivatives of regularization of the zero summand in the
+ * second sum in Crandall's formula in the special case of nu = dim + 2k for some
+ * natural number k.
+ * @param[in] k: k = (nu - d) / 2 as an integer.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] z: input vector of the function.
+ * @param[in] lambda: scaling parameter of crandalls formula.
+ * @return arg ** (- s / 2) * (gamma(s / 2, arg) + ((-1)^k / k! ) * (log(arg) -
+ * log(lambda ** 2)).
+ */
+double complex crandall_gReg_nuequalsdimplus2k_der(unsigned int k, unsigned int dim,
+                                                   const double *z, double lambda,
+                                                   const unsigned int *alpha,
+                                                   unsigned int alphaAbs);
 
 /**
  * @brief Calculates the derivatives of the regularization of the zero summand in the

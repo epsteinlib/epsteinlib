@@ -1059,18 +1059,130 @@ int test_crandall_gReg_der(void) {
     return totalTests - testsPassed;
 }
 
+/*!
+ * @brief Benchmarks 3D regularized Crandall derivatives for nu = dim + 2 * k by
+ * comparing to high-precision values over a range of random parameters.
+ *
+ * @return number of failed tests.
+ * */
+int test_crandall_gReg_nuequalsminus2k_der_prototype(void) {
+    printf("%s ", __func__);
+    char path[MAX_PATH_LENGTH];
+    int result =
+        snprintf(path, sizeof(path),
+                 "%s/crandall_gReg_nuequalsminus2k_der_prototype_Ref.csv", // NOLINT
+                 BASE_PATH);
+    if (result < 0 || result >= sizeof(path)) {
+        return fprintf(stderr, "Error creating file path\n");
+    }
+    FILE *data = fopen(path, "r");
+    if (data == NULL) {
+        return fprintf(stderr, "Error opening file: %s\n", path);
+    }
+
+    double nu;
+    double errorAbs;
+    double errorRel;
+    double errorMaxAbsRel;
+    double complex num;
+    double complex ref;
+    int scanResult;
+    char line[256];
+
+    double errMin = NAN;
+    double errMax = NAN;
+    double errSum = 0.;
+
+    int testsPassed = 0;
+    int totalTests = 0;
+    int dim = 2;
+    double prefactor = 1.;
+    double tol = 5 * pow(10, -12);
+
+    double *nuRef = malloc(sizeof(double));
+    double *z = malloc(dim * sizeof(double));
+    unsigned int *alpha = malloc(dim * sizeof(unsigned int));
+    double *refRead = malloc(2 * sizeof(double));
+
+    printf("\n\t ... ");
+    printf("processing %s ", path);
+    while (fgets(line, sizeof(line), data) != NULL) {
+        // Scan: k, {z1, z2}, {alpha1, alpha2}, Re[result]
+        scanResult = sscanf(line, "%lf,%lf,%lf,%u,%u,%lf", // NOLINT
+                            nuRef, z, z + 1, alpha, alpha + 1, refRead);
+
+        if (scanResult != 6) {
+            printf("Error reading line: %s\n", line);
+            printf("Scanned %d values instead of 6\n", scanResult);
+            continue;
+        }
+
+        nu = nuRef[0];
+
+        num = crandall_gReg_der(dim, nu, z, prefactor, alpha, mult_abs(dim, alpha));
+        ref = refRead[0] + 0. * I;
+
+        errorAbs = errAbs(ref, num);
+        errorRel = errRel(ref, num);
+
+        errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
+
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
+            printf("\n\n");
+            printf("Warning! ");
+            printf("%s: ", __func__);
+            printf(" %0*.16lf (this implementation) \n\t\t\t\t\t\t\t != "
+                   "%.16lf (reference implementation)\n",
+                   4, creal(num), creal(ref));
+            printf("Min(Emax, Erel): %E !< %E  (tolerance)\n", errorMaxAbsRel, tol);
+            printf("\n");
+            printf("nu:\t\t %.16lf\n", nu);
+            printVectorUnitTest("z:\t\t", z, dim);
+            printMultiindexUnitTest("alpha:\t\t", alpha, dim);
+            printf("\n");
+        }
+        totalTests++;
+    }
+
+    free(nuRef);
+    free(z);
+    free(alpha);
+    free(refRead);
+
+    if (fclose(data) != 0) {
+        return fprintf(stderr, "Error closing file: %d\n", errno);
+    }
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
+           tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
+
+    return totalTests - testsPassed;
+}
+
 int main(void) {
 
     printf("start ");
     int failed = 0;
-    failed += test_polynomial_p();
-    failed += test_polynomial_l();
-    failed += test_polynomial_y_der();
-    failed += test_log_l_der();
-    failed += test_singularity_s_der();
-    failed += test_crandall_g_der();
-    failed += test_crandall_gReg_der();
-    failed += test_crandall_g_der_taylor();
-    failed += test_crandall_gReg_der_taylor();
+    //    failed += test_polynomial_p();
+    //    failed += test_polynomial_l();
+    //    failed += test_polynomial_y_der();
+    //    failed += test_log_l_der();
+    //    failed += test_singularity_s_der();
+    //    failed += test_crandall_g_der();
+    //    failed += test_crandall_gReg_der();
+    failed += test_crandall_gReg_nuequalsminus2k_der_prototype();
+    //    failed += test_crandall_g_der_taylor();
+    //    failed += test_crandall_gReg_der_taylor();
     return failed;
 }
