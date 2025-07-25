@@ -17,9 +17,9 @@
 (*Load Mathematica wrapper in every kernel. Remove the "Quiet" if unsure about the parallel evaluation.*)
 
 
-baseDir=FileNameJoin[{NotebookDirectory[], "..", "..", "mathematica"}];
-SetDirectory[baseDir];<<EpsteinZeta.wl
-ParallelEvaluate[SetDirectory[baseDir];Quiet[<<EpsteinZeta.wl]];
+BaseDirectory=FileNameJoin[{NotebookDirectory[], "..", "..", "mathematica"}];
+SetDirectory[BaseDirectory];<<"EpsteinZeta.wl";
+ParallelEvaluate[SetDirectory[BaseDirectory];Quiet[<<"EpsteinZeta.wl"]];
 
 
 (* ::Text:: *)
@@ -310,7 +310,7 @@ Export["csv/setZetaDer_odd_Ref.csv",zOddTab];
 
 
 (* ::Subsection:: *)
-(*Create laplacian derivative set zeta reference values by finite differences*)
+(*Create laplacian derivative set zeta reference values*)
 
 
 (* ::Text:: *)
