@@ -577,23 +577,34 @@ double complex singularity_s_der(unsigned int k, unsigned int dim, const double 
  * @brief Calculates the derivatives of regularization of the zero summand in the
  * second sum in Crandall's formula in the special case of nu = dim + 2k for some
  * natural number k.
+ * @param[in] s: s = (d - nu).
  * @param[in] k: k = (nu - d) / 2 as an integer.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] z: input vector of the function.
  * @param[in] lambda: scaling parameter of crandalls formula.
- * @return arg ** (- s / 2) * (gamma(s / 2, arg) + ((-1)^k / k! ) * (log(arg) -
- * log(lambda ** 2)).
+ * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
+ * @return partial derivative of the regularized Crandall function.
  */
-double complex crandall_gReg_nuequalsdimplus2k_der(unsigned int k, unsigned int dim,
-                                                   const double *z, double lambda,
-                                                   const unsigned int *alpha,
-                                                   unsigned int alphaAbs) {
-    double res = 0;
-    double argBound = 10 * 10;
-    unsigned int taylorBound = 20;
-    // Taylor expansion if arg close to zero.
-    if (dot(dim, z, z) < argBound) {
+double complex crandall_gReg_nuequalsdimplus2k_der(
+    double s, unsigned int k, unsigned int dim, const double *z, double lambda,
+    const unsigned int *alpha, unsigned int alphaAbs, double zArgBound) {
+    double res;
+    double zArg = M_PI * dot(dim, z, z);
+    double choseTaylorBound = M_PI * 0.5 * 0.5;
+    unsigned int taylorBound = 30;
+    if (!alphaAbs) {
+        // No derivative
+        res = crandall_gReg_nuequalsdimplus2k(s, zArg, (double)k, lambda);
+    } else if (zArg < choseTaylorBound) {
+        // Taylor expansion if arg close to zero.
+
+        double complex sum = 0.0;
+        double complex epsilon = 0.0;
+        double complex auxt;
+        double complex auxy;
+
         double eulerGamma = 0.57721566490153286555;
+
         double harmonic = 0;
         for (int i = 1; i < k + 1; i++) {
             harmonic += 1. / (double)i;
@@ -618,11 +629,24 @@ double complex crandall_gReg_nuequalsdimplus2k_der(unsigned int k, unsigned int 
         for (int n = 1; n < taylorBound + 1; n++) {
             nFact *= (unsigned int)n;
             if (n - k) {
-                res -= ((n % 2) ? -1. : 1.) *
-                       polynomial_y_der(n, dim, z, alpha, alphaAbs) /
-                       (double)(n - (int)k) / (double)nFact;
+                // Summing using Kahan's method
+                auxy = ((n % 2) ? -1. : 1.) *
+                           polynomial_y_der(n, dim, z, alpha, alphaAbs) /
+                           (double)(n - (int)k) / (double)nFact -
+                       epsilon;
+                auxt = sum + auxy;
+                epsilon = (auxt - sum) - auxy;
+                sum = auxt;
             }
         }
+
+        res -= sum;
+
+    } else {
+        // Evaluate difference of
+        res = crandall_g_der(dim, s, z, lambda, zArgBound, alpha, alphaAbs) -
+              pow(M_PI, -((double)dim - s) / 2.) * tgamma(((double)dim - s) / 2.) *
+                  singularity_s_der(k, dim, z, alpha, alphaAbs);
     }
 
     return res;
@@ -638,6 +662,7 @@ double complex crandall_gReg_nuequalsdimplus2k_der(unsigned int k, unsigned int 
  * @param[in] prefactor: prefactor of the vector, e. g. lambda.
  * @param[in] alpha: multi-index of the partial derivatives
  * @param[in] alphaAbs: sum of the elements of alpha
+ * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
  * @return partial derivatives of - gamma(s/2) * gammaStar(s/2, pi * prefactor *
  * z**2), where gammaStar is the twice regularized lower incomplete gamma function if
  * s is not equal to - 2k and partial derivatives of (pi * prefactor * y ** 2) ** (-
@@ -646,13 +671,13 @@ double complex crandall_gReg_nuequalsdimplus2k_der(unsigned int k, unsigned int 
  */
 double complex crandall_gReg_der(unsigned int dim, double s, const double *z,
                                  double prefactor, const unsigned int *alpha,
-                                 unsigned int alphaAbs) {
+                                 unsigned int alphaAbs, double zArgBound) {
     double zArgument = dot(dim, z, z);
     zArgument *= M_PI * prefactor * prefactor;
     unsigned int k = (unsigned int)(-nearbyint(s / 2.));
     if (s < 1 && (-s == 2 * k)) {
-        return crandall_gReg_nuequalsdimplus2k_der(k, dim, z, prefactor, alpha,
-                                                   alphaAbs);
+        return crandall_gReg_nuequalsdimplus2k_der(s, k, dim, z, prefactor, alpha,
+                                                   alphaAbs, zArgBound);
     }
 
     unsigned int beta[dim];
@@ -675,7 +700,7 @@ double complex crandall_gReg_der(unsigned int dim, double s, const double *z,
 
         sIt = s + 2 * alphaAbs - 2 * betaAbs;
 
-        // summing using Kahan's method
+        // Summing using Kahan's method
         auxy = -polynomial_p(dim, z, alpha, beta) * tgamma(sIt / 2) *
                    egf_gammaStar(sIt / 2, zArgument) -
                epsilon;

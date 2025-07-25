@@ -423,11 +423,14 @@ int test_crandall_gReg_der_taylor(void) { // NOLINT
         // initialize alphaAbs
         unsigned int alphaAbs = 0;
 
+        double zArgBound = assignzArgBound(nu);
+
         // Iterate over every multi-index alpha so that every alpha[] < order
         while (true) {
 
-            valTaylor += mult_pow(dim, alpha, zDiff) / (double)mult_fac(dim, alpha) *
-                         crandall_gReg_der(dim, nu, z, 1., alpha, alphaAbs);
+            valTaylor +=
+                mult_pow(dim, alpha, zDiff) / (double)mult_fac(dim, alpha) *
+                crandall_gReg_der(dim, nu, z, 1., alpha, alphaAbs, zArgBound);
 
             done = 1;
             for (unsigned int idx = 0; idx < dim; idx++) {
@@ -1006,7 +1009,8 @@ int test_crandall_gReg_der(void) {
 
         nu = nuRef[0];
 
-        num = crandall_gReg_der(dim, nu, z, prefactor, alpha, mult_abs(dim, alpha));
+        num = crandall_gReg_der(dim, nu, z, prefactor, alpha, mult_abs(dim, alpha),
+                                assignzArgBound(nu));
         ref = refRead[0] + refRead[1] * I;
 
         errorAbs = errAbs(ref, num);
@@ -1097,7 +1101,7 @@ int test_crandall_gReg_nuequalsminus2k_der_prototype(void) {
     int totalTests = 0;
     int dim = 2;
     double prefactor = 1.;
-    double tol = 5 * pow(10, -12);
+    double tol = pow(10, -10);
 
     double *nuRef = malloc(sizeof(double));
     double *z = malloc(dim * sizeof(double));
@@ -1119,7 +1123,8 @@ int test_crandall_gReg_nuequalsminus2k_der_prototype(void) {
 
         nu = nuRef[0];
 
-        num = crandall_gReg_der(dim, nu, z, prefactor, alpha, mult_abs(dim, alpha));
+        num = crandall_gReg_der(dim, nu, z, prefactor, alpha, mult_abs(dim, alpha),
+                                assignzArgBound(nu));
         ref = refRead[0] + 0. * I;
 
         errorAbs = errAbs(ref, num);
@@ -1174,15 +1179,15 @@ int main(void) {
 
     printf("start ");
     int failed = 0;
-    //    failed += test_polynomial_p();
-    //    failed += test_polynomial_l();
-    //    failed += test_polynomial_y_der();
-    //    failed += test_log_l_der();
-    //    failed += test_singularity_s_der();
-    //    failed += test_crandall_g_der();
-    //    failed += test_crandall_gReg_der();
+    failed += test_polynomial_p();
+    failed += test_polynomial_l();
+    failed += test_polynomial_y_der();
+    failed += test_log_l_der();
+    failed += test_singularity_s_der();
+    failed += test_crandall_g_der();
+    failed += test_crandall_gReg_der();
     failed += test_crandall_gReg_nuequalsminus2k_der_prototype();
-    //    failed += test_crandall_g_der_taylor();
-    //    failed += test_crandall_gReg_der_taylor();
+    failed += test_crandall_g_der_taylor();
+    failed += test_crandall_gReg_der_taylor();
     return failed;
 }

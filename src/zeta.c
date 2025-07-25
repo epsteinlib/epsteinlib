@@ -495,7 +495,8 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             xfactor = 1. / int_pow(ms, alphaAbs);
         } else if (variant == 3) {
             // calculate Epstein zeta reg derivative function values.
-            nc = crandall_gReg_der(dim, dim - nu, y_t1, lambda, alpha, alphaAbs);
+            nc = crandall_gReg_der(dim, dim - nu, y_t1, lambda, alpha, alphaAbs,
+                                   zArgBoundReci);
             rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
             s2 = sum_fourier_der(nu, dim, lambda, m_fourier, x_t1, y_t2,
                                  cutoffsFourier, zArgBoundReci, alpha, alphaAbs);

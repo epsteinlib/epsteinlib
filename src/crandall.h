@@ -146,15 +146,19 @@ double complex singularity_s_der(unsigned int k, unsigned int dim, const double 
  * @brief Calculates the derivatives of regularization of the zero summand in the
  * second sum in Crandall's formula in the special case of nu = dim + 2k for some
  * natural number k.
+ * @param[in] s: s = (d - nu).
  * @param[in] k: k = (nu - d) / 2 as an integer.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] z: input vector of the function.
  * @param[in] lambda: scaling parameter of crandalls formula.
- * @return arg ** (- s / 2) * (gamma(s / 2, arg) + ((-1)^k / k! ) * (log(arg) -
- * log(lambda ** 2)).
+ * @param[in] alpha: multi-index of the partial derivatives
+ * @param[in] alphaAbs: sum of the elements of alpha
+ * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
+ * @return partial derivative of the regularized Crandall function.
  */
-double complex crandall_gReg_nuequalsdimplus2k_der(unsigned int k, unsigned int dim,
-                                                   const double *z, double lambda,
+double complex crandall_gReg_nuequalsdimplus2k_der(double s, unsigned int k,
+                                                   unsigned int dim, const double *z,
+                                                   double lambda,
                                                    const unsigned int *alpha,
                                                    unsigned int alphaAbs);
 
@@ -168,6 +172,7 @@ double complex crandall_gReg_nuequalsdimplus2k_der(unsigned int k, unsigned int 
  * @param[in] prefactor: prefactor of the vector, e. g. lambda.
  * @param[in] alpha: multi-index of the partial derivatives
  * @param[in] alphaAbs: sum of the elements of alpha
+ * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
  * @return partial derivatives of - gamma(s/2) * gammaStar(s/2, pi * prefactor *
  * z**2), where gammaStar is the twice regularized lower incomplete gamma function if
  * s is not equal to - 2k and partial derivatives of (pi * prefactor * y ** 2) ** (-
@@ -176,6 +181,6 @@ double complex crandall_gReg_nuequalsdimplus2k_der(unsigned int k, unsigned int 
  */
 double complex crandall_gReg_der(unsigned int dim, double s, const double *z,
                                  double prefactor, const unsigned int *alpha,
-                                 unsigned int alphaAbs);
+                                 unsigned int alphaAbs, double zArgBound);
 
 #endif
