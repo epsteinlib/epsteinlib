@@ -154,9 +154,13 @@ sumFourierNonZeroDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[GDer[Length
 
 
 epsteinZetaRegDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:10]:=Module[
-	{prec,\[Nu]N,AN,xN,yN,\[Mu],sumReal,sumReci,res}
+	{dim,prec,\[Nu]N,AN,xN,yN,\[Mu],sumReal,sumReci,res}
 	,prec=60
-	;\[Nu]N=N[\[Nu]Ext,prec]
+	;dim = Length[AExt]
+	;\[Nu]N=If[\[Nu]Ext>=2&&PossibleZeroQ[(\[Nu]Ext-dim)/2-Round[(\[Nu]Ext-dim)/2]]
+		,\[Nu]N=Round[\[Nu]Ext]
+		,\[Nu]N=N[\[Nu]Ext,prec]
+	]
 	;AN=N[AExt,prec]
 	;\[Mu]=Abs[Det[AN]]^(1/Length[AN])
 	;AN=1/\[Mu] N[AExt,prec]
@@ -217,3 +221,41 @@ zDerTab=ParallelTable[
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/epsteinZetaRegDer_prototype_Ref.csv",zDerTab];
+
+
+(* ::Subsection:: *)
+(*Create Epstein zeta regularized prototype reference values for nu = dim + 2k.*)
+
+
+(* ::Text:: *)
+(*Setup test parameters.*)
+
+
+range = Range[100];
+Do[
+	\[Nu]0[i]=2+2 RandomInteger[{0,6}]
+	;a0[i]=IdentityMatrix@2
+	;x0[i]=If[i<10,{0,0},{randRational,randRational}]
+	;y0[i]={randRational,randRational}
+	;\[Alpha]0[i]={randDerivative,randDerivative}
+	,{i,range}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+zDerd2kTab=ParallelTable[
+	With[{result=N[epsteinZetaRegDer[\[Nu]0[i],a0[i],x0[i],y0[i],\[Alpha]0[i]],30]}
+	,Flatten[Join[N[{\[Nu]0[i],a0[i],x0[i],y0[i]},30],\[Alpha]0[i],{Re[result],Im[result]}]]
+	],{i,range}
+];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/epsteinZetaRegDer_d2k_prototype_Ref.csv",zDerd2kTab];
