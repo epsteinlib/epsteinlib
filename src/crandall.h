@@ -120,16 +120,18 @@ double polynomial_l(unsigned int dim, const double *z, const unsigned int *alpha
 double complex log_l_der(unsigned int dim, const double *z,
                          const unsigned int *alpha, unsigned int alphaAbs);
 
-/** @brief Calculates the derivatives of Y_k(z) = (pi * z**2)**k
+/** @brief Calculates the derivatives of Y_k(z) / n! = (pi * z**2)**k / n! where n <=
+ * k.
  * @param[in] k: integer power.
- * @param[in] dim: dimension of y.
- * @param[in] z: vector of the polynomial.
+ * @param[in] dim: dimension of z.
+ * @param[in] y: vector of the polynomial.
  * @parma[in] alpha: multi-index for the derivative.
- * @parma[in] alphaAbs: absolute value of the multi-index alpha.
- * @return partial derivative of Y_k(z).
+ * @param[in] n: factorial divisor smaller than k.
+ * @return partial derivative of Y_k(z) / n!.
  */
-double polynomial_y_der(unsigned int k, unsigned int dim, const double *z,
-                        const unsigned int *alpha, unsigned int alphaAbs);
+double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NOLINT
+                        const unsigned int *alpha, unsigned int alphaAbs,
+                        unsigned int n);
 
 /** @brief Calculates the singularity s_{d+2k}(z) = pi**(k + d / 2) / gamma(k + d /
  * 2) * (-1)**(k+1) / k! * (pi * z**2)**k * log(pi * z**2)

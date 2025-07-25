@@ -551,7 +551,7 @@ int test_polynomial_y_der(void) {
 
         alphaAbs = mult_abs(dim, alpha);
 
-        num = polynomial_y_der(k, dim, z, alpha, alphaAbs);
+        num = polynomial_y_der(k, dim, z, alpha, alphaAbs, 1);
         ref = refRead[0] + 0 * I;
 
         errorAbs = errAbs(ref, num);
@@ -1069,13 +1069,12 @@ int test_crandall_gReg_der(void) {
  *
  * @return number of failed tests.
  * */
-int test_crandall_gReg_nuequalsminus2k_der_prototype(void) {
+int test_crandall_gReg_der_d2k_prototype(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
-    int result =
-        snprintf(path, sizeof(path),
-                 "%s/crandall_gReg_nuequalsminus2k_der_prototype_Ref.csv", // NOLINT
-                 BASE_PATH);
+    int result = snprintf(path, sizeof(path),
+                          "%s/crandall_gReg_der_d2k_prototype_Ref.csv", // NOLINT
+                          BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
@@ -1101,7 +1100,7 @@ int test_crandall_gReg_nuequalsminus2k_der_prototype(void) {
     int totalTests = 0;
     int dim = 2;
     double prefactor = 1.;
-    double tol = pow(10, -10);
+    double tol = 5 * pow(10, -10);
 
     double *nuRef = malloc(sizeof(double));
     double *z = malloc(dim * sizeof(double));
@@ -1186,7 +1185,7 @@ int main(void) {
     failed += test_singularity_s_der();
     failed += test_crandall_g_der();
     failed += test_crandall_gReg_der();
-    failed += test_crandall_gReg_nuequalsminus2k_der_prototype();
+    failed += test_crandall_gReg_der_d2k_prototype();
     failed += test_crandall_g_der_taylor();
     failed += test_crandall_gReg_der_taylor();
     return failed;

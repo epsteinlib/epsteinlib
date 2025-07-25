@@ -114,8 +114,9 @@ sDer[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=(
 
 
 G[\[Nu]_,y_]=Piecewise[{{0,Norm[y]>=4},{ -2/\[Nu],Norm[y]<10^(-64)},{ExpIntegralE[1-\[Nu]/2,Pi y . y],Norm[y]>=10^(-64)&&Norm[y]<4}}];
-GReg[\[Nu]_,z_]=Piecewise[{
-	{-2/\[Nu],Norm[z]<10^(-64)&&Not[Element[-\[Nu]/2,NonNegativeIntegers]]}
+GReg[\[Nu]_,z_]:=Piecewise[{
+	{G[\[Nu],z]-\[Pi]^(-(Length[z]-\[Nu])/2)Gamma[(Length[z]-\[Nu])/2]sDer[Round[-\[Nu]/2],z,ConstantArray[0,Length[z]]],(Norm[z]>10^(-64))&&Element[-\[Nu]/2,NonNegativeIntegers]}
+	,{-2/\[Nu],Norm[z]<10^(-64)&&Not[Element[-\[Nu]/2,NonNegativeIntegers]]}
 	,{-Gamma[\[Nu]/2,0,Pi z . z]/(Pi z . z)^(\[Nu]/2),Norm[z]>=10^(-64)&&Not[Element[-\[Nu]/2,NonNegativeIntegers]]}}
 ];
 
@@ -166,39 +167,6 @@ epsteinZetaRegDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:10]:=Module[
 	;res=SetPrecision[\[Mu]^(Total[\[Alpha]]-\[Nu]N)\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci),prec]
 	;Return[res]
 ]
-
-
-(* ::Subsection:: *)
-(*Create regularized Crandall function prototype reference values for nu = dim + 2*k*)
-
-
-(* ::Text:: *)
-(*Setup test parameters.*)
-
-
-range = Range[100];
-Do[
-	\[Nu]0[i]=-2 RandomInteger[{0,6}]
-	;z0[i]={randRational,randRational}
-	;\[Alpha]0[i]={randDerivative,randDerivative}
-	,{i,range}
-]
-
-
-(* ::Text:: *)
-(*Generate reference values.*)
-
-
-GRegKDerTab=ParallelTable[Flatten[Join[{\[Nu]0[i]},N[z0[i],16],\[Alpha]0[i],{N[SetPrecision[GRegDer[\[Nu]0[i],z0[i],\[Alpha]0[i]],200],30]}]],{i,{1}}];
-
-
-(* ::Text:: *)
-(*Save reference values to file.*)
-
-
-SetDirectory[NotebookDirectory[]];
-Export["csv/crandall_gReg_nuequalsminus2k_der_prototype_Ref.csv",GRegKDerTab]
-
 
 
 (* ::Subsection:: *)

@@ -358,15 +358,18 @@ double complex log_l_der(unsigned int dim, const double *z,
     return sum;
 }
 
-/** @brief Calculates the derivatives of Y_k(z) = (pi * z**2)**k
+/** @brief Calculates the derivatives of Y_k(z) / n! = (pi * z**2)**k / n! where n <=
+ * k.
  * @param[in] k: integer power.
  * @param[in] dim: dimension of z.
  * @param[in] y: vector of the polynomial.
  * @parma[in] alpha: multi-index for the derivative.
- * @return partial derivative of Y_k(z).
+ * @param[in] n: factorial divisor smaller than k.
+ * @return partial derivative of Y_k(z) / n!.
  */
 double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NOLINT
-                        const unsigned int *alpha, unsigned int alphaAbs) {
+                        const unsigned int *alpha, unsigned int alphaAbs,
+                        unsigned int n) {
 
     // Return function if there is no derivative
     if (!alphaAbs) {
@@ -465,15 +468,15 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
         }
     }
 
-    // factorial = alpha! k!
+    // factorial = alpha! k! / n!
     unsigned long long factorial = 1;
-    for (unsigned int j = 1; j < k + 1; j++) {
-        factorial *= j;
-    }
     for (unsigned int i = 0; i < dim; i++) {
         for (int j = 1; j < alpha[i] + 1; j++) {
             factorial *= j;
         }
+    }
+    for (unsigned int j = n + 1; j < k + 1; j++) {
+        factorial *= j;
     }
 
     res = (double)factorial * int_pow(M_PI, k) * sum;
@@ -539,7 +542,8 @@ double complex singularity_s_der(unsigned int k, unsigned int dim, const double 
             }
 
             // summing using Kahan's method
-            auxy = (double)multBinom * polynomial_y_der(k, dim, z, beta, betaAbs) *
+            auxy = (double)multBinom *
+                       polynomial_y_der(k, dim, z, beta, betaAbs, 1) *
                        log_l_der(dim, z, gamma, gammaAbs) -
                    epsilon;
             auxt = sum + auxy;
@@ -590,12 +594,12 @@ double complex crandall_gReg_nuequalsdimplus2k_der(
     const unsigned int *alpha, unsigned int alphaAbs, double zArgBound) {
     double res;
     double zArg = M_PI * dot(dim, z, z);
-    double choseTaylorBound = M_PI * 0.5 * 0.5;
-    unsigned int taylorBound = 30;
+    double taylorBranchBound = M_PI * 0.65 * 0.65;
+    unsigned int taylorSeriesLimit = 25;
     if (!alphaAbs) {
         // No derivative
         res = crandall_gReg_nuequalsdimplus2k(s, zArg, (double)k, lambda);
-    } else if (zArg < choseTaylorBound) {
+    } else if (zArg < taylorBranchBound) {
         // Taylor expansion if arg close to zero.
 
         double complex sum = 0.0;
@@ -617,22 +621,20 @@ double complex crandall_gReg_nuequalsdimplus2k_der(
         res = ((k % 2) ? -1. : 1.) / (double)kFact *
               (harmonic - eulerGamma -
                (double)int_pow(lambda, 2 * k) * log(lambda * lambda)) *
-              polynomial_y_der(k, dim, z, alpha, alphaAbs);
+              polynomial_y_der(k, dim, z, alpha, alphaAbs, 1);
 
         // summand n = 0
         if (k) {
-            res -= polynomial_y_der(0, dim, z, alpha, alphaAbs) / (double)(-k);
+            res -= polynomial_y_der(0, dim, z, alpha, alphaAbs, 1) / (double)(-k);
         }
 
         // summands 0 < n < k
-        unsigned long long nFact = 1;
-        for (int n = 1; n < taylorBound + 1; n++) {
-            nFact *= (unsigned int)n;
+        for (int n = 1; n < taylorSeriesLimit + 1; n++) {
             if (n - k) {
                 // Summing using Kahan's method
                 auxy = ((n % 2) ? -1. : 1.) *
-                           polynomial_y_der(n, dim, z, alpha, alphaAbs) /
-                           (double)(n - (int)k) / (double)nFact -
+                           polynomial_y_der(n, dim, z, alpha, alphaAbs, n) /
+                           (double)(n - (int)k) -
                        epsilon;
                 auxt = sum + auxy;
                 epsilon = (auxt - sum) - auxy;

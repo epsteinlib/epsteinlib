@@ -37,13 +37,37 @@ Protect[Power];
 
 p[z_,\[Alpha]_,\[Beta]_]:=Apply[Times,(-\[Pi])^(\[Alpha]-\[Beta])Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2z)^(\[Alpha]-2\[Beta])]
 l[z_,\[Alpha]_,\[Beta]_]:=-(-1)^Total[\[Alpha]-\[Beta]]Total[\[Alpha]-\[Beta]]!/Total[\[Alpha]-\[Beta]]Apply[Times,Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2z)^(\[Alpha]-2\[Beta])]
+YDer[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=Piecewise[{
+	{(\[Pi] z . z)^k,Total[\[Alpha]]==0}
+	,{k!Pi^k Apply[Times,\[Alpha]!] Total@Table[
+			Piecewise[{
+			{Apply[Times,Binomial[2\[Beta],\[Alpha]]z^(2\[Beta]-\[Alpha])/\[Beta]!],Total[\[Beta]]==k}
+			,{0,Total[\[Beta]]!=k}
+			}],{\[Beta],Tuples[Range[Ceiling[\[Alpha]/2],ConstantArray[k,Length[z]]]]}
+		],True
+	}
+}]
+LDer[z_,\[Alpha]_]:=Piecewise[{
+	{Log[\[Pi] z . z],Total[\[Alpha]]==0}
+	,{Total[Flatten[Table[
+			l[z,\[Alpha],\[Beta]]/(z . z)^(Total[\[Alpha]-\[Beta]])
+			,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}
+		]]],True
+	}
+}]
 
 
 (* ::Text:: *)
-(*Singularity for arguments nu = dim + 2k in 3D.*)
+(*Derivatives of singularity for arguments nu = dim + 2k.*)
 
 
 s[k_,{z1_,z2_,z3_}]=\[Pi]^(k+Length[{z1,z2,z3}]/2)/Gamma[k+Length[{z1,z2,z3}]/2](-1)^(k+1)/k!(\[Pi] {z1,z2,z3} . {z1,z2,z3})^k Log[Pi {z1,z2,z3} . {z1,z2,z3}]
+sDer[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=(
+	\[Pi]^(k+Length[z]/2)/Gamma[k+Length[z]/2](-1)^(k+1)/k!Total@Table[
+			Apply[Times,Binomial[\[Alpha],\[Beta]]]YDer[k,z,\[Beta]]LDer[z,\[Alpha]-\[Beta]]
+			,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]]]}
+	]
+)
 
 
 (* ::Text:: *)
@@ -55,6 +79,19 @@ GReg[\[Nu]_,z_]=Piecewise[{
 	{-2/\[Nu],Norm[z]<10^(-64)&&Not[Element[-\[Nu]/2,NonNegativeIntegers]]}
 	,{-Gamma[\[Nu]/2,0,Pi z . z]/(Pi z . z)^(\[Nu]/2),Norm[z]>=10^(-64)&&Not[Element[-\[Nu]/2,NonNegativeIntegers]]}}
 ];
+GRegDer[\[Nu]_,z_,\[Alpha]_]:=Piecewise[{
+	{
+		(-1)^(-\[Nu]/2)/Round[-\[Nu]/2]!(HarmonicNumber[Round[-\[Nu]/2]]-EulerGamma)YDer[Round[-\[Nu]/2],z,\[Alpha]]-Total[
+			Table[Piecewise[{{0,n==Round[-\[Nu]/2]},{(-1)^n YDer[n,z,\[Alpha]]/(n-Round[-\[Nu]/2])/n!,n!=Round[-\[Nu]/2]}}],{n,0,100}]
+		],(Norm[z]<=1/10)&&Element[-\[Nu]/2,NonNegativeIntegers]
+	},{
+		GDer[\[Nu],z,\[Alpha]]-\[Pi]^(-(Length[z]-\[Nu])/2)Gamma[(Length[z]-\[Nu])/2]sDer[Round[-\[Nu]/2],z,\[Alpha]]
+		,(Norm[z]>1/10)&&Element[-\[Nu]/2,NonNegativeIntegers]
+	},{
+		Total[Flatten[Table[p[z,\[Alpha],\[Beta]]GReg[\[Nu]+2Total[\[Alpha]-\[Beta]],z],{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}]]]
+		,Not[Element[-\[Nu]/2,NonNegativeIntegers]]
+	}
+}]
 GRegDerAnalytic[\[Nu]_,z_,\[Alpha]_]:=Derivative[0,\[Alpha]][GReg][\[Nu],z]
 GDerAnalytic[\[Nu]_,z_,\[Alpha]_]:=Derivative[0,\[Alpha]][G][\[Nu],z]
 
@@ -297,3 +334,31 @@ crandallgRegDerTab=ParallelTable[With[{g=GRegDer[\[Nu]0[i],z0[i],\[Alpha]0[i]]},
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/crandall_gReg_der_Ref.csv",crandallgRegDerTab];
+
+
+(* ::Subsection:: *)
+(*Create regularized Crandall function prototype reference values for nu = dim + 2*k*)
+
+
+(* ::Text:: *)
+(*Setup test parameters.*)
+
+
+range = Range[100];
+Do[
+	\[Nu]0[i]=-2 RandomInteger[{0,12}]
+	;z0[i]={randRational,randRational}
+	;\[Alpha]0[i]={randDerivative,randDerivative}
+	,{i,range}
+]
+
+
+GRegKDerTab=ParallelTable[Flatten[Join[{\[Nu]0[i]},N[z0[i],16],\[Alpha]0[i],{N[SetPrecision[GRegDer[\[Nu]0[i],z0[i],\[Alpha]0[i]],200],30],i}]],{i,range}];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/crandall_gReg_der_d2k_prototype_Ref.csv",GRegKDerTab]
