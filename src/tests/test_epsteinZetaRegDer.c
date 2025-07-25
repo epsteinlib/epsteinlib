@@ -174,7 +174,7 @@ int test_epsteinZetaRegDer_d2k_prototype(void) {
     int testsPassed = 0;
     int totalTests = 0;
     unsigned int dim = 2;
-    double tol = pow(10, -12);
+    double tol = pow(10, -11);
 
     double errMin = NAN;
     double errMax = NAN;

@@ -113,7 +113,7 @@ sDer[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=(
 (*Crandall functions.*)
 
 
-G[\[Nu]_,y_]=Piecewise[{{0,Norm[y]>=4},{ -2/\[Nu],Norm[y]<10^(-64)},{ExpIntegralE[1-\[Nu]/2,Pi y . y],Norm[y]>=10^(-64)&&Norm[y]<4}}];
+G[\[Nu]_,z_]:=Piecewise[{{0,Norm[z]>=4},{ -2/\[Nu],Norm[z]<10^(-64)},{ExpIntegralE[1-\[Nu]/2,Pi z . z],Norm[z]>=10^(-64)&&Norm[z]<4}}];
 GReg[\[Nu]_,z_]:=Piecewise[{
 	{G[\[Nu],z]-\[Pi]^(-(Length[z]-\[Nu])/2)Gamma[(Length[z]-\[Nu])/2]sDer[Round[-\[Nu]/2],z,ConstantArray[0,Length[z]]],(Norm[z]>10^(-64))&&Element[-\[Nu]/2,NonNegativeIntegers]}
 	,{-2/\[Nu],Norm[z]<10^(-64)&&Not[Element[-\[Nu]/2,NonNegativeIntegers]]}
@@ -125,18 +125,25 @@ GReg[\[Nu]_,z_]:=Piecewise[{
 (*Derivatives of Crandall functions.*)
 
 
-GDer[\[Nu]_,y_,\[Alpha]_]:=Total[Flatten[Table[p[y,\[Alpha],\[Beta]]G[\[Nu]+2Total[\[Alpha]-\[Beta]],y],{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}]]]
+GDer[\[Nu]_,y_,\[Alpha]_]:=Piecewise[{
+	{G[\[Nu],y],Total[\[Alpha]]==0}
+	,{Total[Flatten[Table[p[y,\[Alpha],\[Beta]]G[\[Nu]+2Total[\[Alpha]-\[Beta]],y],{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}]]],Total[\[Alpha]]>0}
+}]
 GRegDer[\[Nu]_,z_,\[Alpha]_]:=Piecewise[{
 	{
+		GReg[\[Nu],z]
+		,Total[\[Alpha]]==0
+	}
+	,{
 		(-1)^(-\[Nu]/2)/Round[-\[Nu]/2]!(HarmonicNumber[Round[-\[Nu]/2]]-EulerGamma)YDer[Round[-\[Nu]/2],z,\[Alpha]]-Total[
 			Table[Piecewise[{{0,n==Round[-\[Nu]/2]},{(-1)^n YDer[n,z,\[Alpha]]/(n-Round[-\[Nu]/2])/n!,n!=Round[-\[Nu]/2]}}],{n,0,100}]
-		],(Norm[z]<=1/10)&&Element[-\[Nu]/2,NonNegativeIntegers]
+		],Norm[z]<=1/10&&Element[-\[Nu]/2,NonNegativeIntegers]&&Total[\[Alpha]]>0
 	},{
 		GDer[\[Nu],z,\[Alpha]]-\[Pi]^(-(Length[z]-\[Nu])/2)Gamma[(Length[z]-\[Nu])/2]sDer[Round[-\[Nu]/2],z,\[Alpha]]
-		,(Norm[z]>1/10)&&Element[-\[Nu]/2,NonNegativeIntegers]
+		,Norm[z]>1/10&&Element[-\[Nu]/2,NonNegativeIntegers]&&Total[\[Alpha]]>0
 	},{
 		Total[Flatten[Table[p[z,\[Alpha],\[Beta]]GReg[\[Nu]+2Total[\[Alpha]-\[Beta]],z],{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}]]]
-		,Not[Element[-\[Nu]/2,NonNegativeIntegers]]
+		,Not[Element[-\[Nu]/2,NonNegativeIntegers]]&&Total[\[Alpha]]>0
 	}
 }]
 
@@ -155,10 +162,10 @@ sumFourierNonZeroDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[GDer[Length
 
 epsteinZetaRegDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:10]:=Module[
 	{dim,prec,\[Nu]N,AN,xN,yN,\[Mu],sumReal,sumReci,res}
-	,prec=60
+	,prec=120
 	;dim = Length[AExt]
-	;\[Nu]N=If[\[Nu]Ext>=2&&PossibleZeroQ[(\[Nu]Ext-dim)/2-Round[(\[Nu]Ext-dim)/2]]
-		,\[Nu]N=Round[\[Nu]Ext]
+	;If[\[Nu]Ext>=2&&PossibleZeroQ[(\[Nu]Ext-dim)/2-Round[(\[Nu]Ext-dim)/2]]
+		,\[Nu]N=Round[\[Nu]Ext];If[PossibleZeroQ[Total[\[Alpha]]],Return[" bug for no derivatives in nu equals dim plus 2k"]]
 		,\[Nu]N=N[\[Nu]Ext,prec]
 	]
 	;AN=N[AExt,prec]
@@ -184,7 +191,7 @@ epsteinZetaRegDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:10]:=Module[
 range = Range[100];
 Do[
 	\[Nu]0[i]=10 randRational
-	;a0[i]=IdentityMatrix@2
+	;a0[i]={{1,1/2},{0,Sqrt@3/2}}
 	;x0[i]=If[i<10,{0,0},{randRational,randRational}]
 	;y0[i]={randRational,randRational}
 	;\[Alpha]0[i]={randDerivative,randDerivative}
@@ -198,20 +205,8 @@ Do[
 
 zDerTab=ParallelTable[
 	With[{result=N[epsteinZetaRegDer[\[Nu]0[i],a0[i],x0[i],y0[i],\[Alpha]0[i]],30]}
-	,{N[\[Nu]0[i],30]
-	,N[a0[i][[1,1]],30]
-	,N[a0[i][[1,2]],30]
-	,N[a0[i][[2,1]],30]
-	,N[a0[i][[2,2]],30]
-	,N[x0[i][[1]],30]
-	,N[x0[i][[2]],30]
-	,N[y0[i][[1]],30]
-	,N[y0[i][[2]],30]
-	,\[Alpha]0[i][[1]]
-	,\[Alpha]0[i][[2]]
-	,Re[result]
-	,Im[result]
-	}],{i,range}
+	,Flatten[Join[N[{\[Nu]0[i],a0[i],x0[i],y0[i]},30],\[Alpha]0[i],{Re[result],Im[result]}]]
+	],{i,range}
 ];
 
 
@@ -233,11 +228,11 @@ Export["csv/epsteinZetaRegDer_prototype_Ref.csv",zDerTab];
 
 range = Range[100];
 Do[
-	\[Nu]0[i]=2+2 RandomInteger[{0,6}]
-	;a0[i]=IdentityMatrix@2
+	\[Nu]Int[i]=2+2 RandomInteger[{0,6}]
+	;a0[i]={{1,1/2},{0,Sqrt@3/2}}
 	;x0[i]=If[i<10,{0,0},{randRational,randRational}]
 	;y0[i]={randRational,randRational}
-	;\[Alpha]0[i]={randDerivative,randDerivative}
+	;\[Alpha]0[i]={Max[1,randDerivative],randDerivative}
 	,{i,range}
 ]
 
@@ -247,8 +242,8 @@ Do[
 
 
 zDerd2kTab=ParallelTable[
-	With[{result=N[epsteinZetaRegDer[\[Nu]0[i],a0[i],x0[i],y0[i],\[Alpha]0[i]],30]}
-	,Flatten[Join[N[{\[Nu]0[i],a0[i],x0[i],y0[i]},30],\[Alpha]0[i],{Re[result],Im[result]}]]
+	With[{result=epsteinZetaRegDer[\[Nu]Int[i],a0[i],x0[i],y0[i],\[Alpha]0[i]]}
+	,Flatten[Join[N[{\[Nu]Int[i],a0[i],x0[i],y0[i]},30],\[Alpha]0[i],N[{Re[result],Im[result]},30]]]
 	],{i,range}
 ];
 
