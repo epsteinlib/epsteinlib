@@ -16,7 +16,7 @@ Key features:
 The dispersion relation is calculated using the Epstein zeta function.
 """
 
-# SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan.busse@dlr.de>
+# SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
 # SPDX-License-Identifier: AGPL-3.0-only
 
 from typing import List

@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2024 Jan Schmitz <schmitz@num.uni-sb.de>
-# SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan.busse@dlr.de>
+# SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
 #
 # SPDX-License-Identifier: CC0-1.0
 

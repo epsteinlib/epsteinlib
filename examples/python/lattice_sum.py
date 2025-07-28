@@ -4,7 +4,7 @@ If the library is installed, run with `python lattice_sum.py`.
 """
 
 # SPDX-FileCopyrightText: 2024 Andreas Buchheit <buchheit@num.uni-sb.de>
-# SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan.busse@dlr.de>
+# SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
 # SPDX-FileCopyrightText: 2024 Ruben Gutendorf <ruben.gutendorf@uni-saarland.de>
 # SPDX-License-Identifier: AGPL-3.0-only
 
