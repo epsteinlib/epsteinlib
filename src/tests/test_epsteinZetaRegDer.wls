@@ -1,0 +1,256 @@
+#!/usr/bin/env wolframscript
+(* ::Package:: *)
+
+(* SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
+   SPDX-License-Identifier: AGPL-3.0-only *)
+
+
+(* ::Section:: *)
+(*Unit tests for epsteinZetaReGDer in epsteinZeta.c*)
+
+
+(* ::Subsection:: *)
+(*Setup*)
+
+
+(* ::Text:: *)
+(*Load Mathematica wrapper in every kernel. Remove the "Quiet" if unsure about the parallel evaluation.*)
+
+
+BaseDirectory=FileNameJoin[{NotebookDirectory[], "..", "..", "mathematica"}];
+SetDirectory[BaseDirectory];<<EpsteinZeta.wl
+ParallelEvaluate[SetDirectory[BaseDirectory];Quiet[<<EpsteinZeta.wl]];
+
+
+(* ::Text:: *)
+(*Set 0^0 in every kernel.*)
+
+
+Unprotect[Power];
+Power[0|0.|0*I|0.*I,0|0.|0*I|0.*I]:=1;
+Power[z_,0]/;Abs[z]==0:=1;
+Protect[Power];
+
+
+ParallelEvaluate[
+Unprotect[Power];
+Power[0|0.|0*I|0.*I,0|0.|0*I|0.*I]:=1;
+Power[z_,0]/;Abs[z]==0:=1;
+Protect[Power];
+];
+
+
+(* ::Subsection:: *)
+(*Auxiliary functions*)
+
+
+(* ::Text:: *)
+(*Generate random rational numbers and random integers between 0 and 6.*)
+
+
+randRational := RandomInteger[{-10^(16),10^(16)}]/10^(16)
+randRationalStable := RandomChoice[{-1,1}](1/10+8/10 RandomInteger[{0,10^(16)}]/10^(16))
+randDerivative := RandomInteger[{0,6}]
+
+
+(* ::Text:: *)
+(*Calculates the directional derivative (\[Del]\:22c5 v)\:207f f[x] with finite differences by Taylors method given a stencil size "size" and stencil width "h".*)
+
+
+DirDerTaylorCoeffs[n_,size_]:=LinearSolve[
+	Table[(1/(i-1)!)*(j-((size+1)/2))^(i-1),{i,size},{j,size}]
+	,n(size+1)Map[KroneckerDelta[#,n+1]&,Range[size]]
+]
+DirectionalDerivative[v_,n_,size_:15,h_:1/1000][f_][x_]:=If[PossibleZeroQ[n]
+	,f[x]
+	,Total[DirDerTaylorCoeffs[n,size] Map[f[x+h v #]&,Range[size]-(size+1)/2]]/((h^n)*n(size+1))
+]
+
+
+(* ::Subsection:: *)
+(*Reference functions*)
+
+
+(* ::Text:: *)
+(*Helper functions for the derivatives.*)
+
+
+p[z_,\[Alpha]_,\[Beta]_]:=Apply[Times,(-\[Pi])^(\[Alpha]-\[Beta])Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2z)^(\[Alpha]-2\[Beta])]
+l[z_,\[Alpha]_,\[Beta]_]:=-(-1)^Total[\[Alpha]-\[Beta]]Total[\[Alpha]-\[Beta]]!/Total[\[Alpha]-\[Beta]]Apply[Times,Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2z)^(\[Alpha]-2\[Beta])]
+
+
+(* ::Text:: *)
+(*Derivatives of singularity for arguments nu = dim + 2k.*)
+
+
+YDer[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=Piecewise[{
+	{(\[Pi] z . z)^k,Total[\[Alpha]]==0}
+	,{k!Pi^k Apply[Times,\[Alpha]!] Total@Table[
+			Piecewise[{
+			{Apply[Times,Binomial[2\[Beta],\[Alpha]]z^(2\[Beta]-\[Alpha])/\[Beta]!],Total[\[Beta]]==k}
+			,{0,Total[\[Beta]]!=k}
+			}],{\[Beta],Tuples[Range[Ceiling[\[Alpha]/2],ConstantArray[k,Length[z]]]]}
+		],True
+	}
+}]
+LDer[z_,\[Alpha]_]:=Piecewise[{
+	{Log[\[Pi] z . z],Total[\[Alpha]]==0}
+	,{Total[Flatten[Table[
+			l[z,\[Alpha],\[Beta]]/(z . z)^(Total[\[Alpha]-\[Beta]])
+			,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}
+		]]],True
+	}
+}]
+sDer[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=(
+	\[Pi]^(k+Length[z]/2)/Gamma[k+Length[z]/2](-1)^(k+1)/k!Total@Table[
+			Apply[Times,Binomial[\[Alpha],\[Beta]]]YDer[k,z,\[Beta]]LDer[z,\[Alpha]-\[Beta]]
+			,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]]]}
+	]
+)
+
+
+(* ::Text:: *)
+(*Crandall functions.*)
+
+
+G[\[Nu]_,z_]:=Piecewise[{{0,Norm[z]>=4},{ -2/\[Nu],Norm[z]<10^(-64)},{ExpIntegralE[1-\[Nu]/2,Pi z . z],Norm[z]>=10^(-64)&&Norm[z]<4}}];
+GReg[\[Nu]_,z_]:=Piecewise[{
+	{G[\[Nu],z]-\[Pi]^(-(Length[z]-\[Nu])/2)Gamma[(Length[z]-\[Nu])/2]sDer[Round[-\[Nu]/2],z,ConstantArray[0,Length[z]]],(Norm[z]>10^(-64))&&Element[-\[Nu]/2,NonNegativeIntegers]}
+	,{-2/\[Nu],Norm[z]<10^(-64)&&Not[Element[-\[Nu]/2,NonNegativeIntegers]]}
+	,{-Gamma[\[Nu]/2,0,Pi z . z]/(Pi z . z)^(\[Nu]/2),Norm[z]>=10^(-64)&&Not[Element[-\[Nu]/2,NonNegativeIntegers]]}}
+];
+
+
+(* ::Text:: *)
+(*Derivatives of Crandall functions.*)
+
+
+GDer[\[Nu]_,y_,\[Alpha]_]:=Piecewise[{
+	{G[\[Nu],y],Total[\[Alpha]]==0}
+	,{Total[Flatten[Table[p[y,\[Alpha],\[Beta]]G[\[Nu]+2Total[\[Alpha]-\[Beta]],y],{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}]]],Total[\[Alpha]]>0}
+}]
+GRegDer[\[Nu]_,z_,\[Alpha]_]:=Piecewise[{
+	{
+		GReg[\[Nu],z]
+		,Total[\[Alpha]]==0
+	}
+	,{
+		(-1)^(-\[Nu]/2)/Round[-\[Nu]/2]!(HarmonicNumber[Round[-\[Nu]/2]]-EulerGamma)YDer[Round[-\[Nu]/2],z,\[Alpha]]-Total[
+			Table[Piecewise[{{0,n==Round[-\[Nu]/2]},{(-1)^n YDer[n,z,\[Alpha]]/(n-Round[-\[Nu]/2])/n!,n!=Round[-\[Nu]/2]}}],{n,0,100}]
+		],Norm[z]<=1/10&&Element[-\[Nu]/2,NonNegativeIntegers]&&Total[\[Alpha]]>0
+	},{
+		GDer[\[Nu],z,\[Alpha]]-\[Pi]^(-(Length[z]-\[Nu])/2)Gamma[(Length[z]-\[Nu])/2]sDer[Round[-\[Nu]/2],z,\[Alpha]]
+		,Norm[z]>1/10&&Element[-\[Nu]/2,NonNegativeIntegers]&&Total[\[Alpha]]>0
+	},{
+		Total[Flatten[Table[p[z,\[Alpha],\[Beta]]GReg[\[Nu]+2Total[\[Alpha]-\[Beta]],z],{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}]]]
+		,Not[Element[-\[Nu]/2,NonNegativeIntegers]]&&Total[\[Alpha]]>0
+	}
+}]
+
+
+(* ::Text:: *)
+(*Derivatives of sums in real and reciprocal space.*)
+
+
+sumRealDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[Apply[Times,(-2Pi I z)^\[Alpha]]G[\[Nu],z]Exp[-2Pi I y . z],{z,(A . #-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}]
+sumFourierNonZeroDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[GDer[Length[\[Alpha]]-\[Nu],k+y,\[Alpha]]Exp[-2Pi I x . k],{k,(Inverse[Transpose[A]] . #)&/@Select[Tuples[Range[-sumLim,sumLim],Length[A]],Not[PossibleZeroQ[Norm[#]]]&]}]
+
+
+(* ::Text:: *)
+(*Prototype for epsteinZetaDer without special cases such non-positive even integers nu.*)
+
+
+epsteinZetaRegDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:10]:=Module[
+	{dim,prec,\[Nu]N,AN,xN,yN,\[Mu],sumReal,sumReci,res}
+	,prec=120
+	;dim = Length[AExt]
+	;If[\[Nu]Ext>=2&&PossibleZeroQ[(\[Nu]Ext-dim)/2-Round[(\[Nu]Ext-dim)/2]]
+		,\[Nu]N=Round[\[Nu]Ext];If[PossibleZeroQ[Total[\[Alpha]]],Return[" bug for no derivatives in nu equals dim plus 2k"]]
+		,\[Nu]N=N[\[Nu]Ext,prec]
+	]
+	;AN=N[AExt,prec]
+	;\[Mu]=Abs[Det[AN]]^(1/Length[AN])
+	;AN=1/\[Mu] N[AExt,prec]
+	;xN=1/\[Mu] N[xExt,prec]
+	;yN=\[Mu] N[yExt,prec]
+	;sumReal=SetPrecision[sumRealDer[\[Nu]N,AN,xN,yN,\[Alpha],sumLim],prec]
+	;sumReci=SetPrecision[sumFourierNonZeroDer[\[Nu]N,AN,xN,yN,\[Alpha],sumLim]+GRegDer[Length[AN]-\[Nu]N,yN,\[Alpha]],prec]
+	;res=SetPrecision[\[Mu]^(Total[\[Alpha]]-\[Nu]N)\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci),prec]
+	;Return[res]
+]
+
+
+(* ::Subsection:: *)
+(*Create Epstein zeta regularized prototype reference values*)
+
+
+(* ::Text:: *)
+(*Setup test parameters.*)
+
+
+range = Range[100];
+Do[
+	\[Nu]0[i]=10 randRational
+	;a0[i]={{1,1/2},{0,Sqrt@3/2}}
+	;x0[i]=If[i<10,{0,0},{randRational,randRational}]
+	;y0[i]={randRational,randRational}
+	;\[Alpha]0[i]={randDerivative,randDerivative}
+	,{i,range}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+zDerTab=ParallelTable[
+	With[{result=N[epsteinZetaRegDer[\[Nu]0[i],a0[i],x0[i],y0[i],\[Alpha]0[i]],30]}
+	,Flatten[Join[N[{\[Nu]0[i],a0[i],x0[i],y0[i]},30],\[Alpha]0[i],{Re[result],Im[result]}]]
+	],{i,range}
+];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/epsteinZetaRegDer_prototype_Ref.csv",zDerTab];
+
+
+(* ::Subsection:: *)
+(*Create Epstein zeta regularized prototype reference values for nu = dim + 2k.*)
+
+
+(* ::Text:: *)
+(*Setup test parameters.*)
+
+
+range = Range[100];
+Do[
+	\[Nu]Int[i]=2+2 RandomInteger[{0,6}]
+	;a0[i]={{1,1/2},{0,Sqrt@3/2}}
+	;x0[i]=If[i<10,{0,0},{randRational,randRational}]
+	;y0[i]={randRational,randRational}
+	;\[Alpha]0[i]={Max[1,randDerivative],randDerivative}
+	,{i,range}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+zDerd2kTab=ParallelTable[
+	With[{result=epsteinZetaRegDer[\[Nu]Int[i],a0[i],x0[i],y0[i],\[Alpha]0[i]]}
+	,Flatten[Join[N[{\[Nu]Int[i],a0[i],x0[i],y0[i]},30],\[Alpha]0[i],N[{Re[result],Im[result]},30]]]
+	],{i,range}
+];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/epsteinZetaRegDer_d2k_prototype_Ref.csv",zDerd2kTab];

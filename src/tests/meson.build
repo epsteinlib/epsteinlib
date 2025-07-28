@@ -30,6 +30,15 @@ test_setZetaDer = executable('epsteinlib_test_setZetaDer',
     link_with : epsteinlib
 )
 
+test_epsteinZetaRegDer = executable('epsteinlib_test_epsteinZetaRegDer',
+    ['../tools.c','utils.c','test_epsteinZetaRegDer.c'],
+    include_directories : incdir,
+    dependencies: deps,
+    install: false,
+    override_options: override_options,
+    link_with : epsteinlib
+)
+
 test_crandall_der = executable('epsteinlib_test_crandall_derivatives',
     ['utils.c','test_crandall_der.c'],
     include_directories : incdir,
@@ -69,6 +78,11 @@ test('test_crandall',
 
 test('test_setZetaDer',
     test_setZetaDer,
+    workdir: meson.current_source_dir()
+)
+
+test('test_epsteinZetaRegDer',
+    test_epsteinZetaRegDer,
     workdir: meson.current_source_dir()
 )
 
