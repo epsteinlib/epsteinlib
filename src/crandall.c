@@ -613,19 +613,15 @@ double complex crandall_gReg_nuequalsdimplus2k_der(
         for (int i = 1; i < k + 1; i++) {
             harmonic += 1. / (double)i;
         }
-        unsigned long long kFact = 1;
-        for (int j = 1; j < k + 1; j++) {
-            kFact *= j;
-        }
 
-        res = ((k % 2) ? -1. : 1.) / (double)kFact *
+        res = ((k % 2) ? -1. : 1.) *
               (harmonic - eulerGamma -
                (double)int_pow(lambda, 2 * k) * log(lambda * lambda)) *
-              polynomial_y_der(k, dim, z, alpha, alphaAbs, 1);
+              polynomial_y_der(k, dim, z, alpha, alphaAbs, k);
 
         // summand n = 0
         if (k) {
-            res -= polynomial_y_der(0, dim, z, alpha, alphaAbs, 1) / (double)(-k);
+            res -= polynomial_y_der(0, dim, z, alpha, alphaAbs, 0) / (double)(-k);
         }
 
         // summands 0 < n < k
