@@ -13,7 +13,8 @@ using the algorithm in Crandall, R., Unified algorithms for polylogarithm, L-ser
 EpsteinZetaReg::usage="EpsteinZetaReg[\[Nu],A,x,y] computes the regularized Epstein zeta function exp(2 Pi I x.y) sum_{z in Lambda} exp(- 2 Pi I y.(z - x))/|z - x|^\[Nu]  - s\:0302(y)/|det(\[CapitalLambda])|
 as in Andreas A. Buchheit et al., Exact continuum representation of long-range interacting systems and emerging exotic phases in unconventional superconductors. Phys. Rev. Res. 5 (4 Oct. 2023), p. 043065.  using a modification of the algorithm in Crandall, R., Unified algorithms for polylogarithm, L-series, and zeta variants. Algorithmic Reflections: Selected Works. PSIpress (2012).";
 SetZetaDer::usage="SetZetaDer[\[Nu],A,x,y,\[Alpha]] computes the partiall derivatives of the set zeta function sum_{z in (Lambda - x)} exp(- 2 Pi I y.z)/|z|^\[Nu] with respect to y and some multi-index \[Alpha].";
-EpsteinZetaRegDer::usage="EpsteinZetaRegDer[\[Nu],A,x,y] computes the partiall derivatives of the regularized Epstein zeta function exp(2 Pi I x.y) sum_{z in Lambda} exp(- 2 Pi I y.(z - x))/|z - x|^\[Nu]  - s\:0302(y)/|det(\[CapitalLambda])| with respect to y and some multi-index \[Alpha]."
+EpsteinZetaRegDer::usage="EpsteinZetaRegDer[\[Nu],A,x,y] computes the partiall derivatives of the regularized Epstein zeta function exp(2 Pi I x.y) sum_{z in Lambda} exp(- 2 Pi I y.(z - x))/|z - x|^\[Nu]  - s\:0302(y)/|det(\[CapitalLambda])| with respect to y and some multi-index \[Alpha].";
+GBessel::usage"GBessel[\[Nu],k,r] computes the incomplete Bessel function 2 int_0^1 t^(-nu-1) exp(-pi k^2 / t^2) exp(-pi r^2 t^2) dt";
 
 
 Begin["Private`"];
@@ -69,6 +70,11 @@ If[Head[foreignFunctionEpsteinZetaReg] =!= ForeignFunction,
 foreignFunctionEpsteinZetaRegDer = ForeignFunctionLoad[libPath, "epstein_zeta_reg_der_mathematica_call", {"RawPointer"::["CDouble"], "CDouble", "CInt", "RawPointer"::["CDouble"], "RawPointer"::["CDouble"], "RawPointer"::["CDouble"], "RawPointer"::["CUnsignedInt"]} -> "CInt"]
 If[Head[foreignFunctionEpsteinZetaRegDer] =!= ForeignFunction,
   Print["ForeignFunctionLoad for epstein_zeta_reg_der_mathematica_call failed."]
+]
+
+foreignFunctionGBessel = ForeignFunctionLoad[libPath, "incomplete_bessel_g_mathematica_call", {"RawPointer"::["CDouble"], "CDouble", "CInt", "RawPointer"::["CDouble"], "RawPointer"::["CDouble"]} -> "CInt"]
+If[Head[foreignFunctionGBessel] =!= ForeignFunction,
+  Print["ForeignFunctionLoad for incomplete_bessel_g_mathematica_call failed."]
 ]
 
 (* For checking nan output of C function *)
@@ -151,6 +157,40 @@ Module[
   ]
 ]
 
+GBesselInternal[\[Nu]_, k_, r_, function_, foreignFunction_] :=
+Module[
+  {d = Length[k], failed = False, rMemory, kMemory, gMemory, gObject, realPart, imagPart},
+
+  (* Dimensional error handling *)
+  If[Length[r] != d, Message[function::dimerrr, d, Length[r], k, r]; failed = True];
+  If[failed, Return[$Failed]];
+
+  kMemory = RawMemoryAllocate["CDouble", d];
+  rMemory = RawMemoryAllocate["CDouble", d];
+
+  Table[RawMemoryWrite[kMemory, N[k[[i]]], i-1], {i, 1, d}];
+  Table[RawMemoryWrite[rMemory, N[r[[i]]], i-1], {i, 1, d}];
+
+  gMemory = RawMemoryAllocate["CDouble", 2];
+  gObject = foreignFunction[gMemory, N[\[Nu]], d, kMemory, rMemory];
+
+  realPart = RawMemoryRead[gMemory, 0];
+  imagPart = RawMemoryRead[gMemory, 1];
+
+  If[PossibleZeroQ@gObject,
+    If[!NaNQ[N@realPart] && !NaNQ[N@imagPart],
+      realPart + I*imagPart,
+      ComplexInfinity
+    ],
+    Print["Error: Calculation failed"];
+    Print["Input parameters: \[Nu] = ", \[Nu], ", k = ", k, ", r = ", r];
+    Print["Dimension: ", d];
+    "An Error occurred.";
+    gObject
+  ]
+]
+
+
 
 (* Dimensional error handling messages *)
 EpsteinZeta::dimerrx = "Input vector x = `3` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
@@ -163,6 +203,7 @@ SetZetaDer::dimerr\[Alpha] = "Input vector \[Alpha] = `6` has incorrect dimensio
 EpsteinZetaRegDer::dimerrx = "Input vector x = `3` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
 EpsteinZetaRegDer::dimerry = "Input vector y = `4` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
 EpsteinZetaRegDer::dimerr\[Alpha] = "Input vector \[Alpha] = `6` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
+GBessel::dimerrx = "Input vector r = `4` has incorrect dimension. Expected dimension `1` (matching k = `3`), but got `2`."
 
 
 (* Define the public Epstein and set zeta functions *)
@@ -170,6 +211,7 @@ EpsteinZeta[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ], x_
 EpsteinZetaReg[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ], x_/;VectorQ[x] && AllTrue[x, NumericQ], y_/;VectorQ[y] && AllTrue[y, NumericQ]] := epsteinZetaInternal[\[Nu], A, x, y, EpsteinZetaReg, foreignFunctionEpsteinZetaReg]
 SetZetaDer[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ], x_/;VectorQ[x] && AllTrue[x, NumericQ], y_/;VectorQ[y] && AllTrue[y, NumericQ],  \[Alpha]_/;VectorQ[\[Alpha]] && AllTrue[\[Alpha], Element[#, NonNegativeIntegers]&]] := epsteinZetaDerivativesInternal[\[Nu], A, x, y, \[Alpha], SetZetaDer, foreignFunctionSetZetaDer]
 EpsteinZetaRegDer[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ], x_/;VectorQ[x] && AllTrue[x, NumericQ], y_/;VectorQ[y] && AllTrue[y, NumericQ],  \[Alpha]_/;VectorQ[\[Alpha]] && AllTrue[\[Alpha], Element[#, NonNegativeIntegers]&]] := epsteinZetaDerivativesInternal[\[Nu], A, x, y, \[Alpha], EpsteinZetaRegDer, foreignFunctionEpsteinZetaRegDer]
+GBessel[\[Nu]_?NumericQ,k_/;VectorQ[k] && AllTrue[k, NumericQ], r_/;VectorQ[r] && AllTrue[r, NumericQ]] := GBesselInternal[\[Nu], k, r, GBessel, foreignFunctionGBessel]
 
 
 (* Check if package loaded successfully *)
@@ -194,6 +236,12 @@ If[libPath =!= $Failed &&
 	A is a square matrix
 	x and y are vectors of the same dimension as A
 	\[Alpha] is a non-negative multi-index of the same dimension as A
+
+The incomplete Bessel function can be called using
+	GBessel[\[Nu],k,r]
+
+	\[Nu] is a real number and
+	k and r are vectors of the same dimension
 "]
 ]
 

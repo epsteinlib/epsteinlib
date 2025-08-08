@@ -104,5 +104,17 @@ double crandall_g(unsigned int dim, double nu, const double *z, double prefactor
  * gamma(s,x) / (gamma(s) * x ** s)
  */
 double crandall_gReg(unsigned int dim, double nu, const double *z, double prefactor);
+
+/**
+ * @brief Calculates the incomplete bessel function.
+ * @param[in] nu: exponent of the function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] k: input vector of the function.
+ * @param[in] r: input vector of the function.
+ * @return 2 int_0**1 t**(-nu - 1) exp(-pi k**2 / t**2) exp(-pi r**2 t**2) dt
+ */
+double incomplete_bessel_g(double nu, unsigned int dim, const double *k,
+                           const double *r);
+
 #endif
 #endif

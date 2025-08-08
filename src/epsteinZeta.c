@@ -18,7 +18,9 @@
 #include <complex.h>
 
 #include "epsteinZeta.h"
+#include "tools.h"
 #include "zeta.h"
+#include <math.h>
 
 /**
  * @brief calculates the Epstein zeta function.
@@ -85,4 +87,22 @@ double complex epsteinZetaRegDer(double nu, unsigned int dim, const double *a,
                                  const unsigned int *alpha) {
 
     return epsteinZetaInternal(nu, dim, a, x, y, 1, 3, alpha);
+}
+
+/**
+ * @brief Calculates the incomplete bessel function.
+ * @param[in] nu: exponent of the function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] k: input vector of the function.
+ * @param[in] r: input vector of the function.
+ * @return 2 int_0**1 t**(-nu - 1) exp(-pi k**2 / t**2) exp(-pi r**2 t**2) dt
+ */
+double incomplete_bessel_g(double nu, unsigned int dim, const double *k,
+                           const double *r) {
+
+    double s = -nu / 2.;
+    double x = M_PI * dot(dim, k, k);
+    double y = M_PI * dot(dim, r, r);
+
+    return s + x + y;
 }

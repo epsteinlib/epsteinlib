@@ -185,4 +185,16 @@ double complex crandall_gReg_der(unsigned int dim, double s, const double *z,
                                  double prefactor, const unsigned int *alpha,
                                  unsigned int alphaAbs, double zArgBound);
 
+///**
+// * @brief Calculates the incomplete bessel function.
+// * @param[in] nu: exponent of the function.
+// * @param[in] dim: dimension of the input vectors.
+// * @param[in] k: input vector of the function.
+// * @param[in] r: input vector of the function.
+// * @return 2 int_0**1 t**(-nu - 1) exp(-pi k**2 / t**2) exp(-pi r**2 t**2) dt
+// */
+// double incomplete_bessel_g(double nu, unsigned int dim, const double *k, const
+// double *r);
+//
+
 #endif

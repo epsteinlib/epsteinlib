@@ -75,4 +75,17 @@ int epstein_zeta_reg_der_mathematica_call(double *out, double nu, int dim,
                                           const double *a, const double *x,
                                           const double *y,
                                           const unsigned int *alpha);
+/**
+ * @brief Saves real and imaginary parts of the derivatives of the regularized
+ * the incomplete bessel function in an array.
+ * @param[in, out] out: 2D array, where real and imaginary parts of the regularized
+ * @param[in] nu: exponent of the function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] k: input vector of the function.
+ * @param[in] r: input vector of the function.
+ * @return 2 int_0**1 t**(-nu - 1) exp(-pi k**2 / t**2) exp(-pi r**2 t**2) dt
+ */
+int incomplete_bessel_g_mathematica_call(double *out, double nu, unsigned int dim,
+                                         const double *k, const double *r);
+
 #endif
