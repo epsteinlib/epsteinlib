@@ -68,4 +68,121 @@ double assignzArgBound(double nu);
  */
 double complex crandall_g(unsigned int dim, double nu, const double *z,
                           double prefactor, double zArgBound);
+
+/** @brief Calculates the polynomial p_(alpha,beta)(y) = (-pi)^(alpha - beta) *
+ * (alpha choose beta) *
+ * ((alpha - beta)! / (alpha - 2*beta)!) * (2*y)^(alpha - 2*beta)
+ * where 2 beta =< alpha
+ * @param[in] dim: dimension of alpha, beta and y.
+ * @param[in] z: vector of the polynomial.
+ * @parma[in] alpha: upper multi-index.
+ * @parma[in] beta: lower multi-index.
+ * @return p(y).
+ */
+double polynomial_p(unsigned int dim, const double *z, const unsigned int *alpha,
+                    const unsigned int *beta);
+
+/**
+ * @brief Calculates the partiall deritavies of the upper Crandall function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] nu: exponent of the regularized Epstein zeta function.
+ * @param[in] z: input vector of the function.
+ * @param[in] prefactor: prefactor of the vector, e. g. lambda or 1/lambda in
+ *      Crandall's formula
+ * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
+ * expansion in the calculation of the upper Crandall function.
+ * @param[in] alpha: multi-index for the partiall derivative.
+ * @return upperGamma(nu / 2,pi prefactor * z**2) / (pi * prefactor z**2)^(nu / 2).
+ */
+double complex crandall_g_der(unsigned int dim, double nu, const double *z,
+                              double prefactor, double zArgBound,
+                              const unsigned int *alpha, unsigned int alphaAbs);
+
+/** @brief Calculates the polynomial l_(alpha,beta)(z) = - (-1)**|alpha - beta| *
+ * binom(alpha,beta) * (alpha-beta)! / (alpha - 2 beta)! |alpha - beta|! / |alpha -
+ * beta| * (2 * z)**(alpha - 2 beta) where 2 beta =< alpha
+ * @param[in] dim: dimension of alpha, beta and z.
+ * @param[in] z: vector of the polynomial.
+ * @parma[in] alpha: upper multi-index.
+ * @parma[in] beta: lower multi-index.
+ * @return l(z).
+ */
+double polynomial_l(unsigned int dim, const double *z, const unsigned int *alpha,
+                    const unsigned int *beta);
+
+/** @brief Calculates the derivatives of L(z) = log(pi * z**2)
+ * @param[in] dim: dimension of z.
+ * @param[in] z: vector of the polynomial.
+ * @parma[in] alpha: multi-index for the derivative.
+ * @parma[in] alphaAbs: absolute value of the multi-index alpha.
+ * @return partial derivative of L(z).
+ */
+double complex log_l_der(unsigned int dim, const double *z,
+                         const unsigned int *alpha, unsigned int alphaAbs);
+
+/** @brief Calculates the derivatives of Y_k(z) / n! = (pi * z**2)**k / n! where n <=
+ * k.
+ * @param[in] k: integer power.
+ * @param[in] dim: dimension of z.
+ * @param[in] y: vector of the polynomial.
+ * @parma[in] alpha: multi-index for the derivative.
+ * @param[in] n: factorial divisor smaller than k.
+ * @return partial derivative of Y_k(z) / n!.
+ */
+double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NOLINT
+                        const unsigned int *alpha, unsigned int alphaAbs,
+                        unsigned int n);
+
+/** @brief Calculates the singularity s_{d+2k}(z) = pi**(k + d / 2) / gamma(k + d /
+ * 2) * (-1)**(k+1) / k! * (pi * z**2)**k * log(pi * z**2)
+ * @param[in] k: non-negative integer so that d + 2k is the argument of s.
+ * @param[in] dim: dimension of z.
+ * @param[in] z: vector of the singularity.
+ * @parma[in] alpha: multi-index for the derivative.
+ * @parma[in] alphaAbs: absolute value of the multi-index alpha.
+ * @return partial derivative of s_{d+2k}(z).
+ */
+double complex singularity_s_der(unsigned int k, unsigned int dim, const double *z,
+                                 const unsigned int *alpha, unsigned int alphaAbs);
+/**
+ * @brief Calculates the derivatives of regularization of the zero summand in the
+ * second sum in Crandall's formula in the special case of nu = dim + 2k for some
+ * natural number k.
+ * @param[in] s: s = (d - nu).
+ * @param[in] k: k = (nu - d) / 2 as an integer.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] z: input vector of the function.
+ * @param[in] lambda: scaling parameter of crandalls formula.
+ * @param[in] alpha: multi-index of the partial derivatives
+ * @param[in] alphaAbs: sum of the elements of alpha
+ * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
+ * @return partial derivative of the regularized Crandall function.
+ */
+double complex crandall_gReg_nuequalsdimplus2k_der(double s, unsigned int k,
+                                                   unsigned int dim, const double *z,
+                                                   double lambda,
+                                                   const unsigned int *alpha,
+                                                   unsigned int alphaAbs);
+
+/**
+ * @brief Calculates the derivatives of the regularization of the zero summand in the
+ * second sum in Crandall's formula.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] s: dimension minus exponent of the regularized Epstein zeta function,
+ * that is d - nu.
+ * @param[in] z: input vector of the function.
+ * @param[in] prefactor: prefactor of the vector, e. g. lambda.
+ * @param[in] alpha: multi-index of the partial derivatives
+ * @param[in] alphaAbs: sum of the elements of alpha
+ * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
+ * @return partial derivatives of - gamma(s/2) * gammaStar(s/2, pi * prefactor *
+ * z**2), where gammaStar is the twice regularized lower incomplete gamma function if
+ * s is not equal to - 2k and partial derivatives of (pi * prefactor * y ** 2) ** (-
+ * s / 2) (gamma(s / 2, pi * prefactor * z ** 2) + ((-1)^k / k! ) * (log(pi * y ** 2)
+ * - log(prefactor ** 2))) if s is  equal to - 2k for non negative natural number k.
+ */
+double complex crandall_gReg_der(unsigned int dim, double s, const double *z,
+                                 double prefactor, const unsigned int *alpha,
+                                 unsigned int alphaAbs, double zArgBound);
+
 #endif

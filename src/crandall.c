@@ -103,17 +103,17 @@ double complex crandall_gReg(unsigned int dim, double s, const double *z,
  * calculation of the incomplete upper gamma function upperGamma(nu, z).
  */
 double assignzArgBound(double nu) {
-    if (nu > 1.6 && nu < 4.4) {
-        return M_PI * 2.99 * 2.99;
-    }
-    if (nu > -3 && nu < 8) {
+    if (nu > -1 && nu < 5) {
         return M_PI * 3.15 * 3.15;
     }
-    if (nu > -70 && nu < 40) {
+    if (nu > -20 && nu < 20) {
         return M_PI * 3.35 * 3.35;
     }
-    if (nu > -600 && nu < 80) {
+    if (nu > -150 && nu < 60) {
         return M_PI * 3.5 * 3.5;
+    }
+    if (nu > -400 && nu < 100) {
+        return M_PI * 3.65 * 3.65;
     }
     return DBL_MAX; // do not use expansion if nu is to big
 }
@@ -143,5 +143,587 @@ double complex crandall_g(unsigned int dim, double nu, const double *z,
     }
     return egf_ugamma(nu / 2, zArgument) / pow(zArgument, nu / 2);
 }
+
+/** @brief Calculates the polynomial p_(alpha,beta)(y) = (-pi)^(alpha - beta) *
+ * (alpha choose beta) *
+ * ((alpha - beta)! / (alpha - 2*beta)!) * (2*y)^(alpha - 2*beta)
+ * where 2 beta =< alpha
+ * @param[in] dim: dimension of alpha, beta and y.
+ * @param[in] y: vector of the polynomial.
+ * @parma[in] alpha: upper multi-index.
+ * @parma[in] beta: lower multi-index.
+ * @return p(y).
+ */
+double polynomial_p(unsigned int dim, const double *z, const unsigned int *alpha,
+                    const unsigned int *beta) {
+    double res = 1;
+    unsigned int ai = 0;
+    unsigned int bi = 0;
+    unsigned long long factFrac;
+    unsigned int aMinusb = 0;
+    for (int i = 0; i < dim; i++) {
+        ai = alpha[i];
+        bi = beta[i];
+        aMinusb += ai - bi;
+        factFrac = 1; // Calculate (alpha - beta)!/(alpha - 2beta)!
+        for (unsigned int j = ai - (2 * bi) + 1; j <= ai - bi; j++) {
+            factFrac *= j;
+        }
+        res *= (double)binom(ai, bi) * (double)factFrac *
+               int_pow(2 * z[i], ai - (2 * bi));
+    }
+
+    res *= int_pow(-M_PI, aMinusb);
+
+    return res;
+}
+
+/**
+ * @brief Calculates the upper Crandall function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] nu: exponent of the regularized Epstein zeta function.
+ * @param[in] z: input vector of the function.
+ * @param[in] prefactor: prefactor of the vector, e. g. lambda or 1/lambda in
+ *      Crandall's formula
+ * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast
+ * @param[in] alpha: multi-index of the partial derivatives
+ * @param[in] alphaAbs: sum of the elements of alpha
+ * * @return upperGamma(nu / 2,pi prefactor * z**2) / (pi * prefactor z**2)^(nu /
+ * 2).
+ */
+double complex crandall_g_der(unsigned int dim, double nu, const double *z,
+                              double prefactor, double zArgBound,
+                              const unsigned int *alpha, unsigned int alphaAbs) {
+    if (mult_abs(dim, alpha) == 0) {
+        return crandall_g(dim, nu, z, prefactor, zArgBound);
+    }
+
+    unsigned int beta[dim];
+    for (int i = 0; i < dim; i++) {
+        beta[i] = 0;
+    }
+
+    double nuIt;
+    double zArgBoundIt;
+
+    int done = 0;
+    unsigned int betaAbs = 0;
+
+    double complex sum = 0.0;
+    double complex epsilon = 0.0;
+    double complex auxt;
+    double complex auxy;
+
+    // zArgBounds[i] is the zArgBound for nu = nu + 2 * alphaAbs - 2 * i;
+    double zArgBounds[(alphaAbs / 2) + 1];
+    for (int i = 0; i < (alphaAbs / 2) + 1; i++) {
+        nuIt = nu + 2 * (double)alphaAbs - 2 * (double)i;
+        zArgBounds[i] = assignzArgBound(nuIt);
+    }
+
+    // Iterate over every multi-index beta so that 2 beta <= alpha
+    while (1) {
+
+        nuIt = nu + 2 * alphaAbs - 2 * betaAbs;
+        zArgBoundIt = zArgBounds[betaAbs]; // NOLINT
+
+        // summing using Kahan's method
+        auxy = polynomial_p(dim, z, alpha, beta) *
+                   crandall_g(dim, nuIt, z, prefactor, zArgBoundIt) -
+               epsilon;
+        auxt = sum + auxy;
+        epsilon = (auxt - sum) - auxy;
+        sum = auxt;
+
+        done = 1;
+        for (unsigned int idx = 0; idx < dim; idx++) {
+            if (beta[idx] + 1 <= alpha[idx] / 2) {
+                beta[idx]++;
+                betaAbs++;
+                done = 0;
+                break;
+            }
+            betaAbs -= beta[idx];
+            beta[idx] = 0;
+        }
+        if (done) {
+            break;
+        }
+    }
+
+    return sum;
+}
+
+/** @brief Calculates the polynomial l_(alpha,beta)(y) = - (-1)**|alpha - beta| *
+ * binom(alpha,beta) * (alpha-beta)! / (alpha - 2 beta)! |alpha - beta|! / |alpha -
+ * beta| * (2 * y)**(alpha - 2 beta) where 2 beta =< alpha
+ * @param[in] dim: dimension of alpha, beta and y.
+ * @param[in] y: vector of the polynomial.
+ * @parma[in] alpha: upper multi-index.
+ * @parma[in] beta: lower multi-index.
+ * @return p(y).
+ */
+double polynomial_l(unsigned int dim, const double *z, const unsigned int *alpha,
+                    const unsigned int *beta) {
+
+    double res = 1;
+    unsigned int ai = 0;
+    unsigned int bi = 0;
+    unsigned long long factFrac;
+    unsigned int aMinusb = 0;
+
+    for (int i = 0; i < dim; i++) {
+        ai = alpha[i];
+        bi = beta[i];
+        aMinusb += ai - bi;
+        factFrac = 1; // Calculate (alpha - beta)!/(alpha - 2beta)!
+        for (unsigned int j = ai - (2 * bi) + 1; j <= ai - bi; j++) {
+            factFrac *= j;
+        }
+        res *= (double)binom(ai, bi) * (double)factFrac *
+               (double)int_pow(2 * z[i], ai - (2 * bi));
+    }
+
+    unsigned long long factorial = 1;
+    for (int j = 1; j < aMinusb; j++) {
+        factorial *= j;
+    }
+
+    res *= (double)factorial;
+
+    if (!(aMinusb % 2)) {
+        res *= -1.;
+    }
+
+    return res;
+}
+
+/** @brief Calculates the derivatives of L(z) = log(pi * z**2)
+ * @param[in] dim: dimension of z.
+ * @param[in] z: vector of the polynomial.
+ * @parma[in] alpha: multi-index for the derivative.
+ * @parma[in] alphaAbs: absolute value of the multi-index alpha.
+ * @return partial derivative of L(z).
+ */
+double complex log_l_der(unsigned int dim, const double *z,
+                         const unsigned int *alpha, unsigned int alphaAbs) {
+
+    double zArg = dot(dim, z, z);
+
+    // Return function if there is no derivative
+    if (!alphaAbs) {
+        return log(M_PI * zArg);
+    }
+
+    unsigned int beta[dim];
+    for (int i = 0; i < dim; i++) {
+        beta[i] = 0;
+    }
+
+    unsigned int aMinusb = alphaAbs;
+
+    double complex sum = 0.0;
+    double complex epsilon = 0.0;
+    double complex auxt;
+    double complex auxy;
+
+    int done = 0;
+
+    // Iterate over every multi-index beta so that 2 beta <= alpha
+    while (1) {
+
+        // summing using Kahan's method
+        auxy = polynomial_l(dim, z, alpha, beta) / (double)int_pow(zArg, aMinusb) -
+               epsilon;
+        auxt = sum + auxy;
+        epsilon = (auxt - sum) - auxy;
+        sum = auxt;
+
+        done = 1;
+        for (unsigned int idx = 0; idx < dim; idx++) {
+            if (beta[idx] + 1 <= alpha[idx] / 2) {
+                beta[idx]++;
+                aMinusb--;
+                done = 0;
+                break;
+            }
+            aMinusb += beta[idx];
+            beta[idx] = 0;
+        }
+        if (done) {
+            break;
+        }
+    }
+
+    return sum;
+}
+
+/** @brief Calculates the derivatives of Y_k(z) / n! = (pi * z**2)**k / n! where n <=
+ * k.
+ * @param[in] k: integer power.
+ * @param[in] dim: dimension of z.
+ * @param[in] y: vector of the polynomial.
+ * @parma[in] alpha: multi-index for the derivative.
+ * @param[in] n: factorial divisor smaller than k.
+ * @return partial derivative of Y_k(z) / n!.
+ */
+double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NOLINT
+                        const unsigned int *alpha, unsigned int alphaAbs,
+                        unsigned int n) {
+
+    // Return function if there is no derivative
+    if (!alphaAbs) {
+        return int_pow(M_PI * dot(dim, z, z), k);
+    }
+
+    unsigned int betaMin[dim];
+    for (int i = 0; i < dim; i++) {
+        betaMin[i] = (alpha[i] + 1) / 2;
+    }
+
+    unsigned int absMin = 0;
+    for (int i = 0; i < dim; i++) {
+        absMin += betaMin[i];
+    }
+
+    // Higher derivatives vanish
+    if (absMin > k) {
+        return 0.;
+    }
+
+    unsigned long long factMin = 1;
+    for (int i = 0; i < dim; i++) {
+        for (int j = 1; j < betaMin[i] + 1; j++) {
+            factMin *= j;
+        }
+    }
+
+    unsigned int beta[dim];
+    for (int i = 0; i < dim; i++) {
+        beta[i] = betaMin[i];
+    }
+
+    unsigned int betaAbs = absMin;
+    unsigned long long betaFact = factMin;
+
+    double sum = 0.;
+    double epsilon = 0.;
+    double auxt;
+    double auxy;
+
+    double summand;
+    double res;
+
+    unsigned int redoFact = 0;
+    unsigned int done = 0;
+    while (1) {
+
+        if (!(betaAbs - k)) {
+
+            // Recalculate factorial (expensive but stable)
+            if (redoFact) {
+                betaFact = factMin;
+                for (unsigned int i = 0; i < dim; i++) {
+                    for (unsigned int j = betaMin[i] + 1; j < beta[i] + 1; j++) {
+                        betaFact *= j;
+                    }
+                }
+                redoFact = 0;
+            }
+
+            summand = 1.;
+            for (int i = 0; i < dim; i++) {
+                summand *= (double)binom(2 * beta[i], alpha[i]) *
+                           int_pow(z[i], (2 * beta[i]) - alpha[i]);
+            }
+
+            summand = summand / (double)betaFact;
+
+            // summing using Kahan's method
+            auxy = summand - epsilon;
+            auxt = sum + auxy;
+            epsilon = (auxt - sum) - auxy;
+            sum = auxt;
+        }
+
+        done = 1;
+        // Loop over multi-indexes beta so that 2 beta >= alpha and |beta| <= k
+        for (unsigned int idx = 0; idx < dim; idx++) {
+            if (beta[idx] < k - absMin + betaMin[idx]) {
+                // Fast path: increment current dimension
+                beta[idx]++;
+                betaAbs++;
+                betaFact *= beta[idx];
+                done = 0;
+                break;
+            }
+
+            // Slow path: reset this dimension and continue
+            betaAbs -= beta[idx] - betaMin[idx];
+            beta[idx] = betaMin[idx];
+            redoFact = 1;
+        }
+        if (done) {
+            break;
+        }
+    }
+
+    // factorial = alpha! k! / n!
+    unsigned long long factorial = 1;
+    for (unsigned int i = 0; i < dim; i++) {
+        for (int j = 1; j < alpha[i] + 1; j++) {
+            factorial *= j;
+        }
+    }
+    for (unsigned int j = n + 1; j < k + 1; j++) {
+        factorial *= j;
+    }
+
+    res = (double)factorial * int_pow(M_PI, k) * sum;
+
+    return res;
+}
+
+/** @brief Calculates the singularity s_{d+2k}(z) = pi**(k + d / 2) / gamma(k + d /
+ * 2) * (-1)**(k+1) / k! * (pi * z**2)**k * log(pi * z**2)
+ * @param[in] k: non-negative integer so that d + 2k is the argument of s.
+ * @param[in] dim: dimension of z.
+ * @param[in] z: vector of the singularity.
+ * @parma[in] alpha: multi-index for the derivative.
+ * @parma[in] alphaAbs: absolute value of the multi-index alpha.
+ * @return partial derivative of s_{d+2k}(z).
+ */
+double complex singularity_s_der(unsigned int k, unsigned int dim, const double *z,
+                                 const unsigned int *alpha, unsigned int alphaAbs) {
+
+    double res;
+
+    unsigned long long kFact = 1;
+    for (int j = 1; j < k + 1; j++) {
+        kFact *= j;
+    }
+
+    double prefactor = pow(M_PI, (double)k + ((double)dim / 2.)) /
+                       tgamma((double)k + ((double)dim / 2.)) *
+                       ((k % 2) ? 1. : -1.) / (double)kFact;
+
+    unsigned int beta[dim];
+    unsigned int gamma[dim]; // gamma = alpha - beta
+    for (int i = 0; i < dim; i++) {
+        beta[i] = 0;
+        gamma[i] = alpha[i];
+    }
+
+    // Return function if there is no derivative
+    if (!alphaAbs) {
+        double zArg = M_PI * dot(dim, z, z);
+        res = prefactor * int_pow(zArg, k) * log(zArg);
+        return res;
+    }
+
+    unsigned int betaAbs = 0;
+    unsigned int gammaAbs = alphaAbs;
+
+    double complex sum = 0.0;
+    double complex epsilon = 0.0;
+    double complex auxt;
+    double complex auxy;
+
+    unsigned int multBinom;
+
+    int done = 0;
+    // Iterate over every multi-index beta so that beta + gamma = alpha
+    while (1) {
+
+        if (betaAbs / 2 < k + dim) {
+            multBinom = 1;
+            for (int i = 0; i < dim; i++) {
+                multBinom *= binom(alpha[i], beta[i]);
+            }
+
+            // summing using Kahan's method
+            auxy = (double)multBinom *
+                       polynomial_y_der(k, dim, z, beta, betaAbs, 1) *
+                       log_l_der(dim, z, gamma, gammaAbs) -
+                   epsilon;
+            auxt = sum + auxy;
+            epsilon = (auxt - sum) - auxy;
+            sum = auxt;
+        }
+
+        done = 1;
+        for (unsigned int idx = 0; idx < dim; idx++) {
+            if (beta[idx] < alpha[idx]) {
+                betaAbs++;
+                gammaAbs--;
+                beta[idx]++;
+                gamma[idx]--;
+                done = 0;
+                break;
+            }
+            betaAbs -= beta[idx];
+            gammaAbs += beta[idx];
+            gamma[idx] += beta[idx];
+            beta[idx] = 0;
+            done = 1;
+        }
+        if (done) {
+            break;
+        }
+    }
+
+    res = prefactor * sum;
+
+    return res;
+}
+
+/**
+ * @brief Calculates the derivatives of regularization of the zero summand in the
+ * second sum in Crandall's formula in the special case of nu = dim + 2k for some
+ * natural number k.
+ * @param[in] s: s = (d - nu).
+ * @param[in] k: k = (nu - d) / 2 as an integer.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] z: input vector of the function.
+ * @param[in] lambda: scaling parameter of crandalls formula.
+ * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
+ * @return partial derivative of the regularized Crandall function.
+ */
+double complex crandall_gReg_nuequalsdimplus2k_der(
+    double s, unsigned int k, unsigned int dim, const double *z, double lambda,
+    const unsigned int *alpha, unsigned int alphaAbs, double zArgBound) {
+    double res;
+    double zArg = M_PI * dot(dim, z, z);
+    double taylorBranchBound = M_PI * 0.65 * 0.65;
+    unsigned int taylorSeriesLimit = 25;
+    if (!alphaAbs) {
+        // No derivative
+        res = crandall_gReg_nuequalsdimplus2k(s, zArg, (double)k, lambda);
+    } else if (zArg < taylorBranchBound) {
+        // Taylor expansion if arg close to zero.
+
+        double complex sum = 0.0;
+        double complex epsilon = 0.0;
+        double complex auxt;
+        double complex auxy;
+
+        double eulerGamma = 0.57721566490153286555;
+
+        double harmonic = 0;
+        for (int i = 1; i < k + 1; i++) {
+            harmonic += 1. / (double)i;
+        }
+
+        res = ((k % 2) ? -1. : 1.) *
+              (harmonic - eulerGamma -
+               (double)int_pow(lambda, 2 * k) * log(lambda * lambda)) *
+              polynomial_y_der(k, dim, z, alpha, alphaAbs, k);
+
+        // summand n = 0
+        if (k) {
+            res -= polynomial_y_der(0, dim, z, alpha, alphaAbs, 0) / (double)(-k);
+        }
+
+        // summands 0 < n < k
+        for (int n = 1; n < taylorSeriesLimit + 1; n++) {
+            if (n - k) {
+                // Summing using Kahan's method
+                auxy = ((n % 2) ? -1. : 1.) *
+                           polynomial_y_der(n, dim, z, alpha, alphaAbs, n) /
+                           (double)(n - (int)k) -
+                       epsilon;
+                auxt = sum + auxy;
+                epsilon = (auxt - sum) - auxy;
+                sum = auxt;
+            }
+        }
+
+        res -= sum;
+
+    } else {
+        // Evaluate difference of
+        res = crandall_g_der(dim, s, z, lambda, zArgBound, alpha, alphaAbs) -
+              pow(M_PI, -((double)dim - s) / 2.) * tgamma(((double)dim - s) / 2.) *
+                  singularity_s_der(k, dim, z, alpha, alphaAbs);
+    }
+
+    return res;
+}
+
+/**
+ * @brief Calculates the derivatives of the regularization of the zero summand in the
+ * second sum in Crandall's formula.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] s: dimension minus exponent of the regularized Epstein zeta function,
+ * that is d - nu.
+ * @param[in] z: input vector of the function.
+ * @param[in] prefactor: prefactor of the vector, e. g. lambda.
+ * @param[in] alpha: multi-index of the partial derivatives
+ * @param[in] alphaAbs: sum of the elements of alpha
+ * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
+ * @return partial derivatives of - gamma(s/2) * gammaStar(s/2, pi * prefactor *
+ * z**2), where gammaStar is the twice regularized lower incomplete gamma function if
+ * s is not equal to - 2k and partial derivatives of (pi * prefactor * y ** 2) ** (-
+ * s / 2) (gamma(s / 2, pi * prefactor * z ** 2) + ((-1)^k / k! ) * (log(pi * y ** 2)
+ * - log(prefactor ** 2))) if s is  equal to - 2k for non negative natural number k.
+ */
+double complex crandall_gReg_der(unsigned int dim, double s, const double *z,
+                                 double prefactor, const unsigned int *alpha,
+                                 unsigned int alphaAbs, double zArgBound) {
+    double zArgument = dot(dim, z, z);
+    zArgument *= M_PI * prefactor * prefactor;
+    unsigned int k = (unsigned int)(-nearbyint(s / 2.));
+    if (s < 1 && (-s == 2 * k)) {
+        return crandall_gReg_nuequalsdimplus2k_der(s, k, dim, z, prefactor, alpha,
+                                                   alphaAbs, zArgBound);
+    }
+
+    unsigned int beta[dim];
+    for (int i = 0; i < dim; i++) {
+        beta[i] = 0;
+    }
+
+    double sIt;
+
+    int done = 0;
+    unsigned int betaAbs = 0;
+
+    double complex sum = 0.0;
+    double complex epsilon = 0.0;
+    double complex auxt;
+    double complex auxy;
+
+    // Iterate over every multi-index beta so that 2 beta <= alpha
+    while (1) {
+
+        sIt = s + 2 * alphaAbs - 2 * betaAbs;
+
+        // Summing using Kahan's method
+        auxy = -polynomial_p(dim, z, alpha, beta) * tgamma(sIt / 2) *
+                   egf_gammaStar(sIt / 2, zArgument) -
+               epsilon;
+        auxt = sum + auxy;
+        epsilon = (auxt - sum) - auxy;
+        sum = auxt;
+
+        done = 1;
+        for (unsigned int idx = 0; idx < dim; idx++) {
+            if (beta[idx] + 1 <= alpha[idx] / 2) {
+                beta[idx]++;
+                betaAbs++;
+                done = 0;
+                break;
+            }
+            betaAbs -= beta[idx];
+            beta[idx] = 0;
+        }
+        if (done) {
+            break;
+        }
+    }
+
+    return sum;
+}
+
 #undef EPS
 #undef G_CUTOFF

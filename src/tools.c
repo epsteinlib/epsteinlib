@@ -7,9 +7,11 @@
 
 /**
  * @file tools.c
- * @brief  Minimal linear algebra for matrix vector operations.
+ * @brief  Minimal linear algebra for matrix vector operations, binomials and
+ * factorials.
  */
 
+#include <complex.h>
 #include <math.h>
 #include <stdbool.h>
 
@@ -165,4 +167,62 @@ double inf_norm(unsigned int dim, const double *m) { // NOLINT
     }
     return r;
 }
+
+/**
+ * @brief Compute absolute value of multi-index, that is the sum of its components.
+ * @param[in] dim: dimension of alpha end vec.
+ * @param[in] alpha: multi-index.
+ * @return absolute values of alpha.
+ * @return absolute values of alpha.
+ */
+unsigned int mult_abs(unsigned int dim, const unsigned int *alpha) {
+    unsigned int n = 0;
+    for (int i = 0; i < dim; i++) {
+        n += alpha[i];
+    }
+    return n;
+}
+
+/**
+ * @brief Compute the binomial coefficient bionm(n,k).
+ * @param[in] n: non-negative integer greater or equal k.
+ * @param[in] k: non-negative integer smaller or equal n.
+ * @return binom(n)(k).
+ */
+unsigned long long binom(unsigned int n, unsigned int k) {
+    unsigned long long res = 1;
+
+    // Calculate binom(n)(n-k) if n - k is closer to smaller than k
+    if (k > n - k) {
+        k = n - k;
+    }
+
+    for (unsigned int i = 1; i <= k; i++) {
+        res = res * (n - k + i) / i;
+    }
+    return res;
+}
+
+/**
+ * @brief Compute the integer power of a double by squaring.
+ * @param[in] base: non-negative integer greater or equal k.
+ * @param[in] exp: non-negative integer smaller or equal n.
+ * @return base ** exp.
+ */
+double complex int_pow(double complex base, unsigned int exp) {
+    double complex res = 1.;
+    while (true) {
+        if (exp & 1) {
+            res *= base;
+        }
+        exp >>= 1;
+        if (!exp) {
+            break;
+        }
+        base *= base;
+    }
+
+    return res;
+}
+
 #undef EPS

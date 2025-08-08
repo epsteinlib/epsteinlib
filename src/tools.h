@@ -7,12 +7,14 @@
 
 /**
  * @file tools.h
- * @brief  Minimal linear algebra for matrix vector operations.
+ * @brief  Minimal linear algebra for matrix vector and multi-index operations.
  */
 
 #ifndef EPSTEIN_TOOLS
 #define EPSTEIN_TOOLS
+#include <complex.h>
 #include <stdbool.h>
+
 double dot(unsigned int dim, const double *v1, const double *v2);
 void matrix_intVector(unsigned int dim, const double *m, const int *v, double *res);
 void transpose(unsigned int dim, double *m);
@@ -20,4 +22,7 @@ bool equals(unsigned int dim, const double *v1, const double *v2);
 bool equalsZero(unsigned int dim, const double *v);
 void invert(unsigned int dim, double *m, int *p, double *r);
 double inf_norm(unsigned int dim, const double *m);
+unsigned int mult_abs(unsigned int dim, const unsigned int *alpha);
+unsigned long long binom(unsigned int n, unsigned int k);
+double complex int_pow(double complex base, unsigned int exp);
 #endif

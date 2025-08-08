@@ -101,3 +101,36 @@ void printMatrixUnitTest(const char *name, const double *mat, unsigned int dim) 
         printf("]\n");
     }
 }
+
+/**
+ * @brief Compute the factorial of a multi-index.
+ * @param[in] alpha: multi-index.
+ * @return factorial of alpha.
+ */
+unsigned int mult_fac(unsigned int dim, const unsigned int *alpha) {
+    unsigned int res = 1;
+    for (int i = 0; i < dim; i++) {
+        for (int j = 0; j < alpha[i]; j++) {
+            res *= j + 1;
+        }
+    }
+    return res;
+}
+
+/**
+ * @brief Compute a vector to the power of a multi-index.
+ * @param[in] dim: dimension of alpha end vec.
+ * @param[in] alpha: multi-index.
+ * @param[in] vec: base vector.
+ * @param[in] prefactor: prefactor of the vector.
+ * @return (prefactor * vec) ** alpha.
+ */
+double mult_pow(unsigned int dim, const unsigned int *alpha, const double *vec) {
+    double res = 1;
+    for (int i = 0; i < dim; i++) {
+        for (int j = 0; j < alpha[i]; j++) {
+            res *= vec[i];
+        }
+    }
+    return res;
+}
