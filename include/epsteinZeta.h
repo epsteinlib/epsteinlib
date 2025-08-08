@@ -76,35 +76,6 @@ double complex epsteinZetaRegDer(double nu, unsigned int dim, const double *a,
                                  const double *x, const double *y,
                                  const unsigned int *alpha);
 
-#ifndef EPSTEIN_CRANDALL
-
-/**
- * @brief Assumes x and y to be in the respective elementary lattice cell.
- * Multiply with exp(2 * PI * i * x * y) to get the second sum in Crandall's
- * @param[in] dim: dimension of the input vectors.
- * @param[in] nu: exponent of the regularized Epstein zeta function.
- * @param[in] z: input vector of the function
- * @param[in] prefactor: prefactor of the vector, e. g. lambda or 1/lambda in
- *      Crandall's formula
- * @return upperGamma(nu/2,pi prefactor * z**2)
- *      / (pi * prefactor z**2)^(nu / 2) in
- */
-double crandall_g(unsigned int dim, double nu, const double *z, double prefactor,
-                  double zArgBound);
-
-/**
- * @brief Calculates the regularization of the zero summand in the second
- * sum in Crandall's formula. That is, the summand for k = 0.
- * @param[in] dim: dimension of the input vectors
- * @param[in] nu: exponent of the regularized Epstein zeta function.
- * @param[in] z: input vector of the function
- * @param[in] prefactor: prefactor of the vector, e. g. lambda
- * @return gamma(nu/2) * gammaStar(nu/2, pi * prefactor * z**2), where
- * gammaStar is the twice regularized lower incomplete gamma function
- * gamma(s,x) / (gamma(s) * x ** s)
- */
-double crandall_gReg(unsigned int dim, double nu, const double *z, double prefactor);
-
 /**
  * @brief Calculates the incomplete bessel function.
  * @param[in] nu: exponent of the function.
@@ -115,6 +86,4 @@ double crandall_gReg(unsigned int dim, double nu, const double *z, double prefac
  */
 double incomplete_bessel_g(double nu, unsigned int dim, const double *k,
                            const double *r);
-
-#endif
 #endif

@@ -23,9 +23,8 @@ from typing import List
 
 import matplotlib.pyplot as plt
 import numpy as np
-from numpy.typing import NDArray
-
 from epsteinlib import epstein_zeta
+from numpy.typing import NDArray
 
 
 def epstein_zeta_dispersion(nu: float, k: NDArray[np.float64]) -> float:

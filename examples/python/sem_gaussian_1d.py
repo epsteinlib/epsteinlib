@@ -30,11 +30,10 @@ from typing import Callable, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
+from epsteinlib import epstein_zeta_reg
 from matplotlib.axes import Axes
 from mpmath import factorial, gamma, hyp1f1
 from numpy.typing import NDArray
-
-from epsteinlib import epstein_zeta_reg
 
 EPS_TAYLOR = 1e-8  # taylor expansion at nu = 1 - 2 EPS in integral and lattice_contribution
 EPS_IS_CLOSE = 1e-12

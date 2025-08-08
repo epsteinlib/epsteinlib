@@ -11,14 +11,13 @@ from typing import Callable
 
 import benchmark_functions as bf
 import numpy as np
-from numpy.typing import NDArray
-
 from epsteinlib import (
     epstein_zeta,
     epstein_zeta_reg,
     prepare_inputs,
     validate_inputs,
 )
+from numpy.typing import NDArray
 
 
 class TestEpsteinZeta(unittest.TestCase):

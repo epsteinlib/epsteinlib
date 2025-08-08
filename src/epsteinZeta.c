@@ -16,11 +16,13 @@
  */
 
 #include <complex.h>
+#include <math.h>
 
+#include "crandall.h"
 #include "epsteinZeta.h"
+#include "gamma.h"
 #include "tools.h"
 #include "zeta.h"
-#include <math.h>
 
 /**
  * @brief calculates the Epstein zeta function.
@@ -100,9 +102,90 @@ double complex epsteinZetaRegDer(double nu, unsigned int dim, const double *a,
 double incomplete_bessel_g(double nu, unsigned int dim, const double *k,
                            const double *r) {
 
+    double eps = 1e-32;
+
     double s = -nu / 2.;
     double x = M_PI * dot(dim, k, k);
     double y = M_PI * dot(dim, r, r);
 
-    return s + x + y;
+    // Vanishing arguments
+    if (x + y < eps) {
+        return s;
+    }
+
+    // Vanishing first argument
+    if (x < eps) {
+        // Lower Crandall function
+        return tgamma(s) * egf_gammaStar(s, y);
+    }
+
+    // Vanishing second argument
+    if (y < eps) {
+        return crandall_g(dim, nu, k, 1., assignzArgBound(nu));
+    }
+
+    // Swap not implemented yet, since K is missing
+    //    // Reflect parameters for upper half-plane
+    //    bool swap = (x + 0.1 < y);
+    //    if (swap) {
+    //        s = -s;
+    //        double z = x;
+    //        x = y;
+    //        y = z;
+    //    }
+
+    double result = 0.0;
+
+    // Choose series expansion close to origin
+    if (x + y < 1.5) {
+        result = pow(x, s) * egf_ugamma(-s, x);
+        unsigned long long fact = 1;
+        for (int j = 1; j <= 20; j++) {
+            fact *= j;
+            result += pow(x, s + j) * egf_ugamma(-s - j, x) * int_pow(-y, j) /
+                      (double)fact;
+        }
+    } else {
+        // Recursive algorithm away from origin
+
+        // Initialize numerators
+        double n1 = 0.0;
+        double n2 = 0.0;
+        double n3 = 1.0;
+
+        // Initialize denominators
+        double d1 = 0.0;
+        double d2 = exp(x + y);
+        double d3 = (x - y + s + 1.0) * d2;
+
+        // Initialize final fraction
+        double N = 0.;
+        double D = 0.;
+
+        for (int j = 2; j <= 100; j++) {
+            N = ((x - y + s + 1 + 2 * (j - 1)) * n3 + (2 * y - s - (j - 1)) * n2 -
+                 y * n1) /
+                (double)j;
+            D = ((x - y + s + 1 + 2 * (j - 1)) * d3 +
+                 ((2 * y - s - (j - 1)) * d2 - y * d1)) /
+                (double)j;
+
+            n1 = n2;
+            n2 = n3;
+            n3 = N;
+
+            d1 = d2;
+            d2 = d3;
+            d3 = D;
+        }
+        result = N / D;
+    }
+
+    //    // Reflect result for upper half-plane
+    //    if (swap) {
+    //        result = 2.0 * pow(x / y, s / 2.0) * bessel_K(-s, 2.0 * sqrt(x * y)) -
+    //        result;
+    //    }
+
+    return result;
 }

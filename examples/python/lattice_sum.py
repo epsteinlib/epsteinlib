@@ -10,7 +10,6 @@ If the library is installed, run with `python lattice_sum.py`.
 
 
 import numpy as np
-
 from epsteinlib import epstein_zeta
 
 

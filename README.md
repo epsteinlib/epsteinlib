@@ -35,12 +35,11 @@ This repo includes a mathematica wrapper, where the incomplete Bessel function i
 GBessel[\[Nu],k,r]
 ```
 
+#### Benchmarks
+![[fig_besselError.png]]
 #### installation
 
 The library can be installed by cloning this repo and following the EpsteinLib installation instructions.
-
-Additionally, the following dependencies need to be installed:
-- todo
 
 # EpsteinLib
 
