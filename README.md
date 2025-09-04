@@ -109,7 +109,7 @@ To ensure numerical stability when evaluating the regularized Epstein zeta funct
 
 ## In Development: Derivatives
 
-EpsteinLib offers the partial derivatives of the set zeta function and the regularized Epstein zeta function with respect to the multi-index $\boldsymbol{\alpha}$ and the vector argument $\boldsymbol y$. 
+EpsteinLib offers the partial derivatives of the set zeta function and the regularized Epstein zeta function with respect to the multi-index $\boldsymbol{\alpha}$ and the vector argument $\boldsymbol y$.
 
 For some multi-index $\boldsymbol{\alpha}$ and $L=\Lambda -\boldsymbol x$, the partial derivatives of the set zeta function are defined as meromorphic continuation of
 
