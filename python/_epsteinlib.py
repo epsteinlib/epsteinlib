@@ -13,7 +13,12 @@ from typing import Any, Union
 
 import cython
 import numpy as np
-from cython.cimports.epsteinlib import epsteinZeta, epsteinZetaReg, setZetaDer
+from cython.cimports.epsteinlib import (
+    epsteinZeta,
+    epsteinZetaReg,
+    epsteinZetaRegDer,
+    setZetaDer,
+)
 from numpy.typing import NDArray
 
 
@@ -317,7 +322,7 @@ def set_zeta_der_c_call(  # pylint: disable=too-many-arguments, too-many-positio
     alpha: cython.uint[::1],
 ) -> complex:
     """
-    Call the C function to calculate the regularized Epstein zeta function.
+    Call the C function to calculate the set zeta function.
     """
     return setZetaDer(  # type: ignore [no-any-return]
         nu,
@@ -346,5 +351,47 @@ def set_zeta_der(
         prepare_inputs_der(nu, A, x, y, alpha)
     )
     return set_zeta_der_c_call(
+        nu_cython, dim, a_cython, x_cython, y_cython, alpha_cython
+    )
+
+
+def epstein_zeta_reg_der_c_call(  # pylint: disable=too-many-arguments, too-many-positional-arguments
+    nu: cython.double,
+    dim: cython.int,
+    a: cython.double[::1],
+    x: cython.double[::1],
+    y: cython.double[::1],
+    alpha: cython.uint[::1],
+) -> complex:
+    """
+    Call the C function to calculate the regularized Epstein zeta function.
+    """
+    return epsteinZetaRegDer(  # type: ignore [no-any-return]
+        nu,
+        dim,
+        cython.address(a[0]),
+        cython.address(x[0]),
+        cython.address(y[0]),
+        cython.address(alpha[0]),
+    )
+
+
+def epstein_zeta_reg_der(
+    nu: Union[float, int],
+    A: NDArray[  # pylint: disable=invalid-name
+        Union[np.integer[Any], np.floating[Any]]
+    ],
+    x: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    y: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    alpha: NDArray[np.integer[Any]],
+) -> complex:
+    """
+    Calculate the derivatives of the regularized Epstein zeta function.
+    """
+    validate_inputs_der(nu, A, x, y, alpha)
+    nu_cython, dim, a_cython, x_cython, y_cython, alpha_cython = (
+        prepare_inputs_der(nu, A, x, y, alpha)
+    )
+    return epstein_zeta_reg_der_c_call(
         nu_cython, dim, a_cython, x_cython, y_cython, alpha_cython
     )

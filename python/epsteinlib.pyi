@@ -87,3 +87,18 @@ def set_zeta_der(
     y: NDArray[Union[np.integer[Any], np.floating[Any]]],
     alpha: NDArray[np.integer[Any]],
 ) -> complex: ...
+def epstein_zeta_reg_der_c_call(
+    nu: cython.double,
+    dim: cython.int,
+    a: cython.double[::1],
+    x: cython.double[::1],
+    y: cython.double[::1],
+    alpha: cython.uint[::1],
+) -> complex: ...
+def epstein_zeta_reg_der(
+    nu: Union[float, int],
+    A: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    x: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    y: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    alpha: NDArray[np.integer[Any]],
+) -> complex: ...
