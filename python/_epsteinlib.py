@@ -13,7 +13,7 @@ from typing import Any, Union
 
 import cython
 import numpy as np
-from cython.cimports.epsteinlib import epsteinZeta, epsteinZetaReg
+from cython.cimports.epsteinlib import epsteinZeta, epsteinZetaReg, setZetaDer
 from numpy.typing import NDArray
 
 
@@ -206,7 +206,7 @@ def prepare_inputs_der(
     NDArray[np.float64],
     NDArray[np.float64],
     NDArray[np.float64],
-    NDArray[np.unsignedinteger],
+    NDArray[np.unsignedinteger[Any]],
 ]:
     """
     Prepare the inputs for the Epstein zeta function calculation.
@@ -223,7 +223,9 @@ def prepare_inputs_der(
     a_out: NDArray[np.float64] = a.astype(np.float64, copy=False)
     x_out: NDArray[np.float64] = x.astype(np.float64, copy=False)
     y_out: NDArray[np.float64] = y.astype(np.float64, copy=False)
-    alpha_out: NDArray[np.integer] = alpha.astype(np.uint32, copy=False)
+    alpha_out: NDArray[np.unsignedinteger[Any]] = alpha.astype(
+        np.uint32, copy=False
+    )
 
     # Ensure arrays are C_CONTIGUOUS
     a_out = np.ascontiguousarray(a_out)
@@ -306,7 +308,7 @@ def epstein_zeta_reg(
     )
 
 
-def set_zeta_der_c_call(
+def set_zeta_der_c_call(  # pylint: disable=too-many-arguments, too-many-positional-arguments
     nu: cython.double,
     dim: cython.int,
     a: cython.double[::1],
@@ -334,7 +336,7 @@ def set_zeta_der(
     ],
     x: NDArray[Union[np.integer[Any], np.floating[Any]]],
     y: NDArray[Union[np.integer[Any], np.floating[Any]]],
-    alpha: NDArray[np.integer],
+    alpha: NDArray[np.integer[Any]],
 ) -> complex:
     """
     Calculate the derivatives of the set zeta function.

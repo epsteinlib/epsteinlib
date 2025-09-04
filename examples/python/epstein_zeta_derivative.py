@@ -14,9 +14,11 @@ from epsteinlib import epstein_zeta, set_zeta_der
 
 def check_epstein_zeta_derivative() -> bool:
     """
-    Calculate derivative of the epstein zeta function by finite differences and compare to the set zeta derivatives as provided by the library.
+    Calculate derivative of the epstein zeta function by finite differences
+    and compare to the set zeta derivatives as provided by the library.
 
-    Note in particular, that set_zeta_der(nu, a, x, y, alpha) is the partial derivative with respect to y and a multi-index alpha of
+    Note in particular, that set_zeta_der(nu, a, x, y, alpha) is the partial
+    derivative with respect to y and a multi-index alpha of
     exp(2 pi i  x y) epstein_zeta(nu, a, x, y)
 
     @return true if the relative_error is smaller than 10**(-10)

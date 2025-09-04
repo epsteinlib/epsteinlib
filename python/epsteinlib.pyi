@@ -44,7 +44,7 @@ def prepare_inputs_der(
     NDArray[np.float64],
     NDArray[np.float64],
     NDArray[np.float64],
-    NDArray[np.unsignedinteger],
+    NDArray[np.unsignedinteger[Any]],
 ]: ...
 def epstein_zeta_c_call(
     nu: cython.double,
@@ -85,5 +85,5 @@ def set_zeta_der(
     A: NDArray[Union[np.integer[Any], np.floating[Any]]],
     x: NDArray[Union[np.integer[Any], np.floating[Any]]],
     y: NDArray[Union[np.integer[Any], np.floating[Any]]],
-    alpha: NDArray[np.integer],
+    alpha: NDArray[np.integer[Any]],
 ) -> complex: ...
