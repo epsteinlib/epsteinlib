@@ -107,24 +107,28 @@ EpsteinZetaReg[\[Nu],A,x,y]
 To ensure numerical stability when evaluating the regularized Epstein zeta function as a function of $\boldsymbol x$, we again implement the following cutoff:
 - If $(\boldsymbol x-\boldsymbol z)^2 < 10^{-64}$ for some $\boldsymbol z \in \Lambda$, we numerically set $\boldsymbol x = \boldsymbol z$.
 
-# In Development: Derivatives
+## In Development: Derivatives
 
-EpsteinLib offers the partial derivatives of the set zeta function and the regularized Epstein zeta function with respect to the multi-index $\boldsymbol{\alpha}$ and the vector argument $\boldsymbol y$. For some multi-index $\boldsymbol{\alpha}$, the partial derivatives of the set zeta function are defined as meromorphic continuation of
+EpsteinLib offers the partial derivatives of the set zeta function and the regularized Epstein zeta function with respect to the multi-index $\boldsymbol{\alpha}$ and the vector argument $\boldsymbol y$. 
+
+For some multi-index $\boldsymbol{\alpha}$ and $L=\Lambda -\boldsymbol x$, the partial derivatives of the set zeta function are defined as meromorphic continuation of
+
+$$
+Z_{L,\nu}^{(\boldsymbol\alpha)}(\boldsymbol y)
+=\sum_{\boldsymbol{z}\in L}{}^{'}
+(-2\pi i\boldsymbol z)^{\boldsymbol\alpha}
+\frac{e^{-2\pi i \boldsymbol{y}\cdot \boldsymbol{z}}}{|\boldsymbol{z}|^{\nu}}
+,\qquad\mathrm{Re}(\nu) > d-|\boldsymbol\alpha|
+$$
+
+to $\nu\in\mathbb C$. Note, that the derivatives of the set zeta function are the derivatives of the Epstein zeta function with respect to $\boldsymbol y$ with a phase factor
+
 $$
 Z_{L, \nu}^{(\boldsymbol\alpha)}(\boldsymbol y)
-	=
-    % \partial^{\boldsymbol\alpha}_{\boldsymbol y}
-    \sum_{\boldsymbol{z}\in (\Lambda-\boldsymbol x)}\!\!\!\!\!{}^{'}
-    (-2\pi i\boldsymbol z)^{\boldsymbol\alpha}
-    \frac{e^{-2\pi i \boldsymbol{y}\cdot \boldsymbol{z}}}{|\boldsymbol{z}|^{\nu}}
-	,\qquad\operatorname{Re}(\nu) > d-|\boldsymbol\alpha|
-$$
-to $\nu\in\mathbb C$. Note, that the derivatives of the set zeta function are the derivatives of the Epstein zeta function with respect to $\boldsymbol y$ with a phase factor
-$$Z_{L, \nu}^{(\boldsymbol\alpha)}(\boldsymbol y)
-=
-\partial^{\boldsymbol\alpha}_{\boldsymbol y}
+=\partial_{\boldsymbol y}^{\boldsymbol\alpha}
 \Big(e^{2\pi i \boldsymbol x \cdot\boldsymbol y}Z_{\Lambda,\nu}\begin{vmatrix} \boldsymbol x \newline\boldsymbol y \end{vmatrix} \Big).
 $$
+
 The derivatives of the set zeta function are implemented in this library as
 ```c
 double complex setZetaDer(double nu, unsigned int dim, const double *A, const double *x, const double *y, const unsigned int *alpha);
@@ -145,11 +149,12 @@ SetZetaDer[\[Nu],A,x,y,\[alpha]]
 ```
 
 In addition, the library includes the partial derivatives of the regularized Epstein zeta function
+
 $$
 Z_{\Lambda,\nu}^{\mathrm{reg},(\boldsymbol{\alpha})}\begin{vmatrix} \boldsymbol x \newline\boldsymbol y \end{vmatrix}
-=
-\partial^{\boldsymbol\alpha}_{\boldsymbol y}Z_{\Lambda,\nu}^{\mathrm{reg}}\begin{vmatrix} \boldsymbol x \newline\boldsymbol y \end{vmatrix}
+=\partial_{\boldsymbol y}^{\boldsymbol\alpha}Z_{\Lambda,\nu}^{\mathrm{reg}}\begin{vmatrix} \boldsymbol x \newline\boldsymbol y \end{vmatrix}
 $$
+
 who are implemented in this library as
 ```c
 double complex epsteinZetaRegDer(double nu, unsigned int dim, const double *A, const double *x, const double *y, const unsigned int *alpha);
@@ -168,6 +173,7 @@ In the Mathematica package, it is implemented as
 ```mathematica
 EpsteinZetaRegDer[\[Nu],A,x,y,\[alpha]]
 ```
+
 ## Installation
 Install our required dependencies: meson, ninja, pkg-config, python3 e.g. with
 ```bash
