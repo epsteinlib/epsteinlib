@@ -9,6 +9,14 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 # Changelog
 
+## [0.5.1] - unreleased
+
+### Added
+
+### Fixed
+- Introduced variable `zArgBoundReci` analogous to `zArgBound` for arguments `dim - NU` instead of `NU` in reciprocal sums in `zeta.c`
+- Bounds for asymptotic expansion changed to guarantee precision of $10^{-18}$ instead of $10^{-16}$
+
 ## [0.5.0] - 2025-07-10
 
 ### Added

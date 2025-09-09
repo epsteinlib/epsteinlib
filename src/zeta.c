@@ -281,6 +281,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         res = NAN;
     } else {
         double zArgBound = assignzArgBound(nu);
+        double zArgBoundReci = assignzArgBound(dim - nu);
         double complex s1;
         double complex s2;
         double complex nc;
@@ -296,12 +297,12 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             nc = crandall_gReg(dim, dim - nu, y_t1, lambda);
             rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
             s2 = sum_fourier(nu, dim, lambda, m_fourier, x_t1, y_t2, cutoffsFourier,
-                             zArgBound);
+                             zArgBoundReci);
             // correct wrong zero summand in regularized fourier sum.
             if (!equals(dim, y_t1, y_t2)) {
-                s2 += crandall_g(dim, dim - nu, y_t2, lambda, zArgBound) *
+                s2 += crandall_g(dim, dim - nu, y_t2, lambda, zArgBoundReci) *
                           cexp(-2 * M_PI * I * dot(dim, x_t1, y_t2)) -
-                      crandall_g(dim, dim - nu, y_t1, lambda, zArgBound) *
+                      crandall_g(dim, dim - nu, y_t1, lambda, zArgBoundReci) *
                           cexp(-2 * M_PI * I * dot(dim, x_t1, y_t1));
             }
             s2 = s2 * rot + nc;
@@ -311,12 +312,12 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             xfactor = 1;
         } else {
             // calculate non regularized Epstein zeta function values.
-            nc = crandall_g(dim, dim - nu, y_t2, lambda, zArgBound) *
+            nc = crandall_g(dim, dim - nu, y_t2, lambda, zArgBoundReci) *
                  cexp(-2 * M_PI * I * dot(dim, x_t2, y_t2));
             s1 = sum_real(nu, dim, lambda, m_real, x_t2, y_t2, cutoffsReal,
                           zArgBound);
             s2 = sum_fourier(nu, dim, lambda, m_fourier, x_t2, y_t2, cutoffsFourier,
-                             zArgBound) +
+                             zArgBoundReci) +
                  nc;
         }
         res = xfactor * pow(lambda * lambda / M_PI, -nu / 2.) / tgamma(nu / 2.) *
