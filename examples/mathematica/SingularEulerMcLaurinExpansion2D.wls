@@ -70,17 +70,11 @@ SetOptions[MaTeX,FontSize->18];
 
 
 (* ::Text:: *)
-(*Compiled Sum		\!\(\**)
-(*SubscriptBox["\[Sum]", *)
-(*RowBox[{*)
-(*RowBox[{"(", *)
-(*RowBox[{*)
-(*SubscriptBox["y", *)
-(*RowBox[{"1", ","}]], *)
-(*SubscriptBox["y", "2"]}], ")"}], "\[Element]", *)
-(*SuperscriptBox[*)
-(*TemplateBox[{},*)
-(*"Integers"], "2"]}]]\( *)
+(*Compiled Sum \!\( *)
+(*\*SubscriptBox[\(\[Sum]\), \(\(( *)
+(*\*SubscriptBox[\(y\), \(\(1\)\(,\)\)] *)
+(*\*SubscriptBox[\(y\), \(2\)])\) \[Element] *)
+(*\*SuperscriptBox[\(Integers\), \(2\)]\)]\( *)
 (*\*SuperscriptBox[\(( *)
 (*\*SuperscriptBox[\(( *)
 (*\*SubscriptBox[\(y\), \(1\)] - *)
@@ -88,9 +82,9 @@ SetOptions[MaTeX,FontSize->18];
 (*\*SuperscriptBox[\(( *)
 (*\*SubscriptBox[\(y\), \(2\)] - *)
 (*\*SubscriptBox[\(x\), \(2\)])\), \(2\)])\), \(\(-\[Nu]\)/2\)] *)
-(*\*SuperscriptBox[\(e\), \(\(-\(\[Pi]( *)
+(*\*SuperscriptBox[\(e\), \(\(-\(\[Pi] \(( *)
 (*\*SubsuperscriptBox[\(y\), \(1\), \(2\)] + *)
-(*\*SubsuperscriptBox[\(y\), \(2\), \(2\)])\)\)/*)
+(*\*SubsuperscriptBox[\(y\), \(2\), \(2\)])\)\)\)/*)
 (*\*SuperscriptBox[\(\[Sigma]\), \(2\)]\)]\)\)*)
 
 
@@ -118,7 +112,7 @@ Sum2D[{x1_,x2_},\[Nu]_,\[Sigma]_,lim_:100]:=Sum2DCompiled[N[x1],N[x2],N[\[Nu]],N
 
 
 (* ::Text:: *)
-(*Analytic expression for the integral		 \!\( *)
+(*Analytic expression for the integral \!\( *)
 (*\*SubsuperscriptBox[\(\[Integral]\), \(-\[Infinity]\), \(\[Infinity]\)]\( *)
 (*\*SuperscriptBox[\(( *)
 (*\*SuperscriptBox[\(( *)
@@ -127,11 +121,11 @@ Sum2D[{x1_,x2_},\[Nu]_,\[Sigma]_,lim_:100]:=Sum2DCompiled[N[x1],N[x2],N[\[Nu]],N
 (*\*SuperscriptBox[\(( *)
 (*\*SubscriptBox[\(y\), \(2\)] - *)
 (*\*SubscriptBox[\(x\), \(2\)])\), \(2\)])\), \(\(-\[Nu]\)/2\)] *)
-(*\*SuperscriptBox[\(e\), \(\(-\(\[Pi]( *)
+(*\*SuperscriptBox[\(e\), \(\(-\(\[Pi] \(( *)
 (*\*SubsuperscriptBox[\(y\), \(1\), \(2\)] + *)
-(*\*SubsuperscriptBox[\(y\), \(2\), \(2\)])\)\)/*)
-(*\*SuperscriptBox[\(\[Sigma]\), \(2\)]\)] \[DifferentialD]\ *)
-(*\*SubscriptBox[\(y\), \(1\)] \[DifferentialD]\ *)
+(*\*SubsuperscriptBox[\(y\), \(2\), \(2\)])\)\)\)/*)
+(*\*SuperscriptBox[\(\[Sigma]\), \(2\)]\)] \[DifferentialD]*)
+(*\*SubscriptBox[\(y\), \(1\)] \[DifferentialD]*)
 (*\*SubscriptBox[\(y\), \(2\)]\)\)*)
 
 
@@ -139,9 +133,9 @@ Integral2D[{x1_,x2_},\[Nu]_,\[Sigma]_]:=\[Pi]^(\[Nu]/2) (\[Sigma]^2)^(1-\[Nu]/2)
 
 
 (* ::Text:: *)
-(*Analytic expression for the partial derivatives of the gaussian	 e^(-\[Pi](\!\( *)
+(*Analytic expression for the partial derivatives of the gaussian e^(-((\[Pi] (\!\( *)
 (*\*SubsuperscriptBox[\(y\), \(1\), \(2\)] + *)
-(*\*SubsuperscriptBox[\(y\), \(2\), \(2\)]\))/\[Sigma]^2)*)
+(*\*SubsuperscriptBox[\(y\), \(2\), \(2\)]\)))/\[Sigma]^2))*)
 
 
 Gaussian2D[{y1_,y2_},\[Sigma]_]=Exp[-((\[Pi] (y1^2+y2^2))/\[Sigma]^2)];
