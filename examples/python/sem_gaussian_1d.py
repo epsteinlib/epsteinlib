@@ -274,6 +274,7 @@ def plot_right(
     x_values: NDArray[np.float64],
     diff1: NDArray[np.float64],
     diff2: Union[NDArray[np.float64], None],
+    diff4: Union[NDArray[np.float64], None],
 ) -> None:
     """Plot the right subplot with error analysis."""
     ax.semilogy(
@@ -299,6 +300,19 @@ def plot_right(
             markeredgecolor="b",
             label="|Sum - SEM (order 2)|",
         )
+    if diff4 is not None:
+        ax.semilogy(
+            x_values,
+            diff4,
+            "g-",
+            linewidth=2,
+            marker="s",
+            markersize=4,
+            markerfacecolor="none",
+            markeredgecolor="g",
+            label="|Sum - SEM (order 4)|",
+        )
+
 
     ax.set_xlabel("x")
     ax.set_ylabel("Minimum of absolute and relative error")
@@ -345,15 +359,25 @@ if __name__ == "__main__":
         ]
     )
 
-    # Calculate and plot sem_order_2 if NU0 != 1
+    # Calculate second order sem vaues
     sem_order_2_values = np.array([sem(xx, NU0, SIGMA0, 2) for xx in x])
-
     diff_order_2 = np.array(
         [
             min_abs_rel_error(s, s2)
             for s, s2 in zip(sum_func_values, sem_order_2_values)
         ]
     )
+
+    # Calculate fourth order sem vaues
+    sem_order_4_values = np.array([sem(xx, NU0, SIGMA0, 4) for xx in x])
+    diff_order_4 = np.array(
+        [
+            min_abs_rel_error(s, s4)
+            for s, s4 in zip(sum_func_values, sem_order_4_values)
+        ]
+    )
+ 
+
     # Plot left and right subplots
     plot_data = {
         "integral": integral_values,
@@ -361,7 +385,7 @@ if __name__ == "__main__":
         "sem_order_0": sem_order_0_values,
     }
     plot_left(ax1, x, plot_data, NU0)
-    plot_right(ax2, x, diff_order_0, diff_order_2)
+    plot_right(ax2, x, diff_order_0, diff_order_2, diff_order_4)
 
     plt.tight_layout()
     plt.show()
