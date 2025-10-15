@@ -26,7 +26,7 @@ errors for the specified nu value.
 
 
 import argparse
-from typing import Any, Callable, Union
+from typing import Callable, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -161,7 +161,7 @@ def lattice_contribution(
             lambda nu: lattice_contribution(x_val, nu, sigma, order), nu0
         )
 
-    def epstein_zeta_reg_wrapper(y: float, alpha: np.integer[Any]) -> float:
+    def epstein_zeta_reg_wrapper(y: float, alpha: int) -> float:
         return float(
             np.real(
                 epstein_zeta_reg_der(
@@ -313,7 +313,6 @@ def plot_right(
             label="|Sum - SEM (order 4)|",
         )
 
-
     ax.set_xlabel("x")
     ax.set_ylabel("Minimum of absolute and relative error")
     ax.set_title("Error Analysis: |Sum - SEM|")
@@ -359,7 +358,7 @@ if __name__ == "__main__":
         ]
     )
 
-    # Calculate second order sem vaues
+    # Calculate second order sem values
     sem_order_2_values = np.array([sem(xx, NU0, SIGMA0, 2) for xx in x])
     diff_order_2 = np.array(
         [
@@ -368,7 +367,7 @@ if __name__ == "__main__":
         ]
     )
 
-    # Calculate fourth order sem vaues
+    # Calculate fourth order sem values
     sem_order_4_values = np.array([sem(xx, NU0, SIGMA0, 4) for xx in x])
     diff_order_4 = np.array(
         [
@@ -376,7 +375,6 @@ if __name__ == "__main__":
             for s, s4 in zip(sum_func_values, sem_order_4_values)
         ]
     )
- 
 
     # Plot left and right subplots
     plot_data = {
