@@ -21,12 +21,12 @@ The script generates plots comparing the different approximations and their
 errors for the specified nu value.
 """
 
-# SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
+# SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
 # SPDX-License-Identifier: AGPL-3.0-only
 
 
 import argparse
-from typing import Callable, Union
+from typing import Any, Callable, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -34,7 +34,7 @@ from matplotlib.axes import Axes
 from mpmath import factorial, gamma, hyp1f1
 from numpy.typing import NDArray
 
-from epsteinlib import epstein_zeta_reg
+from epsteinlib import epstein_zeta_reg_der
 
 EPS_TAYLOR = 1e-8  # taylor expansion at nu = 1 - 2 EPS in integral and lattice_contribution
 EPS_IS_CLOSE = 1e-12
@@ -161,14 +161,15 @@ def lattice_contribution(
             lambda nu: lattice_contribution(x_val, nu, sigma, order), nu0
         )
 
-    def epstein_zeta_reg_wrapper(y: float) -> float:
+    def epstein_zeta_reg_wrapper(y: float, alpha: np.integer[Any]) -> float:
         return float(
             np.real(
-                epstein_zeta_reg(
+                epstein_zeta_reg_der(
                     nu,
                     np.array([[1.0]]),
                     np.array([0.0]),
                     np.array([np.double(y)]),
+                    np.array([alpha]),
                 )
             )
         )
@@ -178,12 +179,7 @@ def lattice_contribution(
             sum(
                 (1 / factorial(j))
                 * (1j / (2 * np.pi)) ** j
-                * finite_differences(
-                    epstein_zeta_reg_wrapper,
-                    0,
-                    j,
-                    j + 1,
-                )
+                * epstein_zeta_reg_wrapper(0, j)
                 * gaussian_derivative(x_val, sigma, j)
                 for j in range(0, order + 1, 2)
             )
@@ -350,17 +346,14 @@ if __name__ == "__main__":
     )
 
     # Calculate and plot sem_order_2 if NU0 != 1
-    if NU0 == 1:
-        diff_order_2: Union[NDArray[np.float64], None] = None
-    else:
-        sem_order_2_values = np.array([sem(xx, NU0, SIGMA0, 2) for xx in x])
+    sem_order_2_values = np.array([sem(xx, NU0, SIGMA0, 2) for xx in x])
 
-        diff_order_2 = np.array(
-            [
-                min_abs_rel_error(s, s2)
-                for s, s2 in zip(sum_func_values, sem_order_2_values)
-            ]
-        )
+    diff_order_2 = np.array(
+        [
+            min_abs_rel_error(s, s2)
+            for s, s2 in zip(sum_func_values, sem_order_2_values)
+        ]
+    )
     # Plot left and right subplots
     plot_data = {
         "integral": integral_values,
