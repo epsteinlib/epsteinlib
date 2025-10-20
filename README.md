@@ -1,4 +1,4 @@
-<!--
+<!-
 SPDX-FileCopyrightText: 2025 Andreas Buchheit <buchheit@num.uni-sb.de>
 SPDX-FileCopyrightText: 2025 Jan Schmitz <schmitz@num.uni-sb.de>
 SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
@@ -230,7 +230,6 @@ In the `examples/python/` folder, you can find two more Python examples:
 These examples, along with the `lattice_sum.py` script, provide a comprehensive overview of how to use EpsteinLib in various scenarios.
 
 
-
 ### in Mathematica
 
 ```mathematica
@@ -258,6 +257,38 @@ In the `examples/mathematica/` folder, you can find two more mathematica example
 
 1. `BenchmarkQuick.wls`: Standalone script that compares the (regularized) Epstein zeta function to known formulas in special cases.
 2. `BenchmarkAndPaperFigures.wls`: Script  that reproduces every figure in [8].
+
+### in Julia
+
+```julia
+using Pkg
+
+Pkg.add(url="https://github.com/JuliaBinaryWrappers/Epsteinlib_jll.jl.git")
+using Epsteinlib_jll, Printf
+
+madelung_ref = -1.7475645946331821906362120355443974
+nu, dim = 1.0, UInt32(3)
+A = [1.0 0.0 0.0;
+     0.0 1.0 0.0;
+     0.0 0.0 1.0] |> vec
+x = [0.0, 0.0, 0.0]
+y = [0.5, 0.5, 0.5]
+
+madelung = ccall((:epsteinZeta, Epsteinlib_jll.libepstein),
+                 ComplexF64,
+                 (Cdouble, Cuint, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cdouble}),
+                 nu, dim, A, x, y)
+
+println("Madelung sum:\t", real(madelung))
+println("Reference:\t", madelung_ref)
+@printf("Relative error:\t +%.2e\n", abs(madelung_ref - real(madelung))/abs(madelung_ref))
+
+exit(abs(madelung_ref - real(madelung))/abs(madelung_ref) > 1e-14 ? 1 : 0)
+```
+
+The [Julia wrapper](https://github.com/JuliaBinaryWrappers/Epsteinlib_jll.jl) by [dgomezcastro](https://github.com/dgomezcastro) allows direct use of EpsteinLib from Julia and can be run independently of our build system.
+
+
 
 ## Development environment
 We provide a nix devshell to have a reproducible development environment with the same dependencies across different operating systems. Once you have installed and configured nix, starting developing is as easy as running `nix develop`.
