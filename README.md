@@ -261,10 +261,9 @@ In the `examples/mathematica/` folder, you can find two more mathematica example
 ### in Julia
 
 ```julia
-using Pkg
-
-Pkg.add(url="https://github.com/JuliaBinaryWrappers/Epsteinlib_jll.jl.git")
-using Epsteinlib_jll, Printf
+using Pkg; Pkg.add("Epsteinlib_jll")
+using Epsteinlib_jll
+using Printf
 
 madelung_ref = -1.7475645946331821906362120355443974
 nu, dim = 1.0, UInt32(3)

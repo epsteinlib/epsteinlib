@@ -25,10 +25,7 @@
 #   Ruben Gutendorf
 ##
 
-using Pkg
-Pkg.activate(temp=true)
-Pkg.add(url="https://github.com/JuliaBinaryWrappers/Epsteinlib_jll.jl.git")
-
+using Pkg; Pkg.add("Epsteinlib_jll")
 using Epsteinlib_jll
 using Printf
 
