@@ -1,4 +1,4 @@
-<!-
+<!--
 SPDX-FileCopyrightText: 2025 Andreas Buchheit <buchheit@num.uni-sb.de>
 SPDX-FileCopyrightText: 2025 Jan Schmitz <schmitz@num.uni-sb.de>
 SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
