@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['sum_5ffourier_0',['sum_fourier',['../zeta_8c.html#a23f1e34460959966704420c4c69af3d3',1,'zeta.c']]],
-  ['sum_5freal_1',['sum_real',['../zeta_8c.html#aff681fec488c4a77e615158ff027472a',1,'zeta.c']]]
+  ['recommended_0',['Nix based - recommended',['../index.html#autotoc_md10',1,'']]],
+  ['references_1',['References',['../index.html#autotoc_md13',1,'']]],
+  ['rights_2',['Nix-Portable based - if you do not have root rights',['../index.html#autotoc_md11',1,'']]],
+  ['root_20rights_3',['Nix-Portable based - if you do not have root rights',['../index.html#autotoc_md11',1,'']]]
 ];

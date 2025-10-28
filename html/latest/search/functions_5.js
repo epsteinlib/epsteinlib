@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['matrix_5fintvector_0',['matrix_intVector',['../tools_8c.html#a1ceb5734431f141fb42d8282173e4df9',1,'matrix_intVector(unsigned int dim, const double *m, const int *v, double *res):&#160;tools.c'],['../tools_8h.html#a1ceb5734431f141fb42d8282173e4df9',1,'matrix_intVector(unsigned int dim, const double *m, const int *v, double *res):&#160;tools.c']]]
+  ['finite_5fdifferences_0',['finite_differences',['../namespacesem__gaussian__1d.html#aa5a79f719328d7e567e811fae70aea73',1,'sem_gaussian_1d']]],
+  ['finite_5fdifferences_5fcoefficients_1',['finite_differences_coefficients',['../namespacesem__gaussian__1d.html#a9c17b7e7c896754641d7932bba131386',1,'sem_gaussian_1d']]],
+  ['freetestresources_2',['freeTestResources',['../test__epsteinZeta_8c.html#a59d546683809f9964b872ad32baeeaab',1,'test_epsteinZeta.c']]]
 ];

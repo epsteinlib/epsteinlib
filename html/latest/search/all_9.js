@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['nix_20installation_20instructions_0',['Nix installation instructions',['../index.html#autotoc_md10',1,'']]]
+  ['hermite_5fnumber_0',['hermite_number',['../namespacesem__gaussian__1d.html#ab83b37d0605a572dcd25ca6cfa3e9fdc',1,'sem_gaussian_1d']]]
 ];

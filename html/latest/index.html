@@ -168,7 +168,7 @@ System-wide installation</summary>
 <p>Meson supports a system-wide installation of the compiled library. After that, you can use <code>#include &lt;epsteinZeta.h&gt;</code> and link the library with <code>gcc -lepsteinZeta</code>. This may require superuser rights.</p>
 <ol type="1">
 <li>To install system-wide: <code>meson install -C build</code>.</li>
-<li>Try to compile the sample program in <code>test/lattice_sum.c</code> with the command <code>gcc -o lattice_sum lattice_sum.c -lm -lepsteinZeta</code>. You may encounter the problem that the shared library cannot be found. In this case, you need to modify the environment variables. Please continue with the next step. Otherwise, you are done.</li>
+<li>Try to compile the sample program in <code>test/lattice_sum.c</code> with the command <code>gcc -o <a class="el" href="namespacelattice__sum.html">lattice_sum</a> <a class="el" href="lattice__sum_8c.html" title="Calculates the Madelung constant.">lattice_sum.c</a> -lm -lepsteinZeta</code>. You may encounter the problem that the shared library cannot be found. In this case, you need to modify the environment variables. Please continue with the next step. Otherwise, you are done.</li>
 <li>Update the environment variables to correctly locate the shared library at runtime. You can find <code>/path/to/library</code> in the output given by <code>meson install</code>. <div class="fragment"><div class="line"># Linux</div>
 <div class="line">export \f$LD_LIBRARY_PATH=\f$LD_LIBRARY_PATH:/path/to/library</div>
 <div class="line"> </div>
@@ -185,7 +185,7 @@ Local installation</summary>
 <li>Copy the header <code>include/epsteinZeta.h</code> and move the compiled library <code>build/src/libepsteinZeta.so</code> to places of your choice, e. g. <div class="fragment"><div class="line">cp include/epsteinZeta.h /your/path/to/include</div>
 <div class="line">mv build/src/libepsteinZeta.so /your/path/to/library</div>
 </div><!-- fragment --></li>
-<li>To test your library, try to compile <code>test/lattice_sum.c</code> with the command <code>gcc -o lattice_sum lattice_sum.c -lm -L/your/path/to/library -lepsteinZeta -I/your/path/to/include</code>.</li>
+<li>To test your library, try to compile <code>test/lattice_sum.c</code> with the command <code>gcc -o <a class="el" href="namespacelattice__sum.html">lattice_sum</a> <a class="el" href="lattice__sum_8c.html" title="Calculates the Madelung constant.">lattice_sum.c</a> -lm -L/your/path/to/library -lepsteinZeta -I/your/path/to/include</code>.</li>
 </ol>
 <p></p>
 </details>

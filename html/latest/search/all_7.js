@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['library_0',['Epstein Zeta Library',['../index.html',1,'']]],
-  ['library_20and_20the_20python_20wrapper_20with_20meson_1',['Installing the C library and the Python wrapper with meson',['../index.html#autotoc_md3',1,'']]]
+  ['finite_5fdifferences_0',['finite_differences',['../namespacesem__gaussian__1d.html#aa5a79f719328d7e567e811fae70aea73',1,'sem_gaussian_1d']]],
+  ['finite_5fdifferences_5fcoefficients_1',['finite_differences_coefficients',['../namespacesem__gaussian__1d.html#a9c17b7e7c896754641d7932bba131386',1,'sem_gaussian_1d']]],
+  ['freetestresources_2',['freeTestResources',['../test__epsteinZeta_8c.html#a59d546683809f9964b872ad32baeeaab',1,'test_epsteinZeta.c']]]
 ];

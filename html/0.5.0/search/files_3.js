@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['tools_2ec_0',['tools.c',['../tools_8c.html',1,'']]],
-  ['tools_2eh_1',['tools.h',['../tools_8h.html',1,'']]]
+  ['lattice_5fsum_2ec_0',['lattice_sum.c',['../lattice__sum_8c.html',1,'']]]
 ];

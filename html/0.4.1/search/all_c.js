@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['only_20the_20python_20wrapper_20with_20pip_0',['Installing only the Python wrapper with pip',['../index.html#autotoc_md2',1,'']]]
+  ['nix_20based_20recommended_0',['Nix based - recommended',['../index.html#autotoc_md10',1,'']]],
+  ['nix_20portable_20based_20if_20you_20do_20not_20have_20root_20rights_1',['Nix-Portable based - if you do not have root rights',['../index.html#autotoc_md11',1,'']]],
+  ['not_20have_20root_20rights_2',['Nix-Portable based - if you do not have root rights',['../index.html#autotoc_md11',1,'']]]
 ];

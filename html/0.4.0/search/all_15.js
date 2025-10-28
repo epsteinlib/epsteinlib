@@ -1,6 +1,4 @@
 var searchData=
 [
-  ['zeta_20library_0',['Epstein Zeta Library',['../index.html',1,'']]],
-  ['zeta_2ec_1',['zeta.c',['../zeta_8c.html',1,'']]],
-  ['zeta_2eh_2',['zeta.h',['../zeta_8h.html',1,'']]]
+  ['you_20do_20not_20have_20root_20rights_0',['Nix-Portable based - if you do not have root rights',['../index.html#autotoc_md11',1,'']]]
 ];

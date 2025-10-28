@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['g_5fbound_0',['G_BOUND',['../zeta_8c.html#ae8a0935369fce9a01debea96528bdea6',1,'zeta.c']]],
-  ['gamma_2ec_1',['gamma.c',['../gamma_8c.html',1,'']]],
-  ['gamma_2eh_2',['gamma.h',['../gamma_8h.html',1,'']]]
+  ['finite_5fdifferences_0',['finite_differences',['../namespacesem__gaussian__1d.html#aa5a79f719328d7e567e811fae70aea73',1,'sem_gaussian_1d']]],
+  ['finite_5fdifferences_5fcoefficients_1',['finite_differences_coefficients',['../namespacesem__gaussian__1d.html#a9c17b7e7c896754641d7932bba131386',1,'sem_gaussian_1d']]]
 ];

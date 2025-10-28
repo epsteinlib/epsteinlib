@@ -1,4 +1,7 @@
 var searchData=
 [
-  ['you_20do_20not_20have_20root_20rights_0',['Nix-Portable based - if you do not have root rights',['../index.html#autotoc_md11',1,'']]]
+  ['with_20meson_0',['Installing the C library and the Python wrapper with meson',['../index.html#autotoc_md3',1,'']]],
+  ['with_20pip_1',['Installing only the Python wrapper with pip',['../index.html#autotoc_md2',1,'']]],
+  ['wrapper_20with_20meson_2',['Installing the C library and the Python wrapper with meson',['../index.html#autotoc_md3',1,'']]],
+  ['wrapper_20with_20pip_3',['Installing only the Python wrapper with pip',['../index.html#autotoc_md2',1,'']]]
 ];

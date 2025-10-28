@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['with_20meson_0',['Installing the C library and the Python wrapper with meson',['../index.html#autotoc_md3',1,'']]],
-  ['with_20pip_1',['Installing only the Python wrapper with pip',['../index.html#autotoc_md2',1,'']]],
-  ['wrapper_20with_20meson_2',['Installing the C library and the Python wrapper with meson',['../index.html#autotoc_md3',1,'']]],
-  ['wrapper_20with_20pip_3',['Installing only the Python wrapper with pip',['../index.html#autotoc_md2',1,'']]]
+  ['validate_5finputs_0',['validate_inputs',['../namespace__epsteinlib.html#a23023363cf479a3ee8db4c55a83a2d2c',1,'_epsteinlib']]],
+  ['vectorproj_1',['vectorProj',['../zeta_8c.html#a527140d834111cb62939bb08885cc47b',1,'zeta.c']]],
+  ['view_20api_20documentation_2',['View api documentation',['../index.html#autotoc_md4',1,'']]]
 ];

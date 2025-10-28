@@ -1,6 +1,9 @@
 var searchData=
 [
-  ['nix_20based_20recommended_0',['Nix based - recommended',['../index.html#autotoc_md10',1,'']]],
-  ['nix_20portable_20based_20if_20you_20do_20not_20have_20root_20rights_1',['Nix-Portable based - if you do not have root rights',['../index.html#autotoc_md11',1,'']]],
-  ['not_20have_20root_20rights_2',['Nix-Portable based - if you do not have root rights',['../index.html#autotoc_md11',1,'']]]
+  ['main_0',['main',['../lattice__sum_8c.html#ae66f6b31b5ad750f1fe042a706a4e3d4',1,'main():&#160;lattice_sum.c'],['../namespacedispersion__relation__3d.html#a32203103d36a57068883600593fb92d3',1,'dispersion_relation_3d.main()']]],
+  ['mathematica_1',['in Mathematica',['../index.html#autotoc_md8',1,'']]],
+  ['matrix_5fintvector_2',['matrix_intVector',['../tools_8c.html#a1ceb5734431f141fb42d8282173e4df9',1,'matrix_intVector(unsigned int dim, const double *m, const int *v, double *res):&#160;tools.c'],['../tools_8h.html#a1ceb5734431f141fb42d8282173e4df9',1,'matrix_intVector(unsigned int dim, const double *m, const int *v, double *res):&#160;tools.c']]],
+  ['meson_3',['Installing the C library and the Python wrapper with meson',['../index.html#autotoc_md3',1,'']]],
+  ['min_5fabs_5frel_5ferror_4',['min_abs_rel_error',['../namespacesem__gaussian__1d.html#ae77844fe0fc81aff40e5cd0bc35d32bc',1,'sem_gaussian_1d']]],
+  ['min_5ferrors_5fabs_5ferror_5frel_5',['min_errors_abs_error_rel',['../namespacebenchmark__functions.html#af9c1a521dd3cdd0f57b9aab255da721b',1,'benchmark_functions']]]
 ];

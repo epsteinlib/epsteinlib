@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['validate_5finputs_0',['validate_inputs',['../namespace__epsteinlib.html#a6cfa226625e23ec0b53a91d3dadc6aa0',1,'_epsteinlib']]],
-  ['vectorproj_1',['vectorProj',['../zeta_8c.html#a527140d834111cb62939bb08885cc47b',1,'zeta.c']]]
+  ['lattice_5fcontribution_0',['lattice_contribution',['../namespacesem__gaussian__1d.html#a828ca51e48c05e2918f8c03539496feb',1,'sem_gaussian_1d']]]
 ];
