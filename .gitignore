@@ -6,6 +6,10 @@
 *.out
 build/*
 
+# include single testlog file to compare errors between branches
+!build/meson-logs/
+!build/meson-logs/testlog.junit.xml
+
 .pre-commit-config.yaml
 
 # doxygen
