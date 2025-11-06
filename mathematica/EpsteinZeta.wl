@@ -188,7 +188,7 @@ If[libPath =!= $Failed &&
 	EpsteinZeta[\[Nu], A, x, y]
 	EpsteinZetaReg[\[Nu], A, x, y]
 	SetZetaDer[\[Nu], A, x, y, \[Alpha]]
-	EpsteinZetaReg[\[Nu], A, x, y, \[Alpha]]
+	EpsteinZetaRegDer[\[Nu], A, x, y, \[Alpha]]
 
 	\[Nu] is a real number
 	A is a square matrix
