@@ -524,13 +524,13 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     // apply correction to matrix scaling if nu = d + 2k
     unsigned int k = (unsigned int)fmax(0., nearbyint((nu - (double)dim) / 2));
     if ((variant == 1 || variant == 3) && (nu == (dim + 2 * (double)k))) {
-        if (k) {
-            if (alphaAbs) {
-                res -= pow(M_PI, (double)k + ((double)dim / 2)) /
-                       tgamma((double)k + ((double)dim / 2)) * int_pow(-1, k + 1) *
-                       polynomial_y_der(k, dim, y, alpha, alphaAbs, k) *
-                       log(ms * ms) / vol;
-            } else {
+        if (alphaAbs) {
+            res -= pow(M_PI, (double)k + ((double)dim / 2)) /
+                   tgamma((double)k + ((double)dim / 2)) * int_pow(-1, k + 1) *
+                   polynomial_y_der(k, dim, y, alpha, alphaAbs, k) * log(ms * ms) /
+                   vol;
+        } else {
+            if (k) {
                 double ySquared = 0;
                 for (int i = 0; i < dim; i++) {
                     ySquared += y[i] * y[i];
@@ -540,10 +540,10 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                        tgamma((double)k + ((double)dim / 2)) * int_pow(-1, k + 1) /
                        tgamma((double)k + 1) * int_pow(ySquared, k) * log(ms * ms) /
                        vol;
+            } else {
+                res += pow(M_PI, (double)dim / 2) / tgamma((double)dim / 2) *
+                       log(ms * ms) / vol;
             }
-        } else {
-            res += pow(M_PI, (double)dim / 2) / tgamma((double)dim / 2) *
-                   log(ms * ms) / vol;
         }
     }
     return res;
