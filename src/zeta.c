@@ -16,6 +16,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include <stdio.h>
+
 #include "crandall.h"
 #include "tools.h"
 
@@ -521,22 +523,34 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     free(x_t2);
     free(y_t2);
     res *= pow(ms, nu);
+    printf("potato: %.16lf \n", (double) creal(res) );
     // apply correction to matrix scaling if nu = d + 2k
     double k = fmax(0., nearbyint((nu - (double)dim) / 2));
-    if ((variant == 1) && (nu == (dim + 2 * k))) {
+    if ((variant == 1 || variant == 3) && (nu == (dim + 2 * k))) {
+        printf("check\n");
         if (k == 0) {
             res += pow(M_PI, (double)dim / 2) / tgamma((double)dim / 2) *
                    log(ms * ms) / vol;
         } else {
+        printf("check\n");
             double ySquared = 0;
             for (int i = 0; i < dim; i++) {
                 ySquared += y[i] * y[i];
             }
+            if (alphaAbs){
+            res -= pow(M_PI, k + ((double)dim / 2)) /
+                   tgamma(k + ((double)dim / 2)) * pow(-1, k + 1) / tgamma(k + 1) 
+                   * polynomial_y_der((unsigned int) k, dim, y, alpha, alphaAbs, 1) 
+                   * log(ms * ms) / vol;
+                   // check if y or y and if k or n or something 
+            } else {
             res -= pow(M_PI, (2 * k) + ((double)dim / 2)) /
                    tgamma(k + ((double)dim / 2)) * pow(-1, k + 1) / tgamma(k + 1) *
                    pow(ySquared, k) * log(ms * ms) / vol;
+            }
         }
     }
+    printf("potato: %.16lf \n", (double) creal(res) );
     return res;
 }
 #undef G_BOUND
