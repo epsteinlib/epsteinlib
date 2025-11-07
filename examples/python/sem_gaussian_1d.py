@@ -3,25 +3,46 @@ Singular Euler-Maclaurin (SEM) expansion for a Gaussian function in 1D.
 
 This script demonstrates the application of the Singular Euler-Maclaurin
 expansion to a Gaussian function in one dimension. It calculates and compares
-the integral, sum, and SEM approximations for various orders.
+the integral, sum, and SEM approximations for various orders:
 
-Features:
-- Calculates and plots integral, sum, and SEM approximations
-- Compares SEM approximations of different orders
-- Provides error analysis between sum and SEM approximations
+    sum = ∑_{y ∈ ℤ, y ≠ x} g(y) / |y − x|^ν
+    integral = ∫_{y ∈ ℝ} g(y) / |y − x|^ν dy
+    SEM(order) ≈ sum − integral
+
+We skip the summand y = x so that the sum is well-defined. Here, g denotes the Gaussian:
+
+    g(y) = exp(−π y² / σ²)
+
+We choose σ = 100 to ensure fast convergence of the direct sum. The integral is calculated via:
+
+    integral = 2^ν (σ² / π)^(1 − ν⁄2) Γ(1 − ν) Γ(ν⁄2) ₁F₁(ν⁄2, ½, −(π x² / σ²)) sin(π ν⁄2)
+
+where ₁F₁ is the confluent hypergeometric function and Γ is the Gamma function. In cases where ν
+is a non-negative integer or a negative even integer, the integral is calculated by extrapolating
+from nearby ν-values.
+
+The SEM of some order is calculated as:
+
+    SEM(order) = ∑_{α ∈ {0, 2, …, order}} 1 / (α! (−2πi)^|α|) Z_{Λ,ν}^{reg,(α)}{x}{y=0} g^{(α)}(x)
+
+similar to equation (8) in (*), where (α) denotes differentiation with respect to y, and the
+derivatives of the regularized Epstein zeta function are computed using finite differences.
+
+(*): Andreas A. Buchheit et al. “Exact Continuum Representation of Long-range Interacting Systems
+and Emerging Exotic Phases in Unconventional Superconductors”, Phys. Rev. Research 5, 043065 (2023)
 
 Usage:
     python sem_gaussian_1d.py [--nu NU]
 
 Arguments:
-    --nu NU    Optional. Set the value of nu for calculations. Default is 1.5.
+    --nu NU    Optional. Set the value of ν for calculations. Default is 1.5.
                Example: python sem_gaussian_1d.py --nu 1
 
 The script generates plots comparing the different approximations and their
-errors for the specified nu value.
+errors for the specified ν value.
 """
 
-# SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
+# SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
 # SPDX-License-Identifier: AGPL-3.0-only
 
 
