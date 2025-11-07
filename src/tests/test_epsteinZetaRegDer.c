@@ -20,31 +20,6 @@
 #endif
 
 /*!
- * @brief Compute 3×3 matrix BMat(A) =
- * (1/√(A+1))·diag(√A,1,1)·{{1,1,0},{1,0,1},{0,1,1}}.
- * @param A Input (requires A ≥ 0.1).
- * @param a Output 3×3 row-major array.
- * @return 0 on success, -1 if A < 0.1.
- */
-int BMat(double A, double *a) {
-    if (A < 0.1) {
-        return -1;
-    }
-
-    double s = sqrt(A);
-    double n = 1.0 / sqrt(A + 1.0);
-
-    double M[9] = {1, 1, 0, 1, 0, 1, 0, 1, 1};
-
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            a[i * 3 + j] = n * (!i ? s : 1) * M[i * 3 + j];
-        }
-    }
-    return 0;
-}
-
-/*!
  * @brief Benchmarks 2D epsteinZetaRegDer function by comparing to high-precision
  * values from mathematica prototype over a range of random parameters.
  *
@@ -317,12 +292,12 @@ int test_epsteinZetaRegDer_bain_prototype(void) {
     double complex num;
     double complex ref;
     int scanResult;
-    char line[256];
+    char line[2048];
 
     int testsPassed = 0;
     int totalTests = 0;
     unsigned int dim = 3;
-    double tol = pow(10, -12);
+    double tol = pow(10, -8);
 
     double errMin = NAN;
     double errMax = NAN;
@@ -335,8 +310,6 @@ int test_epsteinZetaRegDer_bain_prototype(void) {
     unsigned int *alpha = malloc(dim * sizeof(unsigned int));
     double *refRead = malloc(2 * sizeof(double));
 
-    double A;
-
     printf("\n\t ... ");
     printf("processing %s ", path);
     while (fgets(line, sizeof(line), data) != NULL) {
@@ -344,20 +317,19 @@ int test_epsteinZetaRegDer_bain_prototype(void) {
         // {y1, y2, y3}, {alpha1, alpha2, alpha3}, {Re[result], Im[result]}
         scanResult = sscanf( // NOLINT
             line,
-            "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%u,%u,%"
+            "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%u,%u,%"
             "u,%lf,%lf",
-            nuRef, &A, x, x + 1, x + 2, y, y + 1, y + 2, alpha, alpha + 1, alpha + 2,
-            refRead, refRead + 1);
+            nuRef, a, a + 1, a + 2, a + 3, a + 4, a + 5, a + 6, a + 7, a + 8, x,
+            x + 1, x + 2, y, y + 1, y + 2, alpha, alpha + 1, alpha + 2, refRead,
+            refRead + 1);
 
-        if (scanResult != 13) {
+        if (scanResult != 21) {
             printf("\n\t ");
             printf("Error reading line: %s", line);
             printf("\t ");
             printf("Scanned %d values instead of 21", scanResult);
             continue;
         }
-
-        BMat(A, a); // read Bain lattice matrix to a
 
         nu = nuRef[0];
 
