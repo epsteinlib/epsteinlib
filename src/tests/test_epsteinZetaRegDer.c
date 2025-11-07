@@ -20,6 +20,31 @@
 #endif
 
 /*!
+ * @brief Compute 3×3 matrix BMat(A) =
+ * (1/√(A+1))·diag(√A,1,1)·{{1,1,0},{1,0,1},{0,1,1}}.
+ * @param A Input (requires A ≥ 0.1).
+ * @param a Output 3×3 row-major array.
+ * @return 0 on success, -1 if A < 0.1.
+ */
+int BMat(double A, double *a) {
+    if (A < 0.1) {
+        return -1;
+    }
+
+    double s = sqrt(A);
+    double n = 1.0 / sqrt(A + 1.0);
+
+    double M[9] = {1, 1, 0, 1, 0, 1, 0, 1, 1};
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            a[i * 3 + j] = n * (!i ? s : 1) * M[i * 3 + j];
+        }
+    }
+    return 0;
+}
+
+/*!
  * @brief Benchmarks 2D epsteinZetaRegDer function by comparing to high-precision
  * values from mathematica prototype over a range of random parameters.
  *
@@ -102,11 +127,11 @@ int test_epsteinZetaRegDer_prototype(void) {
             printf("\n\n");
             printf("Warning! ");
             printf("epsteinZetaRegDer: ");
-            printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
+            printf(" %0*.16lf %+.16lf I (this implementation)\n\t\t\t   ≠ "
                    "%.16lf "
                    "%+.16lf I (reference implementation)\n",
                    4, creal(num), cimag(num), creal(ref), cimag(ref));
-            printf("Min(Emax, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
+            printf("Min(Emax, Erel):\t     %E !< %E  (tolerance)\n", errorMaxAbsRel,
                    tol);
             printf("\n");
             printf("nu:\t\t %.16lf\n", nu);
@@ -225,11 +250,140 @@ int test_epsteinZetaRegDer_d2k_prototype(void) {
             printf("\n\n");
             printf("Warning! ");
             printf("epsteinZetaRegDer: ");
-            printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
+            printf(" %0*.16lf %+.16lf I (this implementation)\n\t\t\t   ≠ "
                    "%.16lf "
                    "%+.16lf I (reference implementation)\n",
                    4, creal(num), cimag(num), creal(ref), cimag(ref));
-            printf("Min(Emax, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
+            printf("Min(Emax, Erel):\t     %E !< %E  (tolerance)\n", errorMaxAbsRel,
+                   tol);
+            printf("\n");
+            printf("nu:\t\t %.16lf\n", nu);
+            printMatrixUnitTest("a:", a, dim);
+            printVectorUnitTest("x:\t\t", x, dim);
+            printVectorUnitTest("y:\t\t", y, dim);
+            printMultiindexUnitTest("alpha:\t\t", alpha, dim);
+            printf("\n");
+        }
+        totalTests++;
+    }
+
+    free(nuRef);
+    free(a);
+    free(x);
+    free(y);
+    free(alpha);
+    free(refRead);
+
+    if (fclose(data) != 0) {
+        return fprintf(stderr, "Error closing file: %d", errno);
+    }
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
+           tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
+
+    return totalTests - testsPassed;
+}
+
+/*!
+ * @brief Benchmarks 3D epsteinZetaRegDer function by comparing to high-precision
+ * values from mathematica prototype over a range of random parameters along the Bain
+ * path.
+ *
+ * @return number of failed tests.
+ * */
+int test_epsteinZetaRegDer_bain_prototype(void) {
+    printf("%s ", __func__);
+    char path[MAX_PATH_LENGTH];
+    int result = snprintf(path, sizeof(path),
+                          "%s/epsteinZetaRegDer_bain_prototype_Ref.csv", // NOLINT
+                          BASE_PATH);
+    if (result < 0 || result >= sizeof(path)) {
+        return fprintf(stderr, "Error creating file path\n");
+    }
+    FILE *data = fopen(path, "r");
+    if (data == NULL) {
+        return fprintf(stderr, "Error opening file: %s\n", path);
+    }
+
+    double nu;
+    double errorAbs;
+    double errorRel;
+    double errorMaxAbsRel;
+    double complex num;
+    double complex ref;
+    int scanResult;
+    char line[256];
+
+    int testsPassed = 0;
+    int totalTests = 0;
+    unsigned int dim = 3;
+    double tol = pow(10, -12);
+
+    double errMin = NAN;
+    double errMax = NAN;
+    double errSum = 0.;
+
+    double *nuRef = malloc(sizeof(double));
+    double *a = malloc((unsigned long)dim * (unsigned long)dim * sizeof(double));
+    double *x = malloc(dim * sizeof(double));
+    double *y = malloc(dim * sizeof(double));
+    unsigned int *alpha = malloc(dim * sizeof(unsigned int));
+    double *refRead = malloc(2 * sizeof(double));
+
+    double A;
+
+    printf("\n\t ... ");
+    printf("processing %s ", path);
+    while (fgets(line, sizeof(line), data) != NULL) {
+        // Scan: nu, A (for Bain lattice matrix), {x1, x2, x3},
+        // {y1, y2, y3}, {alpha1, alpha2, alpha3}, {Re[result], Im[result]}
+        scanResult = sscanf( // NOLINT
+            line,
+            "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%u,%u,%"
+            "u,%lf,%lf",
+            nuRef, &A, x, x + 1, x + 2, y, y + 1, y + 2, alpha, alpha + 1, alpha + 2,
+            refRead, refRead + 1);
+
+        if (scanResult != 13) {
+            printf("\n\t ");
+            printf("Error reading line: %s", line);
+            printf("\t ");
+            printf("Scanned %d values instead of 21", scanResult);
+            continue;
+        }
+
+        BMat(A, a); // read Bain lattice matrix to a
+
+        nu = nuRef[0];
+
+        num = epsteinZetaRegDer(nu, dim, a, x, y, alpha);
+        ref = refRead[0] + refRead[1] * I;
+
+        errorAbs = errAbs(ref, num);
+        errorRel = errRel(ref, num);
+
+        errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
+
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
+            printf("\n\n");
+            printf("Warning! ");
+            printf("epsteinZetaRegDer: ");
+            printf(" %0*.16lf %+.16lf I (this implementation)\n\t\t\t   ≠ "
+                   "%.16lf "
+                   "%+.16lf I (reference implementation)\n",
+                   4, creal(num), cimag(num), creal(ref), cimag(ref));
+            printf("Min(Emax, Erel):\t     %E !< %E  (tolerance)\n", errorMaxAbsRel,
                    tol);
             printf("\n");
             printf("nu:\t\t %.16lf\n", nu);
@@ -396,6 +550,7 @@ int main() {
     int failed = 0;
     failed += test_epsteinZetaRegDer_prototype();
     failed += test_epsteinZetaRegDer_d2k_prototype();
+    failed += test_epsteinZetaRegDer_bain_prototype();
     failed += test_epsteinZetaRegDer_taylor();
     return failed;
 }
