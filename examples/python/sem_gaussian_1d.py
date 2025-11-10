@@ -3,25 +3,45 @@ Singular Euler-Maclaurin (SEM) expansion for a Gaussian function in 1D.
 
 This script demonstrates the application of the Singular Euler-Maclaurin
 expansion to a Gaussian function in one dimension. It calculates and compares
-the integral, sum, and SEM approximations for various orders.
+the integral, sum, and SEM approximations for various orders:
 
-Features:
-- Calculates and plots integral, sum, and SEM approximations
-- Compares SEM approximations of different orders
-- Provides error analysis between sum and SEM approximations
+    sum = ∑_{y ∈ ℤ, y ≠ x} g(y) / |y − x|^ν
+    integral = ∫_{y ∈ ℝ} g(y) / |y − x|^ν dy
+    SEM(order) ≈ sum − integral
+
+We skip the summand y = x so that the sum is well-defined. Here, g denotes the Gaussian:
+
+    g(y) = exp(−π y² / σ²)
+
+We choose σ = 100 to ensure fast convergence of the direct sum. The integral is calculated via:
+
+    integral = 2^ν (σ² / π)^(1 − ν⁄2) Γ(1 − ν) Γ(ν⁄2) ₁F₁(ν⁄2, ½, −(π x² / σ²)) sin(π ν⁄2)
+
+where ₁F₁ is the confluent hypergeometric function and Γ is the Gamma function. In cases where ν
+is a non-negative integer or a negative even integer, the integral is calculated by extrapolating
+from nearby ν-values.
+
+The SEM of some order is calculated as:
+
+    SEM(order) = ∑_{α ∈ {0, 2, …, order}} 1 / (α! (−2πi)^|α|) Z_{Λ,ν}^{reg,(α)}{x}{y=0} g^{(α)}(x)
+
+similar to equation (8) in (*), where (α) denotes differentiation with respect to y.
+
+(*): Andreas A. Buchheit et al. “Exact Continuum Representation of Long-range Interacting Systems
+and Emerging Exotic Phases in Unconventional Superconductors”, Phys. Rev. Research 5, 043065 (2023)
 
 Usage:
     python sem_gaussian_1d.py [--nu NU]
 
 Arguments:
-    --nu NU    Optional. Set the value of nu for calculations. Default is 1.5.
+    --nu NU    Optional. Set the value of ν for calculations. Default is 1.5.
                Example: python sem_gaussian_1d.py --nu 1
 
 The script generates plots comparing the different approximations and their
-errors for the specified nu value.
+errors for the specified ν value.
 """
 
-# SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
+# SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
 # SPDX-License-Identifier: AGPL-3.0-only
 
 
@@ -34,7 +54,7 @@ from matplotlib.axes import Axes
 from mpmath import factorial, gamma, hyp1f1
 from numpy.typing import NDArray
 
-from epsteinlib import epstein_zeta_reg
+from epsteinlib import epstein_zeta_reg_der
 
 EPS_TAYLOR = 1e-8  # taylor expansion at nu = 1 - 2 EPS in integral and lattice_contribution
 EPS_IS_CLOSE = 1e-12
@@ -161,14 +181,15 @@ def lattice_contribution(
             lambda nu: lattice_contribution(x_val, nu, sigma, order), nu0
         )
 
-    def epstein_zeta_reg_wrapper(y: float) -> float:
+    def epstein_zeta_reg_wrapper(y: float, alpha: int) -> float:
         return float(
             np.real(
-                epstein_zeta_reg(
+                epstein_zeta_reg_der(
                     nu,
                     np.array([[1.0]]),
                     np.array([0.0]),
                     np.array([np.double(y)]),
+                    np.array([alpha]),
                 )
             )
         )
@@ -178,12 +199,7 @@ def lattice_contribution(
             sum(
                 (1 / factorial(j))
                 * (1j / (2 * np.pi)) ** j
-                * finite_differences(
-                    epstein_zeta_reg_wrapper,
-                    0,
-                    j,
-                    j + 1,
-                )
+                * epstein_zeta_reg_wrapper(0, j)
                 * gaussian_derivative(x_val, sigma, j)
                 for j in range(0, order + 1, 2)
             )
@@ -278,6 +294,7 @@ def plot_right(
     x_values: NDArray[np.float64],
     diff1: NDArray[np.float64],
     diff2: Union[NDArray[np.float64], None],
+    diff4: Union[NDArray[np.float64], None],
 ) -> None:
     """Plot the right subplot with error analysis."""
     ax.semilogy(
@@ -302,6 +319,18 @@ def plot_right(
             markerfacecolor="none",
             markeredgecolor="b",
             label="|Sum - SEM (order 2)|",
+        )
+    if diff4 is not None:
+        ax.semilogy(
+            x_values,
+            diff4,
+            "g-",
+            linewidth=2,
+            marker="s",
+            markersize=4,
+            markerfacecolor="none",
+            markeredgecolor="g",
+            label="|Sum - SEM (order 4)|",
         )
 
     ax.set_xlabel("x")
@@ -349,18 +378,24 @@ if __name__ == "__main__":
         ]
     )
 
-    # Calculate and plot sem_order_2 if NU0 != 1
-    if NU0 == 1:
-        diff_order_2: Union[NDArray[np.float64], None] = None
-    else:
-        sem_order_2_values = np.array([sem(xx, NU0, SIGMA0, 2) for xx in x])
+    # Calculate second order sem values
+    sem_order_2_values = np.array([sem(xx, NU0, SIGMA0, 2) for xx in x])
+    diff_order_2 = np.array(
+        [
+            min_abs_rel_error(s, s2)
+            for s, s2 in zip(sum_func_values, sem_order_2_values)
+        ]
+    )
 
-        diff_order_2 = np.array(
-            [
-                min_abs_rel_error(s, s2)
-                for s, s2 in zip(sum_func_values, sem_order_2_values)
-            ]
-        )
+    # Calculate fourth order sem values
+    sem_order_4_values = np.array([sem(xx, NU0, SIGMA0, 4) for xx in x])
+    diff_order_4 = np.array(
+        [
+            min_abs_rel_error(s, s4)
+            for s, s4 in zip(sum_func_values, sem_order_4_values)
+        ]
+    )
+
     # Plot left and right subplots
     plot_data = {
         "integral": integral_values,
@@ -368,7 +403,7 @@ if __name__ == "__main__":
         "sem_order_0": sem_order_0_values,
     }
     plot_left(ax1, x, plot_data, NU0)
-    plot_right(ax2, x, diff_order_0, diff_order_2)
+    plot_right(ax2, x, diff_order_0, diff_order_2, diff_order_4)
 
     plt.tight_layout()
     plt.show()
