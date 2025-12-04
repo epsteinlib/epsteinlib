@@ -257,7 +257,7 @@ using Pkg; Pkg.add("EpsteinLib") # Stable release (recommended)
 ```
 The Julia wrapper is developed in a separate repository ([epsteinlib/EpsteinLib.jl](https://github.com/epsteinlib/EpsteinLib.jl)) by Jonathan K. Busse (@JoKaBus) and David Gómez-Castro (@dgomezcastro).
 
-The following example then computes the Madelung constant to machine precision
+The following example in `examples/julia/lattice_sum.jl` computes the Madelung constant to machine precision
 ```julia
 using EpsteinLib, Printf
 
