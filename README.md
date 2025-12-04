@@ -50,6 +50,16 @@ def epstein_zeta(
     y: NDArray[Union[np.integer[Any], np.floating[Any]]],
 ) -> complex
 ```
+In the Julia package as
+```julia
+epsteinzeta(ν::Float64, A::Matrix{Float64}, x::Vector{Float64}, y::Vector{Float64})::Complex{Float64}
+```
+and with optional keyword arguments as
+```julia
+epsteinzeta(ν; d, A, x, y)
+```
+where at least one of the arguments `d`, `x`, `y`, or `A` must be provided. By default, `x` and `y` are zero vectors of length `d`, and `A` is the `d × d` identity matrix.
+
 In the Mathematica package, it is implemented as
 ```mathematica
 EpsteinZeta[\[Nu],A,x,y]
@@ -98,7 +108,15 @@ def epstein_zeta_reg(
     y: NDArray[Union[np.integer[Any], np.floating[Any]]],
 ) -> complex
 ```
-
+in the Julia package as
+```julia
+epsteinzetareg(ν::Float64, A::Matrix{Float64}, x::Vector{Float64}, y::Vector{Float64})::Complex{Float64}
+```
+and with optional keyword arguments as
+```julia
+epsteinzetareg(ν; d, A, x, y)
+```
+with defaults for `x`, `y`, and `A` identical to those used in `epsteinzeta`,
 and in the Mathematica package as
 ```mathematica
 EpsteinZetaReg[\[Nu],A,x,y]
@@ -229,6 +247,40 @@ In the `examples/python/` folder, you can find two more Python examples:
 
 These examples, along with the `lattice_sum.py` script, provide a comprehensive overview of how to use EpsteinLib in various scenarios.
 
+### in Julia
+
+The library can be installed independently of our build system with
+
+```julia
+using Pkg; Pkg.add("EpsteinLib") # Stable release (recommended)
+
+# Development / latest GitHub version (optional)
+# Pkg.add(url="https://github.com/epsteinlib/EpsteinLib.jl")
+```
+The Julia wrapper is developed in a separate repository ([epsteinlib/EpsteinLib.jl](https://github.com/epsteinlib/EpsteinLib.jl)) by Jonathan K. Busse (@JoKaBus) and David Gómez-Castro (@dgomezcastro).
+
+The following example then computes the Madelung constant to machine precision
+```julia
+using EpsteinLib, Printf
+
+ν = 1.0
+A = [1.0 0.0 0.0;
+     0.0 1.0 0.0;
+     0.0 0.0 1.0]
+x = [0.0, 0.0, 0.0]
+y = [0.5, 0.5, 0.5]
+
+# Calculate Madelung constant
+madelung = epsteinzeta(ν, A, x, y)
+
+# Reference value and relative error
+madelung_ref = -1.7475645946331821906362120355443974
+relerr = abs(madelung_ref - real(madelung)) / abs(madelung_ref)
+
+println("Madelung sum in 3 dimensions:\t", real(madelung))
+println("Reference value:\t\t", madelung_ref)
+@printf("Relative error:\t\t\t +%.2e\n", relerr)
+```
 
 
 ### in Mathematica
