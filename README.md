@@ -247,39 +247,7 @@ In the `examples/python/` folder, you can find two more Python examples:
 
 ### in Julia
 
-The library can be installed independently of our build system with
-
-```julia
-using Pkg; Pkg.add("EpsteinLib") # Stable release (recommended)
-
-# Development / latest GitHub version (optional)
-# Pkg.add(url="https://github.com/epsteinlib/EpsteinLib.jl")
-```
-The Julia wrapper is developed in a separate repository ([epsteinlib/EpsteinLib.jl](https://github.com/epsteinlib/EpsteinLib.jl)) by [David Gómez-Castro](https://github.com/dgomezcastro) and [Jonathan K. Busse](https://github.com/JoKaBus).
-
-The following example in `examples/julia/lattice_sum.jl` computes the Madelung constant to machine precision
-```julia
-using EpsteinLib, Printf
-
-ν = 1.0
-A = [1.0 0.0 0.0;
-     0.0 1.0 0.0;
-     0.0 0.0 1.0]
-x = [0.0, 0.0, 0.0]
-y = [0.5, 0.5, 0.5]
-
-# Calculate Madelung constant
-madelung = epsteinzeta(ν, A, x, y)
-
-# Reference value and relative error
-madelung_ref = -1.7475645946331821906362120355443974
-relerr = abs(madelung_ref - real(madelung)) / abs(madelung_ref)
-
-println("Madelung sum in 3 dimensions:\t", real(madelung))
-println("Reference value:\t\t", madelung_ref)
-@printf("Relative error:\t\t\t +%.2e\n", relerr)
-```
-
+The Julia library `EpsteinLib.jl` by [David Gómez-Castro](https://github.com/dgomezcastro) and [Jonathan K. Busse](https://github.com/JoKaBus) can be used independently of our build system. A minimal example computing the Madelung constant is available in `examples/julia/lattice_sum.jl`, and installation instructions can be found in the [repository](https://github.com/epsteinlib/EpsteinLib.jl).
 
 ### in Mathematica
 
