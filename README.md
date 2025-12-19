@@ -50,7 +50,7 @@ def epstein_zeta(
     y: NDArray[Union[np.integer[Any], np.floating[Any]]],
 ) -> complex
 ```
-In the Julia package as
+In the Julia package, it is implemented as
 ```julia
 epsteinzeta(ν::Float64, A::Matrix{Float64}, x::Vector{Float64}, y::Vector{Float64})::Complex{Float64}
 ```
