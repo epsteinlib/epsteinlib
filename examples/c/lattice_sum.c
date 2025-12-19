@@ -9,7 +9,7 @@
  * @file lattice_sum.c
  * @brief Calculates the Madelung constant.
  *
- * Minimal working example for the Epstein Zeta Library.
+ * Minimal working example for the Epstein zeta Library.
  * If the library is installed, compile with `gcc -o lattice_sum lattice_sum.c
  * -lm -lepsteinZeta` If the library is not installed, compile with `gcc -o
  * lattice_sum lattice_sum.c -lm -L/path/to/library -lepsteinZeta
