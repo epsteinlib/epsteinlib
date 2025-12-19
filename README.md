@@ -247,7 +247,7 @@ In the `examples/python/` folder, you can find two more Python examples:
 
 ### in Julia
 
-The Julia library `EpsteinLib.jl` by [David Gómez-Castro](https://github.com/dgomezcastro) and [Jonathan K. Busse](https://github.com/JoKaBus) can be used independently of our build system. A minimal example computing the Madelung constant is available in `examples/julia/lattice_sum.jl`, and installation instructions can be found in the [repository](https://github.com/epsteinlib/EpsteinLib.jl).
+The Julia wrapper `EpsteinLib.jl` by [David Gómez-Castro](https://github.com/dgomezcastro) and [Jonathan K. Busse](https://github.com/JoKaBus) can be used independently of our build system. A minimal example computing the Madelung constant is available in `examples/julia/lattice_sum.jl`, and installation instructions can be found in the [repository](https://github.com/epsteinlib/EpsteinLib.jl).
 
 ### in Mathematica
 
