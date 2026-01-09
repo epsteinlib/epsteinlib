@@ -1,17 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<testsuites tests="7" errors="0" failures="0"><testsuite name="epsteinlib" tests="7" errors="0" failures="0" skipped="0" time="0.014666318893432617"><testcase name="test_crandall" classname="epsteinlib" time="0.014666318893432617"><system-out>test_crandall_g 
-	 ... processing csv/crandall_g_Ref.csv 
-	 ... 200 out of 200 tests passed with tolerance 1.000000E-13.	    [ Error →  min: 0.000000E+00 | max: 1.128955E-14 | avg: 1.307951E-16 ]</system-out></testcase><testcase name="Minimal working example" classname="epsteinlib" time="0.005872488021850586"><system-out>Madelung sum in 3 dimensions:	 -1.7475645946331821
-Reference value:		 -1.7475645946331821
-Relative error:			 +0.00e+00</system-out></testcase><testcase name="test_epsteinZeta" classname="epsteinlib" time="0.05266094207763672"><system-out>test_epsteinZeta_epsteinZetaReg 
-	 ... processing csv/epsteinZeta_Ref.csv 
-	 ... 300 out of 300 tests passed with tolerance 1.000000E-13.	    [ Error →  min: 0.000000E+00 | max: 1.822089E-15 | avg: 2.766178E-16 ]
-	 ... processing file: csv/epsteinZetaReg_Ref.csv 
-	 ... 200 out of 200 tests passed with tolerance 1.000000E-13.	    [ Error →  min: 0.000000E+00 | max: 1.133043E-15 | avg: 1.747445E-16 ]
-test_epsteinZeta_epsteinZetaReg_represent_as_each_other 
-	 ... 200 out of 200 tests passed with tolerance 1.000000E-14.	    [ Error →  min: 0.000000E+00 | max: 9.424515E-16 | avg: 1.707986E-16 ]
-test_epsteinZeta_cutoff 
-	 ... 100 out of 100 tests passed with tolerance 1.000000E-15.</system-out></testcase><testcase name="test_crandall_derivatives" classname="epsteinlib" time="0.12883687019348145"><system-out>start test_polynomial_p 
+<testsuites tests="1" errors="0" failures="0"><testsuite name="epsteinlib" tests="1" errors="0" failures="0" skipped="0" time="0.1163337230682373"><testcase name="test_crandall_derivatives" classname="epsteinlib" time="0.1163337230682373"><system-out>start test_polynomial_p 
 	 ... processing csv/polynomial_p_Ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.007550E-15 | avg: 2.450517E-16 ]
 test_polynomial_l 
@@ -20,6 +8,9 @@ test_polynomial_l
 test_polynomial_y_der 
 	 ... processing csv/polynomial_y_der_Ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-13.	    [ Error →  min: 0.000000E+00 | max: 1.115866E-15 | avg: 1.656990E-16 ]
+test_coeffs_c_inner 
+	 ... processing csv/coeffs_c_inner_Ref.csv 
+	 ... 999 out of 999 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 0.000000E+00 | avg: 0.000000E+00 ]
 test_log_l_der 
 	 ... processing csv/log_l_der_Ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-12.	    [ Error →  min: 0.000000E+00 | max: 7.521929E-13 | avg: 1.453859E-14 ]
@@ -40,36 +31,6 @@ test_crandall_g_der_taylor
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-14.	    [ Error →  min: 0.000000E+00 | max: 7.490270E-15 | avg: 3.891047E-16 ]
 test_crandall_gReg_der_taylor 
 	 ... generating test values
-	 ... 100 out of 100 tests passed with tolerance 1.000000E-14.	    [ Error →  min: 0.000000E+00 | max: 7.880421E-16 | avg: 1.069885E-16 ]</system-out></testcase><testcase name="test_epsteinlib" classname="epsteinlib" time="2.243485450744629"><system-err>.................
-----------------------------------------------------------------------
-Ran 17 tests in 2.099s
-
-OK</system-err></testcase><testcase name="test_epsteinZetaRegDer" classname="epsteinlib" time="2.9304051399230957"><system-out>test_epsteinZetaRegDer_prototype 
-	 ... processing csv/epsteinZetaRegDer_prototype_Ref.csv 
-	 ... 100 out of 100 tests passed with tolerance 5.000000E-12.	    [ Error →  min: 6.795859E-18 | max: 2.446785E-13 | avg: 7.393677E-15 ]
-test_epsteinZetaRegDer_d2k_prototype 
-	 ... processing csv/epsteinZetaRegDer_d2k_prototype_Ref.csv 
-	 ... 100 out of 100 tests passed with tolerance 1.000000E-11.	    [ Error →  min: 6.370986E-19 | max: 3.539860E-13 | avg: 9.142323E-15 ]
-test_epsteinZetaRegDer_bain_prototype 
-	 ... processing csv/epsteinZetaRegDer_bain_prototype_Ref.csv 
-	 ... 12 out of 12 tests passed with tolerance 5.000000E-08.	    [ Error →  min: 4.755118E-16 | max: 2.147164E-09 | avg: 1.962444E-10 ]
-test_epsteinZetaRegDer_taylor 
-	 ... generating test values
-	 ... 100 out of 100 tests passed with tolerance 5.000000E-12.	    [ Error →  min: 0.000000E+00 | max: 2.074108E-15 | avg: 1.713415E-16 ]</system-out></testcase><testcase name="test_setZetaDer" classname="epsteinlib" time="3.0108425617218018"><system-out>test_setZetaDer1D 
-	 ... processing csv/setZetaDer_1D_Ref.csv 
-	 ... 100 out of 100 tests passed with tolerance 1.000000E-12.	    [ Error →  min: 0.000000E+00 | max: 7.237383E-13 | avg: 1.490323E-14 ]
-test_setZetaDer_prototype 
-	 ... processing csv/setZetaDer_prototype_Ref.csv 
-	 ... 100 out of 100 tests passed with tolerance 1.000000E-12.	    [ Error →  min: 5.610934E-17 | max: 7.704835E-14 | avg: 6.167269E-15 ]
-test_setZetaDer_taylor 
-	 ... generating test values
-	 ... 100 out of 100 tests passed with tolerance 5.000000E-12.	    [ Error →  min: 2.775558E-17 | max: 3.136952E-12 | avg: 5.016291E-14 ]
-test_setZetaDer_directional 
-	 ... processing csv/setZetaDer_directional_Ref.csv 
-	 ... 100 out of 100 tests passed with tolerance 1.000000E-08.	    [ Error →  min: 1.652427E-14 | max: 9.304462E-09 | avg: 1.101408E-10 ]
-test_setZetaDer_odd 
-	 ... processing csv/setZetaDer_odd_Ref.csv 
-	 ... 100 out of 100 tests passed with tolerance 1.000000E-10.	    [ Error →  min: 1.547104E-19 | max: 4.317303E-12 | avg: 2.563570E-13 ]
-test_setZetaDer_laplace 
-	 ... processing csv/setZetaDer_laplace_Ref.csv 
-	 ... 100 out of 100 tests passed with tolerance 1.000000E-13.	    [ Error →  min: 9.412197E-23 | max: 1.300723E-14 | avg: 9.190204E-16 ]</system-out></testcase></testsuite></testsuites>
+	 ... 100 out of 100 tests passed with tolerance 1.000000E-14.	    [ Error →  min: 0.000000E+00 | max: 7.880421E-16 | avg: 1.069885E-16 ]</system-out><system-err>libgcov profiling error:/home/buss_jn/learning/programming/c/epsteinlib/build/src/libepstein.so.p/epsteinZeta.c.gcda:Version mismatch - expected 13.3 (release) (B33*) got 11.4 (release) (B14*)
+libgcov profiling error:/home/buss_jn/learning/programming/c/epsteinlib/build/src/libepstein.so.p/gamma.c.gcda:Version mismatch - expected 13.3 (release) (B33*) got 11.4 (release) (B14*)
+libgcov profiling error:/home/buss_jn/learning/programming/c/epsteinlib/build/src/libepstein.so.p/.._mathematica_zeta_mathematica.c.gcda:Version mismatch - expected 13.3 (release) (B33*) got 11.4 (release) (B14*)</system-err></testcase></testsuite></testsuites>

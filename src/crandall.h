@@ -98,6 +98,34 @@ double complex crandall_g_der(unsigned int dim, double nu, const double *z,
                               double prefactor, double zArgBound,
                               const unsigned int *alpha, unsigned int alphaAbs);
 
+/** @brief scalar coefficients defined by cₙ,₀,₀＝1 and
+ * cₙ,ᵢ,ₖ＝2ⁱ ∏ⱼ₌₁ⁱ(2n＋d−2−4k−2j) for i≥k.
+ * @param[in] n: index (total of alpha).
+ * @param[in] i: index (total of beta).
+ * @param[in] k: index (specifies degree |alpha| - 2k).
+ * @param[in] dim: dimension of the zeta function inputs.
+ * @return cₙ,ᵢ,ₖ.
+ */
+double coeffs_c_inner(long long n, long long i, long long k, long long dim);
+
+/** @brief Computes a single summand of h_inner; explicitly
+ * (−1)^{i} / cₙ,ᵢ,ₖ binom(i+k,k) binom(i,β) binom(α,θ₁) θ₂! / (θ₂ - θ₁)!,
+ * where n=|α|, i=|β|, θ₁=α+β−γ, θ₂=γ−β, θ₃=2γ−α−2β.
+ * @param[in] n: index (total of alpha).
+ * @param[in] i: index (total of beta).
+ * @param[in] k: index (specifies degree |alpha| - 2k).
+ * @param[in] dim: dimension of the multi-indices.
+ * @param[in] beta: lower multi-index β.
+ * @param[in] alpha: upper multi-index α.
+ * @param[in] theta1: multi-index α+β−γ.
+ * @param[in] theta2: multi-index γ−β.
+ * @return value of one summand in of h_inner.
+ */
+double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
+                             unsigned int dim, const unsigned int *beta,
+                             const unsigned int *alpha, const unsigned int *theta1,
+                             const unsigned int *theta2);
+
 /** @brief Calculates the polynomial l_(alpha,beta)(z) = - (-1)**|alpha - beta| *
  * binom(alpha,beta) * (alpha-beta)! / (alpha - 2 beta)! |alpha - beta|! / |alpha -
  * beta| * (2 * z)**(alpha - 2 beta) where 2 beta =< alpha

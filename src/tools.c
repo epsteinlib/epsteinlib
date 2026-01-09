@@ -189,7 +189,7 @@ unsigned int mult_abs(unsigned int dim, const unsigned int *alpha) {
  * @param[in] k: non-negative integer smaller or equal n.
  * @return binom(n)(k).
  */
-unsigned long long binom(unsigned int n, unsigned int k) {
+unsigned long long binom(unsigned long long n, unsigned long long k) {
     unsigned long long res = 1;
 
     // Calculate binom(n)(n-k) if n - k is closer to smaller than k

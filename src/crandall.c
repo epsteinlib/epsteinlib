@@ -169,7 +169,7 @@ double polynomial_p(unsigned int dim, const double *z, const unsigned int *alpha
         for (unsigned int j = ai - (2 * bi) + 1; j <= ai - bi; j++) {
             factFrac *= j;
         }
-        res *= (double)binom(ai, bi) * (double)factFrac *
+        res *= (double)binom((long long)ai, (long long)bi) * (double)factFrac *
                int_pow(2 * z[i], ai - (2 * bi));
     }
 
@@ -177,6 +177,116 @@ double polynomial_p(unsigned int dim, const double *z, const unsigned int *alpha
 
     return res;
 }
+
+/** @brief scalar coefficients defined by cₙ,₀＝1 and
+ * cₙ,ₖ＝2⁻ᵏ ∏ⱼ₌₁ᵏ(2n＋d−2j)∕((2n＋d＋2−4j)(2n＋d−4j)).
+ * @param[in] n: index (total of alpha).
+ * @param[in] k: index (specifies degree |alpha| - 2k).
+ * @param[in] dim: dimension of the zeta function inputs.
+ * @return cₙ,ₖ.
+ */
+double coeffs_c_outer(long long n, long long k, long long dim) {
+    double res = 1.;
+    for (long long j = 1; j < k + 1; j++) {
+        res *= (double)((2 * n) + dim - (2 * j)) /
+               (double)((2 * n + dim + 2 - 4 * j) * (2 * n + dim - 4 * j));
+    }
+    res /= int_pow(2, k);
+    return res;
+}
+
+/** @brief scalar coefficients defined by cₙ,₀,₀＝1 and
+ * cₙ,ᵢ,ₖ＝2ⁱ ∏ⱼ₌₁ⁱ(2n＋d−2−4k−2j) for i≥k.
+ * @param[in] n: index (total of alpha).
+ * @param[in] i: index (total of beta).
+ * @param[in] k: index (specifies degree |alpha| - 2k).
+ * @param[in] dim: dimension of the zeta function inputs.
+ * @return cₙ,ᵢ,ₖ.
+ */
+double coeffs_c_inner(long long n, long long i, long long k, long long dim) {
+    double res = int_pow(2, i);
+    for (long long j = 1; j < i + 1; j++) {
+        res *= (double)((2 * n) + dim - 2 - (4 * k) - (2 * j));
+    }
+    return res;
+}
+
+/** @brief Computes a single summand of h_inner; explicitly
+ * (−1)^{i} / cₙ,ᵢ,ₖ binom(i+k,k) binom(i,β) binom(α,θ₁) θ₂! / (θ₂ - θ₁)!,
+ * where n=|α|, i=|β|, θ₁=α+β−γ, θ₂=γ−β, θ₃=2γ−α−2β.
+ * @param[in] n: index (total of alpha).
+ * @param[in] i: index (total of beta).
+ * @param[in] k: index (specifies degree |alpha| - 2k).
+ * @param[in] dim: dimension of the multi-indices.
+ * @param[in] beta: lower multi-index β.
+ * @param[in] alpha: upper multi-index α.
+ * @param[in] theta1: multi-index α+β−γ.
+ * @param[in] theta2: multi-index γ−β.
+ * @return value of one summand in of h_inner.
+ */
+double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
+                             unsigned int dim, const unsigned int *beta,
+                             const unsigned int *alpha, const unsigned int *theta1,
+                             const unsigned int *theta2) {
+
+    unsigned long long resInt; // Integer part of summand
+
+    // 1D term
+    resInt = binom((long long)i + k, (long long)k);
+
+    // multiply components of binom(|beta|, beta) and binom(α,θ₁)
+    unsigned long long betaAbsDim = 1; // Counter for beta1, beta1+beta2, ...
+    for (int j = 0; j < dim + 1; j++) {
+
+        betaAbsDim += beta[j];
+        resInt *= binom(betaAbsDim, (long long)beta[j]) *
+                  binom((long long)alpha[j], (long long)theta1[j]);
+
+        // multiply components of θ₂! / (θ₂ - θ₁)!
+        for (unsigned long long l = theta2[j] - theta1[j] + 1; l < theta2[j] + 1;
+             l++) {
+            resInt *= l;
+        }
+    }
+
+    // multiply non-integer parts of the product
+    double res = int_pow(-1, k) * (double)resInt / coeffs_c_inner(n, i, k, dim);
+
+    return res;
+}
+
+///** @brief Computes the inner sum appearing in the definition of h₍α,k₎,
+// * defined by h_inner(α,γ,k) = ∑{0≤β≤γ−α/2} (−1)^{|β|} / c_{|α|,|β|,k}
+// * · binom(|β|+k,k) binom(|β|,β) binom(α,α+β−γ) (γ−β)! /(2γ−α−2β)! .
+// * @param[in] k: specifies degree |alpha| - 2k.
+// * @param[in] dim: dimension of alpha, beta and gamma.
+// * @param[in] alpha: upper multi-index.
+// * @param[in] gamma: summation multi-index with |gamma| = |alpha| - k.
+// * @param[in] alphaAbs: total of alpha.
+// * @return h_inner(α,γ,k).
+// */
+// double harmonic_h_inner(unsigned int k, unsigned int dim, const unsigned int
+// *alpha,
+//                        const unsigned int *gamma, unsigned int alphaAbs) {
+//
+//    return 0;
+//}
+//
+///** @brief Calculates the homogeneous harmonic polynomial h₍α,k₎
+// * of degree |α|−2k such that y^α = ∑ₖ (y·y)^k h₍α,k₎(y);
+// * explicitly, h₍α,k₎(y)=c_{|α|,k} ∑{|γ|=|α|−k} y^{2γ−α} h_inner(α,γ,k).
+// * @param[in] k: specifies degree |alpha| - 2k.
+// * @param[in] dim: dimension of alpha, gamma and y.
+// * @param[in] z: vector of the polynomial.
+// * @param[in] alpha: upper multi-index.
+// * @param[in] alphaAbs: total of alpha.
+// * @return h₍α,k₎(z).
+// */
+// double harmonic_h(unsigned int k, unsigned int dim, const double *z,
+//                  const unsigned int *alpha, unsigned int alphaAbs) {
+//
+//    return 0;
+//}
 
 /**
  * @brief Calculates the upper Crandall function.
@@ -280,7 +390,7 @@ double polynomial_l(unsigned int dim, const double *z, const unsigned int *alpha
         for (unsigned int j = ai - (2 * bi) + 1; j <= ai - bi; j++) {
             factFrac *= j;
         }
-        res *= (double)binom(ai, bi) * (double)factFrac *
+        res *= (double)binom((long long)ai, (long long)bi) * (double)factFrac *
                (double)int_pow(2 * z[i], ai - (2 * bi));
     }
 
@@ -433,8 +543,9 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
 
             summand = 1.;
             for (int i = 0; i < dim; i++) {
-                summand *= (double)binom(2 * beta[i], alpha[i]) *
-                           int_pow(z[i], (2 * beta[i]) - alpha[i]);
+                summand *=
+                    (double)binom((long long)(2 * beta[i]), (long long)alpha[i]) *
+                    int_pow(z[i], (2 * beta[i]) - alpha[i]);
             }
 
             summand = summand / (double)betaFact;
@@ -538,7 +649,7 @@ double complex singularity_s_der(unsigned int k, unsigned int dim, const double 
         if (betaAbs / 2 < k + dim) {
             multBinom = 1;
             for (int i = 0; i < dim; i++) {
-                multBinom *= binom(alpha[i], beta[i]);
+                multBinom *= binom((long long)alpha[i], (long long)beta[i]);
             }
 
             // summing using Kahan's method

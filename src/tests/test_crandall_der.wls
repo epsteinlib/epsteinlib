@@ -32,6 +32,29 @@ Protect[Power];
 
 
 (* ::Text:: *)
+(*Harmonic polynomials*)
+
+
+cInner[n_,i_,k_,d_]=2^i Product[(2n+d-2-4k-2j),{j,1,i-k}]
+cOuter[n_,k_,d_]=(-1)^k Product[(2n+d-2ell)/((2n+d+2-4ell)(2n+d-4ell)),{ell,k}]
+h[k_][z_,\[Alpha]_]:=Module[
+	{d,n}
+	,d=Length[\[Alpha]]
+	;n=Total[\[Alpha]]
+	;cOuter[n,k,d]Total@Table[
+	Apply[Times,Power[x,2\[Gamma]-\[Alpha]]]
+	Total[Table[
+	(-1)^Total[\[Beta]]/cInner[n,Total[\[Beta]],k,d]
+	 Binomial[Total[\[Beta]],k](Total[\[Beta]]-k)!/Apply[Times,Factorial[\[Gamma]-\[Alpha]+\[Beta]]]
+	Apply[Times,Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!]
+	,{\[Beta],Select[Tuples[Range[\[Alpha]-\[Gamma],\[Alpha]/2]],Total[#]>=k&]}
+	]]
+	,{\[Gamma],Select[Tuples[Range[Ceiling[\[Alpha]/2],0\[Alpha]+Total[\[Alpha]]-k]],Total[#]==Total[\[Alpha]]-k&]}
+	]
+]
+
+
+(* ::Text:: *)
 (*Helper functions for  derivatives for \[Nu] \[Element] d - 2k.*)
 
 
@@ -135,6 +158,44 @@ pTab=ParallelTable[Flatten[Join[N[z0[i],30],\[Alpha]0[i],\[Beta]0[i],{N[SetPreci
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/polynomial_p_Ref.csv",pTab];
+
+
+(* ::Subsection:: *)
+(*Create coefficients c reference values*)
+
+
+(* ::Text:: *)
+(*Setup test parameters.*)
+
+
+range = Range[10];
+Do[
+	n[j]=RandomInteger[{0,20}]
+	;i[j]=RandomInteger[{0,Floor[n[j]/2]}]
+	;k[j]=RandomInteger[{0,i[j]}]
+	;d[j]=RandomInteger[{1,10}]
+	,{j,range}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+cInnerTab=ParallelTable[{n[j],i[j],k[j],d[j],N@cInner[n[j],i[j],k[j],d[j]]},{j,range}];
+cOuterTab=ParallelTable[{n[j],k[j],d[j],N@cOuter[n[j],k[j],d[j]]},{j,range}];
+
+
+cInnerTab
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/coeffs_c_inner_Ref.csv",cInnerTab];
+Export["csv/coeffs_c_outer_Ref.csv",cOuterTab];
 
 
 (* ::Subsection:: *)

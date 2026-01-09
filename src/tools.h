@@ -23,6 +23,6 @@ bool equalsZero(unsigned int dim, const double *v);
 void invert(unsigned int dim, double *m, int *p, double *r);
 double inf_norm(unsigned int dim, const double *m);
 unsigned int mult_abs(unsigned int dim, const unsigned int *alpha);
-unsigned long long binom(unsigned int n, unsigned int k);
+unsigned long long binom(unsigned long long n, unsigned long long k);
 double complex int_pow(double complex base, unsigned int exp);
 #endif

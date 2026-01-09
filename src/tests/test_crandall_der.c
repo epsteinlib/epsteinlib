@@ -716,6 +716,110 @@ int test_log_l_der(void) {
 }
 
 /*!
+ * @brief Benchmarks recursive coefficients
+ * @return number of failed tests.
+ */
+int test_coeffs_c_inner(void) {
+    printf("%s ", __func__);
+
+    char path[MAX_PATH_LENGTH];
+    int result = snprintf(path, sizeof(path), "%s/coeffs_c_inner_Ref.csv", // NOLINT
+                          BASE_PATH);
+    if (result < 0 || result >= sizeof(path)) {
+        return fprintf(stderr, "Error creating file path\n");
+    }
+    FILE *data = fopen(path, "r");
+    if (data == NULL) {
+        return fprintf(stderr, "Error opening file: %s\n", path);
+    }
+
+    double errorAbs;
+    double errorRel;
+    double errorMaxAbsRel;
+    double num;
+    double ref;
+    int scanResult;
+    char line[256];
+
+    double errMin = NAN;
+    double errMax = NAN;
+    double errSum = 0.;
+
+    int testsPassed = 0;
+    int totalTests = 0;
+    double tol = 5 * pow(10, -15);
+
+    unsigned int *n = malloc(sizeof(unsigned int));
+    unsigned int *i = malloc(sizeof(unsigned int));
+    unsigned int *k = malloc(sizeof(unsigned int));
+    unsigned int *dim = malloc(sizeof(unsigned int));
+
+    double *refRead = malloc(sizeof(double));
+
+    printf("\n\t ... ");
+    printf("processing %s ", path);
+
+    while (fgets(line, sizeof(line), data) != NULL) {
+        // Scan: n, i, k ,d, result
+        scanResult = sscanf(line, "%u,%u,%u,%u,%lf", // NOLINT
+                            n, i, k, dim, refRead);
+
+        if (scanResult != 5) {
+            printf("Error reading line: %s\n", line);
+            printf("Scanned %d values instead of 5\n", scanResult);
+            continue;
+        }
+
+        ref = refRead[0];
+        num = coeffs_c_inner(*n, *i, *k, *dim);
+
+        errorAbs = errAbs(ref, num);
+        errorRel = errRel(ref, num);
+
+        errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
+
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
+            printf("\n\n");
+            printf("Warning! ");
+            printf("coeffs_c    ");
+            printf(" %0*.16lf (this implementation) \n\t\t    ≠ "
+                   "%.16lf (reference implementation)\n",
+                   4, num, ref);
+            printf("Min(Emax, Erel):      %E ≮ %E  (tolerance)\n", errorMaxAbsRel,
+                   tol);
+            testsPassed++;
+        }
+        totalTests++;
+    }
+
+    free(n);
+    free(i);
+    free(k);
+    free(dim);
+    free(refRead);
+
+    if (fclose(data) != 0) {
+        return fprintf(stderr, "Error closing file: %d\n", errno);
+    }
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
+           tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
+
+    return totalTests - testsPassed;
+}
+
+/*!
  * @brief Benchmarks 3D singularity s derivatives by comparing to high-precision
  * values over a range of random parameters.
  *
@@ -1181,6 +1285,7 @@ int main(void) {
     failed += test_polynomial_p();
     failed += test_polynomial_l();
     failed += test_polynomial_y_der();
+    failed += test_coeffs_c_inner();
     failed += test_log_l_der();
     failed += test_singularity_s_der();
     failed += test_crandall_g_der();
