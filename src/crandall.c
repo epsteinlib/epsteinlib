@@ -16,7 +16,6 @@
 #include <complex.h>
 #include <float.h>
 #include <math.h>
-#include <stdio.h>
 
 /*!
  * @brief epsilon for the cutoff around nu = dimension.
@@ -230,45 +229,33 @@ double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
                              const unsigned int *beta, const unsigned int *theta1,
                              const unsigned int *theta2) {
 
-    // binom(i+k, k)
-    unsigned long long factor = binom((long long)(i + k), (long long)k);
-    printf(": %llu \n", factor);
-    double res = (double) factor;
-
-    // binom(|beta|, beta) 
-    unsigned long long betaAbsDim = 0; // Counter for beta1, beta1+beta2, ...
-    factor = 1;
-    for (int j = 0; j < dim + 1; j++) {
-        betaAbsDim += beta[j];
-        factor *= binom(betaAbsDim, (long long)beta[j]);
-    }
-    printf(": %llu \n", factor);
-    res *= (double) factor;
-
-    // binom(α,θ₁)
-    factor = 1;
-    for (int j = 0; j < dim + 1; j++) {
-        factor *= binom((long long)alpha[j], (long long)theta1[j]);
-    }
-    printf(": %llu \n", factor);
-    res *= (double) factor;
-
-    // multiply components of θ₂! / (θ₂ - θ₁)!
-    // compute as double as overflow danger here
-    double dres = 1;
-    for (int j = 0; j < dim + 1; j++) {
-        for (unsigned int l = theta2[j] - theta1[j] + 1; l < theta2[j] + 1;
-             l++) {
-            dres *= (double) l;
-        }
-    }
-    printf(": %.lf \n", (double) dres);
-    res *= dres;
+    double res = 1;
 
     // multiply non-integer parts of the product
     res *= int_pow(-1, i) / coeffs_c_inner(n, i, k, dim);
 
-    printf("potato: %.16lf \n", (double) res);
+    // binom(i+k, k)
+    res *= (double)binom((long long)(i + k), (long long)k);
+
+    // binom(|beta|, beta)
+    unsigned long long betaAbsDim = 0; // Counter for beta1, beta1+beta2, ...
+    for (int j = 0; j < dim + 1; j++) {
+        betaAbsDim += beta[j];
+        res *= (double)binom(betaAbsDim, (long long)beta[j]);
+    }
+
+    // binom(α,θ₁)
+    for (int j = 0; j < dim + 1; j++) {
+        res *= (double)binom((long long)alpha[j], (long long)theta1[j]);
+    }
+
+    // multiply components of θ₂! / (θ₂ - θ₁)!
+    // compute as double as overflow danger here
+    for (int j = 0; j < dim + 1; j++) {
+        for (unsigned int l = theta2[j] - theta1[j] + 1; l < theta2[j] + 1; l++) {
+            res *= (double)l;
+        }
+    }
 
     return res;
 }

@@ -122,8 +122,8 @@ double coeffs_c_inner(long long n, long long i, long long k, long long dim);
  * @return value of one summand in of h_inner.
  */
 double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
-                             unsigned int dim, const unsigned int *beta,
-                             const unsigned int *alpha, const unsigned int *theta1,
+                             unsigned int dim, const unsigned int *alpha,
+                             const unsigned int *beta, const unsigned int *theta1,
                              const unsigned int *theta2);
 
 /** @brief Calculates the polynomial l_(alpha,beta)(z) = - (-1)**|alpha - beta| *

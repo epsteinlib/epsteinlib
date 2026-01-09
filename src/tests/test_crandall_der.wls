@@ -32,22 +32,21 @@ Protect[Power];
 
 
 (* ::Text:: *)
-(*Harmonic polynomials*)
+(*Harmonic polynomials.*)
 
 
-cInner[n_,i_,k_,d_]=2^i Product[(2n+d-2-4k-2j),{j,1,i-k}]
-cOuter[n_,k_,d_]=(-1)^k Product[(2n+d-2ell)/((2n+d+2-4ell)(2n+d-4ell)),{ell,k}]
-h[k_][z_,\[Alpha]_]:=Module[
+cInner[n_,i_,k_,d_]=2^i Product[2n+d-2-4k-2j,{j,1,i}]
+cOuter[n_,k_,d_]=2^-k Product[(2n+d-2ell)/((2n+d+2-4ell)(2n+d-4ell)),{ell,k}]
+hInner[\[Alpha]_,\[Beta]_,\[Gamma]_,n_,k_,d_]:=(-1)^Total[\[Beta]]/cInner[n,Total[\[Beta]],k,d]Binomial[Total[\[Beta]]+k,k]Total[\[Beta]]!/Apply[Times,Factorial[\[Beta]]] Apply[Times,Binomial[\[Alpha],\[Alpha]+\[Beta]-\[Gamma]](\[Gamma]-\[Beta])!/(2\[Gamma]-\[Alpha]-2\[Beta])!]
+h[k_][x_,\[Alpha]_]:=Module[
 	{d,n}
 	,d=Length[\[Alpha]]
 	;n=Total[\[Alpha]]
 	;cOuter[n,k,d]Total@Table[
 	Apply[Times,Power[x,2\[Gamma]-\[Alpha]]]
 	Total[Table[
-	(-1)^Total[\[Beta]]/cInner[n,Total[\[Beta]],k,d]
-	 Binomial[Total[\[Beta]],k](Total[\[Beta]]-k)!/Apply[Times,Factorial[\[Gamma]-\[Alpha]+\[Beta]]]
-	Apply[Times,Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!]
-	,{\[Beta],Select[Tuples[Range[\[Alpha]-\[Gamma],\[Alpha]/2]],Total[#]>=k&]}
+	hInner[\[Alpha],\[Beta],\[Gamma],n,k,d]
+	,{\[Beta],Tuples[Range[MapThread[Max,{0\[Alpha],\[Gamma]-\[Alpha]}],\[Gamma]-\[Alpha]/2]]}
 	]]
 	,{\[Gamma],Select[Tuples[Range[Ceiling[\[Alpha]/2],0\[Alpha]+Total[\[Alpha]]-k]],Total[#]==Total[\[Alpha]]-k&]}
 	]
@@ -168,12 +167,12 @@ Export["csv/polynomial_p_Ref.csv",pTab];
 (*Setup test parameters.*)
 
 
-range = Range[10];
+range = Range[999];
 Do[
-	n[j]=RandomInteger[{0,20}]
-	;i[j]=RandomInteger[{0,Floor[n[j]/2]}]
-	;k[j]=RandomInteger[{0,i[j]}]
-	;d[j]=RandomInteger[{1,10}]
+	n0[j]=RandomInteger[{0,20}]
+	;i0[j]=RandomInteger[{0,Floor[n0[j]/2]}]
+	;k0[j]=RandomInteger[{0,i0[j]}]
+	;d0[j]=RandomInteger[{1,10}]
 	,{j,range}
 ]
 
@@ -182,11 +181,8 @@ Do[
 (*Generate reference values.*)
 
 
-cInnerTab=ParallelTable[{n[j],i[j],k[j],d[j],N@cInner[n[j],i[j],k[j],d[j]]},{j,range}];
-cOuterTab=ParallelTable[{n[j],k[j],d[j],N@cOuter[n[j],k[j],d[j]]},{j,range}];
-
-
-cInnerTab
+cInnerTab=ParallelTable[{n0[j],i0[j],k0[j],d0[j],N@cInner[n0[j],i0[j],k0[j],d0[j]]},{j,range}];
+cOuterTab=ParallelTable[{n0[j],k0[j],d0[j],N@cOuter[n0[j],k0[j],d0[j]]},{j,range}];
 
 
 (* ::Text:: *)
@@ -196,6 +192,42 @@ cInnerTab
 SetDirectory[NotebookDirectory[]];
 Export["csv/coeffs_c_inner_Ref.csv",cInnerTab];
 Export["csv/coeffs_c_outer_Ref.csv",cOuterTab];
+
+
+(* ::Subsection:: *)
+(*Create references values for inner sum of harmonic polynomials*)
+
+
+range = Range[100];
+j=1;
+While[j<=Last[range]
+	,
+	\[Alpha]0[j]={RandomInteger[{0,60}],RandomInteger[{0,60}],RandomInteger[{0,60}]}
+	;k0[j]=RandomInteger[{0,Floor[Total[\[Alpha]0[j]]/2]}]
+	;tups=Select[Tuples[Range[Ceiling[\[Alpha]0[j]/2],0 \[Alpha]0[j]+Total[\[Alpha]0[j]]-k0[j]]],Total[#]==Total[\[Alpha]0[j]]-k0[j]&]
+	;If[Length[tups]==0,Continue[]]
+	;\[Gamma]0[j]=RandomChoice@tups
+	;tups=Tuples[Range[MapThread[Max,{0\[Alpha]0[j],\[Gamma]0[j]-\[Alpha]0[j]}],\[Gamma]0[j]-\[Alpha]0[j]/2]]
+	;If[Length[tups]==0,Continue[]]
+	;\[Beta]0[j]=RandomChoice@tups
+	;j++
+]
+Clear[j,tups]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+hInnerTab=ParallelTable[Flatten@{\[Alpha]0[j],\[Beta]0[j],\[Gamma]0[j],k0[j],N@hInner[\[Alpha]0[j],\[Beta]0[j],\[Gamma]0[j],Total[\[Alpha]0[j]],k0[j],3]},{j,range}];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/harmonic_h_inner_Ref.csv",hInnerTab];
 
 
 (* ::Subsection:: *)
@@ -210,7 +242,7 @@ randDerivative := RandomInteger[{0,6}]
 (*Setup test parameters.*)
 
 
-range = Range[100];
+range = Range[10];
 Do[
 	\[Nu]0[i]=With[{\[Nu]=10 randRational},If[PossibleZeroQ@(\[Nu]-2),1/2,\[Nu]]];
 	z0[i]={randRational,randRational,randRational};
@@ -363,10 +395,6 @@ Export["csv/singularity_s_der_Ref.csv",sDerTab];
 
 (* ::Subsection:: *)
 (*Create regularized Crandall derivatives reference values*)
-
-
-randRational := RandomInteger[{-10^(16),10^(16)}]/10^(16)
-randDerivative := RandomInteger[{0,6}]
 
 
 (* ::Text:: *)

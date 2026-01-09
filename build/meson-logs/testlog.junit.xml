@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<testsuites tests="1" errors="0" failures="0"><testsuite name="epsteinlib" tests="1" errors="0" failures="0" skipped="0" time="0.1163337230682373"><testcase name="test_crandall_derivatives" classname="epsteinlib" time="0.1163337230682373"><system-out>start test_polynomial_p 
+<testsuites tests="1" errors="0" failures="0"><testsuite name="epsteinlib" tests="1" errors="0" failures="0" skipped="0" time="0.13279056549072266"><testcase name="test_crandall_derivatives" classname="epsteinlib" time="0.13279056549072266"><system-out>start test_polynomial_p 
 	 ... processing csv/polynomial_p_Ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.007550E-15 | avg: 2.450517E-16 ]
 test_polynomial_l 
@@ -11,6 +11,9 @@ test_polynomial_y_der
 test_coeffs_c_inner 
 	 ... processing csv/coeffs_c_inner_Ref.csv 
 	 ... 999 out of 999 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 0.000000E+00 | avg: 0.000000E+00 ]
+test_harmonic_h_inner 
+	 ... processing csv/harmonic_h_inner_Ref.csv 
+	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 8.834121E-16 | avg: 2.230996E-16 ]
 test_log_l_der 
 	 ... processing csv/log_l_der_Ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-12.	    [ Error →  min: 0.000000E+00 | max: 7.521929E-13 | avg: 1.453859E-14 ]
@@ -31,6 +34,4 @@ test_crandall_g_der_taylor
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-14.	    [ Error →  min: 0.000000E+00 | max: 7.490270E-15 | avg: 3.891047E-16 ]
 test_crandall_gReg_der_taylor 
 	 ... generating test values
-	 ... 100 out of 100 tests passed with tolerance 1.000000E-14.	    [ Error →  min: 0.000000E+00 | max: 7.880421E-16 | avg: 1.069885E-16 ]</system-out><system-err>libgcov profiling error:/home/buss_jn/learning/programming/c/epsteinlib/build/src/libepstein.so.p/epsteinZeta.c.gcda:Version mismatch - expected 13.3 (release) (B33*) got 11.4 (release) (B14*)
-libgcov profiling error:/home/buss_jn/learning/programming/c/epsteinlib/build/src/libepstein.so.p/gamma.c.gcda:Version mismatch - expected 13.3 (release) (B33*) got 11.4 (release) (B14*)
-libgcov profiling error:/home/buss_jn/learning/programming/c/epsteinlib/build/src/libepstein.so.p/.._mathematica_zeta_mathematica.c.gcda:Version mismatch - expected 13.3 (release) (B33*) got 11.4 (release) (B14*)</system-err></testcase></testsuite></testsuites>
+	 ... 100 out of 100 tests passed with tolerance 1.000000E-14.	    [ Error →  min: 0.000000E+00 | max: 7.880421E-16 | avg: 1.069885E-16 ]</system-out></testcase></testsuite></testsuites>

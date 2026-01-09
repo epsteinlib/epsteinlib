@@ -793,7 +793,8 @@ int test_coeffs_c_inner(void) {
                    4, num, ref);
             printf("Min(Emax, Erel):      %E ≮ %E  (tolerance)\n", errorMaxAbsRel,
                    tol);
-            testsPassed++;
+            printf("n: %u,  i: %u,  k: %u,  d: %u", *n, *i, *k, *dim);
+            printf("\n");
         }
         totalTests++;
     }
@@ -802,6 +803,133 @@ int test_coeffs_c_inner(void) {
     free(i);
     free(k);
     free(dim);
+    free(refRead);
+
+    if (fclose(data) != 0) {
+        return fprintf(stderr, "Error closing file: %d\n", errno);
+    }
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
+           tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
+
+    return totalTests - testsPassed;
+}
+
+/*!
+ * @brief Benchmarks recursive coefficients
+ * @return number of failed tests.
+ */
+int test_harmonic_h_inner(void) {
+    printf("%s ", __func__);
+
+    char path[MAX_PATH_LENGTH];
+    int result =
+        snprintf(path, sizeof(path), "%s/harmonic_h_inner_Ref.csv", // NOLINT
+                 BASE_PATH);
+    if (result < 0 || result >= sizeof(path)) {
+        return fprintf(stderr, "Error creating file path\n");
+    }
+    FILE *data = fopen(path, "r");
+    if (data == NULL) {
+        return fprintf(stderr, "Error opening file: %s\n", path);
+    }
+
+    double errorAbs;
+    double errorRel;
+    double errorMaxAbsRel;
+    double num;
+    double ref;
+    int scanResult;
+    char line[256];
+
+    double errMin = NAN;
+    double errMax = NAN;
+    double errSum = 0.;
+
+    int testsPassed = 0;
+    int totalTests = 0;
+    double tol = 5 * pow(10, -15);
+
+    unsigned int n;
+    unsigned int i;
+
+    unsigned int dim = 3;
+    unsigned int theta1[dim];
+    unsigned int theta2[dim];
+
+    unsigned int *k = malloc(sizeof(unsigned int));
+    unsigned int *alpha = malloc(dim * sizeof(unsigned int));
+    unsigned int *beta = malloc(dim * sizeof(unsigned int));
+    unsigned int *gAmma = malloc(dim * sizeof(unsigned int)); // NOLINT
+
+    double *refRead = malloc(sizeof(double));
+
+    printf("\n\t ... ");
+    printf("processing %s ", path);
+
+    while (fgets(line, sizeof(line), data) != NULL) {
+        // Scan: {alpha, alpha+1, alpha+2},
+        //       {beta, beta+1, beta+2}
+        //       {gamma, gamma+2, gamma+2}
+        //       k, result
+        scanResult = sscanf(line, "%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%lf", // NOLINT
+                            alpha, alpha + 1, alpha + 2, beta, beta + 1, beta + 2,
+                            gAmma, gAmma + 1, gAmma + 2, k, refRead); // NOLINT
+
+        if (scanResult != 11) {
+            printf("Error reading line: %s\n", line);
+            printf("Scanned %d values instead of 11\n", scanResult);
+            continue;
+        }
+
+        // set n=|α|, i=|β|, θ₁=α+β−γ, θ₂=γ−β, θ₃=2γ−α−2β.
+        n = mult_abs(dim, alpha);
+        i = mult_abs(dim, beta);
+        for (int j = 0; j < dim; j++) {
+            theta1[j] = alpha[j] + beta[j] - gAmma[j]; // NOLINT
+            theta2[j] = gAmma[j] - beta[j];            // NOLINT
+        }
+
+        ref = refRead[0];
+        num = harmonic_h_inner_term(n, i, *k, dim, alpha, beta, theta1, theta2);
+
+        errorAbs = errAbs(ref, num);
+        errorRel = errRel(ref, num);
+
+        errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
+
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
+            printf("\n\n");
+            printf("Warning! ");
+            printf("harmonic_h_inner ");
+            printf(" %0*.16lf (this implementation) \n\t\t    ≠ "
+                   "%.16lf (reference implementation)\n",
+                   4, num, ref);
+            printf("Min(Emax, Erel):      %E ≮ %E  (tolerance)\n", errorMaxAbsRel,
+                   tol);
+            printMultiindexUnitTest("alpha:\t\t", alpha, dim);
+            printMultiindexUnitTest("beta:\t\t", beta, dim);
+            printMultiindexUnitTest("gamma:\t\t", gAmma, dim); // NOLINT
+            printf("n: %u,  i: %u,  k: %u,  d: %u", n, i, *k, dim);
+        }
+        totalTests++;
+    }
+
+    free(k);
+    free(alpha);
+    free(beta);
+    free(gAmma);
     free(refRead);
 
     if (fclose(data) != 0) {
@@ -1286,6 +1414,7 @@ int main(void) {
     failed += test_polynomial_l();
     failed += test_polynomial_y_der();
     failed += test_coeffs_c_inner();
+    failed += test_harmonic_h_inner();
     failed += test_log_l_der();
     failed += test_singularity_s_der();
     failed += test_crandall_g_der();
