@@ -230,31 +230,43 @@ double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
                              const unsigned int *beta, const unsigned int *theta1,
                              const unsigned int *theta2) {
 
-    unsigned long long resInt; // Integer part of summand
+    // binom(i+k, k)
+    unsigned long long factor = binom((long long)(i + k), (long long)k);
+    printf(": %llu \n", factor);
+    double res = (double) factor;
 
-    // 1D term
-    resInt = binom((long long)(i + k), (long long)k);
-    printf(": %.16lf \n", (double)resInt );
-
-    // multiply components of binom(|beta|, beta) and binom(α,θ₁)
+    // binom(|beta|, beta) 
     unsigned long long betaAbsDim = 0; // Counter for beta1, beta1+beta2, ...
+    factor = 1;
     for (int j = 0; j < dim + 1; j++) {
-
         betaAbsDim += beta[j];
-        resInt *= binom(betaAbsDim, (long long)beta[j]) *
-                  binom((long long)alpha[j], (long long)theta1[j]);
+        factor *= binom(betaAbsDim, (long long)beta[j]);
+    }
+    printf(": %llu \n", factor);
+    res *= (double) factor;
 
-        // multiply components of θ₂! / (θ₂ - θ₁)!
-        for (unsigned long long l = theta2[j] - theta1[j] + 1; l < theta2[j] + 1;
+    // binom(α,θ₁)
+    factor = 1;
+    for (int j = 0; j < dim + 1; j++) {
+        factor *= binom((long long)alpha[j], (long long)theta1[j]);
+    }
+    printf(": %llu \n", factor);
+    res *= (double) factor;
+
+    // multiply components of θ₂! / (θ₂ - θ₁)!
+    // compute as double as overflow danger here
+    double dres = 1;
+    for (int j = 0; j < dim + 1; j++) {
+        for (unsigned int l = theta2[j] - theta1[j] + 1; l < theta2[j] + 1;
              l++) {
-            resInt *= l;
+            dres *= (double) l;
         }
     }
-
-    printf("potato: %.16lf \n", (double)resInt );
+    printf(": %.lf \n", (double) dres);
+    res *= dres;
 
     // multiply non-integer parts of the product
-    double res = int_pow(-1, k) * (double)resInt / coeffs_c_inner(n, i, k, dim);
+    res *= int_pow(-1, i) / coeffs_c_inner(n, i, k, dim);
 
     printf("potato: %.16lf \n", (double) res);
 
