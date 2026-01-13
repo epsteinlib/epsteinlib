@@ -259,6 +259,104 @@ double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
     return res;
 }
 
+/** @brief Computes the inner sum of the harmonic polynomial
+ * h_inner(α,γ,k) = ∑_{β} h_inner_term(α,β,γ,k),
+ * where the sum runs over all multi-indices β such that
+ * 0 ≤ α + β − γ ≤ α/2 componentwise.
+ * @param[in] k: specifies degree |alpha| - 2k.
+ * @param[in] dim: dimension of alpha, beta and gamma.
+ * @param[in] alpha: upper multi-index.
+ * @param[in] gamma: fixed multi-index gamma.
+ * @param[in] alphaAbs: total of alpha.
+ * @return h_inner(α,γ,k).
+ */
+static double complex harmonic_h_inner_sum(unsigned int k, unsigned int dim,
+                                           const unsigned int *alpha,
+                                           const unsigned int *gamma,
+                                           unsigned int alphaAbs) {
+
+    unsigned int beta[dim];
+    unsigned int theta1[dim];
+    unsigned int theta2[dim];
+
+    for (int i = 0; i < dim; i++) {
+        beta[i] = 0;
+    }
+
+    unsigned int betaAbs = 0;
+    int done;
+    int skip;
+
+    double complex sumInner = 0.0;
+    double complex epsilonInner = 0.0;
+    double complex auxtInner;
+    double complex auxyInner;
+
+    while (1) {
+
+        skip = 0;
+        for (int i = 0; i < dim; i++) {
+            if (gamma[i] > alpha[i] && gamma[i] - alpha[i] > beta[i]) {
+                skip = 1;
+            }
+        }
+
+        if (!skip) {
+            for (int i = 0; i < dim; i++) {
+                theta1[i] = alpha[i] + beta[i] - gamma[i];
+                theta2[i] = gamma[i] - beta[i];
+            }
+
+            auxyInner = harmonic_h_inner_term(alphaAbs, betaAbs, k, dim, alpha, beta,
+                                              theta1, theta2) -
+                        epsilonInner;
+            auxtInner = sumInner + auxyInner;
+            epsilonInner = (auxtInner - sumInner) - auxyInner;
+            sumInner = auxtInner;
+        }
+
+        done = 1;
+        for (unsigned int idx = 0; idx < dim; idx++) {
+            if (2 * beta[idx] + 2 <= 2 * gamma[idx] - alpha[idx]) {
+                beta[idx]++;
+                betaAbs++;
+                done = 0;
+                break;
+            }
+            betaAbs -= beta[idx];
+            beta[idx] = 0;
+        }
+        if (done) {
+            break;
+        }
+    }
+
+    return sumInner;
+}
+
+/** @brief Updates the multi-index gamma in graded lexicographic order
+ * while maintaining its total degree.
+ * @param[in,out] gamma: current multi-index to be updated.
+ * @param[in,out] gammaAbs: total of gamma.
+ * @param[in] dim: dimension of gamma.
+ * @param[in] maxAbs: maximum allowed total degree.
+ * @return 1 if iteration is finished, 0 otherwise.
+ */
+static int harmonic_h_update_outer_index(unsigned int *gamma, unsigned int *gammaAbs,
+                                         unsigned int dim, unsigned int maxAbs) {
+
+    for (unsigned int idx = 0; idx < dim; idx++) {
+        if (gamma[idx] + 1 <= maxAbs) {
+            gamma[idx]++;
+            (*gammaAbs)++;
+            return 0;
+        }
+        (*gammaAbs) -= gamma[idx];
+        gamma[idx] = 0;
+    }
+    return 1;
+}
+
 /** @brief Calculates the homogeneous harmonic polynomial h₍α,k₎
  * of degree |α|−2k such that y^α = ∑ₖ (y·y)^k h₍α,k₎(y);
  * explicitly, h₍α,k₎(y)=c_{|α|,k} ∑{|γ|=|α|−k} y^{2γ−α} h_inner(α,γ,k).
@@ -277,14 +375,9 @@ double harmonic_h(unsigned int k, unsigned int dim, const double *z, // NOLINT
         gamma[i] = 0;
     }
 
-    unsigned int theta1[dim];
-    unsigned int theta2[dim];
-
-    int done = 0;
-    int skip;
     unsigned int gammaAbs = 0;
-
-    unsigned int betaAbs = 0;
+    int skip;
+    int done;
 
     double zPow;
 
@@ -293,17 +386,10 @@ double harmonic_h(unsigned int k, unsigned int dim, const double *z, // NOLINT
     double complex auxtOuter;
     double complex auxyOuter;
 
-    double complex sumInner;
-    double complex epsilonInner;
-    double complex auxtInner;
-    double complex auxyInner;
-
-    // Iterate over every multi-index gamma so that |gamma| = |alpha| - k;
-    unsigned int beta[dim];
     while (1) {
 
         skip = 0;
-        if (!(gammaAbs == alphaAbs - k)) {
+        if (gammaAbs != alphaAbs - k) {
             skip = 1;
         }
 
@@ -317,62 +403,10 @@ double harmonic_h(unsigned int k, unsigned int dim, const double *z, // NOLINT
 
         if (!skip) {
 
-            sumInner = 0.;
-            epsilonInner = 0.;
-            betaAbs = 0;
+            double complex sumInner =
+                harmonic_h_inner_sum(k, dim, alpha, gamma, alphaAbs);
 
-            for (int i = 0; i < dim; i++) {
-                beta[i] = 0;
-            }
-
-            // Iterate over multi-index beta, 0 <= alpha + beta - gamma <= alpha/2
-            while (1) {
-
-                skip = 0;
-                for (int i = 0; i < dim; i++) {
-                    if (gamma[i] > alpha[i] && gamma[i] - alpha[i] > beta[i]) {
-                        skip = 1;
-                    }
-                }
-
-                if (!skip) {
-                    // theta1 =  α+β−γ.
-                    for (int i = 0; i < dim; i++) {
-                        theta1[i] = alpha[i] + beta[i] - gamma[i];
-                    }
-
-                    // theta2 = γ−β.
-                    for (int i = 0; i < dim; i++) {
-                        theta2[i] = gamma[i] - beta[i];
-                    }
-
-                    // summing using Kahan's method
-                    auxyInner = harmonic_h_inner_term(alphaAbs, betaAbs, k, dim,
-                                                      alpha, beta, theta1, theta2) -
-                                epsilonInner;
-                    auxtInner = sumInner + auxyInner;
-                    epsilonInner = (auxtInner - sumInner) - auxyInner;
-                    sumInner = auxtInner;
-                }
-
-                done = 1;
-                for (unsigned int idx = 0; idx < dim; idx++) {
-                    // check if the following beta: beta <= gamma - alpha / 2
-                    if (2 * beta[idx] + 2 <= 2 * gamma[idx] - alpha[idx]) {
-                        beta[idx]++;
-                        betaAbs++;
-                        done = 0;
-                        break;
-                    }
-                    betaAbs -= beta[idx];
-                    beta[idx] = 0;
-                }
-                if (done) {
-                    break;
-                }
-            }
-            // z ** (2 * gamma - alpha)
-            zPow = 1.;
+            zPow = 1.0;
             for (int i = 0; i < dim; i++) {
                 zPow *= int_pow(z[i], (2 * gamma[i]) - alpha[i]);
             }
@@ -383,59 +417,15 @@ double harmonic_h(unsigned int k, unsigned int dim, const double *z, // NOLINT
             sumOuter = auxtOuter;
         }
 
-        done = 1;
-        for (unsigned int idx = 0; idx < dim; idx++) {
-            if (gamma[idx] + 1 <= alphaAbs - k) {
-                gamma[idx]++;
-                gammaAbs++;
-                done = 0;
-                break;
-            }
-            gammaAbs -= gamma[idx];
-            gamma[idx] = 0;
-        }
+        done = harmonic_h_update_outer_index(gamma, &gammaAbs, dim, alphaAbs - k);
         if (done) {
             break;
         }
     }
 
     sumOuter *= coeffs_c_outer(alphaAbs, k, dim);
-
     return sumOuter;
 }
-
-///** @brief Computes the inner sum appearing in the definition of h₍α,k₎,
-// * defined by h_inner(α,γ,k) = ∑{0≤β≤γ−α/2} (−1)^{|β|} / c_{|α|,|β|,k}
-// * · binom(|β|+k,k) binom(|β|,β) binom(α,α+β−γ) (γ−β)! /(2γ−α−2β)! .
-// * @param[in] k: specifies degree |alpha| - 2k.
-// * @param[in] dim: dimension of alpha, beta and gamma.
-// * @param[in] alpha: upper multi-index.
-// * @param[in] gamma: summation multi-index with |gamma| = |alpha| - k.
-// * @param[in] alphaAbs: total of alpha.
-// * @return h_inner(α,γ,k).
-// */
-// double harmonic_h_inner(unsigned int k, unsigned int dim, const unsigned int
-// *alpha,
-//                        const unsigned int *gamma, unsigned int alphaAbs) {
-//
-//    return 0;
-//}
-//
-///** @brief Calculates the homogeneous harmonic polynomial h₍α,k₎
-// * of degree |α|−2k such that y^α = ∑ₖ (y·y)^k h₍α,k₎(y);
-// * explicitly, h₍α,k₎(y)=c_{|α|,k} ∑{|γ|=|α|−k} y^{2γ−α} h_inner(α,γ,k).
-// * @param[in] k: specifies degree |alpha| - 2k.
-// * @param[in] dim: dimension of alpha, gamma and y.
-// * @param[in] z: vector of the polynomial.
-// * @param[in] alpha: upper multi-index.
-// * @param[in] alphaAbs: total of alpha.
-// * @return h₍α,k₎(z).
-// */
-// double harmonic_h(unsigned int k, unsigned int dim, const double *z,
-//                  const unsigned int *alpha, unsigned int alphaAbs) {
-//
-//    return 0;
-//}
 
 /**
  * @brief Calculates the upper Crandall function.
