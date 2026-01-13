@@ -270,18 +270,22 @@ double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
  * @param[in] alphaAbs: total of alpha.
  * @return h_inner(α,γ,k).
  */
-static double complex harmonic_h_inner_sum(unsigned int k, unsigned int dim,
-                                           const unsigned int *alpha,
-                                           const unsigned int *gamma,
-                                           unsigned int alphaAbs) {
+double complex harmonic_h_inner_sum(unsigned int k, unsigned int dim, // NOLINT
+                                    const unsigned int *alpha,
+                                    const unsigned int *gamma,
+                                    unsigned int alphaAbs) {
 
     unsigned int beta[dim];
     unsigned int theta1[dim];
     unsigned int theta2[dim];
-
     for (int i = 0; i < dim; i++) {
         beta[i] = 0;
+        theta1[i] = alpha[i] + beta[i] - gamma[i];
+        theta2[i] = gamma[i] - beta[i];
     }
+
+    unsigned int redotheta1 = 0;
+    unsigned int redotheta2 = 0;
 
     unsigned int betaAbs = 0;
     int done;
@@ -302,10 +306,22 @@ static double complex harmonic_h_inner_sum(unsigned int k, unsigned int dim,
         }
 
         if (!skip) {
-            for (int i = 0; i < dim; i++) {
-                theta1[i] = alpha[i] + beta[i] - gamma[i];
-                theta2[i] = gamma[i] - beta[i];
+
+            // redo theta1 = α+β−γ
+            if (redotheta1) {
+                for (int i = 0; i < dim; i++) {
+                    theta1[i] = alpha[i] + beta[i] - gamma[i];
+                }
             }
+            redotheta1 = 0;
+
+            // redo theta2 = γ−β
+            if (redotheta2) {
+                for (int i = 0; i < dim; i++) {
+                    theta2[i] = gamma[i] - beta[i];
+                }
+            }
+            redotheta2 = 0;
 
             auxyInner = harmonic_h_inner_term(alphaAbs, betaAbs, k, dim, alpha, beta,
                                               theta1, theta2) -
@@ -319,12 +335,16 @@ static double complex harmonic_h_inner_sum(unsigned int k, unsigned int dim,
         for (unsigned int idx = 0; idx < dim; idx++) {
             if (2 * beta[idx] + 2 <= 2 * gamma[idx] - alpha[idx]) {
                 beta[idx]++;
+                theta1[idx]++;
                 betaAbs++;
+                redotheta2 = 1;
                 done = 0;
                 break;
             }
             betaAbs -= beta[idx];
+            theta2[idx] = beta[idx];
             beta[idx] = 0;
+            redotheta1 = 1;
         }
         if (done) {
             break;
@@ -342,8 +362,8 @@ static double complex harmonic_h_inner_sum(unsigned int k, unsigned int dim,
  * @param[in] maxAbs: maximum allowed total degree.
  * @return 1 if iteration is finished, 0 otherwise.
  */
-static int harmonic_h_update_outer_index(unsigned int *gamma, unsigned int *gammaAbs,
-                                         unsigned int dim, unsigned int maxAbs) {
+int harmonic_h_update_outer_index(unsigned int *gamma, unsigned int *gammaAbs,
+                                  unsigned int dim, unsigned int maxAbs) {
 
     for (unsigned int idx = 0; idx < dim; idx++) {
         if (gamma[idx] + 1 <= maxAbs) {
