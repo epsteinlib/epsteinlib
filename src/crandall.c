@@ -186,12 +186,11 @@ double polynomial_p(unsigned int dim, const double *z, const unsigned int *alpha
  * @return cₙ,ₖ.
  */
 double coeffs_c_outer(long long n, long long k, long long dim) {
-    double res = 1.;
+    double res = 1. / int_pow(2, k);
     for (long long j = 1; j < k + 1; j++) {
         res *= (double)((2 * n) + dim - (2 * j)) /
                (double)((2 * n + dim + 2 - 4 * j) * (2 * n + dim - 4 * j));
     }
-    res /= int_pow(2, k);
     return res;
 }
 
@@ -239,25 +238,170 @@ double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
 
     // binom(|beta|, beta)
     unsigned long long betaAbsDim = 0; // Counter for beta1, beta1+beta2, ...
-    for (int j = 0; j < dim + 1; j++) {
+    for (int j = 0; j < dim; j++) {
         betaAbsDim += beta[j];
         res *= (double)binom(betaAbsDim, (long long)beta[j]);
     }
 
     // binom(α,θ₁)
-    for (int j = 0; j < dim + 1; j++) {
+    for (int j = 0; j < dim; j++) {
         res *= (double)binom((long long)alpha[j], (long long)theta1[j]);
     }
 
     // multiply components of θ₂! / (θ₂ - θ₁)!
     // compute as double as overflow danger here
-    for (int j = 0; j < dim + 1; j++) {
+    for (int j = 0; j < dim; j++) {
         for (unsigned int l = theta2[j] - theta1[j] + 1; l < theta2[j] + 1; l++) {
             res *= (double)l;
         }
     }
 
     return res;
+}
+
+/** @brief Calculates the homogeneous harmonic polynomial h₍α,k₎
+ * of degree |α|−2k such that y^α = ∑ₖ (y·y)^k h₍α,k₎(y);
+ * explicitly, h₍α,k₎(y)=c_{|α|,k} ∑{|γ|=|α|−k} y^{2γ−α} h_inner(α,γ,k).
+ * @param[in] k: specifies degree |alpha| - 2k.
+ * @param[in] dim: dimension of alpha, gamma and y.
+ * @param[in] z: vector of the polynomial.
+ * @param[in] alpha: upper multi-index.
+ * @param[in] alphaAbs: total of alpha.
+ * @return h₍α,k₎(z).
+ */
+double harmonic_h(unsigned int k, unsigned int dim, const double *z, // NOLINT
+                  const unsigned int *alpha, unsigned int alphaAbs) {
+
+    unsigned int gamma[dim];
+    for (int i = 0; i < dim; i++) {
+        gamma[i] = 0;
+    }
+
+    unsigned int theta1[dim];
+    unsigned int theta2[dim];
+
+    int done = 0;
+    int skip;
+    unsigned int gammaAbs = 0;
+
+    unsigned int betaAbs = 0;
+
+    double zPow;
+
+    double complex sumOuter = 0.0;
+    double complex epsilonOuter = 0.0;
+    double complex auxtOuter;
+    double complex auxyOuter;
+
+    double complex sumInner;
+    double complex epsilonInner;
+    double complex auxtInner;
+    double complex auxyInner;
+
+    // Iterate over every multi-index gamma so that |gamma| = |alpha| - k;
+    unsigned int beta[dim];
+    while (1) {
+
+        skip = 0;
+        if (!(gammaAbs == alphaAbs - k)) {
+            skip = 1;
+        }
+
+        if (!skip) {
+            for (int i = 0; i < dim; i++) {
+                if (2 * gamma[i] < alpha[i]) {
+                    skip = 1;
+                }
+            }
+        }
+
+        if (!skip) {
+
+            sumInner = 0.;
+            epsilonInner = 0.;
+            betaAbs = 0;
+
+            for (int i = 0; i < dim; i++) {
+                beta[i] = 0;
+            }
+
+            // Iterate over multi-index beta, 0 <= alpha + beta - gamma <= alpha/2
+            while (1) {
+
+                skip = 0;
+                for (int i = 0; i < dim; i++) {
+                    if (gamma[i] > alpha[i] && gamma[i] - alpha[i] > beta[i]) {
+                        skip = 1;
+                    }
+                }
+
+                if (!skip) {
+                    // theta1 =  α+β−γ.
+                    for (int i = 0; i < dim; i++) {
+                        theta1[i] = alpha[i] + beta[i] - gamma[i];
+                    }
+
+                    // theta2 = γ−β.
+                    for (int i = 0; i < dim; i++) {
+                        theta2[i] = gamma[i] - beta[i];
+                    }
+
+                    // summing using Kahan's method
+                    auxyInner = harmonic_h_inner_term(alphaAbs, betaAbs, k, dim,
+                                                      alpha, beta, theta1, theta2) -
+                                epsilonInner;
+                    auxtInner = sumInner + auxyInner;
+                    epsilonInner = (auxtInner - sumInner) - auxyInner;
+                    sumInner = auxtInner;
+                }
+
+                done = 1;
+                for (unsigned int idx = 0; idx < dim; idx++) {
+                    // check if the following beta: beta <= gamma - alpha / 2
+                    if (2 * beta[idx] + 2 <= 2 * gamma[idx] - alpha[idx]) {
+                        beta[idx]++;
+                        betaAbs++;
+                        done = 0;
+                        break;
+                    }
+                    betaAbs -= beta[idx];
+                    beta[idx] = 0;
+                }
+                if (done) {
+                    break;
+                }
+            }
+            // z ** (2 * gamma - alpha)
+            zPow = 1.;
+            for (int i = 0; i < dim; i++) {
+                zPow *= int_pow(z[i], (2 * gamma[i]) - alpha[i]);
+            }
+
+            auxyOuter = zPow * sumInner - epsilonOuter;
+            auxtOuter = sumOuter + auxyOuter;
+            epsilonOuter = (auxtOuter - sumOuter) - auxyOuter;
+            sumOuter = auxtOuter;
+        }
+
+        done = 1;
+        for (unsigned int idx = 0; idx < dim; idx++) {
+            if (gamma[idx] + 1 <= alphaAbs - k) {
+                gamma[idx]++;
+                gammaAbs++;
+                done = 0;
+                break;
+            }
+            gammaAbs -= gamma[idx];
+            gamma[idx] = 0;
+        }
+        if (done) {
+            break;
+        }
+    }
+
+    sumOuter *= coeffs_c_outer(alphaAbs, k, dim);
+
+    return sumOuter;
 }
 
 ///** @brief Computes the inner sum appearing in the definition of h₍α,k₎,

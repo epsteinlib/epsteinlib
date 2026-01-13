@@ -98,6 +98,15 @@ double complex crandall_g_der(unsigned int dim, double nu, const double *z,
                               double prefactor, double zArgBound,
                               const unsigned int *alpha, unsigned int alphaAbs);
 
+/** @brief scalar coefficients defined by cₙ,₀＝1 and
+ * cₙ,ₖ＝2⁻ᵏ ∏ⱼ₌₁ᵏ(2n＋d−2j)∕((2n＋d＋2−4j)(2n＋d−4j)).
+ * @param[in] n: index (total of alpha).
+ * @param[in] k: index (specifies degree |alpha| - 2k).
+ * @param[in] dim: dimension of the zeta function inputs.
+ * @return cₙ,ₖ.
+ */
+double coeffs_c_outer(long long n, long long k, long long dim);
+
 /** @brief scalar coefficients defined by cₙ,₀,₀＝1 and
  * cₙ,ᵢ,ₖ＝2ⁱ ∏ⱼ₌₁ⁱ(2n＋d−2−4k−2j) for i≥k.
  * @param[in] n: index (total of alpha).
@@ -125,6 +134,19 @@ double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
                              unsigned int dim, const unsigned int *alpha,
                              const unsigned int *beta, const unsigned int *theta1,
                              const unsigned int *theta2);
+
+/** @brief Calculates the homogeneous harmonic polynomial h₍α,k₎
+ * of degree |α|−2k such that y^α = ∑ₖ (y·y)^k h₍α,k₎(y);
+ * explicitly, h₍α,k₎(y)=c_{|α|,k} ∑{|γ|=|α|−k} y^{2γ−α} h_inner(α,γ,k).
+ * @param[in] k: specifies degree |alpha| - 2k.
+ * @param[in] dim: dimension of alpha, gamma and y.
+ * @param[in] z: vector of the polynomial.
+ * @param[in] alpha: upper multi-index.
+ * @param[in] alphaAbs: total of alpha.
+ * @return h₍α,k₎(z).
+ */
+double harmonic_h(unsigned int k, unsigned int dim, const double *z, // NOLINT
+                  const unsigned int *alpha, unsigned int alphaAbs);
 
 /** @brief Calculates the polynomial l_(alpha,beta)(z) = - (-1)**|alpha - beta| *
  * binom(alpha,beta) * (alpha-beta)! / (alpha - 2 beta)! |alpha - beta|! / |alpha -

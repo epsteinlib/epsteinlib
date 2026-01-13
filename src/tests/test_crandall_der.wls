@@ -42,12 +42,12 @@ h[k_][x_,\[Alpha]_]:=Module[
 	{d,n}
 	,d=Length[\[Alpha]]
 	;n=Total[\[Alpha]]
-	;cOuter[n,k,d]Total@Table[
-	Apply[Times,Power[x,2\[Gamma]-\[Alpha]]]
-	Total[Table[
-	hInner[\[Alpha],\[Beta],\[Gamma],n,k,d]
-	,{\[Beta],Tuples[Range[MapThread[Max,{0\[Alpha],\[Gamma]-\[Alpha]}],\[Gamma]-\[Alpha]/2]]}
-	]]
+		;cOuter[n,k,d]Total@Table[
+		Apply[Times,Power[x,2\[Gamma]-\[Alpha]]]
+		Total[Table[
+		hInner[\[Alpha],\[Beta],\[Gamma],n,k,d]
+		,{\[Beta],Tuples[Range[MapThread[Max,{0\[Alpha],\[Gamma]-\[Alpha]}],\[Gamma]-\[Alpha]/2]]}
+		]]
 	,{\[Gamma],Select[Tuples[Range[Ceiling[\[Alpha]/2],0\[Alpha]+Total[\[Alpha]]-k]],Total[#]==Total[\[Alpha]]-k&]}
 	]
 ]
@@ -198,11 +198,15 @@ Export["csv/coeffs_c_outer_Ref.csv",cOuterTab];
 (*Create references values for inner sum of harmonic polynomials*)
 
 
+(* ::Text:: *)
+(*Generate reference arguments.*)
+
+
 range = Range[100];
 j=1;
 While[j<=Last[range]
 	,
-	\[Alpha]0[j]={RandomInteger[{0,60}],RandomInteger[{0,60}],RandomInteger[{0,60}]}
+	\[Alpha]0[j]={RandomInteger[{0,50}],RandomInteger[{0,50}],RandomInteger[{0,50}]}
 	;k0[j]=RandomInteger[{0,Floor[Total[\[Alpha]0[j]]/2]}]
 	;tups=Select[Tuples[Range[Ceiling[\[Alpha]0[j]/2],0 \[Alpha]0[j]+Total[\[Alpha]0[j]]-k0[j]]],Total[#]==Total[\[Alpha]0[j]]-k0[j]&]
 	;If[Length[tups]==0,Continue[]]
@@ -210,6 +214,7 @@ While[j<=Last[range]
 	;tups=Tuples[Range[MapThread[Max,{0\[Alpha]0[j],\[Gamma]0[j]-\[Alpha]0[j]}],\[Gamma]0[j]-\[Alpha]0[j]/2]]
 	;If[Length[tups]==0,Continue[]]
 	;\[Beta]0[j]=RandomChoice@tups
+	;z0[j]=2{randRational,randRational,randRational};
 	;j++
 ]
 Clear[j,tups]
@@ -228,6 +233,48 @@ hInnerTab=ParallelTable[Flatten@{\[Alpha]0[j],\[Beta]0[j],\[Gamma]0[j],k0[j],N@h
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/harmonic_h_inner_Ref.csv",hInnerTab];
+
+
+(* ::Subsection:: *)
+(*Create harmonic h reference values*)
+
+
+(* ::Text:: *)
+(*Generate reference arguments.*)
+
+
+range = Range[100];
+j=1;
+While[j<=Last[range]
+	,
+	\[Alpha]0[j]={RandomInteger[{0,20}],RandomInteger[{0,20}],RandomInteger[{0,20}]}
+	;If[Total[\[Alpha]0[j]]>30,Continue[]]
+	;k0[j]=RandomInteger[{0,Floor[Total[\[Alpha]0[j]]/2]}]
+	;tups=Select[Tuples[Range[Ceiling[\[Alpha]0[j]/2],0 \[Alpha]0[j]+Total[\[Alpha]0[j]]-k0[j]]],Total[#]==Total[\[Alpha]0[j]]-k0[j]&]
+	;If[Length[tups]==0,Continue[]]
+	;\[Gamma]0[j]=RandomChoice@tups
+	;tups=Tuples[Range[MapThread[Max,{0\[Alpha]0[j],\[Gamma]0[j]-\[Alpha]0[j]}],\[Gamma]0[j]-\[Alpha]0[j]/2]]
+	;If[Length[tups]==0,Continue[]]
+	;\[Beta]0[j]=RandomChoice@tups
+	;z0[j]=2{randRational,randRational,randRational};
+	;j++
+]
+Clear[j,tups]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+hTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@h[k0[j]][z0[j],\[Alpha]0[j]]},{j,range}];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/harmonic_h_Ref.csv",hTab];
 
 
 (* ::Subsection:: *)
