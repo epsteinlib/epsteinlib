@@ -135,6 +135,37 @@ double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
                              const unsigned int *beta, const unsigned int *theta1,
                              const unsigned int *theta2);
 
+/** @brief Computes chunk offsets for precomputed inner harmonic sums
+ * corresponding to k = 0, ..., floor(|alpha|/2).
+ * For each k, chunk_size[k] stores the starting offset in the coeffs array
+ * where values corresponding to |gamma| = |alpha| - k are stored.
+ * The total length of coeffs is returned.
+ * @param[in] alphaAbs: total of alpha.
+ * @param[in] kMax: floor(|alpha|/2).
+ * @param[in] dim: dimension of alpha and gamma.
+ * @param[out] chunk_size: array of length kMax+1 storing offsets.
+ * @return total length required for coeffs array.
+ */
+unsigned long long
+precompute_harmonic_h_inner_chunk_size(unsigned int alphaAbs, unsigned int kMax,
+                                       unsigned int dim,
+                                       unsigned long long *chunk_size);
+
+/** @brief Precomputes and stores inner harmonic sums h_inner(α,γ,k)(α,γ,k)
+ * for all k = 0, ..., floor(|alpha|/2) and all gamma with |gamma| = |alpha| - k.
+ * Values are stored in coeffs starting at offsets given by chunk_size[k],
+ * with gamma ordered identically to harmonic_h_update_gamma.
+ * @param[in] alphaAbs: total of alpha.
+ * @param[in] dim: dimension of alpha and gamma.
+ * @param[in] alpha: upper multi-index.
+ * @param[in] chunk_size: starting offsets for each k.
+ * @param[out] coeffs: array storing precomputed inner harmonic sums.
+ */
+void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, unsigned int dim,
+                                     const unsigned int *alpha,
+                                     const unsigned long long *chunk_size,
+                                     double *coeffs);
+
 /** @brief Calculates the homogeneous harmonic polynomial h₍α,k₎
  * of degree |α|−2k such that y^α = ∑ₖ (y·y)^k h₍α,k₎(y);
  * explicitly, h₍α,k₎(y)=c_{|α|,k} ∑{|γ|=|α|−k} y^{2γ−α} h_inner(α,γ,k).
@@ -143,10 +174,13 @@ double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
  * @param[in] z: vector of the polynomial.
  * @param[in] alpha: upper multi-index.
  * @param[in] alphaAbs: total of alpha.
+ * @param[in] chunk_size: starting offsets for each k.
+ * @param[in] coeffs: array storing precomputed inner harmonic sums.
  * @return h₍α,k₎(z).
  */
 double harmonic_h(unsigned int k, unsigned int dim, const double *z, // NOLINT
-                  const unsigned int *alpha, unsigned int alphaAbs);
+                  const unsigned int *alpha, unsigned int alphaAbs,
+                  const unsigned long long *chunk_size, const double *coeffs);
 
 /** @brief Calculates the polynomial l_(alpha,beta)(z) = - (-1)**|alpha - beta| *
  * binom(alpha,beta) * (alpha-beta)! / (alpha - 2 beta)! |alpha - beta|! / |alpha -

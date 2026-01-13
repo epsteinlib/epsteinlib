@@ -1008,7 +1008,20 @@ int test_harmonic_h(void) {
         alphaAbs = mult_abs(dim, alpha);
 
         ref = refRead[0];
-        num = harmonic_h(*k, dim, z, alpha, alphaAbs);
+
+        // Precompute coefficients for harmonic polynomials
+        unsigned int kMax = alphaAbs / 2;
+        unsigned long long *chunk_size =
+            malloc((kMax + 1) * sizeof(unsigned long long));
+        unsigned long long coeffs_size =
+            precompute_harmonic_h_inner_chunk_size(alphaAbs, kMax, dim, chunk_size);
+        double *coeffs = (double *)malloc(coeffs_size * sizeof(double));
+        precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_size, coeffs);
+
+        num = harmonic_h(*k, dim, z, alpha, alphaAbs, chunk_size, coeffs);
+
+        free(coeffs);
+        free(chunk_size);
 
         errorAbs = errAbs(ref, num);
         errorRel = errRel(ref, num);
