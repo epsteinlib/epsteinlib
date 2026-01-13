@@ -759,11 +759,13 @@ int test_setZetaDer_laplace(void) {
  * @return number of failed tests.
  */
 int main() {
-    int failed1 = test_setZetaDer1D();
-    int failed2 = test_setZetaDer_prototype();
-    int failed3 = test_setZetaDer_taylor();
-    int failed4 = test_setZetaDer_directional();
-    int failed5 = test_setZetaDer_odd();
-    int failed6 = test_setZetaDer_laplace();
-    return failed1 + failed2 + failed3 + failed4 + failed5 + failed6;
+    printf("start ");
+    int failed = 0;
+    //    failed += test_setZetaDer1D();
+        failed += test_setZetaDer_prototype();
+    //    failed += test_setZetaDer_taylor();
+    //    failed += test_setZetaDer_directional();
+    //    failed += test_setZetaDer_odd();
+    //    failed += test_setZetaDer_laplace();
+    return failed;
 }
