@@ -236,6 +236,34 @@ Export["csv/harmonic_h_inner_Ref.csv",hInnerTab];
 
 
 (* ::Subsection:: *)
+(*Create 1D harmonic h reference values*)
+
+
+range=Range[6];
+Do[
+	\[Alpha]0[j]={11}
+	;k0[j]=j-1
+	;z0[j]={1}
+,{j,range}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+h1DTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@h[k0[j]][z0[j],\[Alpha]0[j]]},{j,range}];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/harmonic_h_1D_Ref.csv",h1DTab];
+
+
+(* ::Subsection:: *)
 (*Create harmonic h reference values*)
 
 
@@ -266,7 +294,7 @@ Clear[j,tups]
 (*Generate reference values.*)
 
 
-hTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@h[k0[j]][z0[j],\[Alpha]0[j]]},{j,range}];
+h3DTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@h[k0[j]][z0[j],\[Alpha]0[j]]},{j,range}];
 
 
 (* ::Text:: *)
@@ -274,7 +302,7 @@ hTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@h[k0[j]][z0[j],\[Alpha]
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/harmonic_h_Ref.csv",hTab];
+Export["csv/harmonic_h_3D_Ref.csv",h3DTab];
 
 
 (* ::Subsection:: *)
