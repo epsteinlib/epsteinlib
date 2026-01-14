@@ -651,7 +651,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
 
             double nuIt;
             double nuReci;
-            double resIt;
+            double complex resIt;
 
             res = 0;
             for (unsigned int k = 0; k <= kMax; k++) {
@@ -680,7 +680,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                 s2 = sum_fourier_harmonic(nuReci, k, dim, m_fourier, x_t1, y_t2,
                                           cutoffsFourier, zArgBoundReci, alpha,
                                           alphaAbs, chunk_size, coeffs);
-                printf("s2: %.16lf \n", (double)s2);
+                printf("s2: %.16lf %.16lf I\n", creal(s2), cimag(s2));
 
                 s2 = s2 * rot + nc;
 
@@ -688,15 +688,15 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                        zArgBound, alpha, alphaAbs, chunk_size,
                                        coeffs) *
                      rot * xfactor;
-                printf("s1: %.16lf \n", (double)s1);
-                printf("s2: %.16lf \n", (double)s2);
+                printf("s1: %.16lf %.16lf I\n", creal(s1), cimag(s1));
+                printf("s2: %.16lf %.16lf I\n", creal(s2), cimag(s2));
 
                 resIt = xfactor * pow(lambda * lambda / M_PI, -nuIt / 2.) /
                         tgamma(nuIt / 2.) * (s1 + pow(lambda, dim) * s2);
-                printf("resIt: %.16lf \n", resIt);
+                printf("resIt: %.16lf %.16lf I\n", creal(resIt), cimag(resIt));
                 resIt *= int_pow(-2 * M_PI * I, 2 * k) *
                          int_pow(-2 *M_PI, alphaAbs - (2 * k));
-                printf("resIt: %.16lf \n", resIt);
+                printf("resIt: %.16lf %.16lf I\n", creal(resIt), cimag(resIt));
                 res += resIt;
             }
             res *= 1. / int_pow(ms, alphaAbs);

@@ -762,7 +762,7 @@ int main() {
     printf("start ");
     int failed = 0;
     //    failed += test_setZetaDer1D();
-        failed += test_setZetaDer_prototype();
+    failed += test_setZetaDer_prototype();
     //    failed += test_setZetaDer_taylor();
     //    failed += test_setZetaDer_directional();
     //    failed += test_setZetaDer_odd();
