@@ -239,11 +239,11 @@ Export["csv/harmonic_h_inner_Ref.csv",hInnerTab];
 (*Create 1D harmonic h reference values*)
 
 
-range=Range[6];
+range=Range[100];
 Do[
-	\[Alpha]0[j]={11}
-	;k0[j]=j-1
-	;z0[j]={1}
+	\[Alpha]0[j]={RandomInteger[{0,50}]}
+	;k0[j]=RandomInteger[{0,Floor[First@\[Alpha]0[j]/2]}]
+	;z0[j]={randRational}
 ,{j,range}
 ]
 

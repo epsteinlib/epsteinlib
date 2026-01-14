@@ -979,7 +979,7 @@ int test_harmonic_h_1D(void) {
 
     int testsPassed = 0;
     int totalTests = 0;
-    double tol = 5 * pow(10, -15);
+    double tol = 5 * pow(10, -11);
 
     unsigned int alphaAbs;
 

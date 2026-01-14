@@ -9,7 +9,7 @@
 (*Unit tests for epsteinZetaDer in epsteinZeta.c*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Setup*)
 
 
@@ -17,7 +17,7 @@
 (*Load Mathematica wrapper in every kernel. Remove the "Quiet" if unsure about the parallel evaluation.*)
 
 
-BaseDirectory=FileNameJoin[{NotebookDirectory[], "..", "..", "mathematica"}];
+BaseDirectory=FileNameJoin[{NotebookDirectory[],"..", "..", "mathematica"}];
 SetDirectory[BaseDirectory];<<"EpsteinZeta.wl";
 ParallelEvaluate[SetDirectory[BaseDirectory];Quiet[<<"EpsteinZeta.wl"]];
 
@@ -79,17 +79,10 @@ SetZeta[\[Nu]_,a_,x_,y_]:=Exp[2 Pi I x . y]EpsteinZeta[\[Nu],a,x,y]
 
 
 (* ::Text:: *)
-(*(Stable) analytic derivatives in 1D in x = y = 0.*)
+(*(Stable) analytic even derivatives in 1D.*)
 
 
-SetZetaDerAnalytic[\[Nu]_,{{a_}},{0},{0},{n_}]:=Piecewise[{{Abs[1/a]^(\[Nu]-n)(-2Pi I)^n 2 Zeta[\[Nu]-n],EvenQ[n]},{0,OddQ[n]}}]
-
-
-(* ::Text:: *)
-(*(Unstable) analytic derivatives in 1D for x = 0.*)
-
-
-SetZetaDerAnalytic[\[Nu]_,{{a_}},{0},{y_},{n_}]:=Abs[1/a]^(\[Nu]-n)Re@Derivative[n][2 LerchPhi[Exp[-2 Pi I #],\[Nu],0]&][a y]
+SetZetaDerAnalytic[\[Nu]_,{{a_}},{x_},{y_},{n_?EvenQ}]:=(-4 Pi^2)^Floor[n/2] SetZetaDer[\[Nu]-Floor[n],{{a}},{x},{y},{0}]
 
 
 (* ::Text:: *)
@@ -208,13 +201,13 @@ setZetaDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modu
 (*Setup test parameters.*)
 
 
-range = Range[100];
+range = Range[50];
 Do[
 	\[Nu]1D[i]=10 randRational
 	;a1D[i]={{1/2+i/100}}
-	;x1D[i]={0}
-	;y1D[i]=If[i<50,{0},{randRational}]
-	;n1D[i]={randDerivative}
+	;x1D[i]=If[i<5,{0},{randRational}]
+	;y1D[i]=If[i<10,{0},{randRational}]
+	;n1D[i]={RandomInteger[{0,6}]}
 	,{i,range}
 ]
 
@@ -224,11 +217,11 @@ Do[
 
 
 zDerTab1D=ParallelTable[
-	With[{result=SetPrecision[SetZetaDerAnalytic[\[Nu]1D[i],a1D[i],x1D[i],y1D[i],n1D[i]],60]}
-	,Flatten[{N[\[Nu]1D[i],30]
-	,N[a1D[i],30]
-	,N[x1D[i],30]
-	,N[y1D[i],30]
+	With[{result=N[setZetaDerHarmonic[\[Nu]1D[i],a1D[i],x1D[i],y1D[i],n1D[i],InputPrecision->100,SumLim->8]]}
+	,Flatten[{N[\[Nu]1D[i]]
+	,N[a1D[i]]
+	,N[x1D[i]]
+	,N[y1D[i]]
 	,n1D[i]
 	,Re[result]
 	,Im[result]
