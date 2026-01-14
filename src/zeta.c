@@ -664,6 +664,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
 
                 // calculate set zeta derivative function values.
                 rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
+
                 if (equals(dim, y_t1, y_t2)) {
                     printf("first path\n");
                     nc = harmonic_h(k, dim, y_t1, alpha, alphaAbs, chunk_size,
@@ -690,8 +691,9 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                      rot * xfactor;
                 printf("s1: %.16lf %.16lf I\n", creal(s1), cimag(s1));
                 printf("s2: %.16lf %.16lf I\n", creal(s2), cimag(s2));
+                printf("xfactor: %.16lf %.16lf I\n", creal(xfactor), cimag(xfactor));
 
-                resIt = xfactor * pow(lambda * lambda / M_PI, -nuIt / 2.) /
+                resIt = pow(lambda * lambda / M_PI, -nuIt / 2.) /
                         tgamma(nuIt / 2.) * (s1 + pow(lambda, dim) * s2);
                 printf("resIt: %.16lf %.16lf I\n", creal(resIt), cimag(resIt));
                 resIt *= int_pow(-2 * M_PI * I, 2 * k) *
