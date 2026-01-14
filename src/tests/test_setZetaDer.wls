@@ -253,9 +253,10 @@ Export["csv/setZetaDer_1D_Ref.csv",zDerTab1D];
 
 
 range = Range[100];
+AHex={{1,1/2},{0,Sqrt[3]/2}};
 Do[
 	\[Nu]0[i]=10 randRational
-	;a0[i]={{1,1/2},{0,Sqrt@3/2}}
+	;a0[i]=AHex
 	;x0[i]=If[i<10,{0,0},{randRational,randRational}]
 	;y0[i]={randRational,randRational}
 	;\[Alpha]0[i]={randDerivative,randDerivative}
@@ -282,8 +283,30 @@ zDerTab=ParallelTable[
 	,\[Alpha]0[i][[2]]
 	,Re[result]
 	,Im[result]
-	}],{i,1}
+	}],{i,range}
 ];
+
+
+(* ::Text:: *)
+(*Append specific test values.*)
+
+
+zDerTab=Join[zDerTab,{
+Flatten@{N@1/2,N@IdentityMatrix@2,{0.,0.},{0.,0.},{2,0},N@setZetaDer[1/2,IdentityMatrix@2,{0,0},{0,0},{2,0}],0.}
+,Flatten@{N@1/2,N@IdentityMatrix@2,{0.,0.},{.1,.2},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{0,0},{1,2}/10,{2,0}]}}
+,Flatten@{N@1/2,N@IdentityMatrix@2,{.1,.2},{0.,0.},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{1,2}/10,{0,0},{2,0}]}}
+,Flatten@{N@1/2,N@AHex,{.1,.2},{0.,0.},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,AHex,{1,2}/10,{0,0},{2,0}]}}
+,Flatten@{N@1/2,N@AHex,{0.,0.},{.1,0.3},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,AHex,{0.,0.},{1,3}/10,{2,0}]}}
+,Flatten@{N@1/2,N@AHex,{.1,.2},{.1,0.3},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,AHex,{1,2}/10,{1,3}/10,{2,0}]}}
+,Flatten@{N@1/2,N@IdentityMatrix@2,{3.,4.},{0.,0.},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{3,4},{0,0},{2,0}]}}
+,Flatten@{N@1/2,N@IdentityMatrix@2,{0.,0.},{3.,4.},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{0,0},{3,4},{2,0}]}}
+,Flatten@{N@1/2,N@AHex,{1.1,3.2},{0.,0.},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,AHex,{1,3}+{1,2}/10,{0,0},{2,0}]}}
+,Flatten@{N@1/2,N@AHex,{0.,0.},{1.1,3.2},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,AHex,{0,0},{1,3}+{1,2}/10,{2,0}]}}
+,Flatten@{N@1/2,N@IdentityMatrix@2,1.+{.1,.2},{.0,.0},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,1+{1,2}/10,{0,0},{2,0}]}}
+,Flatten@{N@1/2,N@IdentityMatrix@2,1.+{.1,.2},{.1,.0},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,1+{1,2}/10,{1,0}/10,{2,0}]}}
+,Flatten@{N@1/2,N@IdentityMatrix@2,1.+{.1,.2},3+{.1,.0},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,1+{1,2}/10,3+{1,0}/10,{2,0}]}}
+,Flatten@{N@1/2,N@IdentityMatrix@2,1.+{.1,.2},3+{.1,.0},{2,4},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,1+{1,2}/10,3+{1,0}/10,{2,4}]}}
+}]
 
 
 Options[setZetaDerHarmonic]={InputPrecision->100,SumLim->10};
@@ -361,7 +384,7 @@ setZetaDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modu
 	]
 	;Return[\[Mu]^(Total[\[Alpha]]-\[Nu]True)res]
 ]
-setZetaDerHarmonic[1/2,IdentityMatrix@2,{0,0},{1,2}/10,{2,0}]
+setZetaDerHarmonic[1/2,IdentityMatrix@2,1+{1,2}/10,{1,0}/10,{2,0}]
 
 
 -3.9360571568058997
@@ -375,7 +398,21 @@ Abs[%-%%]
 zDerTab=Join[{
 Flatten@{N@1/2,N@IdentityMatrix@2,{0.,0.},{0.,0.},{2,0},N@setZetaDer[1/2,IdentityMatrix@2,{0,0},{0,0},{2,0}],0.}
 ,Flatten@{N@1/2,N@IdentityMatrix@2,{0.,0.},{.1,.2},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{0,0},{1,2}/10,{2,0}]}}
+,Flatten@{N@1/2,N@IdentityMatrix@2,{.1,.2},{0.,0.},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{1,2}/10,{0,0},{2,0}]}}
+,Flatten@{N@1/2,N@AHex,{.1,.2},{0.,0.},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,AHex,{1,2}/10,{0,0},{2,0}]}}
+,Flatten@{N@1/2,N@AHex,{0.,0.},{.1,0.3},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,AHex,{0.,0.},{1,3}/10,{2,0}]}}
+,Flatten@{N@1/2,N@AHex,{.1,.2},{.1,0.3},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,AHex,{1,2}/10,{1,3}/10,{2,0}]}}
+,Flatten@{N@1/2,N@IdentityMatrix@2,{3.,4.},{0.,0.},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{3,4},{0,0},{2,0}]}}
+,Flatten@{N@1/2,N@IdentityMatrix@2,{0.,0.},{3.,4.},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{0,0},{3,4},{2,0}]}}
+,Flatten@{N@1/2,N@AHex,{1.1,3.2},{0.,0.},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,AHex,{1,3}+{1,2}/10,{0,0},{2,0}]}}
+,Flatten@{N@1/2,N@AHex,{0.,0.},{1.1,3.2},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,AHex,{0,0},{1,3}+{1,2}/10,{2,0}]}}
+,Flatten@{N@1/2,N@IdentityMatrix@2,1.+{.1,.2},{.0,.0},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,1+{1,2}/10,{0,0},{2,0}]}}
+,Flatten@{N@1/2,N@IdentityMatrix@2,1.+{.1,.2},{.1,.0},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,1+{1,2}/10,{1,0}/10,{2,0}]}}
+,Flatten@{N@1/2,N@IdentityMatrix@2,1.+{.1,.2},3+{.1,.0},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,1+{1,2}/10,3+{1,0}/10,{2,0}]}}
+,Flatten@{N@1/2,N@IdentityMatrix@2,1.+{.1,.2},3+{.1,.0},{2,4},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,1+{1,2}/10,3+{1,0}/10,{2,4}]}}
 }]
+SetDirectory[NotebookDirectory[]];
+Export["csv/setZetaDer_prototype_Ref.csv",zDerTab];
 
 
 zDerTab={Last@zDerTab}
@@ -383,6 +420,9 @@ zDerTab={Last@zDerTab}
 
 (* ::Text:: *)
 (*Save reference values to file.*)
+
+
+zDerTab
 
 
 SetDirectory[NotebookDirectory[]];
