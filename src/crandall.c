@@ -186,10 +186,16 @@ double polynomial_p(unsigned int dim, const double *z, const unsigned int *alpha
  * @return cₙ,ₖ.
  */
 double coeffs_c_outer(long long n, long long k, long long dim) {
-    double res = 1. / int_pow(2, k);
+
+    long long num;
+    long long den;
+    long long a = (2 * n) + dim;
+
+    double res = ldexp(1.0, -(int)k);
     for (long long j = 1; j < k + 1; j++) {
-        res *= (double)((2 * n) + dim - (2 * j)) /
-               (double)((2 * n + dim + 2 - 4 * j) * (2 * n + dim - 4 * j));
+        num = a - (2 * j);
+        den = (a + 2 - (4 * j)) * (a - (4 * j));
+        res *= (double)num / (double)den;
     }
     return res;
 }
