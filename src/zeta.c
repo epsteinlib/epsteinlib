@@ -435,7 +435,17 @@ double complex sum_fourier_harmonic(double nu, unsigned int kIndex, unsigned int
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] + y[i];
         }
-        double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
+
+       double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
+        if (lv[0]==-0.9 && lv[1] == 2.2) {
+            printf("success1\n");
+            printf("k: %.16lf \n", (double)kIndex );
+            printf("nuIt: %.16lf \n", (double) (dim -nu) );
+            printf("harmonic: %.16lf \n", (double) harmonic_h(kIndex, dim, lv, alpha, alphaAbs, chunk_size, coeffs));
+            printf("g: %.16lf \n", (double) crandall_g(dim, dim - nu, lv, lambda, zArgBound));
+            printf("rot: %.16lf \n", (double) rot);
+        }
+ 
         auxy = rot *
                    harmonic_h(kIndex, dim, lv, alpha, alphaAbs, chunk_size, coeffs) *
                    crandall_g(dim, dim - nu, lv, lambda, zArgBound) -
@@ -627,6 +637,8 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                  rot * xfactor;
             xfactor = 1;
         } else if (variant == 2) {
+
+
             // Precompute coefficients for harmonic polynomials once
             unsigned int kMax = alphaAbs / 2;
             unsigned long long *chunk_size =
@@ -643,8 +655,10 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
 
             res = 0;
             for (unsigned int k = 0; k <= kMax; k++) {
+
+            printf("\n");
                 nuIt = nu - (2 * k);
-                printf("potato: %.16lf \n", (double)nuIt);
+                printf("potato: %.16lf \n", nuIt);
                 nuReci = nuIt - (2 * alphaAbs) + (4 * k);
                 double zArgBoundReci = assignzArgBound(dim - nuReci);
 
@@ -663,7 +677,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                          cexp(-2 * M_PI * I * dot(dim, y_t2, x_t1)) * rot;
                 }
 
-                s2 = sum_fourier_harmonic(nuIt, k, dim, m_fourier, x_t1, y_t2,
+                s2 = sum_fourier_harmonic(nuReci, k, dim, m_fourier, x_t1, y_t2,
                                           cutoffsFourier, zArgBoundReci, alpha,
                                           alphaAbs, chunk_size, coeffs);
                 printf("s2: %.16lf \n", (double)s2);
@@ -679,10 +693,10 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
 
                 resIt = xfactor * pow(lambda * lambda / M_PI, -nuIt / 2.) /
                         tgamma(nuIt / 2.) * (s1 + pow(lambda, dim) * s2);
-                printf("resIt: %.16lf \n", (double)resIt);
+                printf("resIt: %.16lf \n", resIt);
                 resIt *= int_pow(-2 * M_PI * I, 2 * k) *
-                         int_pow(-M_PI, alphaAbs - (2 * k));
-                printf("resIt: %.16lf \n", (double)resIt);
+                         int_pow(-2 *M_PI, alphaAbs - (2 * k));
+                printf("resIt: %.16lf \n", resIt);
                 res += resIt;
             }
             res *= 1. / int_pow(ms, alphaAbs);
