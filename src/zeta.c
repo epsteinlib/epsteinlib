@@ -21,8 +21,6 @@
 
 #include "zeta.h"
 
-#include <stdio.h>
-
 /*!
    @brief Smallest value z such that G(nu, z) is negligible for
    nu < 10.
@@ -436,16 +434,8 @@ double complex sum_fourier_harmonic(double nu, unsigned int kIndex, unsigned int
             lv[i] = lv[i] + y[i];
         }
 
-       double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
-        if (lv[0]==-0.9 && lv[1] == 2.2) {
-            printf("success1\n");
-            printf("k: %.16lf \n", (double)kIndex );
-            printf("nuIt: %.16lf \n", (double) (dim -nu) );
-            printf("harmonic: %.16lf \n", (double) harmonic_h(kIndex, dim, lv, alpha, alphaAbs, chunk_size, coeffs));
-            printf("g: %.16lf \n", (double) crandall_g(dim, dim - nu, lv, lambda, zArgBound));
-            printf("rot: %.16lf \n", (double) rot);
-        }
- 
+        double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
+
         auxy = rot *
                    harmonic_h(kIndex, dim, lv, alpha, alphaAbs, chunk_size, coeffs) *
                    crandall_g(dim, dim - nu, lv, lambda, zArgBound) -
@@ -638,7 +628,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             xfactor = 1;
         } else if (variant == 2) {
 
-
             // Precompute coefficients for harmonic polynomials once
             unsigned int kMax = alphaAbs / 2;
             unsigned long long *chunk_size =
@@ -656,9 +645,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             res = 0;
             for (unsigned int k = 0; k <= kMax; k++) {
 
-            printf("\n");
                 nuIt = nu - (2 * k);
-                printf("potato: %.16lf \n", nuIt);
                 nuReci = nuIt - (2 * alphaAbs) + (4 * k);
                 double zArgBoundReci = assignzArgBound(dim - nuReci);
 
@@ -666,11 +653,9 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                 rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
 
                 if (equals(dim, y_t1, y_t2)) {
-                    printf("first path\n");
                     nc = harmonic_h(k, dim, y_t1, alpha, alphaAbs, chunk_size,
                                     coeffs) *
                          crandall_g(dim, dim - nuReci, y_t1, lambda, zArgBoundReci);
-                    printf("nc: %.16lf \n", (double)nc);
                 } else {
                     nc = harmonic_h(k, dim, y_t2, alpha, alphaAbs, chunk_size,
                                     coeffs) *
@@ -681,7 +666,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                 s2 = sum_fourier_harmonic(nuReci, k, dim, m_fourier, x_t1, y_t2,
                                           cutoffsFourier, zArgBoundReci, alpha,
                                           alphaAbs, chunk_size, coeffs);
-                printf("s2: %.16lf %.16lf I\n", creal(s2), cimag(s2));
 
                 s2 = s2 * rot + nc;
 
@@ -689,16 +673,10 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                        zArgBound, alpha, alphaAbs, chunk_size,
                                        coeffs) *
                      rot * xfactor;
-                printf("s1: %.16lf %.16lf I\n", creal(s1), cimag(s1));
-                printf("s2: %.16lf %.16lf I\n", creal(s2), cimag(s2));
-                printf("xfactor: %.16lf %.16lf I\n", creal(xfactor), cimag(xfactor));
-
-                resIt = pow(lambda * lambda / M_PI, -nuIt / 2.) /
-                        tgamma(nuIt / 2.) * (s1 + pow(lambda, dim) * s2);
-                printf("resIt: %.16lf %.16lf I\n", creal(resIt), cimag(resIt));
+                resIt = pow(lambda * lambda / M_PI, -nuIt / 2.) / tgamma(nuIt / 2.) *
+                        (s1 + pow(lambda, dim) * s2);
                 resIt *= int_pow(-2 * M_PI * I, 2 * k) *
-                         int_pow(-2 *M_PI, alphaAbs - (2 * k));
-                printf("resIt: %.16lf %.16lf I\n", creal(resIt), cimag(resIt));
+                         int_pow(-2 * M_PI, alphaAbs - (2 * k));
                 res += resIt;
             }
             res *= 1. / int_pow(ms, alphaAbs);
