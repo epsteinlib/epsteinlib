@@ -26,6 +26,33 @@
 #define BASE_PATH "csv"
 #endif
 
+/** @brief Computes a single summand of h_inner; explicitly
+ * (−1)^{i} / cₙ,ᵢ,ₖ binom(i+k,k) binom(i,β) binom(α,θ₁) θ₂! / (θ₂ - θ₁)!,
+ * where n=|α|, i=|β|, θ₁=α+β−γ, θ₂=γ−β.
+ * @param[in] n: index (total of alpha).
+ * @param[in] i: index (total of beta).
+ * @param[in] k: index (specifies degree |alpha| - 2k).
+ * @param[in] dim: dimension of the multi-indices.
+ * @param[in] beta: lower multi-index β.
+ * @param[in] alpha: upper multi-index α.
+ * @param[in] theta1: multi-index α+β−γ.
+ * @param[in] theta2: multi-index γ−β.
+ * @return value of one summand in of h_inner.
+ */
+static double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
+                                    unsigned int dim, const unsigned int *alpha,
+                                    const unsigned int *beta,
+                                    const unsigned int *theta1,
+                                    const unsigned int *theta2) {
+
+    double res = 1;
+
+    res *= harmonic_h_inner_term_scalar(n, i, k, dim);
+    res *= harmonic_h_inner_term_multi(dim, alpha, beta, theta1, theta2);
+
+    return res;
+}
+
 /*!
  * @brief Benchmarks 3D polynomial_p function by comparing to high-precision values
  * over a range of random parameters.

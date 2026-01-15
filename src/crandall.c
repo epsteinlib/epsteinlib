@@ -216,46 +216,52 @@ double coeffs_c_inner(long long n, long long i, long long k, long long dim) {
     return res;
 }
 
-/** @brief Computes a single summand of h_inner; explicitly
- * (−1)^{i} / cₙ,ᵢ,ₖ binom(i+k,k) binom(i,β) binom(α,θ₁) θ₂! / (θ₂ - θ₁)!,
- * where n=|α|, i=|β|, θ₁=α+β−γ, θ₂=γ−β.
+/** @brief Computes the first three scalar terms of a single summand of h_inner;
+ * explicitly (−1)^{i} / cₙ,ᵢ,ₖ · binom(i+k,k).
  * @param[in] n: index (total of alpha).
  * @param[in] i: index (total of beta).
  * @param[in] k: index (specifies degree |alpha| - 2k).
  * @param[in] dim: dimension of the multi-indices.
- * @param[in] beta: lower multi-index β.
- * @param[in] alpha: upper multi-index α.
- * @param[in] theta1: multi-index α+β−γ.
- * @param[in] theta2: multi-index γ−β.
- * @return value of one summand in of h_inner.
+ * @return partial value of one summand in of h_inner.
  */
-double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
-                             unsigned int dim, const unsigned int *alpha,
-                             const unsigned int *beta, const unsigned int *theta1,
-                             const unsigned int *theta2) {
+double harmonic_h_inner_term_scalar(unsigned int n, unsigned int i, unsigned int k,
+                                    unsigned int dim) {
 
     double res = 1;
 
-    // multiply non-integer parts of the product
     res *= int_pow(-1, i) / coeffs_c_inner(n, i, k, dim);
 
-    // binom(i+k, k)
     res *= (double)binom((long long)(i + k), (long long)k);
 
-    // binom(|beta|, beta)
-    unsigned long long betaAbsDim = 0; // Counter for beta1, beta1+beta2, ...
+    return res;
+}
+
+/** @brief Computes the multi-index dependent terms of a single summand of h_inner;
+ * explicitly binom(i,β) · binom(α,θ₁) · θ₂! / (θ₂ - θ₁)!.
+ * @param[in] dim: dimension of the multi-indices.
+ * @param[in] alpha: upper multi-index α.
+ * @param[in] beta: lower multi-index β.
+ * @param[in] theta1: multi-index α+β−γ.
+ * @param[in] theta2: multi-index γ−β.
+ * @return partial value of one summand in of h_inner.
+ */
+double harmonic_h_inner_term_multi(unsigned int dim, const unsigned int *alpha,
+                                   const unsigned int *beta,
+                                   const unsigned int *theta1,
+                                   const unsigned int *theta2) {
+
+    double res = 1;
+
+    unsigned long long betaAbsDim = 0;
     for (int j = 0; j < dim; j++) {
         betaAbsDim += beta[j];
         res *= (double)binom(betaAbsDim, (long long)beta[j]);
     }
 
-    // binom(α,θ₁)
     for (int j = 0; j < dim; j++) {
         res *= (double)binom((long long)alpha[j], (long long)theta1[j]);
     }
 
-    // multiply components of θ₂! / (θ₂ - θ₁)!
-    // compute as double as overflow danger here
     for (int j = 0; j < dim; j++) {
         for (unsigned int l = theta2[j] - theta1[j] + 1; l < theta2[j] + 1; l++) {
             res *= (double)l;
@@ -298,6 +304,14 @@ static double complex harmonic_h_inner_sum(unsigned int k, // NOLINT
     int done;
     int skip;
 
+    // Precompute the scalar terms of the inner sum
+    unsigned int lastScalarIndex = (alphaAbs / 2) - k;
+    double harmonic_h_inner_term_scalar_coeffs[lastScalarIndex + 1];
+    for (unsigned int i = 0; i <= lastScalarIndex; i++) {
+        harmonic_h_inner_term_scalar_coeffs[i] =
+            harmonic_h_inner_term_scalar(alphaAbs, i, k, dim);
+    }
+
     double complex sumInner = 0.0;
     double complex epsilonInner = 0.0;
     double complex auxtInner;
@@ -330,9 +344,11 @@ static double complex harmonic_h_inner_sum(unsigned int k, // NOLINT
             }
             redotheta2 = 0;
 
-            auxyInner = harmonic_h_inner_term(alphaAbs, betaAbs, k, dim, alpha, beta,
-                                              theta1, theta2) -
-                        epsilonInner;
+            auxyInner =
+                harmonic_h_inner_term_scalar_coeffs[betaAbs] * // NOLINT
+                    harmonic_h_inner_term_multi(dim, alpha, beta, theta1, theta2) -
+                epsilonInner;
+
             auxtInner = sumInner + auxyInner;
             epsilonInner = (auxtInner - sumInner) - auxyInner;
             sumInner = auxtInner;

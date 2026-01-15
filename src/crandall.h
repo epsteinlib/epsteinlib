@@ -117,23 +117,30 @@ double coeffs_c_outer(long long n, long long k, long long dim);
  */
 double coeffs_c_inner(long long n, long long i, long long k, long long dim);
 
-/** @brief Computes a single summand of h_inner; explicitly
- * (−1)^{i} / cₙ,ᵢ,ₖ binom(i+k,k) binom(i,β) binom(α,θ₁) θ₂! / (θ₂ - θ₁)!,
- * where n=|α|, i=|β|, θ₁=α+β−γ, θ₂=γ−β, θ₃=2γ−α−2β.
+/** @brief Computes the first three scalar terms of a single summand of h_inner;
+ * explicitly (−1)^{i} / cₙ,ᵢ,ₖ · binom(i+k,k).
  * @param[in] n: index (total of alpha).
  * @param[in] i: index (total of beta).
  * @param[in] k: index (specifies degree |alpha| - 2k).
  * @param[in] dim: dimension of the multi-indices.
- * @param[in] beta: lower multi-index β.
+ * @return partial value of one summand in of h_inner.
+ */
+double harmonic_h_inner_term_scalar(unsigned int n, unsigned int i, unsigned int k,
+                                    unsigned int dim);
+
+/** @brief Computes the multi-index dependent terms of a single summand of h_inner;
+ * explicitly binom(i,β) · binom(α,θ₁) · θ₂! / (θ₂ - θ₁)!.
+ * @param[in] dim: dimension of the multi-indices.
  * @param[in] alpha: upper multi-index α.
+ * @param[in] beta: lower multi-index β.
  * @param[in] theta1: multi-index α+β−γ.
  * @param[in] theta2: multi-index γ−β.
- * @return value of one summand in of h_inner.
+ * @return partial value of one summand in of h_inner.
  */
-double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
-                             unsigned int dim, const unsigned int *alpha,
-                             const unsigned int *beta, const unsigned int *theta1,
-                             const unsigned int *theta2);
+double harmonic_h_inner_term_multi(unsigned int dim, const unsigned int *alpha,
+                                   const unsigned int *beta,
+                                   const unsigned int *theta1,
+                                   const unsigned int *theta2);
 
 /** @brief Computes chunk offsets for precomputed inner harmonic sums
  * corresponding to k = 0, ..., floor(|alpha|/2).
