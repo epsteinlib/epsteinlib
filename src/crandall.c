@@ -304,19 +304,16 @@ static double complex harmonic_h_inner_sum(unsigned int k, // NOLINT
     int done;
     int skip;
 
-    // Precompute the scalar terms of the inner sum
+    // scalar terms of the inner sum
     unsigned int lastScalarIndex = (alphaAbs / 2) - k;
-    double harmonic_h_inner_term_scalar_coeffs[lastScalarIndex + 1];
+    double scalar_coeffs[lastScalarIndex + 1];
+    double multi_coeffs[lastScalarIndex + 1];
     for (unsigned int i = 0; i <= lastScalarIndex; i++) {
-        harmonic_h_inner_term_scalar_coeffs[i] =
-            harmonic_h_inner_term_scalar(alphaAbs, i, k, dim);
+        scalar_coeffs[i] = harmonic_h_inner_term_scalar(alphaAbs, i, k, dim);
+        multi_coeffs[i] = 0;
     }
 
-    double complex sumInner = 0.0;
-    double complex epsilonInner = 0.0;
-    double complex auxtInner;
-    double complex auxyInner;
-
+    // multi-index terms of the inner sum
     while (1) {
 
         skip = 0;
@@ -344,14 +341,8 @@ static double complex harmonic_h_inner_sum(unsigned int k, // NOLINT
             }
             redotheta2 = 0;
 
-            auxyInner =
-                harmonic_h_inner_term_scalar_coeffs[betaAbs] * // NOLINT
-                    harmonic_h_inner_term_multi(dim, alpha, beta, theta1, theta2) -
-                epsilonInner;
-
-            auxtInner = sumInner + auxyInner;
-            epsilonInner = (auxtInner - sumInner) - auxyInner;
-            sumInner = auxtInner;
+            multi_coeffs[betaAbs] += // NOLINT
+                harmonic_h_inner_term_multi(dim, alpha, beta, theta1, theta2);
         }
 
         done = 1;
@@ -372,6 +363,20 @@ static double complex harmonic_h_inner_sum(unsigned int k, // NOLINT
         if (done) {
             break;
         }
+    }
+
+    double sumInner = 0.0;
+    double epsilonInner = 0.0;
+    double auxtInner;
+    double auxyInner;
+
+    // combine scalar coeffs with accumulated multi-index coeffs
+    for (unsigned int i = 0; i <= lastScalarIndex; i++) {
+        auxyInner = scalar_coeffs[i] * multi_coeffs[i] - epsilonInner;
+
+        auxtInner = sumInner + auxyInner;
+        epsilonInner = (auxtInner - sumInner) - auxyInner;
+        sumInner = auxtInner;
     }
 
     return sumInner;
