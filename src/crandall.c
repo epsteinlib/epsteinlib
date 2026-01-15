@@ -209,7 +209,7 @@ double coeffs_c_outer(long long n, long long k, long long dim) {
  * @return cₙ,ᵢ,ₖ.
  */
 double coeffs_c_inner(long long n, long long i, long long k, long long dim) {
-    double res = int_pow(2, i);
+    double res = ldexp(1.0, (int)i);
     for (long long j = 1; j < i + 1; j++) {
         res *= (double)((2 * n) + dim - 2 - (4 * k) - (2 * j));
     }
@@ -227,11 +227,13 @@ double coeffs_c_inner(long long n, long long i, long long k, long long dim) {
 double harmonic_h_inner_term_scalar(unsigned int n, unsigned int i, unsigned int k,
                                     unsigned int dim) {
 
-    double res = 1;
+    double res = (double)binom((long long)(i + k), (long long)k) /
+                 coeffs_c_inner(n, i, k, dim);
 
-    res *= int_pow(-1, i) / coeffs_c_inner(n, i, k, dim);
-
-    res *= (double)binom((long long)(i + k), (long long)k);
+    // (-1) ** i
+    if (i & 1) {
+        res = -res;
+    }
 
     return res;
 }
