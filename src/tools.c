@@ -11,6 +11,7 @@
  * factorials.
  */
 
+#include "tools.h"
 #include <complex.h>
 #include <math.h>
 #include <stdbool.h>
@@ -19,6 +20,53 @@
  * @brief minimal distance of two vector elements considered unequal.
  */
 #define EPS ldexp(1, -32)
+
+/** @brief Count trailing zero bits in a 64-bit unsigned integer.
+ * @param[in] x: input value
+ * @return number of trailing zeros (0..63); returns 64 if x == 0
+ */
+unsigned ctz64(unsigned long long x) {
+    if (x == 0) {
+        return 64;
+    }
+    unsigned n = 0;
+    while ((x & 1) == 0) {
+        x >>= 1;
+        n++;
+    }
+    return n;
+}
+
+/** @brief Find index of most significant bit in a 32-bit unsigned integer.
+ * @param[in] x: input value
+ * @return bit index 0..31; returns 0 for x == 0 (defensive fallback)
+ */
+int msb32(unsigned int x) {
+    if (x == 0) {
+        return 0;
+    }
+    int n = 0;
+    if (x >= 0x10000) {
+        n += 16;
+        x >>= 16;
+    }
+    if (x >= 0x100) {
+        n += 8;
+        x >>= 8;
+    }
+    if (x >= 0x10) {
+        n += 4;
+        x >>= 4;
+    }
+    if (x >= 0x4) {
+        n += 2;
+        x >>= 2;
+    }
+    if (x >= 0x2) {
+        n += 1;
+    }
+    return n;
+}
 
 /**
  * @brief euclidean dot product.
