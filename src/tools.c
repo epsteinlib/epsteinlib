@@ -68,6 +68,35 @@ int msb32(unsigned int x) {
     return n;
 }
 
+/** @brief Initialize apint from unsigned long long with sign.
+ * @param[out] a: destination apint
+ * @param[in] x: unsigned integer value
+ * @param[in] sign: +1 or -1
+ */
+void apint_set_ull(apint_t *a, unsigned long long x, signed char sign) {
+    if (x == 0) {
+        a->n = 0;
+        a->exp2 = 0;
+        a->sign = 1; // canonical zero
+        return;
+    }
+
+    // Extract and remove trailing zeros
+    unsigned tz = ctz64(x);
+    x >>= tz;
+
+    // Split into limbs (little-endian)
+    a->limb[0] = (unsigned int)(x & 0xFFFFFFFFULL);
+    a->limb[1] = (unsigned int)(x >> 32);
+
+    // Set number of used limbs
+    a->n = (a->limb[1] != 0) ? 2 : 1;
+
+    // Store exponent and sign
+    a->exp2 = (int)tz;
+    a->sign = sign;
+}
+
 /**
  * @brief euclidean dot product.
  * @param[in] dim: dimension of the input vectors

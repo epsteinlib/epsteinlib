@@ -90,14 +90,93 @@ int test_ctzmsb(void) {
     printf("\n\t ... %d out of %d tests passed.", testsPassed, totalTests);
     printf("\n");
     return totalTests - testsPassed;
-} /*!
-   * @brief Main function to run all set zeta derivatives function tests.
-   *
-   * @return number of failed tests.
-   */
+}
+
+/*!
+ * @brief Tests apint_set_ull function against Mathematica reference values
+ *
+ * @return number of failed tests.
+ * */
+int test_apint_set_ull(void) {
+    printf("%s ", __func__);
+    char path[MAX_PATH_LENGTH];
+    int result = snprintf(path, sizeof(path), "%s/apint_set_ull_Ref.csv", BASE_PATH);
+    if (result < 0 || result >= sizeof(path)) {
+        return fprintf(stderr, "Error creating file path\n");
+    }
+    FILE *data = fopen(path, "r");
+    if (data == NULL) {
+        return fprintf(stderr, "Error opening file: %s\n", path);
+    }
+    unsigned long long x;
+    int sign_input;
+    unsigned int limb0_expected;
+    unsigned int limb1_expected;
+    int n_expected;
+    int exp2_expected;
+    int sign_expected;
+    int scanResult;
+    char line[256];
+    int testsPassed = 0;
+    int totalTests = 0;
+    printf("\n\t ... ");
+    printf("processing %s ", path);
+    while (fgets(line, sizeof(line), data) != NULL) {
+        scanResult =
+            sscanf(line, "%llu,%d,%u,%u,%d,%d,%d", &x, &sign_input, // NOLINT
+                   &limb0_expected, &limb1_expected, &n_expected, &exp2_expected,
+                   &sign_expected);
+        if (scanResult != 7) {
+            printf("\n\t Error reading line: %s", line);
+            printf("\t Scanned %d values instead of 7", scanResult);
+            continue;
+        }
+
+        apint_t a;
+        apint_set_ull(&a, x, (signed char)sign_input);
+
+        int passed;
+        if (x == 0) {
+            // For zero: only check n, exp2, sign
+            passed = (a.n == n_expected && a.exp2 == exp2_expected &&
+                      a.sign == sign_expected);
+        } else {
+            // For non-zero: check all fields
+            passed = (a.limb[0] == limb0_expected && a.limb[1] == limb1_expected &&
+                      a.n == n_expected && a.exp2 == exp2_expected &&
+                      a.sign == sign_expected);
+        }
+
+        if (passed) {
+            testsPassed++;
+        } else {
+            printf("\n\nWarning! ");
+            printf(
+                "x=%llu, sign=%d: limb[0]=%u (expected %u), limb[1]=%u (expected "
+                "%u), "
+                "n=%d (expected %d), exp2=%d (expected %d), sign=%d (expected %d)\n",
+                x, sign_input, a.limb[0], limb0_expected, a.limb[1], limb1_expected,
+                a.n, n_expected, a.exp2, exp2_expected, a.sign, sign_expected);
+        }
+        totalTests++;
+    }
+    if (fclose(data) != 0) {
+        return fprintf(stderr, "Error closing file: %d", errno);
+    }
+    printf("\n\t ... %d out of %d tests passed.", testsPassed, totalTests);
+    printf("\n");
+    return totalTests - testsPassed;
+}
+
+/*!
+ * @brief Main function to run all set zeta derivatives function tests.
+ *
+ * @return number of failed tests.
+ */
 int main() {
     printf("start ");
     int failed = 0;
     failed += test_ctzmsb();
+    failed += test_apint_set_ull();
     return failed;
 }

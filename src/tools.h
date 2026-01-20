@@ -28,7 +28,7 @@
  */
 typedef struct {
     signed char sign; // +1 or -1
-    signed char n;    // number of used limbs (0 => zero)
+    unsigned char n;  // number of used limbs (0 => zero)
     int exp2;         // global power of two
     unsigned int limb[APINT_MAX_LIMBS];
 } apint_t;
@@ -43,7 +43,15 @@ unsigned ctz64(unsigned long long x);
  * @param[in] x: input value
  * @return bit index 0..31; returns 0 for x == 0 (defensive fallback)
  */
+
+/** @brief Initialize apint from unsigned long long with sign.
+ * @param[out] a: destination apint
+ * @param[in] x: unsigned integer value
+ * @param[in] sign: +1 or -1
+ */
+void apint_set_ull(apint_t *a, unsigned long long x, signed char sign);
 int msb32(unsigned int x);
+
 double dot(unsigned int dim, const double *v1, const double *v2);
 void matrix_intVector(unsigned int dim, const double *m, const int *v, double *res);
 void transpose(unsigned int dim, double *m);
