@@ -1,4 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<testsuites tests="1" errors="0" failures="0"><testsuite name="epsteinlib" tests="1" errors="0" failures="0" skipped="0" time="0.004254579544067383"><testcase name="test_tools" classname="epsteinlib" time="0.004254579544067383"><system-out>start test_ctzmsb 
-	 ... processing csv/ctzmsb_Ref.csv 
-	 ... 999 out of 999 tests passed.</system-out></testcase></testsuite></testsuites>

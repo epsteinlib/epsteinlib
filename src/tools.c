@@ -97,6 +97,46 @@ void apint_set_ull(apint_t *a, unsigned long long x, signed char sign) {
     a->sign = sign;
 }
 
+/** @brief Normalize apint: trim leading zeros and left-shift mantissa so MSB of top
+ * limb is 1
+ * @param[in,out] a: pointer to apint to normalize
+ * @return void
+ */
+void apint_normalize(apint_t *a) {
+    int i;
+    int s;
+
+    // Trim leading zero limbs
+    while (a->n > 0 && a->limb[a->n - 1] == 0) {
+        a->n--;
+    }
+
+    // Zero canonicalization
+    if (a->n == 0) {
+        a->sign = 1;
+        a->exp2 = 0;
+        return;
+    }
+
+    // Invariant: limb[n-1] != 0 now guaranteed
+
+    // Left-shift to normalize MSB of limb[n-1]
+    s = 31 - msb32(a->limb[a->n - 1]);
+
+    if (s == 0) {
+        return; // Already normalized
+    }
+
+    // Shift entire mantissa left by s bits
+    for (i = a->n - 1; i >= 1; i--) {
+        a->limb[i] = (a->limb[i] << s) | (a->limb[i - 1] >> (32 - s));
+    }
+    a->limb[0] <<= s;
+
+    // Adjust exponent
+    a->exp2 -= s;
+}
+
 /**
  * @brief euclidean dot product.
  * @param[in] dim: dimension of the input vectors

@@ -43,6 +43,7 @@ unsigned ctz64(unsigned long long x);
  * @param[in] x: input value
  * @return bit index 0..31; returns 0 for x == 0 (defensive fallback)
  */
+int msb32(unsigned int x);
 
 /** @brief Initialize apint from unsigned long long with sign.
  * @param[out] a: destination apint
@@ -50,7 +51,13 @@ unsigned ctz64(unsigned long long x);
  * @param[in] sign: +1 or -1
  */
 void apint_set_ull(apint_t *a, unsigned long long x, signed char sign);
-int msb32(unsigned int x);
+
+/** @brief Normalize apint: trim leading zeros and left-shift mantissa so MSB of top
+ * limb is 1
+ * @param[in,out] a: pointer to apint to normalize
+ * @return void
+ */
+void apint_normalize(apint_t *a);
 
 double dot(unsigned int dim, const double *v1, const double *v2);
 void matrix_intVector(unsigned int dim, const double *m, const int *v, double *res);

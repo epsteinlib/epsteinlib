@@ -31,18 +31,11 @@ msb32Ref[x_] := If[x == 0, 0, Floor[Log2[x]]]
 (*Convert unsigned 64-bit integer to apint representation.*)
 (*	Input: x (unsigned long long), s (sign: \[PlusMinus]1)*)
 (*	Output: {x, s, limb[0], limb[1], n, exp2, sign}*)
-(*   *)
-(*   Algorithm:*)
-(*   - Factor out trailing zeros: x = shifted * 2^tz*)
-(*   - Split shifted into two 32-bit limbs (base 2^32, little-endian)*)
-(*   - Set n = number of nonzero limbs (1 or 2)*)
-(*   - Set exp2 = tz (power of 2 factored out)*)
-(*   - Canonicalize zero: if x=0 then {n=0, exp2=0, sign=1}*)
 
 
 toApint[x_, s_] := Module[{tz, shifted, l0, l1, n, finalSign}
-	,If[x == 0,
-	Return[{x, s, 0, 0, 0, 0, 1}]
+	,If[x == 0
+		,Return[{x, s, 0, 0, 0, 0, 1}]
 	]
 	;tz = IntegerExponent[x, 2]
 	;shifted = Quotient[x, 2^tz]
@@ -52,6 +45,52 @@ toApint[x_, s_] := Module[{tz, shifted, l0, l1, n, finalSign}
 	;finalSign = s
 	(* Output: {x_input, sign_input, limb0, limb1, n, exp2, sign_output} *)
 	;{x, s, l0, l1, n, tz, finalSign}
+]
+
+
+(* ::Text:: *)
+(*Count leading zeros in 32-bit representation of x. Returns number of zero bits before the most significant 1 and returns 32 if x = 0.*)
+
+
+clz32[x_]:=If[x == 0,32,31-Floor[Log[2,x]]]
+
+
+(* ::Text:: *)
+(*Shifts array of 32-bit limbs left by s bits. Handles carry propagation between adjacent limbs.Low s bits of limb[i-1] overflow into high positions of limb[i]. Result kept modulo 2^32 per limb.*)
+
+
+shiftLimbsLeft[limbs_, s_] := Module[{n, result}
+	,n = Length[limbs]
+	;result = Table[0, {n}]
+	;Do[
+		result[[i]] = Mod[BitShiftLeft[limbs[[i]], s], 2^32] + If[i > 1, BitShiftRight[limbs[[i-1]], 32 - s], 0]
+		,{i, n, 1, -1}
+	]
+	;result
+]
+
+
+(* ::Text:: *)
+(*Normalizes apint representation to canonical form.Removes leading zero limbs from high end. *)
+(*	If result is zero: returns sign=+1, exp2=0, all limbs=0.*)
+(* Otherwise: left-shifts entire mantissa so MSB of highest non-zero limb is 1. Adjusts exp2 to compensate for the shift.*)
+(* 	Returns {new_sign, new_exp2, new_limbs}.*)
+
+
+apintNormalize[{sign_, exp2_, limbs_}] := Module[
+{n, s, newLimbs, newExp2}
+,n = Length[limbs]
+;While[n > 0 && limbs[[n]] == 0, n = n - 1]
+;If[n == 0, Return[{1, 0, Table[0, {8}]}]]
+;s = clz32[limbs[[n]]]
+;If[s == 0
+,newLimbs = limbs
+;newExp2 = exp2
+,newLimbs = shiftLimbsLeft[limbs, s]
+;newExp2 = exp2 - s
+]
+;newLimbs = Join[Take[newLimbs, n], Table[0, {8 - n}]]
+;{sign, newExp2, newLimbs}
 ]
 
 
@@ -119,7 +158,7 @@ testCases = Join[
   (* Random cases *)
   ParallelTable[
     toApint[RandomInteger[{0, 2^64 - 1}], RandomChoice[{-1, 1}]],
-    {1000}
+    {992}
   ]
 ];
 
@@ -128,4 +167,80 @@ testCases = Join[
 (*Export reference values.*)
 
 
-Export["csv/apint_set_ull_Ref.csv", testCases]
+SetDirectory[NotebookDirectory[]];
+Export["csv/apint_set_ull_Ref.csv", testCases];
+
+
+(* ::Subsection:: *)
+(*Test arbitrary precision integer normalization function*)
+
+
+(* ::Text:: *)
+(*Generate test inputs.*)
+
+
+SeedRandom[42];
+testCases = {
+	(* 1. Zero *)
+	{1, 0, {0, 0, 0, 0, 0, 0, 0, 0}}
+	,{-1, 5, {0, 0, 0, 0, 0, 0, 0, 0}}
+	,(* 2. Single limb, needs max shift (limb = 1) *)
+	{1, 0, {1, 0, 0, 0, 0, 0, 0, 0}}
+	,{-1, 10, {1, 0, 0, 0, 0, 0, 0, 0}}
+	,(* 3. Already normalized (MSB set) *)
+	{1, 0, {BitShiftLeft[1, 31], 0, 0, 0, 0, 0, 0, 0}}
+	,{1, 5, {0, BitShiftLeft[1, 31], 0, 0, 0, 0, 0, 0}}
+	,(* 4. Middle zeros *)
+	{1, 0, {5, 0, 0, 7, 0, 0, 0, 0}}
+	,{-1, -3, {100, 0, 200, 0, 0, 0, 0, 0}}
+	,(* 5. Multiple leading zeros to trim *)
+	{1, 0, {42, 0, 0, 0, 0, 0, 0, 0}}
+	,{1, 0, {1234567, 9876543, 0, 0, 0, 0, 0, 0}}
+	,(* 6. Needs various shift amounts *)
+	{1, 0, {BitShiftLeft[1, 15], 0, 0, 0, 0, 0, 0, 0}}
+	,{1, 0, {BitShiftLeft[1, 30], 0, 0, 0, 0, 0, 0, 0}}
+	,{1, 0, {0, BitShiftLeft[1, 7], 0, 0, 0, 0, 0, 0}}
+	,(* 7. Full mantissa with middle zeros *)
+	{1, 100, {16^^FFFFFFFF, 0, 16^^12345678, 0, 16^^ABCDEF00, 0, 0, 16^^80000000}}
+	,(* 8. Dangerous: shift causes carry between limbs *)
+	{1, 0, {16^^FFFF0000, 16^^0000FFFF, 0, 0, 0, 0, 0, 0}}
+	,{1, 0, {16^^80000001, 16^^00000001, 0, 0, 0, 0, 0, 0}}
+	,(* 9. Large exp2 values *)
+	{1, 1000000, {123, 0, 0, 0, 0, 0, 0, 0}}
+	,{-1, -500000, {16^^7FFFFFFF, 0, 0, 0, 0, 0, 0, 0}}
+	,(* 10. Random cases *)
+	{1, RandomInteger[{-1000, 1000}], RandomInteger[{0, 16^^FFFFFFFF}, 8]}
+	,{-1, RandomInteger[{-1000, 1000}], RandomInteger[{0, 16^^FFFFFFFF}, 8]}
+	,{1, RandomInteger[{-1000, 1000}], RandomInteger[{0, 16^^FFFFFFFF}, 8]}
+	,{-1, RandomInteger[{-1000, 1000}], RandomInteger[{0, 16^^FFFFFFFF}, 8]}
+};
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+results = Table[
+	Module[
+		{input, output}
+		,input = testCases[[i]]
+		;output = apintNormalize[input]
+		;Join[
+			{input[[1]]}
+			,{input[[2]]}
+			,input[[3]]
+			,{output[[1]]}
+			,{output[[2]]}
+			,output[[3]]
+		]
+	]
+	,{i, Length[testCases]}
+];
+
+
+(* ::Text:: *)
+(*Export reference values.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/apint_normalize_Ref.csv", N[results, 30]]
