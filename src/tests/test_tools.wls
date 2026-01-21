@@ -125,7 +125,7 @@ toApintFull[x_,s_]:=Module[{tz,shifted,limbs}
 (* ::Text:: *)
 (*Simulate apint_mul: multiply two apints and return normalized result.*)
 (*	Input: valA, signA, valB, signB*)
-(*	Output: {limb0-7, exp2, sign} after normalization*)
+(*	Output: {limb0-7, exp2, sign} after normalization.*)
 
 
 apintMulTest[valA_,signA_,valB_,signB_]:=Module[
@@ -141,7 +141,25 @@ apintMulTest[valA_,signA_,valB_,signB_]:=Module[
 ]
 
 
-(* ::Subsection:: *)
+(* ::Text:: *)
+(*Arbitrary precision integer right-shift with sticky bit.*)
+
+
+apintShrStickyRef[{sign_, exp2_, limbs_}, bits_] := Module[
+	{M, Mshifted, sticky, newLimbs, newExp2}
+	,M = FromDigits[Reverse[limbs], 2^32]
+	;If[M == 0
+		,{1, 0, Table[0, {8}]}
+		,sticky = If[Mod[M, 2^bits] != 0, 1, 0]
+		;Mshifted = BitOr[Floor[M / 2^bits], sticky]
+		;newExp2 = exp2 + bits
+		;newLimbs = Reverse[IntegerDigits[Mshifted, 2^32, 8]]
+		;{sign, newExp2, newLimbs}
+	]
+]
+
+
+(* ::Subsection::Closed:: *)
 (*Test Count Trailing Zeros (64-bit) and Most Significant Bit (32-bit) functions*)
 
 
@@ -188,7 +206,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/ctzmsb_Ref.csv", ctzmsbTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Test arbitrary precision integer apint*)
 
 
@@ -218,7 +236,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/apint_set_ull_Ref.csv", testCases];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Test arbitrary precision integer normalization function*)
 
 
@@ -293,7 +311,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/apint_normalize_Ref.csv", results];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Test exact multiplication*)
 
 
@@ -375,3 +393,99 @@ apintMulTestTable[[1;;10]]
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/apint_mul_Ref.csv",apintMulTestTable];
+
+
+(* ::Subsection:: *)
+(*Test right shift with sticky bits function*)
+
+
+(* ::Text:: *)
+(*Setup reference values.*)
+
+
+SeedRandom[42];
+nTests = 899;
+nEdge = 100;
+
+
+(* ::Text:: *)
+(*Edge cases*)
+
+
+edgeCases=Join[
+	(*Zeroinput*)
+	Table[{1,0,Table[0,{8}],RandomInteger[{0,300}]},{10}]
+	(*Noshift(bits=0)*)
+	,Table[Module[{n,limbs},n=RandomInteger[{1,8}];limbs=PadRight[Table[RandomInteger[{1,2^32-1}],{n}],8,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,0}],{10}]
+	(*Shiftwithinsinglelimb*)
+	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],PadRight[{RandomInteger[{1,2^32-1}]},8,0],RandomInteger[{1,31}]},{10}]
+	(*Shiftexactlyonelimbboundary*)
+	,Table[Module[{n,limbs},n=RandomInteger[{2,8}];limbs=PadRight[Table[RandomInteger[{0,2^32-1}],{n}],8,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,32}],{10}]
+	(*Shiftacrosslimbboundary*)
+	,Table[Module[{n,limbs},n=RandomInteger[{2,8}];limbs=PadRight[Table[RandomInteger[{0,2^32-1}],{n}],8,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,RandomInteger[{33,63}]}],{10}]
+	(*Completeshift-out,nosticky*)
+	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],PadRight[{2^RandomInteger[{0,31}]},8,0],RandomInteger[{32,300}]},{10}]
+	(*Completeshift-out,withsticky*)
+	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],PadRight[{RandomInteger[{1,2^32-1}]},8,0],RandomInteger[{32,300}]},{10}]
+	(*Exactly256bitshift*)
+	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],Table[RandomInteger[{1,2^32-1}],{8}],256},{10}]
+	(*Maxlimbs,smallshift*)
+	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],Table[RandomInteger[{1,2^32-1}],{8}],RandomInteger[{1,31}]},{10}]
+	(*All0xFFFFFFFFlimbs*)
+	,Table[Module[{n,limbs},n=RandomInteger[{1,8}];limbs=PadRight[Table[2^32-1,{n}],8,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,RandomInteger[{1,100}]}],{10}]
+];
+
+
+(* ::Text:: *)
+(*Random cases.*)
+
+
+Do[
+	sign0[i] = RandomChoice[{-1, 1}]
+	;n0[i] = RandomInteger[{0, 8}]
+	;exp0[i] = RandomInteger[{-1000, 1000}]
+	;limbs0[i] = If[n0[i] == 0
+		,Table[0, {8}]
+		,Join[
+			Table[RandomInteger[{0, 2^32 - 1}], {n0[i] - 1}]
+			,{RandomInteger[{1, 2^32 - 1}]}
+			,Table[0, {8 - n0[i]}]
+		]
+	]
+;bits0[i] = RandomInteger[{0, 300}]
+,{i, nTests}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+shrStickyTab=ParallelTable[
+	Module[
+		{apintIn,apintOut,sign,exp2,limbs,bits}
+		,{sign,exp2,limbs,bits}=If[i<=Length[edgeCases]
+			,edgeCases[[i]]
+			,{sign0[i-Length[edgeCases]],exp0[i-Length[edgeCases]]
+			,limbs0[i-Length[edgeCases]],bits0[i-Length[edgeCases]]}
+		]
+		;apintIn={sign,exp2,limbs}
+		;apintOut=apintShrStickyRef[apintIn,bits]
+		;Flatten[Join[
+		{sign,exp2}
+		,limbs
+		,{bits}
+		,{apintOut[[1]],apintOut[[2]]}
+		,apintOut[[3]]
+		]]
+	]
+	,{i,Length[edgeCases]+nTests}
+];
+
+
+(* ::Text:: *)
+(*Export reference values.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/apint_shr_sticky_Ref.csv", shrStickyTab];

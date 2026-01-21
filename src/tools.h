@@ -66,6 +66,17 @@ void apint_normalize(apint_t *a);
  */
 void apint_mul(apint_t *out, const apint_t *a, const apint_t *b);
 
+/** @brief Right-shift mantissa with sticky bit (value-preserving)
+ *
+ * Shifts mantissa right by `bits`, increments exp2 by `bits` to preserve value.
+ * Any 1-bit shifted out ORs into bit 0 (sticky). Does NOT normalize.
+ *
+ * @param[out] dst: destination apint
+ * @param[in] src: source apint
+ * @param[in] bits: number of bits to shift right
+ */
+void apint_shr_bits_sticky(apint_t *dst, const apint_t *src, unsigned int bits);
+
 double dot(unsigned int dim, const double *v1, const double *v2);
 void matrix_intVector(unsigned int dim, const double *m, const int *v, double *res);
 void transpose(unsigned int dim, double *m);

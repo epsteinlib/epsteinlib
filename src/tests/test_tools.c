@@ -336,6 +336,98 @@ int test_apint_mul(void) {
 }
 
 /*!
+ * @brief Tests apint_shr_bits_sticky function against Mathematica reference values
+ *
+ * @return number of failed tests.
+ */
+int test_apint_shr_bits_sticky(void) {
+    printf("%s ", __func__);
+    char path[MAX_PATH_LENGTH];
+    int result =
+        snprintf(path, sizeof(path), "%s/apint_shr_sticky_Ref.csv", BASE_PATH);
+    if (result < 0 || result >= sizeof(path)) {
+        return fprintf(stderr, "Error creating file path\n");
+    }
+    FILE *data = fopen(path, "r");
+    if (data == NULL) {
+        return fprintf(stderr, "Error opening file: %s\n", path);
+    }
+    int sign_in;
+    int exp2_in;
+    unsigned int limbs_in[APINT_MAX_LIMBS];
+    unsigned int bits;
+    int sign_out;
+    int exp2_out;
+    unsigned int limbs_out[APINT_MAX_LIMBS];
+    int scanResult;
+    char line[512];
+    int testsPassed = 0;
+    int totalTests = 0;
+    printf("\n\t ... ");
+    printf("processing %s ", path);
+    while (fgets(line, sizeof(line), data) != NULL) {
+        scanResult = sscanf( // NOLINT
+            line, "%d,%d,%u,%u,%u,%u,%u,%u,%u,%u,%u,%d,%d,%u,%u,%u,%u,%u,%u,%u,%u",
+            &sign_in, &exp2_in, &limbs_in[0], &limbs_in[1], &limbs_in[2],
+            &limbs_in[3], &limbs_in[4], &limbs_in[5], &limbs_in[6], &limbs_in[7],
+            &bits, &sign_out, &exp2_out, &limbs_out[0], &limbs_out[1], &limbs_out[2],
+            &limbs_out[3], &limbs_out[4], &limbs_out[5], &limbs_out[6],
+            &limbs_out[7]);
+        if (scanResult != 21) {
+            printf("\n\t Error reading line: %s", line);
+            printf("\t Scanned %d values instead of 21", scanResult);
+            continue;
+        }
+        apint_t src;
+        apint_t dst;
+        src.sign = (signed char)sign_in;
+        src.exp2 = exp2_in;
+        src.n = 0;
+        for (int i = APINT_MAX_LIMBS - 1; i >= 0; i--) {
+            src.limb[i] = limbs_in[i];
+            if (limbs_in[i] != 0 && src.n == 0) {
+                src.n = (unsigned char)(i + 1);
+            }
+        }
+        apint_shr_bits_sticky(&dst, &src, bits);
+        int passed = 1;
+        if (dst.sign != sign_out || dst.exp2 != exp2_out) {
+            passed = 0;
+        }
+        for (int i = 0; i < APINT_MAX_LIMBS; i++) {
+            if (dst.limb[i] != limbs_out[i]) {
+                passed = 0;
+                break;
+            }
+        }
+        if (passed) {
+            testsPassed++;
+        } else {
+            printf("\n\nWarning! ");
+            printf("Input: sign=%d, exp2=%d, limbs=[%u,%u,%u,%u,%u,%u,%u,%u], "
+                   "bits=%u\n",
+                   sign_in, exp2_in, limbs_in[0], limbs_in[1], limbs_in[2],
+                   limbs_in[3], limbs_in[4], limbs_in[5], limbs_in[6], limbs_in[7],
+                   bits);
+            printf("Expected: sign=%d, exp2=%d, limbs=[%u,%u,%u,%u,%u,%u,%u,%u]\n",
+                   sign_out, exp2_out, limbs_out[0], limbs_out[1], limbs_out[2],
+                   limbs_out[3], limbs_out[4], limbs_out[5], limbs_out[6],
+                   limbs_out[7]);
+            printf("Got:      sign=%d, exp2=%d, limbs=[%u,%u,%u,%u,%u,%u,%u,%u]\n",
+                   dst.sign, dst.exp2, dst.limb[0], dst.limb[1], dst.limb[2],
+                   dst.limb[3], dst.limb[4], dst.limb[5], dst.limb[6], dst.limb[7]);
+        }
+        totalTests++;
+    }
+    if (fclose(data) != 0) {
+        return fprintf(stderr, "Error closing file: %d", errno);
+    }
+    printf("\n\t ... %d out of %d tests passed.", testsPassed, totalTests);
+    printf("\n");
+    return totalTests - testsPassed;
+}
+
+/*!
  * @brief Main function to run all set zeta derivatives function tests.
  *
  * @return number of failed tests.
@@ -347,5 +439,6 @@ int main() {
     failed += test_apint_set_ull();
     failed += test_apint_normalize();
     failed += test_apint_mul();
+    failed += test_apint_shr_bits_sticky();
     return failed;
 }

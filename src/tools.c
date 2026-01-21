@@ -208,6 +208,109 @@ void apint_mul(apint_t *out, const apint_t *a, const apint_t *b) {
     *out = result;
 }
 
+/** @brief Right-shift mantissa with sticky bit (value-preserving)
+ *
+ * Shifts mantissa right by `bits`, increments exp2 by `bits` to preserve value.
+ * Any 1-bit shifted out ORs into bit 0 (sticky). Does NOT normalize.
+ *
+ * @param[out] dst: destination apint
+ * @param[in] src: source apint
+ * @param[in] bits: number of bits to shift right
+ */
+void apint_shr_bits_sticky(apint_t *dst, const apint_t *src, // NOLINT
+                           unsigned int bits) {
+    apint_t tmp;
+    apint_t *target = (dst == src) ? &tmp : dst;
+
+    // Handle zero source
+    if (src->n == 0) {
+        target->sign = 1;
+        target->n = 0;
+        target->exp2 = 0;
+        for (unsigned char i = 0; i < APINT_MAX_LIMBS; i++) {
+            target->limb[i] = 0;
+        }
+        if (dst == src) {
+            *dst = tmp;
+        }
+        return;
+    }
+
+    // Handle complete shift-out
+    if (bits >= 32 * src->n) {
+        target->sign = src->sign;
+        target->exp2 = src->exp2 + (int)bits;
+        target->n = 1;
+        target->limb[0] = 1;
+        for (unsigned char i = 1; i < APINT_MAX_LIMBS; i++) {
+            target->limb[i] = 0;
+        }
+        if (dst == src) {
+            *dst = tmp;
+        }
+        return;
+    }
+
+    unsigned int limb_shift = bits / 32;
+    unsigned int bit_shift = bits % 32;
+    unsigned char sticky = 0;
+
+    // Collect sticky from dropped limbs
+    for (unsigned int i = 0; i < limb_shift; i++) {
+        if (src->limb[i] != 0) {
+            sticky = 1;
+            break;
+        }
+    }
+
+    // Initialize target limbs to zero
+    for (unsigned char i = 0; i < APINT_MAX_LIMBS; i++) {
+        target->limb[i] = 0;
+    }
+
+    // Shift limbs
+    if (bit_shift == 0) {
+        // Simple limb shift (no bit alignment needed)
+        for (unsigned int i = 0; i < src->n - limb_shift; i++) {
+            target->limb[i] = src->limb[i + limb_shift];
+        }
+    } else {
+
+        // Shift with bit alignment
+        for (unsigned int i = 0; i < src->n - limb_shift; i++) {
+            unsigned int lo = src->limb[i + limb_shift];
+            unsigned int hi = ((unsigned int)(i + limb_shift + 1) < src->n)
+                                  ? src->limb[i + limb_shift + 1]
+                                  : 0;
+            // Collect sticky ONLY from the lowest limb (i==0)
+            if (i == 0 && (lo & ((1U << bit_shift) - 1)) != 0) {
+                sticky = 1;
+            }
+            target->limb[i] = (lo >> bit_shift) | (hi << (32 - bit_shift));
+        }
+    }
+
+    // OR sticky into lowest limb
+    if (sticky) {
+        target->limb[0] |= 1;
+    }
+
+    // Zero upper limbs
+    for (unsigned char i = src->n - limb_shift; i < APINT_MAX_LIMBS; i++) {
+        target->limb[i] = 0;
+    }
+
+    // Set fields (conservatively, value-preserving)
+    target->n = src->n - limb_shift;
+    target->exp2 = src->exp2 + (int)bits;
+    target->sign = src->sign;
+
+    // Handle aliasing
+    if (dst == src) {
+        *dst = tmp;
+    }
+}
+
 /**
  * @brief euclidean dot product.
  * @param[in] dim: dimension of the input vectors
