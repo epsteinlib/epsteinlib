@@ -137,6 +137,77 @@ void apint_normalize(apint_t *a) {
     a->exp2 -= s;
 }
 
+/** @brief Multiply two apints: out = a * b
+ * @param[out] out: result (may alias a or b)
+ * @param[in] a: first operand
+ * @param[in] b: second operand
+ */
+void apint_mul(apint_t *out, const apint_t *a, const apint_t *b) {
+    apint_t result;
+    unsigned int i;
+    unsigned int j;
+    unsigned int k;
+    unsigned long long acc;
+    unsigned long long prod;
+    unsigned int carry;
+
+    // Zero handling
+    if (a->n == 0 || b->n == 0) {
+        out->n = 0;
+        out->sign = 1;
+        out->exp2 = 0;
+        for (k = 0; k < APINT_MAX_LIMBS; k++) {
+            out->limb[k] = 0;
+        }
+        return;
+    }
+
+    // Initialize result limbs to zero
+    for (k = 0; k < APINT_MAX_LIMBS; k++) {
+        result.limb[k] = 0;
+    }
+
+    // Schoolbook multiplication with immediate carry propagation
+    for (i = 0; i < a->n; i++) {
+        carry = 0;
+        for (j = 0; j < b->n; j++) {
+            k = i + j;
+            if (k >= APINT_MAX_LIMBS) {
+                break; // Truncate high limbs
+            }
+
+            prod = (unsigned long long)a->limb[i] * b->limb[j];
+            acc = (unsigned long long)result.limb[k] + prod + carry;
+            result.limb[k] = (unsigned int)acc;
+            carry = (unsigned int)(acc >> 32);
+        }
+
+        // Propagate final carry
+        while (carry && k + 1 < APINT_MAX_LIMBS) {
+            k++;
+            acc = (unsigned long long)result.limb[k] + carry;
+            result.limb[k] = (unsigned int)acc;
+            carry = (unsigned int)(acc >> 32);
+        }
+    }
+
+    // Set result size (min of natural size and max limbs)
+    result.n = a->n + b->n;
+    if (result.n > APINT_MAX_LIMBS) {
+        result.n = APINT_MAX_LIMBS;
+    }
+
+    // Set sign and exponent
+    result.sign = (a->sign == b->sign) ? 1 : -1;
+    result.exp2 = a->exp2 + b->exp2;
+
+    // Normalize
+    apint_normalize(&result);
+
+    // Copy to output (handles aliasing)
+    *out = result;
+}
+
 /**
  * @brief euclidean dot product.
  * @param[in] dim: dimension of the input vectors

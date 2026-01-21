@@ -59,6 +59,13 @@ void apint_set_ull(apint_t *a, unsigned long long x, signed char sign);
  */
 void apint_normalize(apint_t *a);
 
+/** @brief Multiply two apints: out = a * b
+ * @param[out] out: result (may alias a or b)
+ * @param[in] a: first operand
+ * @param[in] b: second operand
+ */
+void apint_mul(apint_t *out, const apint_t *a, const apint_t *b);
+
 double dot(unsigned int dim, const double *v1, const double *v2);
 void matrix_intVector(unsigned int dim, const double *m, const int *v, double *res);
 void transpose(unsigned int dim, double *m);
