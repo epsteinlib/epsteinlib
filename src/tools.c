@@ -15,6 +15,7 @@
 #include <complex.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 /*!
  * @brief minimal distance of two vector elements considered unequal.
@@ -118,8 +119,25 @@ void apint_normalize(apint_t *a) {
         return;
     }
 
-    // Invariant: limb[n-1] != 0 now guaranteed
+    // Trim LOW-end zero limbs
+    while (a->n > 0 && a->limb[0] == 0) {
+        // Shift limbs right by one position
+        for (i = 0; i < a->n - 1; i++) {
+            a->limb[i] = a->limb[i + 1];
+        }
+        a->limb[a->n - 1] = 0;
+        a->n--;
+        a->exp2 += 32;
+    }
 
+    // Check for zero after trimming
+    if (a->n == 0) {
+        a->sign = 1;
+        a->exp2 = 0;
+        return;
+    }
+    
+    // Invariant: limb[n-1] != 0 now guaranteed
     // Left-shift to normalize MSB of limb[n-1]
     s = 31 - msb32(a->limb[a->n - 1]);
 
@@ -135,6 +153,18 @@ void apint_normalize(apint_t *a) {
 
     // Adjust exponent
     a->exp2 -= s;
+
+    // Trim LOW-end zeros created by left-shift
+    while (a->n > 0 && a->limb[0] == 0) {
+        // Shift limbs right by one position
+        for (i = 0; i < a->n - 1; i++) {
+            a->limb[i] = a->limb[i + 1];
+        }
+        a->limb[a->n - 1] = 0;
+        a->n--;
+        a->exp2 += 32;
+    }
+
 }
 
 /** @brief Multiply two apints: out = a * b
@@ -308,6 +338,217 @@ void apint_shr_bits_sticky(apint_t *dst, const apint_t *src, // NOLINT
     // Handle aliasing
     if (dst == src) {
         *dst = tmp;
+    }
+}
+
+/** @brief Compare magnitudes of two apints (assumes same exp2 after alignment)
+ * @param[in] a: first apint
+ * @param[in] b: second apint
+ * @return 1 if |a| > |b|, -1 if |a| < |b|, 0 if equal
+ */
+static int compare_magnitudes(const apint_t *a, const apint_t *b) {
+    unsigned char max_n;
+    int i;
+
+    // Conservative n handling: scan from highest possible limb
+    max_n = (a->n > b->n) ? a->n : b->n;
+
+    for (i = (int)max_n - 1; i >= 0; i--) {
+        unsigned int a_limb = (i < a->n) ? a->limb[i] : 0;
+        unsigned int b_limb = (i < b->n) ? b->limb[i] : 0;
+
+        if (a_limb > b_limb) {
+            return 1;
+        }
+        if (a_limb < b_limb) {
+            return -1;
+        }
+    }
+
+    return 0; // Equal magnitude
+}
+
+/** @brief Add two unsigned mantissas (assumes same exp2)
+ * @param[out] result: output apint (only limb[] and n are set)
+ * @param[in] a: first addend
+ * @param[in] b: second addend
+ */
+static void add_mantissas_unsigned(apint_t *result, const apint_t *a,
+                                   const apint_t *b) {
+    unsigned char max_n;
+    unsigned long long sum;
+    unsigned int carry;
+    unsigned char i;
+
+    max_n = (a->n > b->n) ? a->n : b->n;
+    carry = 0;
+
+    // Add limbs with carry propagation
+    for (i = 0; i < APINT_MAX_LIMBS; i++) {
+        // Stop when no more non-zero limbs and no carry
+        if (i >= max_n && carry == 0) {
+            break;
+        }
+
+        unsigned int a_limb = (i < a->n) ? a->limb[i] : 0;
+        unsigned int b_limb = (i < b->n) ? b->limb[i] : 0;
+
+        sum = (unsigned long long)a_limb + b_limb + carry;
+        result->limb[i] = (unsigned int)sum;
+        carry = (unsigned int)(sum >> 32);
+    }
+
+    result->n = i;
+
+    // Zero out unused limbs (for cleanliness)
+    for (; i < APINT_MAX_LIMBS; i++) {
+        result->limb[i] = 0;
+    }
+}
+
+/** @brief Subtract smaller unsigned mantissa from larger (assumes same exp2)
+ * @param[out] result: output apint (only limb[] and n are set)
+ * @param[in] larger: larger magnitude operand
+ * @param[in] smaller: smaller magnitude operand (assumed |larger| >= |smaller|)
+ */
+static void subtract_mantissas_unsigned(apint_t *result, const apint_t *larger,
+                                        const apint_t *smaller) {
+    long long diff;
+    unsigned int borrow;
+    unsigned char i;
+
+    borrow = 0;
+
+    // Subtract limbs with borrow propagation
+    for (i = 0; i < larger->n; i++) {
+        unsigned int larger_limb = larger->limb[i];
+        unsigned int smaller_limb = (i < smaller->n) ? smaller->limb[i] : 0;
+
+        // Compute difference using signed arithmetic to detect borrow
+        diff = (long long)larger_limb - (long long)smaller_limb - (long long)borrow;
+
+        if (diff < 0) {
+            // Need to borrow from next limb
+            result->limb[i] = (unsigned int)(diff + 0x100000000LL);
+            borrow = 1;
+        } else {
+            result->limb[i] = (unsigned int)diff;
+            borrow = 0;
+        }
+    }
+
+    result->n = larger->n;
+
+    // Zero out unused limbs
+    for (i = larger->n; i < APINT_MAX_LIMBS; i++) {
+        result->limb[i] = 0;
+    }
+
+    // Result may have leading zeros; normalization will clean up
+}
+
+/** @brief Add two apints: out = a + b
+ * @param[out] out: result (supports aliasing)
+ * @param[in] a: first operand
+ * @param[in] b: second operand
+ */
+void apint_add(apint_t *out, const apint_t *a, const apint_t *b) { // NOLINT
+    apint_t temp_result;
+    apint_t *result;
+    const apint_t *higher_exp;
+    const apint_t *lower_exp;
+    apint_t aligned_higher;
+    apint_t aligned_lower;
+    int d;
+    unsigned char i;
+
+    // Handle aliasing
+    result = (out == a || out == b) ? &temp_result : out;
+
+    // Handle zeros explicitly
+    if (a->n == 0) {
+        *result = *b;
+        if (result == &temp_result) {
+            *out = temp_result;
+        }
+        return;
+    }
+    if (b->n == 0) {
+        *result = *a;
+        if (result == &temp_result) {
+            *out = temp_result;
+        }
+        return;
+    }
+
+    // Determine which has larger exp2
+    if (a->exp2 >= b->exp2) {
+        higher_exp = a;
+        lower_exp = b;
+        d = a->exp2 - b->exp2;
+    } else {
+        higher_exp = b;
+        lower_exp = a;
+        d = b->exp2 - a->exp2;
+    }
+
+    // If difference too large, smaller operand is negligible
+    if (d >= 32 * APINT_MAX_LIMBS) {
+        *result = *higher_exp;
+        if (result == &temp_result) {
+            *out = temp_result;
+        }
+        return;
+    }
+
+    // Align exponents by shifting lower_exp right
+    aligned_higher = *higher_exp; // No shift needed
+    apint_shr_bits_sticky(&aligned_lower, lower_exp, d);
+
+    // Both now have same exp2
+    result->exp2 = higher_exp->exp2;
+
+    // Perform addition or subtraction based on signs
+    if (aligned_higher.sign == aligned_lower.sign) {
+        // Same sign: add magnitudes
+        add_mantissas_unsigned(result, &aligned_higher, &aligned_lower);
+        result->sign = aligned_higher.sign;
+    } else {
+        // Different signs: subtract magnitudes
+        int cmp = compare_magnitudes(&aligned_higher, &aligned_lower);
+
+        if (cmp == 0) {
+            // Equal magnitude: result is canonical zero
+            result->sign = 1;
+            result->n = 0;
+            result->exp2 = 0;
+            for (i = 0; i < APINT_MAX_LIMBS; i++) {
+                result->limb[i] = 0;
+            }
+        } else {
+            // Determine which has larger magnitude
+            const apint_t *larger_mag = (cmp > 0) ? &aligned_higher : &aligned_lower;
+            const apint_t *smaller_mag =
+                (cmp > 0) ? &aligned_lower : &aligned_higher;
+
+            subtract_mantissas_unsigned(result, larger_mag, smaller_mag);
+            result->sign = larger_mag->sign;
+        }
+    }
+if (result->limb[0] == 0 && result->n > 1) {
+    printf("\nDEBUG before normalize:");
+    printf("\n  sign=%d exp2=%d n=%d", result->sign, result->exp2, result->n);
+    printf("\n  limbs=[%u,%u,%u,%u,%u,%u,%u,%u]\n",
+           result->limb[0], result->limb[1], result->limb[2], result->limb[3],
+           result->limb[4], result->limb[5], result->limb[6], result->limb[7]);
+}
+
+    // Normalize result
+    apint_normalize(result);
+
+    // Copy back if aliasing
+    if (result == &temp_result) {
+        *out = temp_result;
     }
 }
 

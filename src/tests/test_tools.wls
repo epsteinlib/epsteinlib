@@ -77,20 +77,26 @@ shiftLimbsLeft[limbs_, s_] := Module[{n, result}
 (* 	Returns {new_sign, new_exp2, new_limbs}.*)
 
 
-apintNormalize[{sign_, exp2_, limbs_}] := Module[
-{n, s, newLimbs, newExp2}
-,n = Length[limbs]
-;While[n > 0 && limbs[[n]] == 0, n = n - 1]
-;If[n == 0, Return[{1, 0, Table[0, {8}]}]]
-;s = clz32[limbs[[n]]]
-;If[s == 0
-,newLimbs = limbs
-;newExp2 = exp2
-,newLimbs = shiftLimbsLeft[limbs, s]
-;newExp2 = exp2 - s
-]
-;newLimbs = Join[Take[newLimbs, n], Table[0, {8 - n}]]
-;{sign, newExp2, newLimbs}
+apintNormalize[{sign_,exp2_,limbs_}]:=Module[
+	{n,s,newLimbs,newExp2}
+	,n=Length[limbs]
+	;While[n>0&&limbs[[n]]==0,n=n-1]
+	;If[n==0,Return[{1,0,Table[0,{8}]}]]
+	;s=clz32[limbs[[n]]]
+	;If[s==0
+		,newLimbs=limbs
+		;newExp2=exp2
+		,newLimbs=shiftLimbsLeft[limbs,s]
+		;newExp2=exp2-s
+	]
+	;newLimbs=Join[Take[newLimbs,n],Table[0,{8-n}]]
+	(* Trim low-end zeros *)
+	;While[n>0&&newLimbs[[1]]==0
+		,newLimbs=Join[Drop[newLimbs,1],{0}]
+		;n=n-1
+		;newExp2=newExp2+32
+	]
+	;{sign,newExp2,newLimbs}
 ]
 
 
@@ -156,6 +162,18 @@ apintShrStickyRef[{sign_, exp2_, limbs_}, bits_] := Module[
 		;newLimbs = Reverse[IntegerDigits[Mshifted, 2^32, 8]]
 		;{sign, newExp2, newLimbs}
 	]
+]
+
+
+(* ::Text:: *)
+(*Convert  integer  to  apint.*)
+
+
+intToApint[n_] := Module[{raw, sign, absN}
+,absN = Abs[n]
+;sign = If[n == 0, 1, Sign[n]]
+;raw = toApintFull[absN, sign]
+;apintNormalize[{raw[[10]], raw[[9]], raw[[1;;8]]}]
 ]
 
 
@@ -236,7 +254,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/apint_set_ull_Ref.csv", testCases];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Test arbitrary precision integer normalization function*)
 
 
@@ -276,7 +294,7 @@ testCases = Join[{
 	},(* 10. Random values *)
 	Table[
 		{1, RandomInteger[{-1000, 1000}], RandomInteger[{0, 16^^FFFFFFFF}, 8]}
-		,{i,981}
+		,{i,9810}
 	]
 ];
 
@@ -395,7 +413,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/apint_mul_Ref.csv",apintMulTestTable];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Test right shift with sticky bits function*)
 
 
@@ -489,3 +507,215 @@ shrStickyTab=ParallelTable[
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/apint_shr_sticky_Ref.csv", shrStickyTab];
+
+
+(* ::Subsection:: *)
+(*Test arbitrary precision integer addition function*)
+
+
+
+
+(* ============================================ *)
+(* CATEGORY 1: Zero operands (5 cases)         *)
+(* ============================================ *)
+zeroEdgeCases = {
+{0, 0}
+,{0, 12345678}
+,{87654321, 0}
+,{0, -999999}
+,{-111111, 0}
+};
+
+(* ============================================ *)
+(* CATEGORY 2: Same sign, simple (10 cases)    *)
+(* ============================================ *)
+sameSignSimple = {
+{100, 200}
+,{-500, -300}
+,{1000000, 2000000}
+,{-9999999, -1111111}
+,{2^32, 2^32}
+,{-2^40, -2^40}
+,{2^63, 2^63}
+,{-2^100, -2^100}
+,{123456789012345, 987654321098765}
+,{-111111111111111, -222222222222222}
+};
+
+(* ============================================ *)
+(* CATEGORY 3: Same sign with carries (10 cases) *)
+(* ============================================ *)
+sameSignCarry = {
+{2^32-1, 1}
+,{2^32-1, 2^32-1}
+,{2^64-1, 1}
+,{2^64-1, 2^64-1}
+,{2^96-1, 2^96-1}
+,{2^128-1, 2^128-1}
+,{-(2^32-1), -1}
+,{-(2^64-1), -(2^64-1)}
+,{2^32-100, 200}
+,{2^64-1000, 2000}
+};
+
+(* ============================================ *)
+(* CATEGORY 4: Different signs, |a| > |b| (15 cases) *)
+(* ============================================ *)
+diffSignALarger = {
+{1000, -300}
+,{-1000, 300}
+,{2^40, -2^30}
+,{-2^40, 2^30}
+,{2^100, -2^50}
+,{2^64, -1}
+,{2^64, -(2^32-1)}
+,{2^96, -(2^64-1)}
+,{1234567890, -123456789}
+,{-9876543210, 987654321}
+,{2^128, -2^100}
+,{2^200, -2^150}
+,{2^32+1, -1}
+,{2^64+1, -1}
+,{-2^100-1, 1}
+};
+
+(* ============================================ *)
+(* CATEGORY 5: Different signs, |a| < |b| (10 cases) *)
+(* ============================================ *)
+diffSignBLarger = {
+{300, -1000}
+,{-300, 1000}
+,{2^30, -2^40}
+,{-2^30, 2^40}
+,{1, -2^64}
+,{2^32-1, -2^64}
+,{2^50, -2^100}
+,{123456789, -1234567890}
+,{-987654321, 9876543210}
+,{2^100, -2^128}
+};
+
+(* ============================================ *)
+(* CATEGORY 6: Equal magnitude opposite sign (10 cases) *)
+(* ============================================ *)
+equalMagnitude = {
+{100, -100}
+,{-100, 100}
+,{2^32, -2^32}
+,{-2^32, 2^32}
+,{2^64, -2^64}
+,{2^100, -2^100}
+,{-2^128, 2^128}
+,{123456789, -123456789}
+,{2^200, -2^200}
+,{999999999999, -999999999999}
+};
+
+(* ============================================ *)
+(* CATEGORY 7: Borrow propagation (15 cases)   *)
+(* ============================================ *)
+borrowPropagation = {
+{2^32, -1}
+,{2^64, -1}
+,{2^96, -1}
+,{2^128, -1}
+,{2^32, -(2^32-1)}
+,{2^64, -(2^64-1)}
+,{2^96, -(2^96-1)}
+,{2^32*2, -3}
+,{2^64*2, -3}
+,{2^32+2^16, -2^16}
+,{2^64+2^32, -2^32}
+,{2^96+2^64, -2^64}
+,{-2^32, 1}
+,{-2^64, 1}
+,{-2^128, 1}
+};
+
+(* ============================================ *)
+(* CATEGORY 8: Large exp2 differences (10 cases) *)
+(* ============================================ *)
+largeExp2Diff = {
+{2^250, 1}
+,{2^250, -1}
+,{2^250, 2^10}
+,{2^250, -2^10}
+,{-2^250, 2^20}
+,{2^255, 2^50}
+,{2^255, -2^50}
+,{1, 2^250}
+,{-1, 2^250}
+,{2^100, 2^250}
+};
+
+(* ============================================ *)
+(* CATEGORY 9: Powers of 2 (edge cases) (10 cases) *)
+(* ============================================ *)
+powersOfTwo = {
+{2^31, 2^31}
+,{2^32, 2^32}
+,{2^63, 2^63}
+,{2^64, 2^64}
+,{2^31, -2^31}
+,{2^32, -2^32}
+,{2^64, -2^64}
+,{2^128, 2^128}
+,{2^128, -2^128}
+,{2^200, 2^200}
+};
+
+(* ============================================ *)
+(* CATEGORY 10: Random comprehensive (9900 cases) *)
+(* ============================================ *)
+SeedRandom[42];
+randomTests = Table[
+Module[{a, b, range}
+,range = RandomChoice[{2^50, 2^100, 2^150, 2^200, 2^250}]
+;a = RandomInteger[{-range, range}]
+;b = RandomInteger[{-range, range}]
+;{a, b}
+]
+,{9900}
+];
+
+(* ============================================ *)
+(* COMBINE ALL TEST CASES                      *)
+(* ============================================ *)
+allEdgeCases = Join[
+zeroEdgeCases
+,sameSignSimple
+,sameSignCarry
+,diffSignALarger
+,diffSignBLarger
+,equalMagnitude
+,borrowPropagation
+,largeExp2Diff
+,powersOfTwo
+];
+
+allTests = Join[allEdgeCases, randomTests];
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+testData = ParallelTable[
+ Module[{a,b,aApint, bApint, refApint, ref}
+,{a,b}={allTests[[i, 1]], allTests[[i, 2]]}
+;ref = a + b
+;aApint = intToApint[a]
+;bApint = intToApint[b]
+;refApint = intToApint[ref]
+;Flatten[{aApint[[1]], aApint[[2]], aApint[[3]], bApint[[1]], bApint[[2]], bApint[[3]], refApint[[1]], refApint[[2]], refApint[[3]]}]
+]
+,{i, 1, 10}
+];
+
+
+(* ::Text:: *)
+(*Export test values.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/apint_add_Ref.csv", testData];

@@ -77,6 +77,13 @@ void apint_mul(apint_t *out, const apint_t *a, const apint_t *b);
  */
 void apint_shr_bits_sticky(apint_t *dst, const apint_t *src, unsigned int bits);
 
+/** @brief Add two apints: out = a + b
+ * @param[out] out: result (supports aliasing)
+ * @param[in] a: first operand
+ * @param[in] b: second operand
+ */
+void apint_add(apint_t *out, const apint_t *a, const apint_t *b);
+
 double dot(unsigned int dim, const double *v1, const double *v2);
 void matrix_intVector(unsigned int dim, const double *m, const int *v, double *res);
 void transpose(unsigned int dim, double *m);
