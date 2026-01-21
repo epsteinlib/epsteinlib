@@ -466,13 +466,10 @@ void apint_shl_bits(apint_t *dst, const apint_t *src, int bits) {
         }
         return;
     }
-
     // Copy sign
     dst->sign = src->sign;
-
     // Adjust exponent (value-preserving: multiply mantissa, divide by 2^bits)
     dst->exp2 = src->exp2 - bits;
-
     limb_shift = bits / 32;
     bit_shift = bits % 32;
 
@@ -485,12 +482,10 @@ void apint_shl_bits(apint_t *dst, const apint_t *src, int bits) {
         }
         return;
     }
-
     // Zero out destination
     for (i = 0; i < APINT_MAX_LIMBS; i++) {
         dst->limb[i] = 0;
     }
-
     // Shift by whole limbs first
     if (bit_shift == 0) {
         // Simple limb shift
@@ -502,17 +497,16 @@ void apint_shl_bits(apint_t *dst, const apint_t *src, int bits) {
     } else {
         // Shift with bit offset
         for (i = 0; i < src->n && (i + limb_shift) < APINT_MAX_LIMBS; i++) {
-            dst->limb[i + limb_shift] |= src->limb[i] << bit_shift;
+            unsigned long long temp = (unsigned long long)src->limb[i] << bit_shift;
+            dst->limb[i + limb_shift] |= (unsigned int)temp;
             if (i + limb_shift + 1 < APINT_MAX_LIMBS) {
-                dst->limb[i + limb_shift + 1] = src->limb[i] >> (32 - bit_shift);
+                dst->limb[i + limb_shift + 1] = (unsigned int)(temp >> 32);
             }
         }
         dst->n = (src->n + limb_shift + 1 < APINT_MAX_LIMBS)
                      ? src->n + limb_shift + 1
                      : APINT_MAX_LIMBS;
     }
-
-    // Does NOT normalize - caller handles that
 }
 
 /** @brief Add two apints: out = a + b
@@ -562,30 +556,21 @@ void apint_add(apint_t *out, const apint_t *a, const apint_t *b) { // NOLINT
         d = b->exp2 - a->exp2;
     }
 
-    // If difference too large, smaller operand is negligible
-    if (d >= 32 * APINT_MAX_LIMBS - 32) { // d >= 224 bits
-        *result = *higher_exp;
-        if (result == &temp_result) {
-            *out = temp_result;
-        }
-        return;
-    }
-
     // Smart alignment strategy
-    // Check if both operands fit when aligned to lower exp2
     bits_higher =
         32 * (higher_exp->n - 1) + msb32(higher_exp->limb[higher_exp->n - 1]) + 1;
     bits_available = 32 * APINT_MAX_LIMBS;
 
     if (d > 0 && d + bits_higher <= bits_available) {
-        // Both fit! Align to LOWER exp2 for exact arithmetic
-        aligned_lower = *lower_exp;                     // No shift needed
-        apint_shl_bits(&aligned_higher, higher_exp, d); // Shift higher LEFT
+        // Result of shift fits in available space - exact arithmetic
+        aligned_lower = *lower_exp;
+        apint_shl_bits(&aligned_higher, higher_exp, d);
         result->exp2 = lower_exp->exp2;
+
     } else {
-        // Won't fit or d==0, align to HIGHER exp2 (sticky bit approach)
-        aligned_higher = *higher_exp;                        // No shift needed
-        apint_shr_bits_sticky(&aligned_lower, lower_exp, d); // Shift lower RIGHT
+        // Result wouldn't fit, use sticky bit approach
+        aligned_higher = *higher_exp;
+        apint_shr_bits_sticky(&aligned_lower, lower_exp, d);
         result->exp2 = higher_exp->exp2;
     }
 
@@ -624,13 +609,15 @@ void apint_add(apint_t *out, const apint_t *a, const apint_t *b) { // NOLINT
     if (result == &temp_result) {
         *out = temp_result;
     }
-} /**
-   * @brief euclidean dot product.
-   * @param[in] dim: dimension of the input vectors
-   * @param[in] v1: first vector.
-   * @param[in] v2: second vector.
-   * @return dot product of v1 and v2.
-   */
+}
+
+/**
+ * @brief euclidean dot product.
+ * @param[in] dim: dimension of the input vectors
+ * @param[in] v1: first vector.
+ * @param[in] v2: second vector.
+ * @return dot product of v1 and v2.
+ */
 double dot(unsigned int dim, const double *v1, const double *v2) {
     double r = 0;
     for (int i = 0; i < dim; i++) {

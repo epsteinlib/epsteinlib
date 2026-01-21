@@ -192,22 +192,28 @@ int test_apint_normalize(void) {
     int exp2_out;
     unsigned int limbs_out[APINT_MAX_LIMBS];
     int scanResult;
-    char line[512];
+    char line[1024]; // Increased from 512 for 16 limbs
     int testsPassed = 0;
     int totalTests = 0;
     printf("\n\t ... ");
     printf("processing %s ", path);
     while (fgets(line, sizeof(line), data) != NULL) {
+        // Read 2 + 16 + 2 + 16 = 36 values
         scanResult = sscanf( // NOLINT
-            line, "%d,%d,%u,%u,%u,%u,%u,%u,%u,%u,%d,%d,%u,%u,%u,%u,%u,%u,%u,%u",
+            line,
+            "%d,%d,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%d,%d,%u,%u,%u,%"
+            "u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
             &sign_in, &exp2_in, &limbs_in[0], &limbs_in[1], &limbs_in[2],
             &limbs_in[3], &limbs_in[4], &limbs_in[5], &limbs_in[6], &limbs_in[7],
-            &sign_out, &exp2_out, &limbs_out[0], &limbs_out[1], &limbs_out[2],
-            &limbs_out[3], &limbs_out[4], &limbs_out[5], &limbs_out[6],
-            &limbs_out[7]);
-        if (scanResult != 20) {
+            &limbs_in[8], &limbs_in[9], &limbs_in[10], &limbs_in[11], &limbs_in[12],
+            &limbs_in[13], &limbs_in[14], &limbs_in[15], &sign_out, &exp2_out,
+            &limbs_out[0], &limbs_out[1], &limbs_out[2], &limbs_out[3],
+            &limbs_out[4], &limbs_out[5], &limbs_out[6], &limbs_out[7],
+            &limbs_out[8], &limbs_out[9], &limbs_out[10], &limbs_out[11],
+            &limbs_out[12], &limbs_out[13], &limbs_out[14], &limbs_out[15]);
+        if (scanResult != 36) {
             printf("\n\t Error reading line: %s", line);
-            printf("\t Scanned %d values instead of 20", scanResult);
+            printf("\t Scanned %d values instead of 36", scanResult);
             continue;
         }
         apint_t a;
@@ -232,16 +238,25 @@ int test_apint_normalize(void) {
             testsPassed++;
         } else {
             printf("\n\nWarning! ");
-            printf("Input: sign=%d, exp2=%d, limbs=[%u,%u,%u,%u,%u,%u,%u,%u]\n",
+            printf("Input: sign=%d, exp2=%d, "
+                   "limbs=[%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u]\n",
                    sign_in, exp2_in, limbs_in[0], limbs_in[1], limbs_in[2],
-                   limbs_in[3], limbs_in[4], limbs_in[5], limbs_in[6], limbs_in[7]);
-            printf("Expected: sign=%d, exp2=%d, limbs=[%u,%u,%u,%u,%u,%u,%u,%u]\n",
+                   limbs_in[3], limbs_in[4], limbs_in[5], limbs_in[6], limbs_in[7],
+                   limbs_in[8], limbs_in[9], limbs_in[10], limbs_in[11],
+                   limbs_in[12], limbs_in[13], limbs_in[14], limbs_in[15]);
+            printf("Expected: sign=%d, exp2=%d, "
+                   "limbs=[%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u]\n",
                    sign_out, exp2_out, limbs_out[0], limbs_out[1], limbs_out[2],
                    limbs_out[3], limbs_out[4], limbs_out[5], limbs_out[6],
-                   limbs_out[7]);
-            printf("Got:      sign=%d, exp2=%d, limbs=[%u,%u,%u,%u,%u,%u,%u,%u]\n",
+                   limbs_out[7], limbs_out[8], limbs_out[9], limbs_out[10],
+                   limbs_out[11], limbs_out[12], limbs_out[13], limbs_out[14],
+                   limbs_out[15]);
+            printf("Got:      sign=%d, exp2=%d, "
+                   "limbs=[%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u]\n",
                    a.sign, a.exp2, a.limb[0], a.limb[1], a.limb[2], a.limb[3],
-                   a.limb[4], a.limb[5], a.limb[6], a.limb[7]);
+                   a.limb[4], a.limb[5], a.limb[6], a.limb[7], a.limb[8], a.limb[9],
+                   a.limb[10], a.limb[11], a.limb[12], a.limb[13], a.limb[14],
+                   a.limb[15]);
         }
         totalTests++;
     }
@@ -277,20 +292,23 @@ int test_apint_mul(void) {
     int exp2_out;
     unsigned int limbs_out[APINT_MAX_LIMBS];
     int scanResult;
-    char line[512];
+    char line[1024];
     int testsPassed = 0;
     int totalTests = 0;
     printf("\n\t ... ");
     printf("processing %s ", path);
     while (fgets(line, sizeof(line), data) != NULL) {
         scanResult = sscanf( // NOLINT
-            line, "%llu,%d,%llu,%d,%u,%u,%u,%u,%u,%u,%u,%u,%d,%d", &valA, &signA,
-            &valB, &signB, &limbs_out[0], &limbs_out[1], &limbs_out[2],
-            &limbs_out[3], &limbs_out[4], &limbs_out[5], &limbs_out[6],
-            &limbs_out[7], &exp2_out, &sign_out);
-        if (scanResult != 14) {
+            line,
+            "%llu,%d,%llu,%d,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%d,%d",
+            &valA, &signA, &valB, &signB, &limbs_out[0], &limbs_out[1],
+            &limbs_out[2], &limbs_out[3], &limbs_out[4], &limbs_out[5],
+            &limbs_out[6], &limbs_out[7], &limbs_out[8], &limbs_out[9],
+            &limbs_out[10], &limbs_out[11], &limbs_out[12], &limbs_out[13],
+            &limbs_out[14], &limbs_out[15], &exp2_out, &sign_out);
+        if (scanResult != 22) {
             printf("\n\t Error reading line: %s", line);
-            printf("\t Scanned %d values instead of 14", scanResult);
+            printf("\t Scanned %d values instead of 22", scanResult);
             continue;
         }
         apint_t a;
@@ -360,22 +378,27 @@ int test_apint_shr_bits_sticky(void) {
     int exp2_out;
     unsigned int limbs_out[APINT_MAX_LIMBS];
     int scanResult;
-    char line[512];
+    char line[1024];
     int testsPassed = 0;
     int totalTests = 0;
     printf("\n\t ... ");
     printf("processing %s ", path);
     while (fgets(line, sizeof(line), data) != NULL) {
         scanResult = sscanf( // NOLINT
-            line, "%d,%d,%u,%u,%u,%u,%u,%u,%u,%u,%u,%d,%d,%u,%u,%u,%u,%u,%u,%u,%u",
+            line,
+            "%d,%d,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%d,%d,%u,%u,%"
+            "u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
             &sign_in, &exp2_in, &limbs_in[0], &limbs_in[1], &limbs_in[2],
             &limbs_in[3], &limbs_in[4], &limbs_in[5], &limbs_in[6], &limbs_in[7],
-            &bits, &sign_out, &exp2_out, &limbs_out[0], &limbs_out[1], &limbs_out[2],
-            &limbs_out[3], &limbs_out[4], &limbs_out[5], &limbs_out[6],
-            &limbs_out[7]);
-        if (scanResult != 21) {
+            &limbs_in[8], &limbs_in[9], &limbs_in[10], &limbs_in[11], &limbs_in[12],
+            &limbs_in[13], &limbs_in[14], &limbs_in[15], &bits, &sign_out, &exp2_out,
+            &limbs_out[0], &limbs_out[1], &limbs_out[2], &limbs_out[3],
+            &limbs_out[4], &limbs_out[5], &limbs_out[6], &limbs_out[7],
+            &limbs_out[8], &limbs_out[9], &limbs_out[10], &limbs_out[11],
+            &limbs_out[12], &limbs_out[13], &limbs_out[14], &limbs_out[15]);
+        if (scanResult != 37) {
             printf("\n\t Error reading line: %s", line);
-            printf("\t Scanned %d values instead of 21", scanResult);
+            printf("\t Scanned %d values instead of 37", scanResult);
             continue;
         }
         apint_t src;
@@ -455,7 +478,7 @@ int test_apint_add(void) { // NOLINT
     unsigned int limb_expected[APINT_MAX_LIMBS];
 
     int scanResult;
-    char line[512]; // Longer line buffer for 30 integers
+    char line[2048];
     int testsPassed = 0;
     int totalTests = 0;
 
@@ -465,19 +488,25 @@ int test_apint_add(void) { // NOLINT
     while (fgets(line, sizeof(line), data) != NULL) {
         scanResult =
             sscanf(line, // NOLINT
-                   "%d,%d,%u,%u,%u,%u,%u,%u,%u,%u,%d,%d,%u,%u,%u,%u,%u,%u,%u,%u,%d,%"
-                   "d,%u,%u,%u,%u,%u,%u,%u,%u", /* NOLINT */
+                   "%d,%d,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%d,%d,%u,%"
+                   "u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%d,%d,%u,%u,%u,%u,%"
+                   "u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
                    &sign_a, &exp2_a, &limb_a[0], &limb_a[1], &limb_a[2], &limb_a[3],
-                   &limb_a[4], &limb_a[5], &limb_a[6], &limb_a[7], &sign_b, &exp2_b,
-                   &limb_b[0], &limb_b[1], &limb_b[2], &limb_b[3], &limb_b[4],
-                   &limb_b[5], &limb_b[6], &limb_b[7], &sign_expected,
-                   &exp2_expected, &limb_expected[0], &limb_expected[1],
-                   &limb_expected[2], &limb_expected[3], &limb_expected[4],
-                   &limb_expected[5], &limb_expected[6], &limb_expected[7]);
-
-        if (scanResult != 30) {
+                   &limb_a[4], &limb_a[5], &limb_a[6], &limb_a[7], &limb_a[8],
+                   &limb_a[9], &limb_a[10], &limb_a[11], &limb_a[12], &limb_a[13],
+                   &limb_a[14], &limb_a[15], &sign_b, &exp2_b, &limb_b[0],
+                   &limb_b[1], &limb_b[2], &limb_b[3], &limb_b[4], &limb_b[5],
+                   &limb_b[6], &limb_b[7], &limb_b[8], &limb_b[9], &limb_b[10],
+                   &limb_b[11], &limb_b[12], &limb_b[13], &limb_b[14], &limb_b[15],
+                   &sign_expected, &exp2_expected, &limb_expected[0],
+                   &limb_expected[1], &limb_expected[2], &limb_expected[3],
+                   &limb_expected[4], &limb_expected[5], &limb_expected[6],
+                   &limb_expected[7], &limb_expected[8], &limb_expected[9],
+                   &limb_expected[10], &limb_expected[11], &limb_expected[12],
+                   &limb_expected[13], &limb_expected[14], &limb_expected[15]);
+        if (scanResult != 54) {
             printf("\n\t Error reading line: %s", line);
-            printf("\t Scanned %d values instead of 30", scanResult);
+            printf("\t Scanned %d values instead of 54", scanResult);
             continue;
         }
 

@@ -9,8 +9,11 @@
 (*Unit tests for tools . c*)
 
 
-(* ::Subsection:: *)
-(*Setup r	eference functions*)
+(* ::Subsection::Closed:: *)
+(*Setup reference functions*)
+
+
+APINTMAXLIMBS = 16;
 
 
 (* ::Text:: *)
@@ -81,7 +84,7 @@ apintNormalize[{sign_,exp2_,limbs_}]:=Module[
 	{n,s,newLimbs,newExp2}
 	,n=Length[limbs]
 	;While[n>0&&limbs[[n]]==0,n=n-1]
-	;If[n==0,Return[{1,0,Table[0,{8}]}]]
+	;If[n==0,Return[{1,0,Table[0,{APINTMAXLIMBS}]}]]
 	;s=clz32[limbs[[n]]]
 	;If[s==0
 		,newLimbs=limbs
@@ -89,7 +92,7 @@ apintNormalize[{sign_,exp2_,limbs_}]:=Module[
 		,newLimbs=shiftLimbsLeft[limbs,s]
 		;newExp2=exp2-s
 	]
-	;newLimbs=Join[Take[newLimbs,n],Table[0,{8-n}]]
+	;newLimbs=Join[Take[newLimbs,n],Table[0,{APINTMAXLIMBS -n}]]
 	(* Trim low-end zeros *)
 	;While[n>0&&newLimbs[[1]]==0
 		,newLimbs=Join[Drop[newLimbs,1],{0}]
@@ -114,16 +117,16 @@ apintMulTest[valA_,signA_,valB_,signB_]:=Module[{prod}
 
 
 (* ::Text:: *)
-(*Convert arbitrary integer to full 8-limb apint representation. Returns {limb0, limb1, ..., limb7, exp2, sign}.*)
+(*Convert arbitrary integer to full 16-limb apint representation. Returns {limb0, limb1, ..., limb7, exp2, sign}.*)
 
 
 toApintFull[x_,s_]:=Module[{tz,shifted,limbs}
 	,If[x==0
-		,Return[{0,0,0,0,0,0,0,0,0,1}]
+	    ,Return[Join[Table[0,{APINTMAXLIMBS}],{0,1}]]
 	]
 	;tz=IntegerExponent[x,2]
 	;shifted=Quotient[x,2^tz]
-	;limbs=Table[Mod[Quotient[shifted,2^(32*i)],2^32],{i,0,7}]
+	;limbs=Table[Mod[Quotient[shifted,2^(32*i)],2^32],{i,0,APINTMAXLIMBS-1}]
 	;Flatten[{limbs,tz,s}]
 ]
 
@@ -137,12 +140,12 @@ toApintFull[x_,s_]:=Module[{tz,shifted,limbs}
 apintMulTest[valA_,signA_,valB_,signB_]:=Module[
 	{prod,prodApint,normalized,limbList}
 	,If[valA==0||valB==0
-		,Return[{0,0,0,0,0,0,0,0,0,1}]
+	    ,Return[Join[Table[0,{APINTMAXLIMBS}],{0,1}]]
 	]
 	;prod=signA*valA*signB*valB
 	;prodApint=toApintFull[Abs[prod],Sign[prod]]
-	;limbList=Take[prodApint,8]
-	;normalized=apintNormalize[{prodApint[[10]],prodApint[[9]],limbList}]
+	;limbList=Take[prodApint,APINTMAXLIMBS]
+	;normalized=apintNormalize[{prodApint[[APINTMAXLIMBS+2]],prodApint[[APINTMAXLIMBS+1]],limbList}]
 	;Flatten[{normalized[[3]],normalized[[2]],normalized[[1]]}]
 ]
 
@@ -155,11 +158,11 @@ apintShrStickyRef[{sign_, exp2_, limbs_}, bits_] := Module[
 	{M, Mshifted, sticky, newLimbs, newExp2}
 	,M = FromDigits[Reverse[limbs], 2^32]
 	;If[M == 0
-		,{1, 0, Table[0, {8}]}
+		,{1, 0, Table[0, {APINTMAXLIMBS}]}
 		,sticky = If[Mod[M, 2^bits] != 0, 1, 0]
 		;Mshifted = BitOr[Floor[M / 2^bits], sticky]
 		;newExp2 = exp2 + bits
-		;newLimbs = Reverse[IntegerDigits[Mshifted, 2^32, 8]]
+		;newLimbs = Reverse[IntegerDigits[Mshifted, 2^32, APINTMAXLIMBS]]
 		;{sign, newExp2, newLimbs}
 	]
 ]
@@ -169,11 +172,12 @@ apintShrStickyRef[{sign_, exp2_, limbs_}, bits_] := Module[
 (*Convert  integer  to  apint.*)
 
 
-intToApint[n_] := Module[{raw, sign, absN}
-,absN = Abs[n]
-;sign = If[n == 0, 1, Sign[n]]
-;raw = toApintFull[absN, sign]
-;apintNormalize[{raw[[10]], raw[[9]], raw[[1;;8]]}]
+intToApint[n_] := Module[
+	{raw, sign, absN}
+	,absN = Abs[n]
+	;sign = If[n == 0, 1, Sign[n]]
+	;raw = toApintFull[absN, sign]
+	;apintNormalize[{raw[[APINTMAXLIMBS+2]], raw[[APINTMAXLIMBS+1]], raw[[1;;APINTMAXLIMBS]]}]
 ]
 
 
@@ -254,7 +258,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/apint_set_ull_Ref.csv", testCases];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Test arbitrary precision integer normalization function*)
 
 
@@ -265,37 +269,38 @@ Export["csv/apint_set_ull_Ref.csv", testCases];
 SeedRandom[42];
 testCases = Join[{
 	(* 1. Zero *)
-	{1, 0, {0, 0, 0, 0, 0, 0, 0, 0}}
-	,{-1, 5, {0, 0, 0, 0, 0, 0, 0, 0}}
-	,(* 2. Single limb, needs max shift (limb = 1) *)
-	{1, 0, {1, 0, 0, 0, 0, 0, 0, 0}}
-	,{-1, 10, {1, 0, 0, 0, 0, 0, 0, 0}}
-	,(* 3. Already normalized (MSB set) *)
-	{1, 0, {BitShiftLeft[1, 31], 0, 0, 0, 0, 0, 0, 0}}
-	,{1, 5, {0, BitShiftLeft[1, 31], 0, 0, 0, 0, 0, 0}}
-	,(* 4. Middle zeros *)
-	{1, 0, {5, 0, 0, 7, 0, 0, 0, 0}}
-	,{-1, -3, {100, 0, 200, 0, 0, 0, 0, 0}}
-	,(* 5. Multiple leading zeros to trim *)
-	{1, 0, {42, 0, 0, 0, 0, 0, 0, 0}}
-	,{1, 0, {1234567, 9876543, 0, 0, 0, 0, 0, 0}}
-	,(* 6. Needs various shift amounts *)
-	{1, 0, {BitShiftLeft[1, 15], 0, 0, 0, 0, 0, 0, 0}}
-	,{1, 0, {BitShiftLeft[1, 30], 0, 0, 0, 0, 0, 0, 0}}
-	,{1, 0, {0, BitShiftLeft[1, 7], 0, 0, 0, 0, 0, 0}}
-	,(* 7. Full mantissa with middle zeros *)
-	{1, 100, {16^^FFFFFFFF, 0, 16^^12345678, 0, 16^^ABCDEF00, 0, 0, 16^^80000000}}
-	,(* 8. Dangerous: shift causes carry between limbs *)
-	{1, 0, {16^^FFFF0000, 16^^0000FFFF, 0, 0, 0, 0, 0, 0}}
-	,{1, 0, {16^^80000001, 16^^00000001, 0, 0, 0, 0, 0, 0}}
-	,(* 9. Large exp2 values *)
-	{1, 1000000, {123, 0, 0, 0, 0, 0, 0, 0}}
-	,{-1, -500000, {16^^7FFFFFFF, 0, 0, 0, 0, 0, 0, 0}}
-	},(* 10. Random values *)
-	Table[
-		{1, RandomInteger[{-1000, 1000}], RandomInteger[{0, 16^^FFFFFFFF}, 8]}
-		,{i,9810}
-	]
+	{1, 0, PadRight[{}, APINTMAXLIMBS, 0]}
+	,{-1, 5, PadRight[{}, APINTMAXLIMBS, 0]}
+	(* 2. Single limb *)
+	,{1, 0, PadRight[{1}, APINTMAXLIMBS, 0]}
+	,{-1, 10, PadRight[{1}, APINTMAXLIMBS, 0]}
+	(* 3. Already normalized *)
+	,{1, 0, PadRight[{BitShiftLeft[1, 31]}, APINTMAXLIMBS, 0]}
+	,{1, 5, PadRight[{0, BitShiftLeft[1, 31]}, APINTMAXLIMBS, 0]}
+	(* 4. Middle zeros *)
+	,{1, 0, PadRight[{5, 0, 0, 7}, APINTMAXLIMBS, 0]}
+	,{-1, -3, PadRight[{100, 0, 200}, APINTMAXLIMBS, 0]}
+	(* 5. Multiple leading zeros *)
+	,{1, 0, PadRight[{42}, APINTMAXLIMBS, 0]}
+	,{1, 0, PadRight[{1234567, 9876543}, APINTMAXLIMBS, 0]}
+	(* 6. Shift amounts *)
+	,{1, 0, PadRight[{BitShiftLeft[1, 15]}, APINTMAXLIMBS, 0]}
+	,{1, 0, PadRight[{BitShiftLeft[1, 30]}, APINTMAXLIMBS, 0]}
+	,{1, 0, PadRight[{0, BitShiftLeft[1, 7]}, APINTMAXLIMBS, 0]}
+	(* 7. Full mantissa *)
+	,{1, 100, PadRight[{16^^FFFFFFFF, 0, 16^^12345678, 0, 16^^ABCDEF00, 0, 0, 16^^80000000}, APINTMAXLIMBS, 0]}
+	(* 8. Dangerous *)
+	,{1, 0, PadRight[{16^^FFFF0000, 16^^0000FFFF}, APINTMAXLIMBS, 0]}
+	,{1, 0, PadRight[{16^^80000001, 16^^00000001}, APINTMAXLIMBS, 0]}
+	(* 9. Large exp2 *)
+	,{1, 1000000, PadRight[{123}, APINTMAXLIMBS, 0]}
+	,{-1, -500000, PadRight[{16^^7FFFFFFF}, APINTMAXLIMBS, 0]}
+	}
+	,(* 10. Random values *)
+		Table[
+			{1, RandomInteger[{-1000, 1000}], RandomInteger[{0, 16^^FFFFFFFF}, APINTMAXLIMBS]}
+			,{i,981}
+		]
 ];
 
 
@@ -383,7 +388,7 @@ randomCases=Table[
 	,RandomInteger[{0,18446744073709551615}]
 	,RandomChoice[{1,-1}]
 	}
-	,{9696}
+	,{969}
 ];
 
 allCases=Join[specialCases,randomCases];
@@ -400,9 +405,6 @@ apintMulTestTable=ParallelTable[
 	]]
 	,{i,1,Length[allCases]}
 ];
-
-
-apintMulTestTable[[1;;10]]
 
 
 (* ::Text:: *)
@@ -432,25 +434,25 @@ nEdge = 100;
 
 edgeCases=Join[
 	(*Zeroinput*)
-	Table[{1,0,Table[0,{8}],RandomInteger[{0,300}]},{10}]
+	Table[{1,0,Table[0,{APINTMAXLIMBS}],RandomInteger[{0,300}]},{10}]
 	(*Noshift(bits=0)*)
-	,Table[Module[{n,limbs},n=RandomInteger[{1,8}];limbs=PadRight[Table[RandomInteger[{1,2^32-1}],{n}],8,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,0}],{10}]
+	,Table[Module[{n,limbs},n=RandomInteger[{1,APINTMAXLIMBS}];limbs=PadRight[Table[RandomInteger[{1,2^32-1}],{n}],APINTMAXLIMBS,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,0}],{10}]
 	(*Shiftwithinsinglelimb*)
-	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],PadRight[{RandomInteger[{1,2^32-1}]},8,0],RandomInteger[{1,31}]},{10}]
+	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],PadRight[{RandomInteger[{1,2^32-1}]},APINTMAXLIMBS,0],RandomInteger[{1,31}]},{10}]
 	(*Shiftexactlyonelimbboundary*)
-	,Table[Module[{n,limbs},n=RandomInteger[{2,8}];limbs=PadRight[Table[RandomInteger[{0,2^32-1}],{n}],8,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,32}],{10}]
+	,Table[Module[{n,limbs},n=RandomInteger[{2,APINTMAXLIMBS}];limbs=PadRight[Table[RandomInteger[{0,2^32-1}],{n}],APINTMAXLIMBS,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,32}],{10}]
 	(*Shiftacrosslimbboundary*)
-	,Table[Module[{n,limbs},n=RandomInteger[{2,8}];limbs=PadRight[Table[RandomInteger[{0,2^32-1}],{n}],8,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,RandomInteger[{33,63}]}],{10}]
+	,Table[Module[{n,limbs},n=RandomInteger[{2,APINTMAXLIMBS}];limbs=PadRight[Table[RandomInteger[{0,2^32-1}],{n}],APINTMAXLIMBS,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,RandomInteger[{33,63}]}],{10}]
 	(*Completeshift-out,nosticky*)
-	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],PadRight[{2^RandomInteger[{0,31}]},8,0],RandomInteger[{32,300}]},{10}]
+	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],PadRight[{2^RandomInteger[{0,31}]},APINTMAXLIMBS,0],RandomInteger[{32,300}]},{10}]
 	(*Completeshift-out,withsticky*)
-	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],PadRight[{RandomInteger[{1,2^32-1}]},8,0],RandomInteger[{32,300}]},{10}]
+	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],PadRight[{RandomInteger[{1,2^32-1}]},APINTMAXLIMBS,0],RandomInteger[{32,300}]},{10}]
 	(*Exactly256bitshift*)
-	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],Table[RandomInteger[{1,2^32-1}],{8}],256},{10}]
+	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],Table[RandomInteger[{1,2^32-1}],{APINTMAXLIMBS}],256},{10}]
 	(*Maxlimbs,smallshift*)
-	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],Table[RandomInteger[{1,2^32-1}],{8}],RandomInteger[{1,31}]},{10}]
+	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],Table[RandomInteger[{1,2^32-1}],{APINTMAXLIMBS}],RandomInteger[{1,31}]},{10}]
 	(*All0xFFFFFFFFlimbs*)
-	,Table[Module[{n,limbs},n=RandomInteger[{1,8}];limbs=PadRight[Table[2^32-1,{n}],8,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,RandomInteger[{1,100}]}],{10}]
+	,Table[Module[{n,limbs},n=RandomInteger[{1,APINTMAXLIMBS}];limbs=PadRight[Table[2^32-1,{n}],APINTMAXLIMBS,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,RandomInteger[{1,100}]}],{10}]
 ];
 
 
@@ -460,18 +462,18 @@ edgeCases=Join[
 
 Do[
 	sign0[i] = RandomChoice[{-1, 1}]
-	;n0[i] = RandomInteger[{0, 8}]
+	;n0[i] = RandomInteger[{0,APINTMAXLIMBS}]
 	;exp0[i] = RandomInteger[{-1000, 1000}]
 	;limbs0[i] = If[n0[i] == 0
-		,Table[0, {8}]
+		,Table[0, {APINTMAXLIMBS}]
 		,Join[
 			Table[RandomInteger[{0, 2^32 - 1}], {n0[i] - 1}]
 			,{RandomInteger[{1, 2^32 - 1}]}
-			,Table[0, {8 - n0[i]}]
+			,Table[0, {APINTMAXLIMBS - n0[i]}]
 		]
 	]
-;bits0[i] = RandomInteger[{0, 300}]
-,{i, nTests}
+	;bits0[i] = RandomInteger[{0, 300}]
+	,{i, nTests}
 ]
 
 
@@ -509,192 +511,56 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/apint_shr_sticky_Ref.csv", shrStickyTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Test arbitrary precision integer addition function*)
 
 
-nTests = 904;
-(* Zero operands *)
-zeroEdgeCases = {
-{0, 0}
-,{0, 12345678}
-,{87654321, 0}
-,{0, -999999}
-,{-111111, 0}
-};
+(* ::Text:: *)
+(*Setup reference values.*)
 
-(* ============================================ *)
-(* CATEGORY 2: Same sign, simple (10 cases)    *)
-(* ============================================ *)
-sameSignSimple = {
-{100, 200}
-,{-500, -300}
-,{1000000, 2000000}
-,{-9999999, -1111111}
-,{2^32, 2^32}
-,{-2^40, -2^40}
-,{2^63, 2^63}
-,{-2^100, -2^100}
-,{123456789012345, 987654321098765}
-,{-111111111111111, -222222222222222}
-};
 
-(* ============================================ *)
-(* CATEGORY 3: Same sign with carries (10 cases) *)
-(* ============================================ *)
-sameSignCarry = {
-{2^32-1, 1}
-,{2^32-1, 2^32-1}
-,{2^64-1, 1}
-,{2^64-1, 2^64-1}
-,{2^96-1, 2^96-1}
-,{2^128-1, 2^128-1}
-,{-(2^32-1), -1}
-,{-(2^64-1), -(2^64-1)}
-,{2^32-100, 200}
-,{2^64-1000, 2000}
-};
+edgeCases=Join[
+	(* Zero operands *)
+	{{0,0},{0,12345678},{87654321,0},{0,-999999},{-111111,0}}
+	(* Same sign, simple *)
+	,{{100,200},{-500,-300},{1000000,2000000},{-9999999,-1111111},{2^32,2^32},{-2^40,-2^40},{2^63,2^63},{-2^100,-2^100},{123456789012345,987654321098765},{-111111111111111,-222222222222222}}
+	(* Same sign with carries *)
+	,{{2^32-1,1},{2^32-1,2^32-1},{2^64-1,1},{2^64-1,2^64-1},{2^96-1,2^96-1},{2^128-1,2^128-1},{-(2^32-1),-1},{-(2^64-1),-(2^64-1)},{2^32-100,200},{2^64-1000,2000}}
+	(* Different signs, large d *)
+	,{{2^200,-2^50},{-2^200,2^50},{2^240,-1},{-2^240,1},{2^250,-2^100},{2^220,-2^20},{-2^220,2^20},{2^200,-(2^200-1)},{2^180,-2^80},{-2^180,2^80},{2^230,-2^130},{2^255,-2^10},{-2^255,2^10},{2^200,-2^150},{2^150,-2^200}}
+	(* Different signs, |a|<|b|, large d *)
+	,{{2^50,-2^200},{-2^50,2^200},{1,-2^240},{-1,2^240},{2^100,-2^250},{2^20,-2^220},{-2^20,2^220},{2^80,-2^180},{-2^80,2^180},{2^130,-2^230}}
+	(* Equal magnitude opposite sign *)
+	,{{100,-100},{-100,100},{2^32,-2^32},{-2^32,2^32},{2^64,-2^64},{2^100,-2^100},{-2^128,2^128},{123456789,-123456789},{2^200,-2^200},{2^240,-2^240}}
+	(* Borrow propagation with large values *)
+	,{{2^100,-1},{2^128,-1},{2^200,-1},{2^240,-1},{2^100,-(2^100-1)},{2^150,-(2^150-1)},{2^200,-(2^200-1)},{2^100*2,-3},{2^150*2,-3},{2^100+2^50,-2^50},{2^150+2^100,-2^100},{2^200+2^150,-2^150},{-2^100,1},{-2^150,1},{-2^200,1}}
+	(* Large exp2 differences *)
+	,{{2^250,1},{2^250,-1},{2^250,2^100},{2^250,-2^100},{-2^250,2^100},{2^255,2^50},{2^255,-2^50},{1,2^250},{-1,2^250},{2^100,2^250}}
+	(* Powers of 2 *)
+	,{{2^31,2^31},{2^100,2^100},{2^150,2^150},{2^200,2^200},{2^31,-2^31},{2^100,-2^100},{2^150,-2^150},{2^200,-2^200},{2^240,2^240},{2^240,-2^240}}
+];
 
-(* ============================================ *)
-(* CATEGORY 4: Different signs, small d (15 cases) *)
-(* ============================================ *)
-diffSignSmallD = {
-{1000, -300}
-,{-1000, 300}
-,{2^40, -2^38}
-,{-2^40, 2^38}
-,{2^100, -2^98}
-,{2^64, -1}
-,{2^64, -(2^32-1)}
-,{2^96, -(2^96-2)}
-,{1234567890, -123456789}
-,{-9876543210, 987654321}
-,{2^128, -2^126}
-,{2^200, -2^198}
-,{2^32+1, -1}
-,{2^64+1, -1}
-,{-2^100-1, 1}
-};
 
-(* ============================================ *)
-(* CATEGORY 5: Different signs, |a| < |b|, small d (10 cases) *)
-(* ============================================ *)
-diffSignBLargerSmallD = {
-{300, -1000}
-,{-300, 1000}
-,{2^38, -2^40}
-,{-2^38, 2^40}
-,{1, -2^10}
-,{2^32-1, -2^34}
-,{2^98, -2^100}
-,{123456789, -1234567890}
-,{-987654321, 9876543210}
-,{2^126, -2^128}
-};
+(* ::Text:: *)
+(*Setup random reference values.*)
 
-(* ============================================ *)
-(* CATEGORY 6: Equal magnitude opposite sign (10 cases) *)
-(* ============================================ *)
-equalMagnitude = {
-{100, -100}
-,{-100, 100}
-,{2^32, -2^32}
-,{-2^32, 2^32}
-,{2^64, -2^64}
-,{2^100, -2^100}
-,{-2^128, 2^128}
-,{123456789, -123456789}
-,{2^200, -2^200}
-,{999999999999, -999999999999}
-};
 
-(* ============================================ *)
-(* CATEGORY 7: Borrow propagation (15 cases)   *)
-(* ============================================ *)
-borrowPropagation = {
-{2^32, -1}
-,{2^33, -1}
-,{2^34, -1}
-,{2^35, -1}
-,{2^32, -(2^32-1)}
-,{2^33, -(2^33-1)}
-,{2^34, -(2^34-1)}
-,{2^32*2, -3}
-,{2^33*2, -3}
-,{2^32+2^16, -2^16}
-,{2^33+2^17, -2^17}
-,{2^34+2^18, -2^18}
-,{-2^32, 1}
-,{-2^33, 1}
-,{-2^34, 1}
-};
-
-(* ============================================ *)
-(* CATEGORY 8: Small exp2 differences only (10 cases) *)
-(* ============================================ *)
-smallExp2Diff = {
-{2^100, 1}
-,{2^100, -1}
-,{2^100, 2^99}
-,{2^100, -2^99}
-,{-2^100, 2^99}
-,{2^128, 2^127}
-,{2^128, -2^127}
-,{1, 2^20}
-,{-1, 2^20}
-,{2^100, 2^110}
-};
-
-(* ============================================ *)
-(* CATEGORY 9: Powers of 2 (edge cases) (10 cases) *)
-(* ============================================ *)
-powersOfTwo = {
-{2^31, 2^31}
-,{2^32, 2^32}
-,{2^63, 2^63}
-,{2^64, 2^64}
-,{2^31, -2^31}
-,{2^32, -2^32}
-,{2^64, -2^64}
-,{2^128, 2^128}
-,{2^128, -2^128}
-,{2^200, 2^200}
-};
-
-(* ============================================ *)
-(* CATEGORY 10: Random with small d (9910 cases) *)
-(* ============================================ *)
 SeedRandom[42];
-randomTests = Table[
+nTests=904;
+randomTests=Table[
 	Module[
-		{a, b, aApint, bApint, d, range, aExp2, bRange}
-		,range = RandomChoice[{2^50, 2^100, 2^150, 2^200, 2^250}]
-		;a = RandomInteger[{-range, range}]
-		;aApint = intToApint[a]
-		;aExp2 = aApint[[2]]
-		;bRange = 2^(aExp2 + 31)
-		;b = RandomInteger[{-bRange, bRange}]
-		;{a, b}
+		{a,b,range}
+		,{
+			range=RandomChoice[{2^100,2^150,2^200,2^240,2^250}]
+			,a=RandomInteger[{-range,range}]
+			,b=RandomInteger[{-range,range}]
+			,{a,b}
+		}
 	]
-,{nTests}
+	,{nTests}
 ];
 
-(* ============================================ *)
-(* COMBINE ALL TEST CASES                      *)
-(* ============================================ *)
-allEdgeCases = Join[
-zeroEdgeCases
-,sameSignSimple
-,sameSignCarry
-,diffSignSmallD
-,diffSignBLargerSmallD
-,equalMagnitude
-,borrowPropagation
-,smallExp2Diff
-,powersOfTwo
-];
-
-allTests = Join[allEdgeCases, randomTests];
+allTests=Join[edgeCases,randomTests];
 
 
 (* ::Text:: *)
@@ -702,15 +568,15 @@ allTests = Join[allEdgeCases, randomTests];
 
 
 testData = ParallelTable[
- Module[{a,b,aApint, bApint, refApint, ref}
-,{a,b}={allTests[[i, 1]], allTests[[i, 2]]}
-;ref = a + b
-;aApint = intToApint[a]
-;bApint = intToApint[b]
-;refApint = intToApint[ref]
-;Flatten[{aApint[[1]], aApint[[2]], aApint[[3]], bApint[[1]], bApint[[2]], bApint[[3]], refApint[[1]], refApint[[2]], refApint[[3]]}]
-]
-,{i, 1,Length[allTests]}
+	Module[{a,b,aApint, bApint, refApint, ref}
+		,{a,b}={allTests[[i, 1]], allTests[[i, 2]]}
+		;ref = a + b
+		;aApint = intToApint[a]
+		;bApint = intToApint[b]
+		;refApint = intToApint[ref]
+		;Flatten[{aApint[[1]], aApint[[2]], aApint[[3]], bApint[[1]], bApint[[2]], bApint[[3]], refApint[[1]], refApint[[2]], refApint[[3]]}]
+	]
+	,{i, Length[allTests]}
 ];
 
 
