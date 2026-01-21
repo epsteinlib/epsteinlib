@@ -13,7 +13,7 @@
 (*Setup reference functions*)
 
 
-APINTMAXLIMBS = 16;
+APINTMAXLIMBS = 32;
 
 
 (* ::Text:: *)

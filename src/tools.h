@@ -17,7 +17,7 @@
 
 /** @brief Maximum number of 64-bit limbs in fixed-size representation (256 bits
  * total). */
-#define APINT_MAX_LIMBS 16
+#define APINT_MAX_LIMBS 32
 
 /** @brief Fixed-size arbitrary-precision integer with separate sign and binary
  * exponent.
