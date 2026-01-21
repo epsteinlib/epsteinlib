@@ -15,7 +15,6 @@
 #include <complex.h>
 #include <math.h>
 #include <stdbool.h>
-#include <stdio.h>
 
 /*!
  * @brief minimal distance of two vector elements considered unequal.
@@ -136,7 +135,7 @@ void apint_normalize(apint_t *a) {
         a->exp2 = 0;
         return;
     }
-    
+
     // Invariant: limb[n-1] != 0 now guaranteed
     // Left-shift to normalize MSB of limb[n-1]
     s = 31 - msb32(a->limb[a->n - 1]);
@@ -164,7 +163,6 @@ void apint_normalize(apint_t *a) {
         a->n--;
         a->exp2 += 32;
     }
-
 }
 
 /** @brief Multiply two apints: out = a * b
@@ -447,6 +445,76 @@ static void subtract_mantissas_unsigned(apint_t *result, const apint_t *larger,
     // Result may have leading zeros; normalization will clean up
 }
 
+/** @brief Left-shift mantissa by specified number of bits (value-preserving)
+ * @param[out] dst: destination apint
+ * @param[in] src: source apint
+ * @param[in] bits: number of bits to shift left
+ * @return void
+ */
+void apint_shl_bits(apint_t *dst, const apint_t *src, int bits) {
+    unsigned int limb_shift;
+    unsigned int bit_shift;
+    unsigned char i;
+
+    // Handle zero input
+    if (src->n == 0) {
+        dst->sign = 1;
+        dst->exp2 = 0;
+        dst->n = 0;
+        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+            dst->limb[i] = 0;
+        }
+        return;
+    }
+
+    // Copy sign
+    dst->sign = src->sign;
+
+    // Adjust exponent (value-preserving: multiply mantissa, divide by 2^bits)
+    dst->exp2 = src->exp2 - bits;
+
+    limb_shift = bits / 32;
+    bit_shift = bits % 32;
+
+    // Check if shift exceeds available space
+    if (limb_shift >= APINT_MAX_LIMBS) {
+        // Complete overflow - saturate to max
+        dst->n = APINT_MAX_LIMBS;
+        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+            dst->limb[i] = 0xFFFFFFFF;
+        }
+        return;
+    }
+
+    // Zero out destination
+    for (i = 0; i < APINT_MAX_LIMBS; i++) {
+        dst->limb[i] = 0;
+    }
+
+    // Shift by whole limbs first
+    if (bit_shift == 0) {
+        // Simple limb shift
+        for (i = 0; i < src->n && (i + limb_shift) < APINT_MAX_LIMBS; i++) {
+            dst->limb[i + limb_shift] = src->limb[i];
+        }
+        dst->n = (src->n + limb_shift < APINT_MAX_LIMBS) ? src->n + limb_shift
+                                                         : APINT_MAX_LIMBS;
+    } else {
+        // Shift with bit offset
+        for (i = 0; i < src->n && (i + limb_shift) < APINT_MAX_LIMBS; i++) {
+            dst->limb[i + limb_shift] |= src->limb[i] << bit_shift;
+            if (i + limb_shift + 1 < APINT_MAX_LIMBS) {
+                dst->limb[i + limb_shift + 1] = src->limb[i] >> (32 - bit_shift);
+            }
+        }
+        dst->n = (src->n + limb_shift + 1 < APINT_MAX_LIMBS)
+                     ? src->n + limb_shift + 1
+                     : APINT_MAX_LIMBS;
+    }
+
+    // Does NOT normalize - caller handles that
+}
+
 /** @brief Add two apints: out = a + b
  * @param[out] out: result (supports aliasing)
  * @param[in] a: first operand
@@ -461,6 +529,8 @@ void apint_add(apint_t *out, const apint_t *a, const apint_t *b) { // NOLINT
     apint_t aligned_lower;
     int d;
     unsigned char i;
+    int bits_higher;
+    int bits_available;
 
     // Handle aliasing
     result = (out == a || out == b) ? &temp_result : out;
@@ -493,7 +563,7 @@ void apint_add(apint_t *out, const apint_t *a, const apint_t *b) { // NOLINT
     }
 
     // If difference too large, smaller operand is negligible
-    if (d >= 32 * APINT_MAX_LIMBS) {
+    if (d >= 32 * APINT_MAX_LIMBS - 32) { // d >= 224 bits
         *result = *higher_exp;
         if (result == &temp_result) {
             *out = temp_result;
@@ -501,12 +571,23 @@ void apint_add(apint_t *out, const apint_t *a, const apint_t *b) { // NOLINT
         return;
     }
 
-    // Align exponents by shifting lower_exp right
-    aligned_higher = *higher_exp; // No shift needed
-    apint_shr_bits_sticky(&aligned_lower, lower_exp, d);
+    // Smart alignment strategy
+    // Check if both operands fit when aligned to lower exp2
+    bits_higher =
+        32 * (higher_exp->n - 1) + msb32(higher_exp->limb[higher_exp->n - 1]) + 1;
+    bits_available = 32 * APINT_MAX_LIMBS;
 
-    // Both now have same exp2
-    result->exp2 = higher_exp->exp2;
+    if (d > 0 && d + bits_higher <= bits_available) {
+        // Both fit! Align to LOWER exp2 for exact arithmetic
+        aligned_lower = *lower_exp;                     // No shift needed
+        apint_shl_bits(&aligned_higher, higher_exp, d); // Shift higher LEFT
+        result->exp2 = lower_exp->exp2;
+    } else {
+        // Won't fit or d==0, align to HIGHER exp2 (sticky bit approach)
+        aligned_higher = *higher_exp;                        // No shift needed
+        apint_shr_bits_sticky(&aligned_lower, lower_exp, d); // Shift lower RIGHT
+        result->exp2 = higher_exp->exp2;
+    }
 
     // Perform addition or subtraction based on signs
     if (aligned_higher.sign == aligned_lower.sign) {
@@ -535,13 +616,6 @@ void apint_add(apint_t *out, const apint_t *a, const apint_t *b) { // NOLINT
             result->sign = larger_mag->sign;
         }
     }
-if (result->limb[0] == 0 && result->n > 1) {
-    printf("\nDEBUG before normalize:");
-    printf("\n  sign=%d exp2=%d n=%d", result->sign, result->exp2, result->n);
-    printf("\n  limbs=[%u,%u,%u,%u,%u,%u,%u,%u]\n",
-           result->limb[0], result->limb[1], result->limb[2], result->limb[3],
-           result->limb[4], result->limb[5], result->limb[6], result->limb[7]);
-}
 
     // Normalize result
     apint_normalize(result);
@@ -550,15 +624,13 @@ if (result->limb[0] == 0 && result->n > 1) {
     if (result == &temp_result) {
         *out = temp_result;
     }
-}
-
-/**
- * @brief euclidean dot product.
- * @param[in] dim: dimension of the input vectors
- * @param[in] v1: first vector.
- * @param[in] v2: second vector.
- * @return dot product of v1 and v2.
- */
+} /**
+   * @brief euclidean dot product.
+   * @param[in] dim: dimension of the input vectors
+   * @param[in] v1: first vector.
+   * @param[in] v2: second vector.
+   * @return dot product of v1 and v2.
+   */
 double dot(unsigned int dim, const double *v1, const double *v2) {
     double r = 0;
     for (int i = 0; i < dim; i++) {

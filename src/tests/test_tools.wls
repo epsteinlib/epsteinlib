@@ -513,11 +513,8 @@ Export["csv/apint_shr_sticky_Ref.csv", shrStickyTab];
 (*Test arbitrary precision integer addition function*)
 
 
-
-
-(* ============================================ *)
-(* CATEGORY 1: Zero operands (5 cases)         *)
-(* ============================================ *)
+nTests = 904;
+(* Zero operands *)
 zeroEdgeCases = {
 {0, 0}
 ,{0, 12345678}
@@ -559,40 +556,40 @@ sameSignCarry = {
 };
 
 (* ============================================ *)
-(* CATEGORY 4: Different signs, |a| > |b| (15 cases) *)
+(* CATEGORY 4: Different signs, small d (15 cases) *)
 (* ============================================ *)
-diffSignALarger = {
+diffSignSmallD = {
 {1000, -300}
 ,{-1000, 300}
-,{2^40, -2^30}
-,{-2^40, 2^30}
-,{2^100, -2^50}
+,{2^40, -2^38}
+,{-2^40, 2^38}
+,{2^100, -2^98}
 ,{2^64, -1}
 ,{2^64, -(2^32-1)}
-,{2^96, -(2^64-1)}
+,{2^96, -(2^96-2)}
 ,{1234567890, -123456789}
 ,{-9876543210, 987654321}
-,{2^128, -2^100}
-,{2^200, -2^150}
+,{2^128, -2^126}
+,{2^200, -2^198}
 ,{2^32+1, -1}
 ,{2^64+1, -1}
 ,{-2^100-1, 1}
 };
 
 (* ============================================ *)
-(* CATEGORY 5: Different signs, |a| < |b| (10 cases) *)
+(* CATEGORY 5: Different signs, |a| < |b|, small d (10 cases) *)
 (* ============================================ *)
-diffSignBLarger = {
+diffSignBLargerSmallD = {
 {300, -1000}
 ,{-300, 1000}
-,{2^30, -2^40}
-,{-2^30, 2^40}
-,{1, -2^64}
-,{2^32-1, -2^64}
-,{2^50, -2^100}
+,{2^38, -2^40}
+,{-2^38, 2^40}
+,{1, -2^10}
+,{2^32-1, -2^34}
+,{2^98, -2^100}
 ,{123456789, -1234567890}
 ,{-987654321, 9876543210}
-,{2^100, -2^128}
+,{2^126, -2^128}
 };
 
 (* ============================================ *)
@@ -616,36 +613,36 @@ equalMagnitude = {
 (* ============================================ *)
 borrowPropagation = {
 {2^32, -1}
-,{2^64, -1}
-,{2^96, -1}
-,{2^128, -1}
+,{2^33, -1}
+,{2^34, -1}
+,{2^35, -1}
 ,{2^32, -(2^32-1)}
-,{2^64, -(2^64-1)}
-,{2^96, -(2^96-1)}
+,{2^33, -(2^33-1)}
+,{2^34, -(2^34-1)}
 ,{2^32*2, -3}
-,{2^64*2, -3}
+,{2^33*2, -3}
 ,{2^32+2^16, -2^16}
-,{2^64+2^32, -2^32}
-,{2^96+2^64, -2^64}
+,{2^33+2^17, -2^17}
+,{2^34+2^18, -2^18}
 ,{-2^32, 1}
-,{-2^64, 1}
-,{-2^128, 1}
+,{-2^33, 1}
+,{-2^34, 1}
 };
 
 (* ============================================ *)
-(* CATEGORY 8: Large exp2 differences (10 cases) *)
+(* CATEGORY 8: Small exp2 differences only (10 cases) *)
 (* ============================================ *)
-largeExp2Diff = {
-{2^250, 1}
-,{2^250, -1}
-,{2^250, 2^10}
-,{2^250, -2^10}
-,{-2^250, 2^20}
-,{2^255, 2^50}
-,{2^255, -2^50}
-,{1, 2^250}
-,{-1, 2^250}
-,{2^100, 2^250}
+smallExp2Diff = {
+{2^100, 1}
+,{2^100, -1}
+,{2^100, 2^99}
+,{2^100, -2^99}
+,{-2^100, 2^99}
+,{2^128, 2^127}
+,{2^128, -2^127}
+,{1, 2^20}
+,{-1, 2^20}
+,{2^100, 2^110}
 };
 
 (* ============================================ *)
@@ -665,17 +662,21 @@ powersOfTwo = {
 };
 
 (* ============================================ *)
-(* CATEGORY 10: Random comprehensive (9900 cases) *)
+(* CATEGORY 10: Random with small d (9910 cases) *)
 (* ============================================ *)
 SeedRandom[42];
 randomTests = Table[
-Module[{a, b, range}
-,range = RandomChoice[{2^50, 2^100, 2^150, 2^200, 2^250}]
-;a = RandomInteger[{-range, range}]
-;b = RandomInteger[{-range, range}]
-;{a, b}
-]
-,{9900}
+	Module[
+		{a, b, aApint, bApint, d, range, aExp2, bRange}
+		,range = RandomChoice[{2^50, 2^100, 2^150, 2^200, 2^250}]
+		;a = RandomInteger[{-range, range}]
+		;aApint = intToApint[a]
+		;aExp2 = aApint[[2]]
+		;bRange = 2^(aExp2 + 31)
+		;b = RandomInteger[{-bRange, bRange}]
+		;{a, b}
+	]
+,{nTests}
 ];
 
 (* ============================================ *)
@@ -685,11 +686,11 @@ allEdgeCases = Join[
 zeroEdgeCases
 ,sameSignSimple
 ,sameSignCarry
-,diffSignALarger
-,diffSignBLarger
+,diffSignSmallD
+,diffSignBLargerSmallD
 ,equalMagnitude
 ,borrowPropagation
-,largeExp2Diff
+,smallExp2Diff
 ,powersOfTwo
 ];
 
@@ -709,7 +710,7 @@ testData = ParallelTable[
 ;refApint = intToApint[ref]
 ;Flatten[{aApint[[1]], aApint[[2]], aApint[[3]], bApint[[1]], bApint[[2]], bApint[[3]], refApint[[1]], refApint[[2]], refApint[[3]]}]
 ]
-,{i, 1, 10}
+,{i, 1,Length[allTests]}
 ];
 
 

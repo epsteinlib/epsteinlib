@@ -428,6 +428,167 @@ int test_apint_shr_bits_sticky(void) {
 }
 
 /*!
+ * @brief Tests apint_add function against Mathematica reference values
+ *
+ * @return number of failed tests.
+ * */
+int test_apint_add(void) { // NOLINT
+    printf("%s ", __func__);
+    char path[MAX_PATH_LENGTH];
+    int result = snprintf(path, sizeof(path), "%s/apint_add_Ref.csv", BASE_PATH);
+    if (result < 0 || result >= sizeof(path)) {
+        return fprintf(stderr, "Error creating file path\n");
+    }
+    FILE *data = fopen(path, "r");
+    if (data == NULL) {
+        return fprintf(stderr, "Error opening file: %s\n", path);
+    }
+
+    int sign_a;
+    int exp2_a;
+    unsigned int limb_a[APINT_MAX_LIMBS];
+    int sign_b;
+    int exp2_b;
+    unsigned int limb_b[APINT_MAX_LIMBS];
+    int sign_expected;
+    int exp2_expected;
+    unsigned int limb_expected[APINT_MAX_LIMBS];
+
+    int scanResult;
+    char line[512]; // Longer line buffer for 30 integers
+    int testsPassed = 0;
+    int totalTests = 0;
+
+    printf("\n\t ... ");
+    printf("processing %s ", path);
+
+    while (fgets(line, sizeof(line), data) != NULL) {
+        scanResult =
+            sscanf(line, // NOLINT
+                   "%d,%d,%u,%u,%u,%u,%u,%u,%u,%u,%d,%d,%u,%u,%u,%u,%u,%u,%u,%u,%d,%"
+                   "d,%u,%u,%u,%u,%u,%u,%u,%u", /* NOLINT */
+                   &sign_a, &exp2_a, &limb_a[0], &limb_a[1], &limb_a[2], &limb_a[3],
+                   &limb_a[4], &limb_a[5], &limb_a[6], &limb_a[7], &sign_b, &exp2_b,
+                   &limb_b[0], &limb_b[1], &limb_b[2], &limb_b[3], &limb_b[4],
+                   &limb_b[5], &limb_b[6], &limb_b[7], &sign_expected,
+                   &exp2_expected, &limb_expected[0], &limb_expected[1],
+                   &limb_expected[2], &limb_expected[3], &limb_expected[4],
+                   &limb_expected[5], &limb_expected[6], &limb_expected[7]);
+
+        if (scanResult != 30) {
+            printf("\n\t Error reading line: %s", line);
+            printf("\t Scanned %d values instead of 30", scanResult);
+            continue;
+        }
+
+        // Build apint structures from parsed data
+        apint_t a;
+        apint_t b;
+        apint_t expected;
+        apint_t result;
+        unsigned char i;
+
+        // Build a
+        a.sign = (signed char)sign_a;
+        a.exp2 = exp2_a;
+        a.n = 0;
+        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+            a.limb[i] = limb_a[i];
+            if (limb_a[i] != 0) {
+                a.n = i + 1;
+            }
+        }
+        if (a.n == 0) {
+            a.sign = 1;
+            a.exp2 = 0;
+        }
+
+        // Build b
+        b.sign = (signed char)sign_b;
+        b.exp2 = exp2_b;
+        b.n = 0;
+        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+            b.limb[i] = limb_b[i];
+            if (limb_b[i] != 0) {
+                b.n = i + 1;
+            }
+        }
+        if (b.n == 0) {
+            b.sign = 1;
+            b.exp2 = 0;
+        }
+
+        // Build expected
+        expected.sign = (signed char)sign_expected;
+        expected.exp2 = exp2_expected;
+        expected.n = 0;
+        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+            expected.limb[i] = limb_expected[i];
+            if (limb_expected[i] != 0) {
+                expected.n = i + 1;
+            }
+        }
+        if (expected.n == 0) {
+            expected.sign = 1;
+            expected.exp2 = 0;
+        }
+
+        // Perform addition
+        apint_add(&result, &a, &b);
+
+        // Compare result with expected
+        int passed = 1;
+        if (result.sign != expected.sign) {
+            passed = 0;
+        }
+        if (result.exp2 != expected.exp2) {
+            passed = 0;
+        }
+        if (result.n != expected.n) {
+            passed = 0;
+        }
+        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+            if (result.limb[i] != expected.limb[i]) {
+                passed = 0;
+                break;
+            }
+        }
+
+        if (passed) {
+            testsPassed++;
+        } else {
+            printf("\n\nWarning! Test %d failed:", totalTests + 1);
+            printf("\n  a: sign=%d exp2=%d limbs=[%u,%u,%u,%u,%u,%u,%u,%u]", a.sign,
+                   a.exp2, a.limb[0], a.limb[1], a.limb[2], a.limb[3], a.limb[4],
+                   a.limb[5], a.limb[6], a.limb[7]);
+            printf("\n  b: sign=%d exp2=%d limbs=[%u,%u,%u,%u,%u,%u,%u,%u]", b.sign,
+                   b.exp2, b.limb[0], b.limb[1], b.limb[2], b.limb[3], b.limb[4],
+                   b.limb[5], b.limb[6], b.limb[7]);
+            printf(
+                "\n  result:   sign=%d exp2=%d n=%d limbs=[%u,%u,%u,%u,%u,%u,%u,%u]",
+                result.sign, result.exp2, result.n, result.limb[0], result.limb[1],
+                result.limb[2], result.limb[3], result.limb[4], result.limb[5],
+                result.limb[6], result.limb[7]);
+            printf("\n  expected: sign=%d exp2=%d n=%d "
+                   "limbs=[%u,%u,%u,%u,%u,%u,%u,%u]\n",
+                   expected.sign, expected.exp2, expected.n, expected.limb[0],
+                   expected.limb[1], expected.limb[2], expected.limb[3],
+                   expected.limb[4], expected.limb[5], expected.limb[6],
+                   expected.limb[7]);
+        }
+        totalTests++;
+    }
+
+    if (fclose(data) != 0) {
+        return fprintf(stderr, "Error closing file: %d", errno);
+    }
+
+    printf("\n\t ... %d out of %d tests passed.", testsPassed, totalTests);
+    printf("\n");
+    return totalTests - testsPassed;
+}
+
+/*!
  * @brief Main function to run all set zeta derivatives function tests.
  *
  * @return number of failed tests.
@@ -440,5 +601,6 @@ int main() {
     failed += test_apint_normalize();
     failed += test_apint_mul();
     failed += test_apint_shr_bits_sticky();
+    failed += test_apint_add();
     return failed;
 }

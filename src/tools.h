@@ -77,6 +77,14 @@ void apint_mul(apint_t *out, const apint_t *a, const apint_t *b);
  */
 void apint_shr_bits_sticky(apint_t *dst, const apint_t *src, unsigned int bits);
 
+/** @brief Left-shift mantissa by specified number of bits (value-preserving)
+ * @param[out] dst: destination apint
+ * @param[in] src: source apint
+ * @param[in] bits: number of bits to shift left
+ * @return void
+ */
+void apint_shl_bits(apint_t *dst, const apint_t *src, int bits);
+
 /** @brief Add two apints: out = a + b
  * @param[out] out: result (supports aliasing)
  * @param[in] a: first operand
