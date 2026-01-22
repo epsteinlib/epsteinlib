@@ -424,13 +424,7 @@ double harmonic_h_inner_sum(unsigned int k, // NOLINT
     // convert to double
     double result = apint_to_double(&sumInner);
 
-    // divide by scalarCoeffsProd (double)
-    double scalarCoeffsProd = 1.0;
-    for (unsigned int l = 0; l <= alphaAbs / 2 - k; l++) {
-        scalarCoeffsProd *= coeffs_c_inner(alphaAbs, l, k, dim);
-    }
-
-    return result / scalarCoeffsProd;
+    return result;
 }
 
 /** @brief Updates the multi-index gamma in graded lexicographic order
@@ -508,7 +502,15 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, // NOLINT
     unsigned int kMax = alphaAbs / 2;
     long long n;
 
+    double scalarCoeffsProd = 1.0;
+
     for (k = 0; k <= kMax; k++) {
+
+        // divide by scalarCoeffsProd (double)
+        scalarCoeffsProd = 1.0;
+        for (unsigned int l = 0; l <= alphaAbs / 2 - k; l++) {
+            scalarCoeffsProd *= coeffs_c_inner(alphaAbs, l, k, dim);
+        }
 
         // Initialize gamma and count n
         for (unsigned int i = 0; i < dim; i++) {
@@ -534,7 +536,8 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, // NOLINT
 
             if (!skip) {
                 coeffs[chunk_size[k] + n] =
-                    harmonic_h_inner_sum(k, dim, alpha, gamma, alphaAbs);
+                    harmonic_h_inner_sum(k, dim, alpha, gamma, alphaAbs) /
+                    scalarCoeffsProd;
                 n++;
             }
 
