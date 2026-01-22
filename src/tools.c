@@ -13,6 +13,7 @@
 
 #include "tools.h"
 #include <complex.h>
+#include <float.h>
 #include <math.h>
 #include <stdbool.h>
 
@@ -609,6 +610,69 @@ void apint_add(apint_t *out, const apint_t *a, const apint_t *b) { // NOLINT
     if (result == &temp_result) {
         *out = temp_result;
     }
+}
+
+/** @brief Convert apint to double with round-to-nearest-even.
+ * @param[in] a: pointer to normalized apint
+ * @return closest double representation; ±DBL_MAX on overflow
+ */
+double apint_to_double(const apint_t *a) {
+    int i;
+    int top_bit;
+    int adj_exp;
+    int guard;
+    int sticky;
+    unsigned long long top53;
+    double result;
+
+    // Zero → +0.0
+    if (a->n == 0) {
+        return 0.0;
+    }
+
+    // MSB position of value (assumes normalized: msb of limb[n-1] is 31)
+    top_bit = a->exp2 + 32 * a->n - 1;
+
+    // Overflow
+    if (top_bit >= 1024) {
+        return (a->sign > 0) ? DBL_MAX : -DBL_MAX;
+    }
+
+    if (a->n == 1) {
+        // ≤32 bits, always exact
+        result = ldexp((double)a->limb[0], a->exp2);
+    } else {
+        // Extract top 53 bits
+        top53 = ((unsigned long long)a->limb[a->n - 1] << 21) |
+                (a->limb[a->n - 2] >> 11);
+
+        // Guard bit (bit 10 of limb[n-2]) and sticky bits (bits 9..0)
+        guard = ((a->limb[a->n - 2] & 0x400U) != 0);
+        sticky = ((a->limb[a->n - 2] & 0x3FFU) != 0);
+
+        // OR in lower limbs for sticky
+        for (i = 0; i < a->n - 2; i++) {
+            if (a->limb[i] != 0) {
+                sticky = 1;
+                break;
+            }
+        }
+
+        // Round to nearest even
+        if (guard && (sticky || (top53 & 1))) {
+            top53++;
+        }
+
+        adj_exp = a->exp2 + 32 * (a->n - 2) + 11;
+        result = ldexp((double)top53, adj_exp);
+
+        // Clamp overflow from rounding
+        if (result > DBL_MAX) {
+            result = DBL_MAX;
+        }
+    }
+
+    return (a->sign > 0) ? result : -result;
 }
 
 /**

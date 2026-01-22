@@ -511,7 +511,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/apint_shr_sticky_Ref.csv", shrStickyTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Test arbitrary precision integer addition function*)
 
 
@@ -586,3 +586,80 @@ testData=ParallelTable[
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/apint_add_Ref.csv", testData];
+
+
+(* ::Subsection::Closed:: *)
+(*Test apint to double conversion with round-to-nearest-even*)
+
+
+(* ::Text:: *)
+(*Setup edge case reference values.*)
+
+
+edgeCases=Join[
+	(* Zero *)
+	{0}
+	(* Small exact integers *)
+	,{1,-1,2,-2,100,-100,12345,-12345,2^31-1,-(2^31-1),2^32-1,2^32,2^32+1}
+	(* Exact powers of 2 *)
+	,{2^52,2^53-1,2^53,2^53+1,2^53+2,2^54,2^63,2^64,-2^52,-2^53,-(2^53+1),-2^64}
+	(* 53-bit boundary: exactly representable *)
+	,{2^53-1,-(2^53-1),2^52+2^51,-(2^52+2^51)}
+	(* 54-bit: rounding needed *)
+	,{2^54+1,2^54+2,2^54+3,2^54+4,-(2^54+1),-(2^54+2),-(2^54+3),-(2^54+4)}
+	(* Round to even cases: 2^54 + k where k determines rounding *)
+	,{2^54+0,2^54+1,2^54+2,2^54+3,2^54+4,2^54+5,2^54+6,2^54+7,2^54+8}
+	(* Large values within range *)
+	,{2^100,2^100+2^47,2^100+2^48,-(2^100),2^200,2^500,2^700,2^900,2^950,-2^950}
+	(* Near max double exponent *)
+	,{2^1023,2^1023+2^970,-(2^1023),-(2^1023+2^970)}
+	(* Odd/even rounding at various scales *)
+	,{3*2^52,3*2^52+1,3*2^52+2,5*2^60,5*2^60+2^8,7*2^100,7*2^100+2^48}
+	(* Multi-limb with rounding *)
+	,{2^64+2^11,2^64+2^11+1,2^64+2^12,2^96+2^43,2^96+2^43+1,2^96+2^44}
+	(* Sticky bit cases: many low bits set *)
+	,{2^64+2^11+2^5+1,2^100+2^47+2^30+2^10+1,2^200+2^147+2^100+2^50+2^10+1}
+];
+
+
+(* ::Text:: *)
+(*Setup  random  reference  values .*)
+
+
+SeedRandom[43];
+nTests=922;
+randomTests=Table[
+Module[
+	{bits,x,sign}
+	,bits=RandomInteger[{1,1000}]
+	;x=RandomInteger[{2^(bits-1),2^bits-1}]
+	;sign=RandomChoice[{1,-1}]
+	;sign*x
+	]
+	,{nTests}
+];
+allTests=Join[edgeCases,randomTests];
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+testData=ParallelTable[
+	Module[
+		{x,xApint,refDouble}
+		,x=allTests[[i]]
+		;xApint=intToApint[x]
+		;refDouble=N[x]
+		;Flatten[{xApint[[1]],xApint[[2]],xApint[[3]],refDouble}]
+	]
+	,{i,Length[allTests]}
+];
+
+
+(* ::Text:: *)
+(*Export  test  values.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/apint_to_double_Ref.csv",testData];

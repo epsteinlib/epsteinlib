@@ -94,6 +94,12 @@ void apint_shl_bits(apint_t *dst, const apint_t *src, int bits);
  */
 void apint_add(apint_t *out, const apint_t *a, const apint_t *b);
 
+/** @brief Convert apint to double with round-to-nearest-even.
+ * @param[in] a: pointer to normalized apint
+ * @return closest double representation; ±DBL_MAX on overflow
+ */
+double apint_to_double(const apint_t *a);
+
 double dot(unsigned int dim, const double *v1, const double *v2);
 void matrix_intVector(unsigned int dim, const double *m, const int *v, double *res);
 void transpose(unsigned int dim, double *m);

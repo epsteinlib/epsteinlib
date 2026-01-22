@@ -651,6 +651,101 @@ int test_apint_add(void) { // NOLINT
 }
 
 /*!
+ * @brief Tests apint_to_double function against Mathematica reference values
+ *
+ * @return number of failed tests.
+ */
+int test_apint_to_double(void) { // NOLINT
+    printf("%s ", __func__);
+    char path[MAX_PATH_LENGTH];
+    int result =
+        snprintf(path, sizeof(path), "%s/apint_to_double_Ref.csv", BASE_PATH);
+    if (result < 0 || result >= sizeof(path)) {
+        return fprintf(stderr, "Error creating file path\n");
+    }
+    FILE *data = fopen(path, "r");
+    if (data == NULL) {
+        return fprintf(stderr, "Error opening file: %s\n", path);
+    }
+    int sign_input;
+    int exp2_input;
+    unsigned int limbs_input[APINT_MAX_LIMBS];
+    double ref_double;
+    char line[4096];
+    int testsPassed = 0;
+    int totalTests = 0;
+    int i;
+    printf("\n\t ... ");
+    printf("processing %s ", path);
+    while (fgets(line, sizeof(line), data) != NULL) {
+        char *ptr = line;
+        char *endptr;
+        // Parse sign
+        sign_input = (int)strtol(ptr, &endptr, 10);
+        if (*endptr != ',') {
+            continue;
+        }
+        ptr = endptr + 1;
+        // Parse exp2
+        exp2_input = (int)strtol(ptr, &endptr, 10);
+        if (*endptr != ',') {
+            continue;
+        }
+        ptr = endptr + 1;
+        // Parse 32 limbs
+        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+            limbs_input[i] = (unsigned int)strtoul(ptr, &endptr, 10);
+            if (*endptr != ',') {
+                break;
+            }
+            ptr = endptr + 1;
+        }
+        if (i < APINT_MAX_LIMBS) {
+            continue;
+        }
+        // Parse reference double
+        ref_double = strtod(ptr, &endptr);
+        // Build apint
+        apint_t a;
+        a.sign = (signed char)sign_input;
+        a.exp2 = exp2_input;
+        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+            a.limb[i] = limbs_input[i];
+        }
+        // Compute n (number of used limbs)
+        a.n = 0;
+        for (i = APINT_MAX_LIMBS - 1; i >= 0; i--) {
+            if (a.limb[i] != 0) {
+                a.n = (unsigned char)(i + 1);
+                break;
+            }
+        }
+        // Test
+        double result_double = apint_to_double(&a);
+        int passed;
+        if (ref_double == 0.0) {
+            passed = (result_double == 0.0);
+        } else {
+            passed = (result_double == ref_double);
+        }
+        if (passed) {
+            testsPassed++;
+        } else {
+            printf("\n\nWarning! ");
+            printf("sign=%d, exp2=%d, n=%d: result=%.17g (expected %.17g)\n",
+                   sign_input, exp2_input, a.n, result_double, ref_double);
+        }
+        totalTests++;
+    }
+    if (fclose(data) != 0) {
+        return fprintf(stderr, "Error closing file: %d", errno);
+    }
+    printf("\n\t ... %d out of %d tests passed.", testsPassed, totalTests);
+    printf("\n");
+    return totalTests - testsPassed;
+}
+
+/*!
  * @brief Main function to run all set zeta derivatives function tests.
  *
  * @return number of failed tests.
@@ -664,5 +759,6 @@ int main() {
     failed += test_apint_mul();
     failed += test_apint_shr_bits_sticky();
     failed += test_apint_add();
+    failed += test_apint_to_double();
     return failed;
 }
