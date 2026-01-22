@@ -35,9 +35,9 @@ Protect[Power];
 (*Harmonic polynomials.*)
 
 
-cInner[n_,i_,k_,d_]=2^i Product[2n+d-2-4k-2j,{j,1,i}]
+cInner[n_,i_,k_,d_]= Product[2n+d-2-4k-2j,{j,1,i}]
 cOuter[n_,k_,d_]=2^-k Product[(2n+d-2ell)/((2n+d+2-4ell)(2n+d-4ell)),{ell,k}]
-hInner[\[Alpha]_,\[Beta]_,\[Gamma]_,n_,k_,d_]:=(-1)^Total[\[Beta]]/cInner[n,Total[\[Beta]],k,d]Binomial[Total[\[Beta]]+k,k]Total[\[Beta]]!/Apply[Times,Factorial[\[Beta]]] Apply[Times,Binomial[\[Alpha],\[Alpha]+\[Beta]-\[Gamma]](\[Gamma]-\[Beta])!/(2\[Gamma]-\[Alpha]-2\[Beta])!]
+hInner[\[Alpha]_,\[Beta]_,\[Gamma]_,n_,k_,d_]:=(-1/2)^Total[\[Beta]]/cInner[n,Total[\[Beta]],k,d]Binomial[Total[\[Beta]]+k,k]Total[\[Beta]]!/Apply[Times,Factorial[\[Beta]]] Apply[Times,Binomial[\[Alpha],\[Alpha]+\[Beta]-\[Gamma]](\[Gamma]-\[Beta])!/(2\[Gamma]-\[Alpha]-2\[Beta])!]
 h[k_][x_,\[Alpha]_]:=Module[
 	{d,n}
 	,d=Length[\[Alpha]]

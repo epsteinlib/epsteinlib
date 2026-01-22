@@ -67,4 +67,11 @@ unsigned int mult_fac(unsigned int dim, const unsigned int *alpha);
  */
 double mult_pow(unsigned int dim, const unsigned int *alpha, const double *vec);
 
+/** @brief Runs a test function and prints its runtime.
+ *
+ * @param[in] test_fn: pointer to test function returning number of failures.
+ * @return number of failures reported by the test.
+ */
+int run_timed_test(int (*test_fn)(void));
+
 #endif

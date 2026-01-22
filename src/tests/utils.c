@@ -5,6 +5,7 @@
 #include <complex.h>
 #include <math.h>
 #include <stdio.h>
+#include <time.h>
 
 #define EPSILON_REF (double)pow(10, -62)
 
@@ -133,4 +134,18 @@ double mult_pow(unsigned int dim, const unsigned int *alpha, const double *vec) 
         }
     }
     return res;
+}
+
+/** @brief Runs a test function and prints its runtime.
+ *
+ * @param[in] test_fn: pointer to test function returning number of failures.
+ * @return number of failures reported by the test.
+ */
+int run_timed_test(int (*test_fn)(void)) {
+    clock_t t0 = clock();
+    int failed = test_fn();
+    clock_t t1 = clock();
+    double dt = (double)(t1 - t0) / CLOCKS_PER_SEC;
+    printf("\t\t\t\t\t\t\t\t\t    [ Time  →  sec: %.6f     ]\n", dt);
+    return failed;
 }

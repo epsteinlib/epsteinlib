@@ -751,7 +751,6 @@ int test_apint_to_double(void) { // NOLINT
  * @return number of failed tests.
  */
 int main() {
-    printf("start ");
     int failed = 0;
     failed += test_ctzmsb();
     failed += test_apint_set_ull();

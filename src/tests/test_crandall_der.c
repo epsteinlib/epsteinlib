@@ -1687,23 +1687,29 @@ int test_crandall_gReg_der_d2k_prototype(void) {
     return totalTests - testsPassed;
 }
 
+/*!
+ * @brief Main function to run all set crandall and related derivatives function
+ * tests.
+ *
+ * @return number of failed tests.
+ */
 int main(void) {
-
-    printf("start ");
     int failed = 0;
-    failed += test_polynomial_p();
-    failed += test_polynomial_l();
-    failed += test_polynomial_y_der();
-    failed += test_coeffs_c_inner();
-    failed += test_harmonic_h_inner();
-    failed += test_harmonic_h_1D();
-    failed += test_harmonic_h_3D();
-    failed += test_log_l_der();
-    failed += test_singularity_s_der();
-    failed += test_crandall_g_der();
-    failed += test_crandall_gReg_der();
-    failed += test_crandall_gReg_der_d2k_prototype();
-    failed += test_crandall_g_der_taylor();
-    failed += test_crandall_gReg_der_taylor();
+
+    failed += run_timed_test(test_polynomial_p);
+    failed += run_timed_test(test_polynomial_l);
+    failed += run_timed_test(test_polynomial_y_der);
+    failed += run_timed_test(test_coeffs_c_inner);
+    failed += run_timed_test(test_harmonic_h_inner);
+    failed += run_timed_test(test_harmonic_h_1D);
+    failed += run_timed_test(test_harmonic_h_3D);
+    failed += run_timed_test(test_log_l_der);
+    failed += run_timed_test(test_singularity_s_der);
+    failed += run_timed_test(test_crandall_g_der);
+    failed += run_timed_test(test_crandall_gReg_der);
+    failed += run_timed_test(test_crandall_gReg_der_d2k_prototype);
+    failed += run_timed_test(test_crandall_g_der_taylor);
+    failed += run_timed_test(test_crandall_gReg_der_taylor);
+
     return failed;
 }
