@@ -15,8 +15,9 @@
 #include <complex.h>
 #include <stdbool.h>
 
-/** @brief Maximum number of 64-bit limbs in fixed-size representation (256 bits
- * total). */
+/** @brief Maximum number of 32-bit limbs in fixed-size representation (1024 bits
+ * total).
+ * */
 #define APINT_MAX_LIMBS 32
 
 /** @brief Fixed-size arbitrary-precision integer with separate sign and binary
@@ -25,6 +26,7 @@
  * Representation: value = sign × (mantissa in base 2^32) × 2^exp2
  * Limbs are little-endian: limb[0] is least significant.
  * Invariant: if n > 0, then limb[n-1] != 0 (no leading zeros).
+ * Invariant: if n > 0, then limb[0] != 0 (no trailing zeros after normalization).
  */
 typedef struct {
     signed char sign; // +1 or -1
