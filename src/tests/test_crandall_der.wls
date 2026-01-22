@@ -202,11 +202,12 @@ Export["csv/coeffs_c_outer_Ref.csv",cOuterTab];
 (*Generate reference arguments.*)
 
 
-range = Range[100];
+range = Range[500];
 j=1;
+maxn=35;
 While[j<=Last[range]
 	,
-	\[Alpha]0[j]={RandomInteger[{0,50}],RandomInteger[{0,50}],RandomInteger[{0,50}]}
+	\[Alpha]0[j]={temp1=RandomInteger[{1,maxn}],temp2=RandomInteger[{0,maxn-temp1}],RandomInteger[{0,maxn-temp1-temp2}]}
 	;k0[j]=RandomInteger[{0,Floor[Total[\[Alpha]0[j]]/2]}]
 	;tups=Select[Tuples[Range[Ceiling[\[Alpha]0[j]/2],0 \[Alpha]0[j]+Total[\[Alpha]0[j]]-k0[j]]],Total[#]==Total[\[Alpha]0[j]]-k0[j]&]
 	;If[Length[tups]==0,Continue[]]

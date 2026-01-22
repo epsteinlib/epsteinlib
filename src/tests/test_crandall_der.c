@@ -55,7 +55,7 @@ static double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int
 
     double denominator = 1.0;
 
-    for (unsigned int l = 0; l <= n / 2 - k; l++) {
+    for (unsigned int l = 1; l <= n / 2 - k; l++) {
         denominator *= coeffs_c_inner(n, l, k, dim);
     }
 
