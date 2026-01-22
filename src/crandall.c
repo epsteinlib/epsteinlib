@@ -217,7 +217,7 @@ double coeffs_c_inner(long long n, long long i, long long k, long long dim) {
 }
 
 /** @brief Computes the first three scalar terms of a single summand of h_inner;
- * explicitly (−1)^{i} / cₙ,ᵢ,ₖ · binom(i+k,k).
+ * explicitly (−1)^{i} (prod_{l !=i } cₙ,l,ₖ) · binom(i+k,k).
  * @param[in] n: index (total of alpha).
  * @param[in] i: index (total of beta).
  * @param[in] k: index (specifies degree |alpha| - 2k).
@@ -227,8 +227,14 @@ double coeffs_c_inner(long long n, long long i, long long k, long long dim) {
 double harmonic_h_inner_term_scalar(unsigned int n, unsigned int i, unsigned int k,
                                     unsigned int dim) {
 
-    double res = (double)binom((long long)(i + k), (long long)k) /
-                 coeffs_c_inner(n, i, k, dim);
+    double res = (double)binom((long long)(i + k), (long long)k);
+
+    // multiply non-integer parts of the product
+    for (unsigned int l = 0; l <= n / 2 - k; l++) {
+        if (!(l == i)) {
+            res *= coeffs_c_inner(n, l, k, dim);
+        }
+    }
 
     // (-1) ** i
     if (i & 1) {
@@ -380,6 +386,14 @@ static double complex harmonic_h_inner_sum(unsigned int k, // NOLINT
         epsilonInner = (auxtInner - sumInner) - auxyInner;
         sumInner = auxtInner;
     }
+
+    // prod_{i} cₙ,ᵢ,ₖ
+    double scalarCoeffsProd = 1;
+    for (unsigned int l = 0; l <= alphaAbs / 2 - k; l++) {
+        scalarCoeffsProd *= coeffs_c_inner(alphaAbs, l, k, dim);
+    }
+
+    sumInner /= scalarCoeffsProd;
 
     return sumInner;
 }
