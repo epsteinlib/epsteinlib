@@ -26,6 +26,40 @@
 #define BASE_PATH "csv"
 #endif
 
+/** @brief Computes the first three scalar terms of a single summand of h_inner;
+ * explicitly (−1)^{i} (prod_{l !=i } cₙ,l,ₖ) · binom(i+k,k).
+ * @param[in] n: index (total of alpha).
+ * @param[in] i: index (total of beta).
+ * @param[in] k: index (specifies degree |alpha| - 2k).
+ * @param[in] dim: dimension of the multi-indices.
+ * @return partial value of one summand in of h_inner.
+ */
+static double harmonic_h_inner_term_scalar(unsigned int n, unsigned int i,
+                                           unsigned int k, unsigned int dim) {
+    apint_t res;
+    harmonic_h_inner_term_scalar_apint(n, i, k, dim, &res);
+    return apint_to_double(&res);
+}
+
+/** @brief Computes the multi-index dependent terms of a single summand of h_inner;
+ * explicitly binom(i,β) · binom(α,θ₁) · θ₂! / (θ₂ - θ₁)!.
+ * @param[in] dim: dimension of the multi-indices.
+ * @param[in] alpha: upper multi-index α.
+ * @param[in] beta: lower multi-index β.
+ * @param[in] theta1: multi-index α+β−γ.
+ * @param[in] theta2: multi-index γ−β.
+ * @return partial value of one summand in of h_inner.
+ */
+static double harmonic_h_inner_term_multi(unsigned int dim,
+                                          const unsigned int *alpha,
+                                          const unsigned int *beta,
+                                          const unsigned int *theta1,
+                                          const unsigned int *theta2) {
+    apint_t res;
+    harmonic_h_inner_term_multi_apint(dim, alpha, beta, theta1, theta2, &res);
+    return apint_to_double(&res);
+}
+
 /** @brief Computes a single summand of h_inner; explicitly
  * (−1)^{i} / cₙ,ᵢ,ₖ binom(i+k,k) binom(i,β) binom(α,θ₁) θ₂! / (θ₂ - θ₁)!,
  * where n=|α|, i=|β|, θ₁=α+β−γ, θ₂=γ−β.

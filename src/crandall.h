@@ -11,6 +11,7 @@
  * in Crandall's formula.
  */
 
+#include "tools.h"
 #include <complex.h>
 
 #ifndef EPSTEIN_CRANDALL
@@ -117,30 +118,51 @@ double coeffs_c_outer(long long n, long long k, long long dim);
  */
 double coeffs_c_inner(long long n, long long i, long long k, long long dim);
 
-/** @brief Computes the first three scalar terms of a single summand of h_inner;
- * explicitly (−1)^{i} / cₙ,ᵢ,ₖ · binom(i+k,k).
+/** @brief Computes cₙ,ᵢ,ₖ = 2^i × ∏_{j=1}^{i}(2n+d-2-4k-2j) as apint.
  * @param[in] n: index (total of alpha).
  * @param[in] i: index (total of beta).
  * @param[in] k: index (specifies degree |alpha| - 2k).
  * @param[in] dim: dimension of the multi-indices.
- * @return partial value of one summand in of h_inner.
+ * @param[out] out: result apint.
  */
-double harmonic_h_inner_term_scalar(unsigned int n, unsigned int i, unsigned int k,
-                                    unsigned int dim);
+void coeffs_c_inner_apint(unsigned int n, unsigned int i, unsigned int k,
+                          unsigned int dim, apint_t *out);
 
-/** @brief Computes the multi-index dependent terms of a single summand of h_inner;
- * explicitly binom(i,β) · binom(α,θ₁) · θ₂! / (θ₂ - θ₁)!.
+/** @brief Computes (−1)^i × binom(i+k,k) × ∏_{l≠i} cₙ,l,ₖ as apint.
+ * @param[in] n: index (total of alpha).
+ * @param[in] i: index (total of beta).
+ * @param[in] k: index (specifies degree |alpha| - 2k).
+ * @param[in] dim: dimension of the multi-indices.
+ * @param[out] out: result apint.
+ */
+void harmonic_h_inner_term_scalar_apint(unsigned int n, unsigned int i,
+                                        unsigned int k, unsigned int dim,
+                                        apint_t *out);
+
+/** @brief Computes binom(i,β) × binom(α,θ₁) × θ₂!/(θ₂−θ₁)! as apint.
  * @param[in] dim: dimension of the multi-indices.
  * @param[in] alpha: upper multi-index α.
  * @param[in] beta: lower multi-index β.
  * @param[in] theta1: multi-index α+β−γ.
  * @param[in] theta2: multi-index γ−β.
- * @return partial value of one summand in of h_inner.
+ * @param[out] out: result apint (always positive).
  */
-double harmonic_h_inner_term_multi(unsigned int dim, const unsigned int *alpha,
-                                   const unsigned int *beta,
-                                   const unsigned int *theta1,
-                                   const unsigned int *theta2);
+void harmonic_h_inner_term_multi_apint(unsigned int dim, const unsigned int *alpha,
+                                       const unsigned int *beta,
+                                       const unsigned int *theta1,
+                                       const unsigned int *theta2, apint_t *out);
+
+/** @brief Computes the inner sum h_inner(α,γ,k) using exact apint arithmetic.
+ * @param[in] k: specifies degree |alpha| - 2k.
+ * @param[in] dim: dimension of alpha, beta and gamma.
+ * @param[in] alpha: upper multi-index.
+ * @param[in] gamma: fixed multi-index gamma.
+ * @param[in] alphaAbs: total of alpha.
+ * @return h_inner(α,γ,k).
+ */
+double harmonic_h_inner_sum(unsigned int k, // NOLINT
+                            unsigned int dim, const unsigned int *alpha,
+                            const unsigned int *gamma, unsigned int alphaAbs);
 
 /** @brief Computes chunk offsets for precomputed inner harmonic sums
  * corresponding to k = 0, ..., floor(|alpha|/2).

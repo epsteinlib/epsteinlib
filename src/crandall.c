@@ -216,73 +216,109 @@ double coeffs_c_inner(long long n, long long i, long long k, long long dim) {
     return res;
 }
 
-/** @brief Computes the first three scalar terms of a single summand of h_inner;
- * explicitly (−1)^{i} (prod_{l !=i } cₙ,l,ₖ) · binom(i+k,k).
+/** @brief Computes cₙ,ᵢ,ₖ = 2^i × ∏_{j=1}^{i}(2n+d-2-4k-2j) as apint.
  * @param[in] n: index (total of alpha).
  * @param[in] i: index (total of beta).
  * @param[in] k: index (specifies degree |alpha| - 2k).
  * @param[in] dim: dimension of the multi-indices.
- * @return partial value of one summand in of h_inner.
+ * @param[out] out: result apint.
  */
-double harmonic_h_inner_term_scalar(unsigned int n, unsigned int i, unsigned int k,
-                                    unsigned int dim) {
+void coeffs_c_inner_apint(unsigned int n, unsigned int i, unsigned int k,
+                          unsigned int dim, apint_t *out) {
+    apint_set_ull(out, 1, 1);
 
-    double res = (double)binom((long long)(i + k), (long long)k);
+    if (i == 0) {
+        apint_normalize(out);
+        return;
+    }
 
-    // multiply non-integer parts of the product
-    for (unsigned int l = 0; l <= n / 2 - k; l++) {
-        if (!(l == i)) {
-            res *= coeffs_c_inner(n, l, k, dim);
+    int base = (2 * (int)n) + (int)dim - 2 - (4 * (int)k);
+    for (unsigned int j = 1; j <= i; j++) {
+        int factor = base - (2 * (int)j);
+        apint_t tmp;
+        apint_set_ull(&tmp, (unsigned long long)factor, 1);
+        apint_mul(out, out, &tmp);
+    }
+
+    // 2^i factor goes into exponent
+    out->exp2 += (int)i;
+}
+
+/** @brief Computes (−1)^i × binom(i+k,k) × ∏_{l≠i} cₙ,l,ₖ as apint.
+ * @param[in] n: index (total of alpha).
+ * @param[in] i: index (total of beta).
+ * @param[in] k: index (specifies degree |alpha| - 2k).
+ * @param[in] dim: dimension of the multi-indices.
+ * @param[out] out: result apint.
+ */
+void harmonic_h_inner_term_scalar_apint(unsigned int n, unsigned int i,
+                                        unsigned int k, unsigned int dim,
+                                        apint_t *out) {
+    unsigned long long b = binom((long long)(i + k), (long long)k);
+    apint_set_ull(out, b, 1);
+
+    unsigned int lastIndex = (n / 2) - k;
+    for (unsigned int l = 0; l <= lastIndex; l++) {
+        if (l != i) {
+            apint_t tmp;
+            coeffs_c_inner_apint(n, l, k, dim, &tmp);
+            apint_mul(out, out, &tmp);
         }
     }
 
-    // (-1) ** i
-    if (i & 1) {
-        res = -res;
-    }
+    apint_normalize(out);
 
-    return res;
+    // sign: (-1)^i
+    if (i & 1) {
+        out->sign = -1;
+    }
 }
 
-/** @brief Computes the multi-index dependent terms of a single summand of h_inner;
- * explicitly binom(i,β) · binom(α,θ₁) · θ₂! / (θ₂ - θ₁)!.
+/** @brief Computes binom(i,β) × binom(α,θ₁) × θ₂!/(θ₂−θ₁)! as apint.
  * @param[in] dim: dimension of the multi-indices.
  * @param[in] alpha: upper multi-index α.
  * @param[in] beta: lower multi-index β.
  * @param[in] theta1: multi-index α+β−γ.
  * @param[in] theta2: multi-index γ−β.
- * @return partial value of one summand in of h_inner.
+ * @param[out] out: result apint (always positive).
  */
-double harmonic_h_inner_term_multi(unsigned int dim, const unsigned int *alpha,
-                                   const unsigned int *beta,
-                                   const unsigned int *theta1,
-                                   const unsigned int *theta2) {
+void harmonic_h_inner_term_multi_apint(unsigned int dim, const unsigned int *alpha,
+                                       const unsigned int *beta,
+                                       const unsigned int *theta1,
+                                       const unsigned int *theta2, apint_t *out) {
+    apint_set_ull(out, 1, 1);
 
-    double res = 1;
-
+    // prod_j binom(betaAbsDim, beta[j])
     unsigned long long betaAbsDim = 0;
-    for (int j = 0; j < dim; j++) {
+    for (unsigned int j = 0; j < dim; j++) {
         betaAbsDim += beta[j];
-        res *= (double)binom(betaAbsDim, (long long)beta[j]);
+        unsigned long long b = binom((long long)betaAbsDim, (long long)beta[j]);
+        apint_t tmp;
+        apint_set_ull(&tmp, b, 1);
+        apint_mul(out, out, &tmp);
     }
 
-    for (int j = 0; j < dim; j++) {
-        res *= (double)binom((long long)alpha[j], (long long)theta1[j]);
+    // prod_j binom(alpha[j], theta1[j])
+    for (unsigned int j = 0; j < dim; j++) {
+        unsigned long long b = binom((long long)alpha[j], (long long)theta1[j]);
+        apint_t tmp;
+        apint_set_ull(&tmp, b, 1);
+        apint_mul(out, out, &tmp);
     }
 
-    for (int j = 0; j < dim; j++) {
-        for (unsigned int l = theta2[j] - theta1[j] + 1; l < theta2[j] + 1; l++) {
-            res *= (double)l;
+    // prod_j falling factorial: theta2[j]! / (theta2[j] - theta1[j])!
+    for (unsigned int j = 0; j < dim; j++) {
+        for (unsigned int l = theta2[j] - theta1[j] + 1; l <= theta2[j]; l++) {
+            apint_t tmp;
+            apint_set_ull(&tmp, (unsigned long long)l, 1);
+            apint_mul(out, out, &tmp);
         }
     }
 
-    return res;
+    apint_normalize(out);
 }
 
-/** @brief Computes the inner sum of the harmonic polynomial
- * h_inner(α,γ,k) = ∑_{β} h_inner_term(α,β,γ,k),
- * where the sum runs over all multi-indices β such that
- * 0 ≤ α + β − γ ≤ α/2 componentwise.
+/** @brief Computes the inner sum h_inner(α,γ,k) using exact apint arithmetic.
  * @param[in] k: specifies degree |alpha| - 2k.
  * @param[in] dim: dimension of alpha, beta and gamma.
  * @param[in] alpha: upper multi-index.
@@ -290,67 +326,69 @@ double harmonic_h_inner_term_multi(unsigned int dim, const unsigned int *alpha,
  * @param[in] alphaAbs: total of alpha.
  * @return h_inner(α,γ,k).
  */
-static double complex harmonic_h_inner_sum(unsigned int k, // NOLINT
-                                           unsigned int dim,
-                                           const unsigned int *alpha,
-                                           const unsigned int *gamma,
-                                           unsigned int alphaAbs) {
+double harmonic_h_inner_sum(unsigned int k, // NOLINT
+                            unsigned int dim, const unsigned int *alpha,
+                            const unsigned int *gamma, unsigned int alphaAbs) {
 
     unsigned int beta[dim];
     unsigned int theta1[dim];
     unsigned int theta2[dim];
-    for (int i = 0; i < dim; i++) {
-        beta[i] = 0;
-        theta1[i] = alpha[i] + beta[i] - gamma[i];
-        theta2[i] = gamma[i] - beta[i];
+    for (unsigned int j = 0; j < dim; j++) {
+        beta[j] = 0;
+        theta1[j] = alpha[j] + beta[j] - gamma[j];
+        theta2[j] = gamma[j] - beta[j];
     }
 
     unsigned int redotheta1 = 0;
     unsigned int redotheta2 = 0;
-
     unsigned int betaAbs = 0;
     int done;
     int skip;
 
-    // scalar terms of the inner sum
     unsigned int lastScalarIndex = (alphaAbs / 2) - k;
-    double scalar_coeffs[lastScalarIndex + 1];
-    double multi_coeffs[lastScalarIndex + 1];
+
+    // scalar coefficients as apint
+    apint_t scalar_coeffs[lastScalarIndex + 1];
     for (unsigned int i = 0; i <= lastScalarIndex; i++) {
-        scalar_coeffs[i] = harmonic_h_inner_term_scalar(alphaAbs, i, k, dim);
-        multi_coeffs[i] = 0;
+        harmonic_h_inner_term_scalar_apint(alphaAbs, i, k, dim, &scalar_coeffs[i]);
     }
 
-    // multi-index terms of the inner sum
+    // multi-index coefficients as apint (accumulated via apint_add)
+    apint_t multi_coeffs[lastScalarIndex + 1];
+    for (unsigned int i = 0; i <= lastScalarIndex; i++) {
+        apint_set_ull(&multi_coeffs[i], 0, 1);
+    }
+
+    // loop over beta multi-indices
     while (1) {
 
         skip = 0;
-        for (int i = 0; i < dim; i++) {
-            if (gamma[i] > alpha[i] && gamma[i] - alpha[i] > beta[i]) {
+        for (unsigned int j = 0; j < dim; j++) {
+            if (gamma[j] > alpha[j] && gamma[j] - alpha[j] > beta[j]) {
                 skip = 1;
             }
         }
 
         if (!skip) {
 
-            // redo theta1 = α+β−γ
             if (redotheta1) {
-                for (int i = 0; i < dim; i++) {
-                    theta1[i] = alpha[i] + beta[i] - gamma[i];
+                for (unsigned int j = 0; j < dim; j++) {
+                    theta1[j] = alpha[j] + beta[j] - gamma[j];
                 }
             }
             redotheta1 = 0;
 
-            // redo theta2 = γ−β
             if (redotheta2) {
-                for (int i = 0; i < dim; i++) {
-                    theta2[i] = gamma[i] - beta[i];
+                for (unsigned int j = 0; j < dim; j++) {
+                    theta2[j] = gamma[j] - beta[j];
                 }
             }
             redotheta2 = 0;
 
-            multi_coeffs[betaAbs] += // NOLINT
-                harmonic_h_inner_term_multi(dim, alpha, beta, theta1, theta2);
+            apint_t term;
+            harmonic_h_inner_term_multi_apint(dim, alpha, beta, theta1, theta2,
+                                              &term);
+            apint_add(&multi_coeffs[betaAbs], &multi_coeffs[betaAbs], &term);
         }
 
         done = 1;
@@ -373,29 +411,26 @@ static double complex harmonic_h_inner_sum(unsigned int k, // NOLINT
         }
     }
 
-    double sumInner = 0.0;
-    double epsilonInner = 0.0;
-    double auxtInner;
-    double auxyInner;
+    // combine: sum_i scalar_coeffs[i] * multi_coeffs[i]
+    apint_t sumInner;
+    apint_set_ull(&sumInner, 0, 1);
 
-    // combine scalar coeffs with accumulated multi-index coeffs
     for (unsigned int i = 0; i <= lastScalarIndex; i++) {
-        auxyInner = scalar_coeffs[i] * multi_coeffs[i] - epsilonInner;
-
-        auxtInner = sumInner + auxyInner;
-        epsilonInner = (auxtInner - sumInner) - auxyInner;
-        sumInner = auxtInner;
+        apint_t term;
+        apint_mul(&term, &scalar_coeffs[i], &multi_coeffs[i]);
+        apint_add(&sumInner, &sumInner, &term);
     }
 
-    // prod_{i} cₙ,ᵢ,ₖ
-    double scalarCoeffsProd = 1;
+    // convert to double
+    double result = apint_to_double(&sumInner);
+
+    // divide by scalarCoeffsProd (double)
+    double scalarCoeffsProd = 1.0;
     for (unsigned int l = 0; l <= alphaAbs / 2 - k; l++) {
         scalarCoeffsProd *= coeffs_c_inner(alphaAbs, l, k, dim);
     }
 
-    sumInner /= scalarCoeffsProd;
-
-    return sumInner;
+    return result / scalarCoeffsProd;
 }
 
 /** @brief Updates the multi-index gamma in graded lexicographic order
