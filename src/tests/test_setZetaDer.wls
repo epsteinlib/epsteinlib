@@ -54,20 +54,6 @@ randDerivative := RandomInteger[{0,6}]
 
 
 (* ::Text:: *)
-(*Calculates the directional derivative (\[Del]\:22c5 v)\:207f f[x] with finite differences by Taylors method given a stencil size "size" and stencil width "h".*)
-
-
-DirDerTaylorCoeffs[n_,size_]:=LinearSolve[
-	Table[(1/(i-1)!)*(j-((size+1)/2))^(i-1),{i,size},{j,size}]
-	,n(size+1)Map[KroneckerDelta[#,n+1]&,Range[size]]
-]
-DirectionalDerivative[v_,n_,size_:15,h_:1/1000][f_][x_]:=If[PossibleZeroQ[n]
-	,f[x]
-	,Total[DirDerTaylorCoeffs[n,size] Map[f[x+h v #]&,Range[size]-(size+1)/2]]/((h^n)*n(size+1))
-]
-
-
-(* ::Text:: *)
 (*Set Zeta without derivatives.*)
 
 
@@ -295,54 +281,6 @@ zDerTab=Join[zDerTab,{
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_prototype_Ref.csv",zDerTab];
-
-
-(* ::Subsection:: *)
-(*Create directional derivative set zeta reference values by finite differences*)
-
-
-(* ::Text:: *)
-(*Setup test parameters.*)
-
-
-range = Range[100];
-Do[
-	\[Nu]D[i]=10 randRational
-	;aD[i]={{1,1/2},{0,Sqrt@3/2}}
-	;xD[i]=If[i<10,{0,0},{randRational,randRational}]
-	;yD[i]={randRationalStable,randRationalStable}
-	,{i,range}
-]
-
-
-(* ::Text:: *)
-(*Generate reference values.*)
-
-
-zDirectionalTab=ParallelTable[
-	(* big stencil width and size works best for "low" precision reference values *)
-	With[{result=DirectionalDerivative[{1,1},2,(*stencil size: *)25,(*stencil width: *)1/250][SetZeta[\[Nu]D[i],aD[i],xD[i],#]&][yD[i]]}
-	,{N[\[Nu]D[i]]
-	,N[aD[i][[1,1]]]
-	,N[aD[i][[1,2]]]
-	,N[aD[i][[2,1]]]
-	,N[aD[i][[2,2]]]
-	,N[xD[i][[1]]]
-	,N[xD[i][[2]]]
-	,N[yD[i][[1]]]
-	,N[yD[i][[2]]]
-	,Re[result]
-	,Im[result]
-	}],{i,range}
-];
-
-
-(* ::Text:: *)
-(*Save reference values to file.*)
-
-
-SetDirectory[NotebookDirectory[]];
-Export["csv/setZetaDer_directional_Ref.csv",zDirectionalTab];
 
 
 (* ::Subsection:: *)
