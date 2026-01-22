@@ -1691,19 +1691,19 @@ int main(void) {
 
     printf("start ");
     int failed = 0;
-    //    failed += test_polynomial_p();
-    //    failed += test_polynomial_l();
-    //    failed += test_polynomial_y_der();
-    //    failed += test_coeffs_c_inner();
+    failed += test_polynomial_p();
+    failed += test_polynomial_l();
+    failed += test_polynomial_y_der();
+    failed += test_coeffs_c_inner();
     failed += test_harmonic_h_inner();
-    //    failed += test_harmonic_h_1D();
-    //    failed += test_harmonic_h_3D();
-    //    failed += test_log_l_der();
-    //    failed += test_singularity_s_der();
-    //    failed += test_crandall_g_der();
-    //    failed += test_crandall_gReg_der();
-    //    failed += test_crandall_gReg_der_d2k_prototype();
-    //    failed += test_crandall_g_der_taylor();
-    //    failed += test_crandall_gReg_der_taylor();
+    failed += test_harmonic_h_1D();
+    failed += test_harmonic_h_3D();
+    failed += test_log_l_der();
+    failed += test_singularity_s_der();
+    failed += test_crandall_g_der();
+    failed += test_crandall_gReg_der();
+    failed += test_crandall_gReg_der_d2k_prototype();
+    failed += test_crandall_g_der_taylor();
+    failed += test_crandall_gReg_der_taylor();
     return failed;
 }
