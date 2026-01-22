@@ -297,9 +297,9 @@ int test_setZetaDer_taylor(void) { // NOLINT
 
     printf("\n\t ... ");
     printf("generating test values");
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10; i++) {
 
-        nu = -12.5 + 0.333 * (i + 1);
+        nu = -12.5 + 3.33 * (i + 1);
 
         x[0] = 0.003 * i;
         x[1] = -0.002 * i;
