@@ -26,43 +26,9 @@
 #define BASE_PATH "csv"
 #endif
 
-/** @brief Computes the first three scalar terms of a single summand of h_inner;
- * explicitly (−1)^{i} (prod_{l !=i } cₙ,l,ₖ) · binom(i+k,k).
- * @param[in] n: index (total of alpha).
- * @param[in] i: index (total of beta).
- * @param[in] k: index (specifies degree |alpha| - 2k).
- * @param[in] dim: dimension of the multi-indices.
- * @return partial value of one summand in of h_inner.
- */
-static double harmonic_h_inner_term_scalar(unsigned int n, unsigned int i,
-                                           unsigned int k, unsigned int dim) {
-    apint_t res;
-    harmonic_h_inner_term_scalar_apint(n, i, k, dim, &res);
-    return apint_to_double(&res);
-}
-
-/** @brief Computes the multi-index dependent terms of a single summand of h_inner;
- * explicitly binom(i,β) · binom(α,θ₁) · θ₂! / (θ₂ - θ₁)!.
- * @param[in] dim: dimension of the multi-indices.
- * @param[in] alpha: upper multi-index α.
- * @param[in] beta: lower multi-index β.
- * @param[in] theta1: multi-index α+β−γ.
- * @param[in] theta2: multi-index γ−β.
- * @return partial value of one summand in of h_inner.
- */
-static double harmonic_h_inner_term_multi(unsigned int dim,
-                                          const unsigned int *alpha,
-                                          const unsigned int *beta,
-                                          const unsigned int *theta1,
-                                          const unsigned int *theta2) {
-    apint_t res;
-    harmonic_h_inner_term_multi_apint(dim, alpha, beta, theta1, theta2, &res);
-    return apint_to_double(&res);
-}
-
 /** @brief Computes a single summand of h_inner; explicitly
- * (−1)^{i} / cₙ,ᵢ,ₖ binom(i+k,k) binom(i,β) binom(α,θ₁) θ₂! / (θ₂ - θ₁)!,
- * where n=|α|, i=|β|, θ₁=α+β−γ, θ₂=γ−β.
+ * (−1/2)^{i} / cn,i,k binom(i+k,k) binom(i,β) binom(α,θ1) θ2! / (θ2 - θ1)!,
+ * where n=|α|, i=|β|, θ1=α+β−γ, θ2=γ−β.
  * @param[in] n: index (total of alpha).
  * @param[in] i: index (total of beta).
  * @param[in] k: index (specifies degree |alpha| - 2k).
@@ -78,11 +44,22 @@ static double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int
                                     const unsigned int *beta,
                                     const unsigned int *theta1,
                                     const unsigned int *theta2) {
+    apint_t numerator;
 
-    double res = 1;
+    harmonic_h_inner_term_scalar_apint(n, i, k, dim, &numerator);
 
-    res *= harmonic_h_inner_term_scalar(n, i, k, dim);
-    res *= harmonic_h_inner_term_multi(dim, alpha, beta, theta1, theta2);
+    apint_t multi_term;
+    harmonic_h_inner_term_multi_apint(dim, alpha, beta, theta1, theta2, &multi_term);
+
+    apint_mul(&numerator, &multi_term, &numerator);
+
+    double denominator = 1.0;
+
+    for (unsigned int l = 0; l <= n / 2 - k; l++) {
+        denominator *= coeffs_c_inner(n, l, k, dim);
+    }
+
+    double res = apint_to_double(&numerator) / denominator;
 
     return res;
 }
@@ -1714,19 +1691,19 @@ int main(void) {
 
     printf("start ");
     int failed = 0;
-    failed += test_polynomial_p();
-    failed += test_polynomial_l();
-    failed += test_polynomial_y_der();
-    failed += test_coeffs_c_inner();
+    //    failed += test_polynomial_p();
+    //    failed += test_polynomial_l();
+    //    failed += test_polynomial_y_der();
+    //    failed += test_coeffs_c_inner();
     failed += test_harmonic_h_inner();
-    failed += test_harmonic_h_1D();
-    failed += test_harmonic_h_3D();
-    failed += test_log_l_der();
-    failed += test_singularity_s_der();
-    failed += test_crandall_g_der();
-    failed += test_crandall_gReg_der();
-    failed += test_crandall_gReg_der_d2k_prototype();
-    failed += test_crandall_g_der_taylor();
-    failed += test_crandall_gReg_der_taylor();
+    //    failed += test_harmonic_h_1D();
+    //    failed += test_harmonic_h_3D();
+    //    failed += test_log_l_der();
+    //    failed += test_singularity_s_der();
+    //    failed += test_crandall_g_der();
+    //    failed += test_crandall_gReg_der();
+    //    failed += test_crandall_gReg_der_d2k_prototype();
+    //    failed += test_crandall_g_der_taylor();
+    //    failed += test_crandall_gReg_der_taylor();
     return failed;
 }

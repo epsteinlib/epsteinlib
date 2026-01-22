@@ -144,8 +144,7 @@ double complex crandall_g(unsigned int dim, double nu, const double *z,
     return egf_ugamma(nu / 2, zArgument) / pow(zArgument, nu / 2);
 }
 
-/** @brief Calculates the polynomial p_(alpha,beta)(y) = (-pi)^(alpha - beta) *
- * (alpha choose beta) *
+/** @brief Computes p_(alpha,beta)(y) = (-pi)^(alpha - beta) * (alpha choose beta)
  * ((alpha - beta)! / (alpha - 2*beta)!) * (2*y)^(alpha - 2*beta)
  * where 2 beta =< alpha
  * @param[in] dim: dimension of alpha, beta and y.
@@ -178,8 +177,7 @@ double polynomial_p(unsigned int dim, const double *z, const unsigned int *alpha
     return res;
 }
 
-/** @brief scalar coefficients defined by cₙ,₀＝1 and
- * cₙ,ₖ＝2⁻ᵏ ∏ⱼ₌₁ᵏ(2n＋d−2j)∕((2n＋d＋2−4j)(2n＋d−4j)).
+/** @brief Computes cₙ,ₖ＝2⁻ᵏ ∏ⱼ₌₁ᵏ(2n＋d−2j)∕((2n＋d＋2−4j)(2n＋d−4j)).
  * @param[in] n: index (total of alpha).
  * @param[in] k: index (specifies degree |alpha| - 2k).
  * @param[in] dim: dimension of the zeta function inputs.
@@ -200,8 +198,7 @@ double coeffs_c_outer(long long n, long long k, long long dim) {
     return res;
 }
 
-/** @brief scalar coefficients defined by cₙ,₀,₀＝1 and
- * cₙ,ᵢ,ₖ＝2ⁱ ∏ⱼ₌₁ⁱ(2n＋d−2−4k−2j) for i≥k.
+/** @brief Computes cₙ,ᵢ,ₖ＝ ∏ⱼ₌₁ⁱ(2n＋d−2−4k−2j).
  * @param[in] n: index (total of alpha).
  * @param[in] i: index (total of beta).
  * @param[in] k: index (specifies degree |alpha| - 2k).
@@ -209,14 +206,14 @@ double coeffs_c_outer(long long n, long long k, long long dim) {
  * @return cₙ,ᵢ,ₖ.
  */
 double coeffs_c_inner(long long n, long long i, long long k, long long dim) {
-    double res = ldexp(1.0, (int)i);
+    double res = 1.;
     for (long long j = 1; j < i + 1; j++) {
         res *= (double)((2 * n) + dim - 2 - (4 * k) - (2 * j));
     }
     return res;
 }
 
-/** @brief Computes cₙ,ᵢ,ₖ = 2^i × ∏_{j=1}^{i}(2n+d-2-4k-2j) as apint.
+/** @brief Computes cₙ,ᵢ,ₖ＝ ∏ⱼ₌₁ⁱ(2n＋d−2−4k−2j) as apint.
  * @param[in] n: index (total of alpha).
  * @param[in] i: index (total of beta).
  * @param[in] k: index (specifies degree |alpha| - 2k).
@@ -239,12 +236,9 @@ void coeffs_c_inner_apint(unsigned int n, unsigned int i, unsigned int k,
         apint_set_ull(&tmp, (unsigned long long)factor, 1);
         apint_mul(out, out, &tmp);
     }
-
-    // 2^i factor goes into exponent
-    out->exp2 += (int)i;
 }
 
-/** @brief Computes (−1)^i × binom(i+k,k) × ∏_{l≠i} cₙ,l,ₖ as apint.
+/** @brief Computes (−1/2)ⁱ · binom(i+k,k) · ∏_{l=1,l≠i}^{⌊n/2⌋−k} cₙ,ₗ,ₖ as apint.
  * @param[in] n: index (total of alpha).
  * @param[in] i: index (total of beta).
  * @param[in] k: index (specifies degree |alpha| - 2k).
@@ -258,7 +252,7 @@ void harmonic_h_inner_term_scalar_apint(unsigned int n, unsigned int i,
     apint_set_ull(out, b, 1);
 
     unsigned int lastIndex = (n / 2) - k;
-    for (unsigned int l = 0; l <= lastIndex; l++) {
+    for (unsigned int l = 1; l <= lastIndex; l++) {
         if (l != i) {
             apint_t tmp;
             coeffs_c_inner_apint(n, l, k, dim, &tmp);
@@ -268,10 +262,11 @@ void harmonic_h_inner_term_scalar_apint(unsigned int n, unsigned int i,
 
     apint_normalize(out);
 
-    // sign: (-1)^i
+    // (-1/2)^i
     if (i & 1) {
         out->sign = -1;
     }
+    out->exp2 -= (int)i;
 }
 
 /** @brief Computes binom(i,β) × binom(α,θ₁) × θ₂!/(θ₂−θ₁)! as apint.
@@ -478,7 +473,7 @@ precompute_harmonic_h_inner_chunk_size(unsigned int alphaAbs, unsigned int kMax,
     return totalSize;
 }
 
-/** @brief Precomputes and stores inner harmonic sums h_inner(α,γ,k)(α,γ,k)
+/** @brief Precomputes and stores inner harmonic sums h_inner(α,γ,k)
  * for all k = 0, ..., floor(|alpha|/2) and all gamma with |gamma| = |alpha| - k.
  * Values are stored in coeffs starting at offsets given by chunk_size[k],
  * with gamma ordered identically to harmonic_h_update_gamma.
@@ -508,7 +503,7 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, // NOLINT
 
         // divide by scalarCoeffsProd (double)
         scalarCoeffsProd = 1.0;
-        for (unsigned int l = 0; l <= alphaAbs / 2 - k; l++) {
+        for (unsigned int l = 1; l <= alphaAbs / 2 - k; l++) {
             scalarCoeffsProd *= coeffs_c_inner(alphaAbs, l, k, dim);
         }
 
@@ -603,8 +598,6 @@ double harmonic_h(unsigned int k, unsigned int dim, const double *z, // NOLINT
 
             double sumInner = coeffs[chunk_size[k] + n];
             n++;
-            //            double complex sumInner =
-            //                harmonic_h_inner_sum(k, dim, alpha, gamma, alphaAbs);
 
             zPow = 1.0;
             for (int i = 0; i < dim; i++) {
