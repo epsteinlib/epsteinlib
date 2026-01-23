@@ -99,8 +99,17 @@ double complex crandall_g_der(unsigned int dim, double nu, const double *z,
                               double prefactor, double zArgBound,
                               const unsigned int *alpha, unsigned int alphaAbs);
 
-/** @brief scalar coefficients defined by cₙ,₀＝1 and
- * cₙ,ₖ＝2⁻ᵏ ∏ⱼ₌₁ᵏ(2n＋d−2j)∕((2n＋d＋2−4j)(2n＋d−4j)).
+/** @brief Computes cₙ,ᵢ,ₖ＝ ∏_{j=i+1}^{⌊n/2⌋-k} (2n＋d−2−4k−2j).
+ * @param[in] n: index (total of alpha).
+ * @param[in] start: lower bound of product (exclusive).
+ * @param[in] end: upper bound of product (inclusive).
+ * @param[in] k: index (specifies degree |alpha| - 2k).
+ * @param[in] dim: dimension of the zeta function inputs.
+ * @return cₙ,ᵢ,ₖ.
+ */
+double coeffs_c_inner(long long n, long long i, long long k, long long dim);
+
+/** @brief Computes cₙ,ₖ＝2⁻ᵏ/ cₙ,₀,ₖ ∏ⱼ₌₁ᵏ(2n＋d−2j)∕((2n＋d＋2−4j)(2n＋d−4j)).
  * @param[in] n: index (total of alpha).
  * @param[in] k: index (specifies degree |alpha| - 2k).
  * @param[in] dim: dimension of the zeta function inputs.
@@ -108,32 +117,21 @@ double complex crandall_g_der(unsigned int dim, double nu, const double *z,
  */
 double coeffs_c_outer(long long n, long long k, long long dim);
 
-/** @brief scalar coefficients defined by cₙ,₀,₀＝1 and
- * cₙ,ᵢ,ₖ＝2ⁱ ∏ⱼ₌₁ⁱ(2n＋d−2−4k−2j) for i≥k.
+/** @brief Computes cₙ,ᵢ,ₖ＝ ∏_{j=i+1}^{⌊n/2⌋-k} (2n＋d−2−4k−2j) as apint.
  * @param[in] n: index (total of alpha).
- * @param[in] i: index (total of beta).
- * @param[in] k: index (specifies degree |alpha| - 2k).
- * @param[in] dim: dimension of the zeta function inputs.
- * @return cₙ,ᵢ,ₖ.
- */
-double coeffs_c_inner(long long n, long long i, long long k, long long dim);
-
-/** @brief Computes ∏_{j=start}^{end} (2n + d - 2 - 4k - 2j) as apint.
- * @param[in] n: index (total of alpha).
- * @param[in] start: lower bound of product (inclusive).
- * @param[in] end: upper bound of product (inclusive).
+ * @param[in] i: lower bound of product (exclusive).
  * @param[in] k: index (specifies degree |alpha| - 2k).
  * @param[in] dim: dimension.
  * @param[out] out: result apint.
  */
-void coeffs_c_inner_apint(unsigned int n, unsigned int start, unsigned int end,
-                          unsigned int k, unsigned int dim, apint_t *out);
+void coeffs_c_inner_apint(unsigned int n, unsigned int i, unsigned int k,
+                          unsigned int dim, apint_t *out);
 
-/** @brief Computes (−1)^i × binom(i+k,k) × ∏_{l≠i} cₙ,l,ₖ as apint.
+/** @brief Computes (-2)**(-i) · c_{n,i,k} · binom(i+k,k) as apint.
  * @param[in] n: index (total of alpha).
  * @param[in] i: index (total of beta).
  * @param[in] k: index (specifies degree |alpha| - 2k).
- * @param[in] dim: dimension of the multi-indices.
+ * @param[in] dim: dimension.
  * @param[out] out: result apint.
  */
 void harmonic_h_inner_term_scalar_apint(unsigned int n, unsigned int i,

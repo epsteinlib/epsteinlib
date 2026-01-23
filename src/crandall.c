@@ -177,7 +177,22 @@ double polynomial_p(unsigned int dim, const double *z, const unsigned int *alpha
     return res;
 }
 
-/** @brief Computes cₙ,ₖ＝2⁻ᵏ ∏ⱼ₌₁ᵏ(2n＋d−2j)∕((2n＋d＋2−4j)(2n＋d−4j)).
+/** @brief Computes cₙ,ᵢ,ₖ＝ ∏_{j=i+1}^{⌊n/2⌋-k} (2n＋d−2−4k−2j).
+ * @param[in] n: index (total of alpha).
+ * @param[in] i: lower bound of product (exclusive).
+ * @param[in] k: index (specifies degree |alpha| - 2k).
+ * @param[in] dim: dimension of the zeta function inputs.
+ * @return cₙ,ᵢ,ₖ.
+ */
+double coeffs_c_inner(long long n, long long i, long long k, long long dim) {
+    double res = 1.;
+    for (long long j = i + 1; j <= n / 2 - k; j++) {
+        res *= (double)((2 * n) + dim - 2 - (4 * k) - (2 * j));
+    }
+    return res;
+}
+
+/** @brief Computes cₙ,ₖ＝2⁻ᵏ/ cₙ,₀,ₖ ∏ⱼ₌₁ᵏ(2n＋d−2j)∕((2n＋d＋2−4j)(2n＋d−4j)).
  * @param[in] n: index (total of alpha).
  * @param[in] k: index (specifies degree |alpha| - 2k).
  * @param[in] dim: dimension of the zeta function inputs.
@@ -195,41 +210,31 @@ double coeffs_c_outer(long long n, long long k, long long dim) {
         den = (a + 2 - (4 * j)) * (a - (4 * j));
         res *= (double)num / (double)den;
     }
+
+    res /= coeffs_c_inner(n, 0, k, dim);
+
     return res;
 }
 
-/** @brief Computes cₙ,ᵢ,ₖ＝ ∏ⱼ₌₁ⁱ(2n＋d−2−4k−2j).
+/** @brief Computes cₙ,ᵢ,ₖ＝ ∏_{j=i+1}^{⌊n/2⌋-k} (2n＋d−2−4k−2j) as apint.
  * @param[in] n: index (total of alpha).
- * @param[in] i: index (total of beta).
- * @param[in] k: index (specifies degree |alpha| - 2k).
- * @param[in] dim: dimension of the zeta function inputs.
- * @return cₙ,ᵢ,ₖ.
- */
-double coeffs_c_inner(long long n, long long i, long long k, long long dim) {
-    double res = 1.;
-    for (long long j = 1; j < i + 1; j++) {
-        res *= (double)((2 * n) + dim - 2 - (4 * k) - (2 * j));
-    }
-    return res;
-}
-
-/** @brief Computes ∏_{j=start}^{end} (2n + d - 2 - 4k - 2j) as apint.
- * @param[in] n: index (total of alpha).
- * @param[in] start: lower bound of product (inclusive).
- * @param[in] end: upper bound of product (inclusive).
+ * @param[in] i: lower bound of product (exclusive).
  * @param[in] k: index (specifies degree |alpha| - 2k).
  * @param[in] dim: dimension.
  * @param[out] out: result apint.
  */
-void coeffs_c_inner_apint(unsigned int n, unsigned int start, unsigned int end,
-                          unsigned int k, unsigned int dim, apint_t *out) {
+void coeffs_c_inner_apint(unsigned int n, unsigned int i, unsigned int k,
+                          unsigned int dim, apint_t *out) {
+
+    long long end = (n / 2) - k;
+
     apint_set_ull(out, 1, 1);
-    if (start > end) {
+    if (i >= end) {
         apint_normalize(out);
         return;
     }
     int base = (2 * (int)n) + (int)dim - 2 - (4 * (int)k);
-    for (unsigned int j = start; j <= end; j++) {
+    for (unsigned int j = i + 1; j <= end; j++) {
         int factor = base - (2 * (int)j);
         apint_t tmp;
         apint_set_ull(&tmp, (unsigned long long)factor, 1);
@@ -237,9 +242,7 @@ void coeffs_c_inner_apint(unsigned int n, unsigned int start, unsigned int end,
     }
 }
 
-/** @brief Computes binom(i+k,k) · (c_{n,m,k} / c_{n,i,k}) as apint.
- *         where m = ⌊n/2⌋ - k.
- *         Ratio = ∏_{j=i+1}^{m} (2n + d - 2 - 4k - 2j).
+/** @brief Computes (-2)**(-i) · c_{n,i,k} · binom(i+k,k) as apint.
  * @param[in] n: index (total of alpha).
  * @param[in] i: index (total of beta).
  * @param[in] k: index (specifies degree |alpha| - 2k).
@@ -252,12 +255,10 @@ void harmonic_h_inner_term_scalar_apint(unsigned int n, unsigned int i,
     unsigned long long b = binom((long long)(i + k), (long long)k);
     apint_set_ull(out, b, 1);
 
-    unsigned int m = (n / 2) - k;
-
-    // Compute c_{n,m,k} / c_{n,i,k} = ∏_{j=i+1}^{m} (2n + d - 2 - 4k - 2j)
-    apint_t ratio;
-    coeffs_c_inner_apint(n, i + 1, m, k, dim, &ratio);
-    apint_mul(out, out, &ratio);
+    // c_{n,i,k}
+    apint_t coeff;
+    coeffs_c_inner_apint(n, i, k, dim, &coeff);
+    apint_mul(out, out, &coeff);
 
     apint_normalize(out);
 
@@ -496,12 +497,7 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, // NOLINT
     unsigned int kMax = alphaAbs / 2;
     long long n;
 
-    double scalarCoeffsProd = 1.0;
-
     for (k = 0; k <= kMax; k++) {
-
-        // divide by scalarCoeffsProd (double)
-        scalarCoeffsProd = coeffs_c_inner(alphaAbs, (alphaAbs / 2) - k, k, dim);
 
         // Initialize gamma and count n
         for (unsigned int i = 0; i < dim; i++) {
@@ -527,8 +523,7 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, // NOLINT
 
             if (!skip) {
                 coeffs[chunk_size[k] + n] =
-                    harmonic_h_inner_sum(k, dim, alpha, gamma, alphaAbs) /
-                    scalarCoeffsProd;
+                    harmonic_h_inner_sum(k, dim, alpha, gamma, alphaAbs);
                 n++;
             }
 

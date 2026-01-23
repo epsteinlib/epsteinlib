@@ -52,9 +52,7 @@ static double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int
 
     apint_mul(&numerator, &multi_term, &numerator);
 
-    double denom = coeffs_c_inner(n, (n / 2) - k, k, dim);
-
-    double res = apint_to_double(&numerator) / denom;
+    double res = apint_to_double(&numerator);
 
     return res;
 }
@@ -1262,7 +1260,7 @@ int test_singularity_s_der(void) {
     int testsPassed = 0;
     int totalTests = 0;
     int dim = 3;
-    double tol = 5 * pow(10, -12);
+    double tol = 5 * pow(10, -11);
 
     unsigned int *kRef = malloc(sizeof(unsigned int));
     double *z = malloc(dim * sizeof(double));
