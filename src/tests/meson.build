@@ -75,6 +75,16 @@ benchmark_gamma = executable('epsteinlib_benchmark_gamma',
     link_with : epsteinlib
 )
 
+benchmark_derivatives_timing = executable('epsteinlib_benchmark_derivatives_timing',
+    ['utils.c','benchmark_derivatives_timing.c'],
+    include_directories : incdir,
+    dependencies: deps,
+    install: false,
+    override_options: override_options,
+    link_with : epsteinlib
+)
+
+
 test('test_epsteinZeta',
     test_epsteinZeta,
     workdir: meson.current_source_dir()

@@ -74,4 +74,11 @@ double mult_pow(unsigned int dim, const unsigned int *alpha, const double *vec);
  */
 int run_timed_test(int (*test_fn)(void));
 
+/**
+ * @brief Sorts an array of doubles in ascending order using bubble sort.
+ * @param arr: The array to be sorted.
+ * @param size: The size of the array.
+ */
+void sort(double *arr, int size);
+
 #endif

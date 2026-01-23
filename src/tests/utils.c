@@ -149,3 +149,20 @@ int run_timed_test(int (*test_fn)(void)) {
     printf("\t\t\t\t\t\t\t\t\t    [ Time  →  sec: %.6f     ]\n", dt);
     return failed;
 }
+
+/**
+ * @brief Sorts an array of doubles in ascending order using bubble sort.
+ * @param arr: The array to be sorted.
+ * @param size: The size of the array.
+ */
+void sort(double *arr, int size) {
+    for (int i = 0; i < size - 1; i++) {
+        for (int j = 0; j < size - i - 1; j++) {
+            if (*(arr + j) > *(arr + j + 1)) {
+                double temp = *(arr + j);
+                *(arr + j) = *(arr + j + 1);
+                *(arr + j + 1) = temp;
+            }
+        }
+    }
+}
