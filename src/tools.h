@@ -24,14 +24,16 @@
  * exponent.
  *
  * Representation: value = sign × (mantissa in base 2^32) × 2^exp2
+ * Supports both integers (exp2 ≥ 0) and dyadic rationals (exp2 < 0).
  * Limbs are little-endian: limb[0] is least significant.
+ * Maximum precision: APINT_MAX_LIMBS × 32 bits.
  * Invariant: if n > 0, then limb[n-1] != 0 (no leading zeros).
  * Invariant: if n > 0, then limb[0] != 0 (no trailing zeros after normalization).
  */
 typedef struct {
     signed char sign; // +1 or -1
     unsigned char n;  // number of used limbs (0 => zero)
-    int exp2;         // global power of two
+    int exp2;         // global power of two (negative for dyadic rationals)
     unsigned int limb[APINT_MAX_LIMBS];
 } apint_t;
 

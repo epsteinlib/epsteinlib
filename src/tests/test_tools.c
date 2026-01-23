@@ -798,6 +798,7 @@ int main() {
     failed += test_apint_mul();
     failed += test_apint_shr_bits_sticky();
     failed += test_apint_add();
+    failed += test_apint_add_fractional();
     failed += test_apint_to_double();
     return failed;
 }

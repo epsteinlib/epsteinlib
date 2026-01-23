@@ -117,15 +117,19 @@ apintMulTest[valA_,signA_,valB_,signB_]:=Module[{prod}
 
 
 (* ::Text:: *)
-(*Convert arbitrary integer to full 16-limb apint representation. Returns {limb0, limb1, ..., limb7, exp2, sign}.*)
+(*Convert arbitrary integer to full APINTMAXLIMBS-limb apint representation. Returns {limb0, limb1, ..., limb7, exp2, sign}.*)
 
 
-toApintFull[x_,s_]:=Module[{tz,shifted,limbs}
+toApintFull[x_,s_]:=Module[
+	{num,den,denExp,tz,shifted,limbs}
 	,If[x==0
-	    ,Return[Join[Table[0,{APINTMAXLIMBS}],{0,1}]]
+		,Return[Join[Table[0,{APINTMAXLIMBS}],{0,1}]]
 	]
-	;tz=IntegerExponent[x,2]
-	;shifted=Quotient[x,2^tz]
+	;num=Numerator[x]
+	;den=Denominator[x]
+	;denExp=IntegerExponent[den,2]
+	;tz=IntegerExponent[num,2]-denExp
+	;shifted=Quotient[num,2^IntegerExponent[num,2]]
 	;limbs=Table[Mod[Quotient[shifted,2^(32*i)],2^32],{i,0,APINTMAXLIMBS-1}]
 	;Flatten[{limbs,tz,s}]
 ]
@@ -172,7 +176,7 @@ apintShrStickyRef[{sign_, exp2_, limbs_}, bits_] := Module[
 (*Convert  integer  to  apint.*)
 
 
-intToApint[n_] := Module[
+ratToApint[n_] := Module[
 	{raw, sign, absN}
 	,absN = Abs[n]
 	;sign = If[n == 0, 1, Sign[n]]
@@ -571,9 +575,9 @@ testData=ParallelTable[
 	Module[{a,b,aApint,bApint,refApint,ref}
 		,{a,b}={allTests[[i,1]],allTests[[i,2]]}
 		;ref=a+b
-		;aApint=intToApint[a]
-		;bApint=intToApint[b]
-		;refApint=intToApint[ref]
+		;aApint=ratToApint[a]
+		;bApint=ratToApint[b]
+		;refApint=ratToApint[ref]
 		;Flatten[{aApint[[1]],aApint[[2]],aApint[[3]],bApint[[1]],bApint[[2]],bApint[[3]],refApint[[1]],refApint[[2]],refApint[[3]]}]
 	]
 	,{i,Length[allTests]}
@@ -586,6 +590,92 @@ testData=ParallelTable[
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/apint_add_Ref.csv", testData];
+
+
+(* ::Subsection::Closed:: *)
+(*Test arbitrary precision rational addition function*)
+
+
+(* ::Text:: *)
+(*Setup edge case reference values.*)
+
+
+fractionalEdgeCases = Join[
+	(* Zero operands *)
+	{{0,0},{0,1/2},{1/4,0},{0,-3/8},{-7/16,0}}
+	(* Same sign fractions *)
+	,{{1/2,1/4},{-1/2,-1/4},{3/4,1/8},{-7/8,-1/16},{1/2,1/2}}
+	(* Mixed integer and fraction *)
+	,{{1,1/2},{-1,-1/2},{100,1/4},{-100,-3/4},{2^32,1/2}}
+	(* Large integer + small fraction *)
+	,{{2^100,1/2},{2^500,1/4},{2^900,1/8},{-2^100,-1/2},{-2^500,-1/4}}
+	(* Small fraction + large integer *)
+	,{{1/2,2^100},{1/4,2^500},{1/8,2^900},{-1/2,-2^100},{-1/4,-2^500}}
+	(* Opposite signs with fractions *)
+	,{{1/2,-1/4},{-1/2,1/4},{3/4,-1/2},{-3/4,1/2},{1,-1/2}}
+	(* Cancellation to fraction *)
+	,{{1,-1/2},{2,-3/2},{3/2,-1},{-3/2,1},{5/4,-1/4}}
+	(* Cancellation to zero *)
+	,{{1/2,-1/2},{-1/4,1/4},{3/8,-3/8},{-7/16,7/16},{2^(-10),-2^(-10)}}
+	(* Very small fractions *)
+	,{{2^(-50),2^(-50)},{2^(-100),2^(-100)},{-2^(-50),-2^(-50)},{2^(-50),-2^(-51)}}
+	(* Large exp2 difference with fractions *)
+	,{{2^200,2^50},{2^50,2^200},{2^300,2^150},{2^150,2^300}}
+	(* Negative exp2 both operands *)
+	,{{2^(-10),2^(-20)},{2^(-50),2^(-100)},{-2^(-10),-2^(-20)},{2^(-10),-2^(-20)}}
+	(* Borrow with fractions *)
+	,{{1,-2^(-50)},{2^100,-2^(-50)},{2^500,-2^(-50)},{1/2,-2^(-60)}}
+	(* Carry with fractions *)
+	,{{1/2,1/2},{3/4,1/4},{7/8,1/8},{2^(-10)-2^(-50),2^(-50)}}
+  ];
+
+
+(* ::Text:: *)
+(*Setup random reference values.*)
+
+
+SeedRandom[44];
+nTestsFrac=939;
+randomFractionalTests=Table[
+	Module[
+		{a,b,expA,expB,mantA,mantB}
+		,expA=RandomInteger[{-50,900}]
+		;expB=RandomInteger[{expA-200,expA+200}]
+		;mantA=RandomInteger[{1,2^64}]*RandomChoice[{1,-1}]
+		;mantB=RandomInteger[{1,2^64}]*RandomChoice[{1,-1}]
+		;a=mantA*2^expA
+		;b=mantB*2^expB
+		;{a,b}
+	]
+	,{nTestsFrac}
+];
+
+allFractionalTests=Join[fractionalEdgeCases,randomFractionalTests];
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+fractionalTestData = ParallelTable[
+	Module[{a,b,aApint,bApint,refApint,ref}
+		,{a,b} = allFractionalTests[[i]]
+		;ref = a + b
+		;aApint = ratToApint[a]
+		;bApint = ratToApint[b]
+		;refApint = ratToApint[ref]
+		;Flatten[{aApint[[1]],aApint[[2]],aApint[[3]],bApint[[1]],bApint[[2]],bApint[[3]],refApint[[1]],refApint[[2]],refApint[[3]]}]
+	]
+	,{i,Length[allFractionalTests]}
+];
+
+
+(* ::Text:: *)
+(*Export reference values.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/apint_add_fractional_Ref.csv", fractionalTestData];
 
 
 (* ::Subsection::Closed:: *)
@@ -649,7 +739,7 @@ testData=ParallelTable[
 	Module[
 		{x,xApint,refDouble}
 		,x=allTests[[i]]
-		;xApint=intToApint[x]
+		;xApint=ratToApint[x]
 		;refDouble=N[x]
 		;Flatten[{xApint[[1]],xApint[[2]],xApint[[3]],refDouble}]
 	]
