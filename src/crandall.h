@@ -118,15 +118,16 @@ double coeffs_c_outer(long long n, long long k, long long dim);
  */
 double coeffs_c_inner(long long n, long long i, long long k, long long dim);
 
-/** @brief Computes cₙ,ᵢ,ₖ = 2^i × ∏_{j=1}^{i}(2n+d-2-4k-2j) as apint.
+/** @brief Computes ∏_{j=start}^{end} (2n + d - 2 - 4k - 2j) as apint.
  * @param[in] n: index (total of alpha).
- * @param[in] i: index (total of beta).
+ * @param[in] start: lower bound of product (inclusive).
+ * @param[in] end: upper bound of product (inclusive).
  * @param[in] k: index (specifies degree |alpha| - 2k).
- * @param[in] dim: dimension of the multi-indices.
+ * @param[in] dim: dimension.
  * @param[out] out: result apint.
  */
-void coeffs_c_inner_apint(unsigned int n, unsigned int i, unsigned int k,
-                          unsigned int dim, apint_t *out);
+void coeffs_c_inner_apint(unsigned int n, unsigned int start, unsigned int end,
+                          unsigned int k, unsigned int dim, apint_t *out);
 
 /** @brief Computes (−1)^i × binom(i+k,k) × ∏_{l≠i} cₙ,l,ₖ as apint.
  * @param[in] n: index (total of alpha).

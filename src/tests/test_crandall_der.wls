@@ -27,7 +27,7 @@ Protect[Power];
 ];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Setup reference functions*)
 
 
@@ -118,7 +118,7 @@ GRegDerAnalytic[\[Nu]_,z_,\[Alpha]_]:=Derivative[0,\[Alpha]][GReg][\[Nu],z]
 GDerAnalytic[\[Nu]_,z_,\[Alpha]_]:=Derivative[0,\[Alpha]][G][\[Nu],z]
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Random Values*)
 
 
@@ -127,7 +127,7 @@ randDerivative := RandomInteger[{0,6}]
 randDerivativeBeta[a_] := RandomInteger[{0,Floor[a/2]}]
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create polynomial p reference values*)
 
 
@@ -159,7 +159,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/polynomial_p_Ref.csv",pTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create coefficients c reference values*)
 
 
@@ -194,7 +194,7 @@ Export["csv/coeffs_c_inner_Ref.csv",cInnerTab];
 Export["csv/coeffs_c_outer_Ref.csv",cOuterTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create references values for inner sum of harmonic polynomials*)
 
 
@@ -202,9 +202,9 @@ Export["csv/coeffs_c_outer_Ref.csv",cOuterTab];
 (*Generate reference arguments.*)
 
 
-range = Range[500];
+range = Range[100];
 j=1;
-maxn=35;
+maxn=60;
 While[j<=Last[range]
 	,
 	\[Alpha]0[j]={temp1=RandomInteger[{1,maxn}],temp2=RandomInteger[{0,maxn-temp1}],RandomInteger[{0,maxn-temp1-temp2}]}
@@ -236,7 +236,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/harmonic_h_inner_Ref.csv",hInnerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create 1D harmonic h reference values*)
 
 
@@ -264,7 +264,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/harmonic_h_1D_Ref.csv",h1DTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create harmonic h reference values*)
 
 
@@ -306,7 +306,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/harmonic_h_3D_Ref.csv",h3DTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create upper Crandall derivatives reference values*)
 
 
@@ -342,7 +342,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/crandall_g_der_Ref.csv",crandallDerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create polynomial l reference values*)
 
 
@@ -374,7 +374,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/polynomial_l_Ref.csv",lTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create (\[Pi] y\.b2)^k derivatives reference values*)
 
 
@@ -406,7 +406,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/polynomial_y_der_Ref.csv",YDerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create Log[\[Pi] y\.b2] derivatives reference values*)
 
 
@@ -437,7 +437,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/log_l_der_Ref.csv",LDerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create singularity derivatives reference values*)
 
 
@@ -469,7 +469,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/singularity_s_der_Ref.csv",sDerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create regularized Crandall derivatives reference values*)
 
 
@@ -501,7 +501,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/crandall_gReg_der_Ref.csv",crandallgRegDerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create regularized Crandall function prototype reference values for nu = dim + 2*k*)
 
 

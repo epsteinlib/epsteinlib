@@ -45,7 +45,6 @@ static double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int
                                     const unsigned int *theta1,
                                     const unsigned int *theta2) {
     apint_t numerator;
-
     harmonic_h_inner_term_scalar_apint(n, i, k, dim, &numerator);
 
     apint_t multi_term;
@@ -53,13 +52,9 @@ static double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int
 
     apint_mul(&numerator, &multi_term, &numerator);
 
-    double denominator = 1.0;
+    double denom = coeffs_c_inner(n, (n / 2) - k, k, dim);
 
-    for (unsigned int l = 1; l <= n / 2 - k; l++) {
-        denominator *= coeffs_c_inner(n, l, k, dim);
-    }
-
-    double res = apint_to_double(&numerator) / denominator;
+    double res = apint_to_double(&numerator) / denom;
 
     return res;
 }
@@ -951,11 +946,11 @@ int test_harmonic_h_inner(void) {
             printf("\n\n");
             printf("Warning! ");
             printf("harmonic_h_inner ");
-            printf(" %0*.16lf (this implementation) \n\t\t    ≠ "
+            printf(" %0*.16lf (this implementation) \n\t\t\t ≠ "
                    "%.16lf (reference implementation)\n",
                    4, num, ref);
-            printf("Min(Emax, Erel):      %E ≮ %E  (tolerance)\n", errorMaxAbsRel,
-                   tol);
+            printf("Min(Emax, Erel):           %E ≮ %E  (tolerance)\n",
+                   errorMaxAbsRel, tol);
             printMultiindexUnitTest("alpha:\t\t", alpha, dim);
             printMultiindexUnitTest("beta:\t\t", beta, dim);
             printMultiindexUnitTest("gamma:\t\t", gAmma, dim); // NOLINT
