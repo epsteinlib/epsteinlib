@@ -583,7 +583,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         }
     }
     // handle special case of non-positive integer values nu.
-    double complex res;
+    double complex res = 0.;
     if (nu < 1 && fabs((nu / 2.) - nearbyint(nu / 2.)) < EPS &&
         (variant == 0 || variant == 1)) {
         if (dot(dim, x_t2, x_t2) == 0 && nu == 0) {
@@ -634,7 +634,8 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                           zArgBound) *
                  rot * xfactor;
             xfactor = 1;
-        } else if (variant == 2) {
+        } else if (variant == 2 && alphaAbs > 3) {
+            // Compute set zeta derivatives by harmonic method
 
             // Precompute coefficients for harmonic polynomials once
             unsigned int kMax = alphaAbs / 2;
@@ -654,7 +655,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             double nuReci;
             double complex resIt;
 
-            res = 0;
             for (unsigned int k = 0; k <= kMax; k++) {
 
                 nuIt = nu - (2 * k);
@@ -693,6 +693,24 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                 res += resIt;
             }
             res *= 1. / int_pow(ms, alphaAbs);
+        } else if (variant == 2) {
+            // Compute set zeta derivatives by polynomial p method
+            rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
+            if (equals(dim, y_t1, y_t2)) {
+                nc = crandall_g_der(dim, dim - nu, y_t1, lambda, zArgBoundReci,
+                                    alpha, alphaAbs);
+            } else {
+                nc = crandall_g_der(dim, dim - nu, y_t2, lambda, zArgBoundReci,
+                                    alpha, alphaAbs) *
+                     cexp(-2 * M_PI * I * dot(dim, y_t2, x_t1)) * rot;
+            }
+            s2 = sum_fourier_der(nu, dim, lambda, m_fourier, x_t1, y_t2,
+                                 cutoffsFourier, zArgBoundReci, alpha, alphaAbs);
+            s2 = int_pow(lambda, alphaAbs) * (s2 * rot + nc);
+            s1 = sum_real_der(nu, dim, lambda, m_real, x_t2, y_t2, cutoffsReal,
+                              zArgBound, alpha) *
+                 rot * xfactor;
+            xfactor = 1. / int_pow(ms, alphaAbs);
         } else if (variant == 3) {
             // calculate Epstein zeta reg derivative function values.
             nc = crandall_gReg_der(dim, dim - nu, y_t1, lambda, alpha, alphaAbs,
@@ -715,7 +733,9 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                  rot * xfactor;
             xfactor = 1. / int_pow(ms, alphaAbs);
         }
-        if (!(variant == 2)) {
+        // In the harmonic method, the res is already set as there is no global
+        // nu-dependent coefficient there
+        if (!(variant == 2 && alphaAbs > 3)) {
             res = xfactor * pow(lambda * lambda / M_PI, -nu / 2.) / tgamma(nu / 2.) *
                   (s1 + pow(lambda, dim) * s2);
         }
