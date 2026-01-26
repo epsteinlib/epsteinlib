@@ -1041,19 +1041,25 @@ int test_harmonic_h_1D(void) {
 
         // Precompute coefficients for harmonic polynomials
         unsigned int kMax = alphaAbs / 2;
-        unsigned long long *chunk_size =
+        unsigned long long *chunk_offset =
             malloc((kMax + 1) * sizeof(unsigned long long));
-        unsigned long long coeffs_size =
-            precompute_harmonic_h_inner_chunk_size(alphaAbs, kMax, dim, chunk_size);
+        unsigned long long *valid_count =
+            malloc((kMax + 1) * sizeof(unsigned long long));
+        unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
+            alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
         double *coeffs = (double *)malloc(coeffs_size * sizeof(double));
-        precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_size, coeffs);
-
-        num = harmonic_h(*k, dim, z, alpha, alphaAbs, chunk_size, coeffs);
-
-        free(coeffs);
-        free(chunk_size);
-
+        unsigned int *exponents =
+            (unsigned int *)malloc(coeffs_size * dim * sizeof(unsigned int));
+        precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
+                                        exponents);
+        num = harmonic_h(*k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
+                         exponents);
         errorAbs = errAbs(ref, num);
+
+        free(chunk_offset);
+        free(valid_count);
+        free(exponents);
+
         errorRel = errRel(ref, num);
 
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
@@ -1163,17 +1169,21 @@ int test_harmonic_h_3D(void) {
 
         // Precompute coefficients for harmonic polynomials
         unsigned int kMax = alphaAbs / 2;
-        unsigned long long *chunk_size =
+        unsigned long long *chunk_offset =
             malloc((kMax + 1) * sizeof(unsigned long long));
-        unsigned long long coeffs_size =
-            precompute_harmonic_h_inner_chunk_size(alphaAbs, kMax, dim, chunk_size);
-        double *coeffs = (double *)malloc(coeffs_size * sizeof(double));
-        precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_size, coeffs);
-
-        num = harmonic_h(*k, dim, z, alpha, alphaAbs, chunk_size, coeffs);
-
-        free(coeffs);
-        free(chunk_size);
+        unsigned long long *valid_count =
+            malloc((kMax + 1) * sizeof(unsigned long long));
+        unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
+            alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
+        double *coeffs = malloc(coeffs_size * sizeof(double));
+        unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
+        precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
+                                        exponents);
+        num = harmonic_h(*k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
+                         exponents);
+        free(chunk_offset);
+        free(valid_count);
+        free(exponents);
 
         errorAbs = errAbs(ref, num);
         errorRel = errRel(ref, num);

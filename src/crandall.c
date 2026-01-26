@@ -433,7 +433,6 @@ double harmonic_h_inner_sum(unsigned int k, // NOLINT
 static int harmonic_h_update_outer_index(unsigned int maxAbs, unsigned int dim,
                                          unsigned int *gamma,
                                          unsigned int *gammaAbs) {
-
     for (unsigned int idx = 0; idx < dim; idx++) {
         if (gamma[idx] + 1 <= maxAbs) {
             gamma[idx]++;
@@ -446,87 +445,106 @@ static int harmonic_h_update_outer_index(unsigned int maxAbs, unsigned int dim,
     return 1;
 }
 
-/** @brief Computes chunk offsets for precomputed inner harmonic sums
- * corresponding to k = 0, ..., floor(|alpha|/2).
- * For each k, chunk_size[k] stores the starting offset in the coeffs array
+/** @brief Computes chunk offsets and valid entry counts for precomputed
+ * inner harmonic sums corresponding to k = 0, ..., floor(|alpha|/2).
+ * For each k, chunk_offset[k] stores the starting offset in the coeffs array
  * where values corresponding to |gamma| = |alpha| - k are stored.
- * The total length of coeffs is returned.
+ * valid_count[k] stores the number of valid gamma for that k.
  * @param[in] alphaAbs: total of alpha.
  * @param[in] kMax: floor(|alpha|/2).
  * @param[in] dim: dimension of alpha and gamma.
- * @param[out] chunk_size: array of length kMax+1 storing offsets.
+ * @param[in] alpha: upper multi-index.
+ * @param[out] chunk_offset: array of length kMax+1 storing offsets.
+ * @param[out] valid_count: array of length kMax+1 storing valid entry counts.
  * @return total length required for coeffs array.
  */
 unsigned long long
 precompute_harmonic_h_inner_chunk_size(unsigned int alphaAbs, unsigned int kMax,
-                                       unsigned int dim,
-                                       unsigned long long *chunk_size) {
-
+                                       unsigned int dim, const unsigned int *alpha,
+                                       unsigned long long *chunk_offset,
+                                       unsigned long long *valid_count) {
     unsigned int k;
     unsigned long long totalSize = 0;
+    unsigned int ceilHalfAlphaAbs = 0;
+    unsigned int i;
+    long long remainder;
 
-    for (k = 0; k <= kMax; k++) {
-        chunk_size[k] = totalSize;
-        totalSize += binom((long long)(alphaAbs - k + dim - 1), (long long)dim - 1);
+    // Compute sum of ceil(alpha[i]/2)
+    for (i = 0; i < dim; i++) {
+        ceilHalfAlphaAbs += (alpha[i] + 1) / 2;
     }
 
+    for (k = 0; k <= kMax; k++) {
+        chunk_offset[k] = totalSize;
+        remainder = (long long)(alphaAbs - k) - (long long)ceilHalfAlphaAbs;
+        if (remainder < 0) {
+            valid_count[k] = 0;
+        } else {
+            valid_count[k] = binom(remainder + dim - 1, dim - 1);
+        }
+        totalSize += valid_count[k];
+    }
     return totalSize;
 }
 
 /** @brief Precomputes and stores inner harmonic sums h_inner(α,γ,k)
- * for all k = 0, ..., floor(|alpha|/2) and all gamma with |gamma| = |alpha| - k.
- * Values are stored in coeffs starting at offsets given by chunk_size[k],
- * with gamma ordered identically to harmonic_h_update_gamma.
+ * and exponents (2γ-α) for all k = 0, ..., floor(|alpha|/2) and all gamma
+ * with |gamma| = |alpha| - k satisfying 2γ[i] >= α[i].
+ * Coefficients are stored in coeffs starting at offsets given by chunk_offset[k].
+ * Exponents are stored in exponents with stride dim, i.e., exponent i for
+ * entry n of chunk k is at exponents[(chunk_offset[k] + n) * dim + i].
+ * Gamma is ordered identically to harmonic_h_update_outer_index.
  * @param[in] alphaAbs: total of alpha.
  * @param[in] dim: dimension of alpha and gamma.
  * @param[in] alpha: upper multi-index.
- * @param[in] chunk_size: starting offsets for each k.
+ * @param[in] chunk_offset: starting offsets for each k.
  * @param[out] coeffs: array storing precomputed inner harmonic sums.
+ * @param[out] exponents: array storing precomputed exponents (2γ-α), size =
+ * totalSize * dim.
  */
 void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, // NOLINT
                                      unsigned int dim, const unsigned int *alpha,
-                                     const unsigned long long *chunk_size,
-                                     double *coeffs) {
-
+                                     const unsigned long long *chunk_offset,
+                                     double *coeffs, unsigned int *exponents) {
     unsigned int gamma[dim];
     unsigned int gammaAbs;
     int skip;
     int done;
-
     unsigned int k;
     unsigned int kMax = alphaAbs / 2;
     long long n;
+    unsigned long long expIdx;
+    unsigned int i;
 
     for (k = 0; k <= kMax; k++) {
-
-        // Initialize gamma and count n
-        for (unsigned int i = 0; i < dim; i++) {
+        /* Initialize gamma and count n */
+        for (i = 0; i < dim; i++) {
             gamma[i] = 0;
         }
         gammaAbs = 0;
         n = 0;
-
         while (1) {
-
             skip = 0;
             if (gammaAbs != alphaAbs - k) {
                 skip = 1;
             }
-
             if (!skip) {
-                for (int i = 0; i < dim; i++) {
+                for (i = 0; i < dim; i++) {
                     if (2 * gamma[i] < alpha[i]) {
                         skip = 1;
+                        break;
                     }
                 }
             }
-
             if (!skip) {
-                coeffs[chunk_size[k] + n] =
+                coeffs[chunk_offset[k] + n] =
                     harmonic_h_inner_sum(k, dim, alpha, gamma, alphaAbs);
+                expIdx = (chunk_offset[k] + n) * dim;
+                for (i = 0; i < dim; i++) {
+                    exponents[expIdx + i] = (2 * gamma[i]) - alpha[i];
+                }
                 n++;
             }
-
             done =
                 harmonic_h_update_outer_index(alphaAbs - k, dim, gamma, &gammaAbs);
             if (done) {
@@ -539,74 +557,44 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, // NOLINT
 /** @brief Calculates the homogeneous harmonic polynomial h₍α,k₎
  * of degree |α|−2k such that y^α = ∑ₖ (y·y)^k h₍α,k₎(y);
  * explicitly, h₍α,k₎(y)=c_{|α|,k} ∑{|γ|=|α|−k} y^{2γ−α} h_inner(α,γ,k).
+ * Uses precomputed coefficients and exponents to avoid multi-index iteration.
  * @param[in] k: specifies degree |alpha| - 2k.
  * @param[in] dim: dimension of alpha, gamma and y.
  * @param[in] z: vector of the polynomial.
- * @param[in] alpha: upper multi-index.
  * @param[in] alphaAbs: total of alpha.
- * @param[in] chunk_size: starting offsets for each k.
+ * @param[in] chunk_offset: starting offsets for each k.
+ * @param[in] valid_count: number of valid entries for each k.
  * @param[in] coeffs: array storing precomputed inner harmonic sums.
+ * @param[in] exponents: array storing precomputed exponents (2γ-α).
  * @return h₍α,k₎(z).
  */
-double harmonic_h(unsigned int k, unsigned int dim, const double *z, // NOLINT
-                  const unsigned int *alpha, unsigned int alphaAbs,
-                  const unsigned long long *chunk_size, const double *coeffs) {
-
-    unsigned int gamma[dim];
-    for (int i = 0; i < dim; i++) {
-        gamma[i] = 0;
-    }
-
-    unsigned int gammaAbs = 0;
-    int skip;
-    int done;
-
+double harmonic_h(unsigned int k, unsigned int dim, const double *z,
+                  unsigned int alphaAbs, const unsigned long long *chunk_offset,
+                  const unsigned long long *valid_count, const double *coeffs,
+                  const unsigned int *exponents) {
     double zPow;
-
     double complex sumOuter = 0.0;
     double complex epsilonOuter = 0.0;
     double complex auxtOuter;
     double complex auxyOuter;
+    unsigned long long n;
+    unsigned long long count = valid_count[k];
+    unsigned long long baseIdx = chunk_offset[k];
+    unsigned long long expIdx;
+    unsigned int i;
 
-    long long n = 0;
-
-    while (1) {
-
-        skip = 0;
-        if (gammaAbs != alphaAbs - k) {
-            skip = 1;
+    for (n = 0; n < count; n++) {
+        double sumInner = coeffs[baseIdx + n];
+        expIdx = (baseIdx + n) * dim;
+        zPow = 1.0;
+        for (i = 0; i < dim; i++) {
+            zPow *= int_pow(z[i], exponents[expIdx + i]);
         }
-
-        if (!skip) {
-            for (int i = 0; i < dim; i++) {
-                if (2 * gamma[i] < alpha[i]) {
-                    skip = 1;
-                }
-            }
-        }
-
-        if (!skip) {
-
-            double sumInner = coeffs[chunk_size[k] + n];
-            n++;
-
-            zPow = 1.0;
-            for (int i = 0; i < dim; i++) {
-                zPow *= int_pow(z[i], (2 * gamma[i]) - alpha[i]);
-            }
-
-            auxyOuter = zPow * sumInner - epsilonOuter;
-            auxtOuter = sumOuter + auxyOuter;
-            epsilonOuter = (auxtOuter - sumOuter) - auxyOuter;
-            sumOuter = auxtOuter;
-        }
-
-        done = harmonic_h_update_outer_index(alphaAbs - k, dim, gamma, &gammaAbs);
-        if (done) {
-            break;
-        }
+        auxyOuter = zPow * sumInner - epsilonOuter;
+        auxtOuter = sumOuter + auxyOuter;
+        epsilonOuter = (auxtOuter - sumOuter) - auxyOuter;
+        sumOuter = auxtOuter;
     }
-
     sumOuter *= coeffs_c_outer(alphaAbs, k, dim);
     return sumOuter;
 }

@@ -53,9 +53,9 @@
  * sum_{z in m whole_numbers ** dim} G_{nu}((z - x) / lambda))
  * X exp(-2 * PI * I * z * y)
  */
-double complex sum_real(double nu, unsigned int dim, double lambda, const double *m,
-                        const double *x, const double *y, const int cutoffs[],
-                        double zArgBound) {
+static double complex sum_real(double nu, unsigned int dim, double lambda,
+                               const double *m, const double *x, const double *y,
+                               const int cutoffs[], double zArgBound) {
     int zv[dim];    // counting vector in Z^dim
     double lv[dim]; // lattice vector
     // cuboid cutoffs
@@ -108,10 +108,10 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
  * sum_{z in m whole_numbers ** dim} (-2 * PI * I * (z-x) ) ** alpha
  * * G_{nu}^{(alpha)}((z - x) / lambda)) X exp(-2 * PI * I * (z * y)
  */
-double complex sum_real_der(double nu, unsigned int dim, double lambda,
-                            const double *m, const double *x, const double *y,
-                            const int cutoffs[], double zArgBound,
-                            const unsigned int *alpha) {
+static double complex sum_real_der(double nu, unsigned int dim, double lambda,
+                                   const double *m, const double *x, const double *y,
+                                   const int cutoffs[], double zArgBound,
+                                   const unsigned int *alpha) {
     int zv[dim];    // counting vector in Z^dim
     double lv[dim]; // lattice vector
     // cuboid cutoffs
@@ -167,20 +167,22 @@ double complex sum_real_der(double nu, unsigned int dim, double lambda,
  * @param[in] cutoffs: how many summands in each direction are considered.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
- * @param[in] alpha: multi-index for the derivative.
  * @param[in] alphaAbs: total of alpha.
- * @param[in] chunk_size: starting offsets for each k.
- * @param[in] coeffs: array storing precomputed inner harmonic sums.
+ * @param[in] chunk_offset: starting offsets for each k.
+ * @param[in] valid_count: number of valid gamma entries for each k.
+ * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
+ * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
  * @return helper function for the first sum in crandalls formula. Calculates
  * sum_{z in m whole_numbers ** dim} I ** (|α| - 2k) h₍α,kIndex₎(y) * G_{nu}(z - x) *
  * exp(-2 * PI * I * (z * y)
  */
-double complex sum_real_harmonic(double nu, unsigned int kIndex, unsigned int dim,
-                                 const double *m, const double *x, const double *y,
-                                 const int cutoffs[], double zArgBound,
-                                 const unsigned int *alpha, unsigned int alphaAbs,
-                                 const unsigned long long *chunk_size,
-                                 const double *coeffs) {
+static double complex sum_real_harmonic(
+    double nu, unsigned int kIndex, unsigned int dim, const double *m,
+    const double *x, const double *y, const int cutoffs[], double zArgBound,
+    unsigned int alphaAbs, const unsigned long long *chunk_offset,
+    const unsigned long long *valid_count, const double *coeffs,
+    const unsigned int *exponents) {
+
     double lambda = 1.; // parameter that decides the weight of each sum
 
     int zv[dim];    // counting vector in Z^dim
@@ -211,7 +213,8 @@ double complex sum_real_harmonic(double nu, unsigned int kIndex, unsigned int di
 
         // summing using Kahan's method
         auxy = rot * int_pow(I, alphaAbs - (2 * kIndex)) *
-                   harmonic_h(kIndex, dim, lv, alpha, alphaAbs, chunk_size, coeffs) *
+                   harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
+                              coeffs, exponents) *
                    crandall_g(dim, nu, lv, 1. / lambda, zArgBound) -
                epsilon;
         auxt = sum + auxy;
@@ -237,9 +240,10 @@ double complex sum_real_harmonic(double nu, unsigned int kIndex, unsigned int di
  * sum_{k in m_invt whole_numbers ** dim without zero} G_{dim - nu}(lambda * (k + y))
  * X exp(-2 * PI * I * x * (k + y))
  */
-double complex sum_fourier(double nu, unsigned int dim, double lambda,
-                           const double *m_invt, const double *x, const double *y,
-                           const int cutoffs[], double zArgBound) {
+static double complex sum_fourier(double nu, unsigned int dim, double lambda,
+                                  const double *m_invt, const double *x,
+                                  const double *y, const int cutoffs[],
+                                  double zArgBound) {
     int zv[dim];    // counting vector in Z^dim
     double lv[dim]; // lattice vector
     // cuboid cutoffs
@@ -305,11 +309,11 @@ double complex sum_fourier(double nu, unsigned int dim, double lambda,
  * sum_{k in m_invt whole_numbers ** dim without zero}
  * * G_{dim - nu}^{(alpha)}(lambda * (k + y)) * exp(-2 * PI * I * x * (k + y))
  */
-double complex sum_fourier_der(double nu, unsigned int dim, double lambda,
-                               const double *m_invt, const double *x,
-                               const double *y, const int cutoffs[],
-                               double zArgBound, const unsigned int *alpha,
-                               unsigned int alphaAbs) {
+static double complex sum_fourier_der(double nu, unsigned int dim, double lambda,
+                                      const double *m_invt, const double *x,
+                                      const double *y, const int cutoffs[],
+                                      double zArgBound, const unsigned int *alpha,
+                                      unsigned int alphaAbs) {
     int zv[dim];    // counting vector in Z^dim
     double lv[dim]; // lattice vector
     // cuboid cutoffs
@@ -375,19 +379,21 @@ double complex sum_fourier_der(double nu, unsigned int dim, double lambda,
  * @param[in] cutoffs: how many summands in each direction are considered.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
- * @param[in] chunk_size: starting offsets for each k.
- * @param[in] coeffs: array storing precomputed inner harmonic sums.
+ * @param[in] alphaAbs: total of alpha.
+ * @param[in] chunk_offset: starting offsets for each k.
+ * @param[in] valid_count: number of valid gamma entries for each k.
+ * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
+ * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
  * @return helper function for the second sum in crandalls formula. Calculates
  * sum_{k in m_invt whole_numbers ** dim without zero} h₍α,kIndex₎(y + k) G_{dim - nu
  * + 2 * |α| - 4 * kIndex}(k + y) * exp(-2 * PI * I * x * (k + y))
  */
-double complex sum_fourier_harmonic(double nu, unsigned int kIndex, unsigned int dim,
-                                    const double *m_invt, const double *x,
-                                    const double *y, const int cutoffs[],
-                                    double zArgBound, const unsigned int *alpha,
-                                    unsigned int alphaAbs,
-                                    const unsigned long long *chunk_size,
-                                    const double *coeffs) {
+static double complex sum_fourier_harmonic(
+    double nu, unsigned int kIndex, unsigned int dim, const double *m_invt,
+    const double *x, const double *y, const int cutoffs[], double zArgBound,
+    unsigned int alphaAbs, const unsigned long long *chunk_offset,
+    const unsigned long long *valid_count, const double *coeffs,
+    const unsigned int *exponents) {
     double lambda = 1.; // parameter that decides the weight of each sum
 
     int zv[dim];    // counting vector in Z^dim
@@ -416,7 +422,8 @@ double complex sum_fourier_harmonic(double nu, unsigned int kIndex, unsigned int
         }
         double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
         auxy = rot *
-                   harmonic_h(kIndex, dim, lv, alpha, alphaAbs, chunk_size, coeffs) *
+                   harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
+                              coeffs, exponents) *
                    crandall_g(dim, dim - nu, lv, lambda, zArgBound) -
                epsilon;
         auxt = sum + auxy;
@@ -437,7 +444,8 @@ double complex sum_fourier_harmonic(double nu, unsigned int kIndex, unsigned int
         double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
 
         auxy = rot *
-                   harmonic_h(kIndex, dim, lv, alpha, alphaAbs, chunk_size, coeffs) *
+                   harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
+                              coeffs, exponents) *
                    crandall_g(dim, dim - nu, lv, lambda, zArgBound) -
                epsilon;
         auxt = sum + auxy;
@@ -456,8 +464,8 @@ double complex sum_fourier_harmonic(double nu, unsigned int kIndex, unsigned int
  * is needet.
  * @return projection of v to the elementary lattice cell.
  */
-double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
-                   const double *v) {
+static double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
+                          const double *v) {
     bool todo = false;
     double *vt = malloc(dim * sizeof(double));
     for (int i = 0; i < dim; i++) {
@@ -630,13 +638,17 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
 
             // Precompute coefficients for harmonic polynomials once
             unsigned int kMax = alphaAbs / 2;
-            unsigned long long *chunk_size =
+            unsigned long long *chunk_offset =
+                malloc((kMax + 1) * sizeof(unsigned long long));
+            unsigned long long *valid_count =
                 malloc((kMax + 1) * sizeof(unsigned long long));
             unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
-                alphaAbs, kMax, dim, chunk_size);
-            double *coeffs = (double *)malloc(coeffs_size * sizeof(double));
-            precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_size,
-                                            coeffs);
+                alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
+            double *coeffs = malloc(coeffs_size * sizeof(double));
+            unsigned int *exponents =
+                malloc(coeffs_size * dim * sizeof(unsigned int));
+            precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset,
+                                            coeffs, exponents);
 
             double nuIt;
             double nuReci;
@@ -653,25 +665,26 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                 rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
 
                 if (equals(dim, y_t1, y_t2)) {
-                    nc = harmonic_h(k, dim, y_t1, alpha, alphaAbs, chunk_size,
-                                    coeffs) *
+                    nc = harmonic_h(k, dim, y_t1, alphaAbs, chunk_offset,
+                                    valid_count, coeffs, exponents) *
                          crandall_g(dim, dim - nuReci, y_t1, lambda, zArgBoundReci);
                 } else {
-                    nc = harmonic_h(k, dim, y_t2, alpha, alphaAbs, chunk_size,
-                                    coeffs) *
+                    nc = harmonic_h(k, dim, y_t2, alphaAbs, chunk_offset,
+                                    valid_count, coeffs, exponents) *
                          crandall_g(dim, dim - nuReci, y_t2, lambda, zArgBoundReci) *
                          cexp(-2 * M_PI * I * dot(dim, y_t2, x_t1)) * rot;
                 }
 
                 s2 = sum_fourier_harmonic(nuReci, k, dim, m_fourier, x_t1, y_t2,
-                                          cutoffsFourier, zArgBoundReci, alpha,
-                                          alphaAbs, chunk_size, coeffs);
+                                          cutoffsFourier, zArgBoundReci, alphaAbs,
+                                          chunk_offset, valid_count, coeffs,
+                                          exponents);
 
                 s2 = s2 * rot + nc;
 
                 s1 = sum_real_harmonic(nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal,
-                                       zArgBound, alpha, alphaAbs, chunk_size,
-                                       coeffs) *
+                                       zArgBound, alphaAbs, chunk_offset,
+                                       valid_count, coeffs, exponents) *
                      rot * xfactor;
                 resIt = pow(lambda * lambda / M_PI, -nuIt / 2.) / tgamma(nuIt / 2.) *
                         (s1 + pow(lambda, dim) * s2);
