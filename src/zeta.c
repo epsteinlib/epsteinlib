@@ -432,8 +432,8 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         } else {
             res = 0;
         }
-    } else if (fabs(nu - dim) < EPS && dot(dim, y_t2, y_t2) < EPS_ZERO_Y &&
-               variant == 0) {
+    } else if ((variant == 0 || variant == 2) && fabs(nu - dim - alphaAbs) < EPS &&
+               dot(dim, y_t2, y_t2) < EPS_ZERO_Y) {
         res = NAN;
     } else {
         double zArgBound = assignzArgBound(nu);
