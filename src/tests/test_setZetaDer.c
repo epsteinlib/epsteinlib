@@ -50,7 +50,7 @@ int test_setZetaDer1D(void) {
     int testsPassed = 0;
     int totalTests = 0;
     unsigned int dim = 1;
-    double tol = pow(10, -12);
+    double tol = pow(10, -13);
 
     double errMin = NAN;
     double errMax = NAN;

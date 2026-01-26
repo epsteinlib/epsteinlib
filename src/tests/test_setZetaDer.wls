@@ -193,7 +193,7 @@ Do[
 	;a1D[i]={{1/2+i/100}}
 	;x1D[i]=If[i<5,{0},{randRational}]
 	;y1D[i]=If[i<10,{0},{randRational}]
-	;n1D[i]={RandomInteger[{0,6}]}
+	;n1D[i]={i}
 	,{i,range}
 ]
 
@@ -203,7 +203,7 @@ Do[
 
 
 zDerTab1D=ParallelTable[
-	With[{result=N[setZetaDerHarmonic[\[Nu]1D[i],a1D[i],x1D[i],y1D[i],n1D[i],InputPrecision->100,SumLim->8]]}
+	With[{result=N[setZetaDer[\[Nu]1D[i],a1D[i],x1D[i],y1D[i],n1D[i],InputPrecision->100,SumLim->8]]}
 	,Flatten[{N[\[Nu]1D[i]]
 	,N[a1D[i]]
 	,N[x1D[i]]
