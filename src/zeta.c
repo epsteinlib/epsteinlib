@@ -663,9 +663,11 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         return epsteinZetaInternal(nu, dim, m, x, y, 1, 1, alpha);
     }
     // Odd derivatives in zero
-    for (int i = 0; i < dim; i++) {
-        if (alpha[i] % 2 && fabs(x[i]) < EPS_ZERO_Y && fabs(y[i]) < EPS_ZERO_Y) {
-            return 0.;
+    if (variant == 2) {
+        for (int i = 0; i < dim; i++) {
+            if (alpha[i] % 2 && fabs(x[i]) < EPS_ZERO_Y && fabs(y[i]) < EPS_ZERO_Y) {
+                return 0.;
+            }
         }
     }
     // 1. Transform: Compute determinant and fourier transformed matrix, scale
