@@ -57,6 +57,22 @@ static double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int
     return res;
 }
 
+/** @brief Calculates the homogeneous harmonic polynomial h₍α,k₎
+ * of degree |α|−2k such that y^α = ∑ₖ (y·y)^k h₍α,k₎(y) for d = 1 and k =
+ * floor(|alpha|/2), explicitly, h₍α,k₎(y)=c_{|α|,k} ∑{|γ|=|α|−k} y^{2γ−α}
+ * h_inner(α,γ,k). In 1D, h₍α,k₎(y) is y ** (alphaAbs mod 2) and zero otherwise. Uses
+ * precomputed coefficients and exponents to avoid multi-index iteration.
+ * @param[in] k: index (specifies degree |alpha| - 2k).
+ * @param[in] z: vector of the polynomial.
+ * @param[in] alphaAbs: total of alpha.
+ * @return h₍α,k₎(z).
+ */
+static double harmonic_h_1D(unsigned int k, const double *z, unsigned int alphaAbs) {
+    if (k == alphaAbs / 2) {
+        return harmonic_h_1D_kMax(z, alphaAbs);
+    }
+    return 0.;
+}
 /*!
  * @brief Benchmarks 3D polynomial_p function by comparing to high-precision values
  * over a range of random parameters.
@@ -1039,26 +1055,9 @@ int test_harmonic_h_1D(void) {
 
         ref = refRead[0];
 
-        // Precompute coefficients for harmonic polynomials
-        unsigned int kMax = alphaAbs / 2;
-        unsigned long long *chunk_offset =
-            malloc((kMax + 1) * sizeof(unsigned long long));
-        unsigned long long *valid_count =
-            malloc((kMax + 1) * sizeof(unsigned long long));
-        unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
-            alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
-        double *coeffs = (double *)malloc(coeffs_size * sizeof(double));
-        unsigned int *exponents =
-            (unsigned int *)malloc(coeffs_size * dim * sizeof(unsigned int));
-        precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
-                                        exponents);
-        num = harmonic_h(*k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
-                         exponents);
-        errorAbs = errAbs(ref, num);
+        num = harmonic_h_1D(*k, z, alphaAbs);
 
-        free(chunk_offset);
-        free(valid_count);
-        free(exponents);
+        errorAbs = errAbs(ref, num);
 
         errorRel = errRel(ref, num);
 

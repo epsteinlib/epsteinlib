@@ -225,6 +225,70 @@ static double complex sum_real_harmonic(
 }
 
 /**
+ * @brief calculates the an harmonic polynomial applied to the summands in real
+ * space.
+ * @param[in] nu: exponent for the Epstein zeta function.
+ * @param[in] kIndex: specifies degree |alpha| - 2k.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] m: matrix that transforms the lattice in the Epstein zeta
+ * function.
+ * @param[in] x: projection of x vector to elementary lattice cell.
+ * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] cutoffs: how many summands in each direction are considered.
+ * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
+ * the incomplete gamma evaluation.
+ * @param[in] alphaAbs: total of alpha.
+ * @return helper function for the first sum in crandalls formula. Calculates
+ * sum_{z in m whole_numbers ** dim} I ** (|α| - 2k) h₍α,kIndex₎(y) * G_{nu}(z - x) *
+ * exp(-2 * PI * I * (z * y)
+ */
+static double complex sum_real_harmonic_1D(double nu, unsigned int kIndex,
+                                           unsigned int dim, const double *m,
+                                           const double *x, const double *y,
+                                           const int cutoffs[], double zArgBound,
+                                           unsigned int alphaAbs) {
+
+    double lambda = 1.; // parameter that decides the weight of each sum
+
+    int zv[dim];    // counting vector in Z^dim
+    double lv[dim]; // lattice vector
+    // cuboid cutoffs
+    long totalSummands = 1;
+    long totalCutoffs[dim + 1];
+    for (int k = 0; k < dim; k++) {
+        totalCutoffs[k] = totalSummands;
+        totalSummands *= 2 * cutoffs[k] + 1;
+    }
+    double complex sum = 0.0;
+    double complex epsilon = 0.0;
+    double complex auxt;
+    double complex auxy;
+    double complex rot;
+    // First Sum (in real space)
+    for (long n = 0; n < totalSummands; n++) {
+        for (int k = 0; k < dim; k++) {
+            zv[k] =
+                (((int)(n / totalCutoffs[k])) % (2 * cutoffs[k] + 1)) - cutoffs[k];
+        }
+        matrix_intVector(dim, m, zv, lv);
+        rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
+        for (int i = 0; i < dim; i++) {
+            lv[i] = lv[i] - x[i];
+        }
+
+        // summing using Kahan's method
+        auxy = rot * int_pow(I, alphaAbs - (2 * kIndex)) *
+                   harmonic_h_1D_kMax(lv, alphaAbs) *
+                   crandall_g(dim, nu, lv, 1. / lambda, zArgBound) -
+               epsilon;
+        auxt = sum + auxy;
+        epsilon = (auxt - sum) - auxy;
+        sum = auxt;
+    }
+    return sum;
+}
+
+/**
  * @brief calculates the second sum in Crandall's formula.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
@@ -359,6 +423,85 @@ static double complex sum_fourier_der(double nu, unsigned int dim, double lambda
         double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
         auxy = rot * crandall_g_der(dim, dim - nu, lv, lambda, zArgBound, alpha,
                                     alphaAbs) -
+               epsilon;
+        auxt = sum + auxy;
+        epsilon = (auxt - sum) - auxy;
+        sum = auxt;
+    }
+    return sum;
+}
+
+/**
+ * @brief calculates the harmonic polynomials applied to the sum in fourier space in
+ * 1D.
+ * @param[in] nu: exponent for the Epstein zeta function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] m: matrix that transforms the lattice in the Epstein zeta
+ * function.
+ * @param[in] x: projection of x vector to elementary lattice cell.
+ * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] cutoffs: how many summands in each direction are considered.
+ * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
+ * the incomplete gamma evaluation.
+ * @param[in] alphaAbs: total of alpha.
+ * @return helper function for the second sum in crandalls formula. Calculates
+ * sum_{k in m_invt whole_numbers ** dim without zero} h₍α,kIndex₎(y + k) G_{dim - nu
+ * + 2 * |α| - 4 * kIndex}(k + y) * exp(-2 * PI * I * x * (k + y))
+ */
+static double complex sum_fourier_harmonic_1D(double nu, unsigned int dim,
+                                              const double *m_invt, const double *x,
+                                              const double *y, const int cutoffs[],
+                                              double zArgBound,
+                                              unsigned int alphaAbs) {
+    double lambda = 1.; // parameter that decides the weight of each sum
+
+    int zv[dim];    // counting vector in Z^dim
+    double lv[dim]; // lattice vector
+    // cuboid cutoffs
+    long totalSummands = 1;
+    long totalCutoffs[dim + 1];
+    for (int k = 0; k < dim; k++) {
+        totalCutoffs[k] = totalSummands;
+        totalSummands *= 2 * cutoffs[k] + 1;
+    };
+    long zeroIndex = (totalSummands - 1) / 2;
+    double complex sum = 0.0;
+    double complex epsilon = 0.0;
+    double complex auxt;
+    double complex auxy;
+    // second sum (in fourier space)
+    for (long n = 0; n < zeroIndex; n++) {
+        for (int k = 0; k < dim; k++) {
+            zv[k] =
+                (((int)(n / totalCutoffs[k])) % (2 * cutoffs[k] + 1)) - cutoffs[k];
+        }
+        matrix_intVector(dim, m_invt, zv, lv);
+        for (int i = 0; i < dim; i++) {
+            lv[i] = lv[i] + y[i];
+        }
+        double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
+        auxy = rot * harmonic_h_1D_kMax(lv, alphaAbs) *
+                   crandall_g(dim, dim - nu, lv, lambda, zArgBound) -
+               epsilon;
+        auxt = sum + auxy;
+        epsilon = (auxt - sum) - auxy;
+        sum = auxt;
+    }
+    // skips zero
+    for (long n = zeroIndex + 1; n < totalSummands; n++) {
+        for (int k = 0; k < dim; k++) {
+            zv[k] =
+                (((int)(n / totalCutoffs[k])) % (2 * cutoffs[k] + 1)) - cutoffs[k];
+        }
+        matrix_intVector(dim, m_invt, zv, lv);
+        for (int i = 0; i < dim; i++) {
+            lv[i] = lv[i] + y[i];
+        }
+
+        double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
+
+        auxy = rot * harmonic_h_1D_kMax(lv, alphaAbs) *
+                   crandall_g(dim, dim - nu, lv, lambda, zArgBound) -
                epsilon;
         auxt = sum + auxy;
         epsilon = (auxt - sum) - auxy;
@@ -634,6 +777,45 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                           zArgBound) *
                  rot * xfactor;
             xfactor = 1;
+        } else if (variant == 2 && dim == 1) {
+            // Compute set zeta derivatives by harmonic method
+
+            double nuIt;
+            double nuReci;
+            double complex resIt;
+
+            unsigned int k = alphaAbs / 2;
+
+            nuIt = nu - (2 * k);
+            nuReci = nuIt - (2 * alphaAbs) + (4 * k);
+            double zArgBoundReci = assignzArgBound(dim - nuReci);
+
+            // calculate set zeta derivative function values.
+            rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
+
+            if (equals(dim, y_t1, y_t2)) {
+                nc = harmonic_h_1D_kMax(y_t1, alphaAbs) *
+                     crandall_g(dim, dim - nuReci, y_t1, lambda, zArgBoundReci);
+            } else {
+                nc = harmonic_h_1D_kMax(y_t2, alphaAbs) *
+                     crandall_g(dim, dim - nuReci, y_t2, lambda, zArgBoundReci) *
+                     cexp(-2 * M_PI * I * dot(dim, y_t2, x_t1)) * rot;
+            }
+
+            s2 = sum_fourier_harmonic_1D(nuReci, dim, m_fourier, x_t1, y_t2,
+                                         cutoffsFourier, zArgBoundReci, alphaAbs);
+
+            s2 = s2 * rot + nc;
+
+            s1 = sum_real_harmonic_1D(nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal,
+                                      zArgBound, alphaAbs) *
+                 rot * xfactor;
+            resIt = pow(lambda * lambda / M_PI, -nuIt / 2.) / tgamma(nuIt / 2.) *
+                    (s1 + pow(lambda, dim) * s2);
+            resIt *= int_pow(-2 * M_PI * I, 2 * k) *
+                     int_pow(-2 * M_PI, alphaAbs - (2 * k));
+            res += resIt;
+            res *= 1. / int_pow(ms, alphaAbs);
         } else if (variant == 2 && alphaAbs > 3) {
             // Compute set zeta derivatives by harmonic method
 
@@ -735,7 +917,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         }
         // In the harmonic method, the res is already set as there is no global
         // nu-dependent coefficient there
-        if (!(variant == 2 && alphaAbs > 3)) {
+        if (!(variant == 2 && (alphaAbs > 3 || dim == 1))) {
             res = xfactor * pow(lambda * lambda / M_PI, -nu / 2.) / tgamma(nu / 2.) *
                   (s1 + pow(lambda, dim) * s2);
         }

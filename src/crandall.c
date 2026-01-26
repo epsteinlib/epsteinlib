@@ -650,6 +650,21 @@ double harmonic_h(unsigned int k, unsigned int dim, const double *z,
     return sumOuter;
 }
 
+/** @brief Calculates the homogeneous harmonic polynomial h₍α,k₎
+ * of degree |α|−2k such that y^α = ∑ₖ (y·y)^k h₍α,k₎(y) for d = 1 and k =
+ * floor(|alpha|/2), explicitly, h₍α,k₎(y)=c_{|α|,k} ∑{|γ|=|α|−k} y^{2γ−α}
+ * h_inner(α,γ,k). In 1D, h₍α,k₎(y) is y ** (alphaAbs mod 2) and zero otherwise. Uses
+ * precomputed coefficients and exponents to avoid multi-index iteration.
+ * @param[in] z: vector of the polynomial.
+ * @param[in] alphaAbs: total of alpha.
+ * @return h₍α,k₎(z).
+ */
+double harmonic_h_1D_kMax(const double *z, unsigned int alphaAbs) {
+    if (alphaAbs % 2) {
+        return z[0];
+    }
+    return 1.;
+}
 /**
  * @brief Calculates the upper Crandall function.
  * @param[in] dim: dimension of the input vectors.
