@@ -480,29 +480,22 @@ static double complex sum_fourier_harmonic_1D(double nu, unsigned int dim,
             lv[i] = lv[i] + y[i];
         }
         double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
+        // symmetric addition of terms to catch same - same cancellation errors
         auxy = rot * harmonic_h_1D_kMax(lv, alphaAbs) *
-                   crandall_g(dim, dim - nu, lv, lambda, zArgBound) -
-               epsilon;
-        auxt = sum + auxy;
-        epsilon = (auxt - sum) - auxy;
-        sum = auxt;
-    }
-    // skips zero
-    for (long n = zeroIndex + 1; n < totalSummands; n++) {
+               crandall_g(dim, dim - nu, lv, lambda, zArgBound);
         for (int k = 0; k < dim; k++) {
-            zv[k] =
-                (((int)(n / totalCutoffs[k])) % (2 * cutoffs[k] + 1)) - cutoffs[k];
+            zv[k] = (((int)((totalSummands - 1 - n) / totalCutoffs[k])) %
+                     (2 * cutoffs[k] + 1)) -
+                    cutoffs[k];
         }
         matrix_intVector(dim, m_invt, zv, lv);
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] + y[i];
         }
-
-        double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
-
-        auxy = rot * harmonic_h_1D_kMax(lv, alphaAbs) *
-                   crandall_g(dim, dim - nu, lv, lambda, zArgBound) -
-               epsilon;
+        rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
+        auxy += rot * harmonic_h_1D_kMax(lv, alphaAbs) *
+                crandall_g(dim, dim - nu, lv, lambda, zArgBound);
+        auxy -= epsilon;
         auxt = sum + auxy;
         epsilon = (auxt - sum) - auxy;
         sum = auxt;
@@ -670,6 +663,11 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     }
     if (variant == 3 && !alphaAbs) {
         return epsteinZetaInternal(nu, dim, m, x, y, 1, 1, alpha);
+    }
+    // 1D odd derivatives in zero
+    if (variant == 2 && dim == 1 && alphaAbs % 2 && fabs(x[0]) < EPS_ZERO_Y &&
+        fabs(y[0]) < EPS_ZERO_Y) {
+        return 0.;
     }
     // 1. Transform: Compute determinant and fourier transformed matrix, scale
     // both of them

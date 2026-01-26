@@ -187,13 +187,14 @@ setZetaDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modu
 (*Setup test parameters.*)
 
 
-range = Range[50];
+range = Range[100];
+SeedRandom[2]; (* TODO: cancellation error, seed 2 and up to 40 ders *)
 Do[
 	\[Nu]1D[i]=10 randRational
 	;a1D[i]={{1/2+i/100}}
 	;x1D[i]=If[i<5,{0},{randRational}]
 	;y1D[i]=If[i<10,{0},{randRational}]
-	;n1D[i]={i}
+	;n1D[i]={RandomInteger[{0,40}]}
 	,{i,range}
 ]
 
@@ -224,7 +225,7 @@ Export["csv/setZetaDer_1D_Ref.csv",zDerTab1D];
 
 
 (* ::Subsection:: *)
-(*Create set zeta prototype reference values*)
+(*Create set zeta 2D reference values*)
 
 
 (* ::Text:: *)
@@ -232,13 +233,14 @@ Export["csv/setZetaDer_1D_Ref.csv",zDerTab1D];
 
 
 range = Range[186];
+SeedRandom[42];
 AHex={{1,1/2},{0,Sqrt[3]/2}};
 Do[
 	\[Nu]0[i]=10 randRational
 	;a0[i]=AHex
 	;x0[i]=If[i<10,{0,0},{randRational,randRational}]
 	;y0[i]={randRational,randRational}
-	;\[Alpha]0[i]={randDerivative,randDerivative}
+	;\[Alpha]0[i]={RandomInteger[{0,15}],RandomInteger[{0,15}]}
 	,{i,range}
 ]
 
@@ -280,7 +282,7 @@ zDerTab=Join[zDerTab,{
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/setZetaDer_prototype_Ref.csv",zDerTab];
+Export["csv/setZetaDer_2D_Ref.csv",zDerTab];
 
 
 (* ::Subsection:: *)
