@@ -20,6 +20,7 @@
 #include "tools.h"
 
 #include "zeta.h"
+#include <assert.h>
 
 /*!
    @brief Smallest value z such that G(nu, z) is negligible for
@@ -565,20 +566,17 @@ static double complex sum_fourier_harmonic(
         auxt = sum + auxy;
         epsilon = (auxt - sum) - auxy;
         sum = auxt;
-    }
-    // skips zero
-    for (long n = zeroIndex + 1; n < totalSummands; n++) {
+        // symmerict addition to catch +- identical terms in y = 0
         for (int k = 0; k < dim; k++) {
-            zv[k] =
-                (((int)(n / totalCutoffs[k])) % (2 * cutoffs[k] + 1)) - cutoffs[k];
+            zv[k] = (((int)((totalSummands - 1 - n) / totalCutoffs[k])) %
+                     (2 * cutoffs[k] + 1)) -
+                    cutoffs[k];
         }
         matrix_intVector(dim, m_invt, zv, lv);
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] + y[i];
         }
-
-        double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
-
+        rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
         auxy = rot *
                    harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
                               coeffs, exponents) *
@@ -664,13 +662,15 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     if (variant == 3 && !alphaAbs) {
         return epsteinZetaInternal(nu, dim, m, x, y, 1, 1, alpha);
     }
-    // 1D odd derivatives in zero
-    if (variant == 2 && dim == 1 && alphaAbs % 2 && fabs(x[0]) < EPS_ZERO_Y &&
-        fabs(y[0]) < EPS_ZERO_Y) {
-        return 0.;
+    // Odd derivatives in zero
+    for (int i = 0; i < dim; i++) {
+        if (alpha[i] % 2 && fabs(x[i]) < EPS_ZERO_Y && fabs(y[i]) < EPS_ZERO_Y) {
+            return 0.;
+        }
     }
     // 1. Transform: Compute determinant and fourier transformed matrix, scale
     // both of them
+    assert(dim > 0);
     double m_fourier[dim * dim];
     double m_copy[dim * dim];
     double m_real[dim * dim];
