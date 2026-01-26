@@ -715,12 +715,14 @@ double complex crandall_g_der(unsigned int dim, double nu, const double *z,
         zArgBoundIt = zArgBounds[betaAbs]; // NOLINT
 
         // summing using Kahan's method
-        auxy = polynomial_p(dim, z, alpha, beta) *
-                   crandall_g(dim, nuIt, z, prefactor, zArgBoundIt) -
-               epsilon;
-        auxt = sum + auxy;
-        epsilon = (auxt - sum) - auxy;
-        sum = auxt;
+        // catch vanishing polynomials
+        double p = polynomial_p(dim, z, alpha, beta);
+        if (p) {
+            auxy = p * crandall_g(dim, nuIt, z, prefactor, zArgBoundIt) - epsilon;
+            auxt = sum + auxy;
+            epsilon = (auxt - sum) - auxy;
+            sum = auxt;
+        }
 
         done = 1;
         for (unsigned int idx = 0; idx < dim; idx++) {
