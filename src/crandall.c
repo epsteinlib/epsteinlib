@@ -554,6 +554,57 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, // NOLINT
     }
 }
 
+/**
+ * @brief Compute the integer power of a double by squaring.
+ * Uses switch for small exponents to avoid loop overhead.
+ * @param[in] base: the base value.
+ * @param[in] exp: non-negative integer exponent.
+ * @return base ** exp.
+ */
+static inline double real_int_pow(double base, unsigned int exp) {
+    double b2;
+    switch (exp) {
+    case 0:
+        return 1.0;
+    case 1:
+        return base;
+    case 2:
+        return base * base;
+    case 3:
+        return base * base * base;
+    case 4:
+        b2 = base * base;
+        return b2 * b2;
+    case 5:
+        b2 = base * base;
+        return b2 * b2 * base;
+    case 6:
+        b2 = base * base;
+        return b2 * b2 * b2;
+    case 7:
+        b2 = base * base;
+        return b2 * b2 * b2 * base;
+    case 8:
+        b2 = base * base;
+        b2 = b2 * b2;
+        return b2 * b2;
+    default:
+        break;
+    }
+    double res = 1.0;
+    while (1) {
+        if (exp & 1) {
+            res *= base;
+        }
+        exp >>= 1;
+        if (!exp) {
+            break;
+        }
+        base *= base;
+    }
+    return res;
+}
+
 /** @brief Calculates the homogeneous harmonic polynomial h₍α,k₎
  * of degree |α|−2k such that y^α = ∑ₖ (y·y)^k h₍α,k₎(y);
  * explicitly, h₍α,k₎(y)=c_{|α|,k} ∑{|γ|=|α|−k} y^{2γ−α} h_inner(α,γ,k).
@@ -573,10 +624,10 @@ double harmonic_h(unsigned int k, unsigned int dim, const double *z,
                   const unsigned long long *valid_count, const double *coeffs,
                   const unsigned int *exponents) {
     double zPow;
-    double complex sumOuter = 0.0;
-    double complex epsilonOuter = 0.0;
-    double complex auxtOuter;
-    double complex auxyOuter;
+    double sumOuter = 0.0;
+    double epsilonOuter = 0.0;
+    double auxtOuter;
+    double auxyOuter;
     unsigned long long n;
     unsigned long long count = valid_count[k];
     unsigned long long baseIdx = chunk_offset[k];
@@ -588,7 +639,7 @@ double harmonic_h(unsigned int k, unsigned int dim, const double *z,
         expIdx = (baseIdx + n) * dim;
         zPow = 1.0;
         for (i = 0; i < dim; i++) {
-            zPow *= int_pow(z[i], exponents[expIdx + i]);
+            zPow *= real_int_pow(z[i], exponents[expIdx + i]);
         }
         auxyOuter = zPow * sumInner - epsilonOuter;
         auxtOuter = sumOuter + auxyOuter;
