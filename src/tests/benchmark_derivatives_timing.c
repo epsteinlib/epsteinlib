@@ -51,7 +51,7 @@ int benchmark_setZetaDer_timing() { // NOLINT
     printf("\n========== Benchmarking %s ==========\n", __func__);
 
     char zetaDataString[MAX_PATH_LENGTH];
-    unsigned int dimMax = 4;
+    unsigned int dimMax = 6;
     double nu = 0.5;
     double complex res;
     double elapsedTime;
@@ -96,6 +96,10 @@ int benchmark_setZetaDer_timing() { // NOLINT
         printf("d: %u, t: ", dim);
 
         for (int j = 0; j < 10 + 1; j++) {
+
+            if (dim > 4 && j > 5) {
+                continue;
+            }
 
             elapsedTimeMax = 0.;
 
