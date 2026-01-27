@@ -397,48 +397,50 @@ Export["csv/setZetaDer_laplace_Ref.csv",zLaplaceTab];
 
 smallVal = 10^-200;
 zetaSpecialTab = {
-	(* 1D: nu = 1 + Total[alpha] + 2, Total[alpha] even => nu odd *)
-	Flatten@{1, 5., N@{{1}}, {0.}, {0.}, {2}, {N@Re@#, N@Im@#} &@ setZetaDer[5, {{1}}, {0}, {0}, {2}]}
-	,Flatten@{1, 7., N@{{1}}, {0.}, {0.}, {4}, {N@Re@#, N@Im@#} &@ setZetaDer[7, {{1}}, {0}, {0}, {4}]}
-	,Flatten@{1, 5., N@{{1}}, {0.1}, {0.}, {2}, {N@Re@#, N@Im@#} &@ setZetaDer[5, {{1}}, {1/10}, {0}, {2}]}
-	,Flatten@{1, 7., N@{{1}}, {0.1}, {0.}, {4}, {N@Re@#, N@Im@#} &@ setZetaDer[7, {{1}}, {1/10}, {0}, {4}]}
-	,Flatten@{1, 5., N@{{1}}, {0.}, {smallVal}, {2}, {N@Re@#, N@Im@#} &@ setZetaDer[5, {{1}}, {0}, {smallVal}, {2}]}
-	,Flatten@{1, 5., N@{{1/2}}, {0.}, {0.}, {2}, {N@Re@#, N@Im@#} &@ setZetaDer[5, {{1/2}}, {0}, {0}, {2}]}
-	,Flatten@{1, 5., N@{{2}}, {0.}, {0.}, {2}, {N@Re@#, N@Im@#} &@ setZetaDer[5, {{2}}, {0}, {0}, {2}]}
-	(* 2D: nu = 2 + Total[alpha] + 2, Total[alpha] even => nu even *)
-	,Flatten@{2, 6., N@IdentityMatrix@2, {0., 0.}, {0., 0.}, {2, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[6, IdentityMatrix@2, {0, 0}, {0, 0}, {2, 0}]}
-	,Flatten@{2, 6., N@IdentityMatrix@2, {0., 0.}, {0., 0.}, {1, 1}, {N@Re@#, N@Im@#} &@ setZetaDer[6, IdentityMatrix@2, {0, 0}, {0, 0}, {1, 1}]}
-	,Flatten@{2, 6., N@IdentityMatrix@2, {0., 0.}, {0., 0.}, {0, 2}, {N@Re@#, N@Im@#} &@ setZetaDer[6, IdentityMatrix@2, {0, 0}, {0, 0}, {0, 2}]}
-	,Flatten@{2, 8., N@IdentityMatrix@2, {0., 0.}, {0., 0.}, {4, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[8, IdentityMatrix@2, {0, 0}, {0, 0}, {4, 0}]}
-	,Flatten@{2, 8., N@IdentityMatrix@2, {0., 0.}, {0., 0.}, {2, 2}, {N@Re@#, N@Im@#} &@ setZetaDer[8, IdentityMatrix@2, {0, 0}, {0, 0}, {2, 2}]}
-	,Flatten@{2, 6., N@IdentityMatrix@2, {0.1, 0.2}, {0., 0.}, {2, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[6, IdentityMatrix@2, {1, 2}/10, {0, 0}, {2, 0}]}
-	,Flatten@{2, 6., N@IdentityMatrix@2, {0.1, 0.2}, {0., 0.}, {1, 1}, {N@Re@#, N@Im@#} &@ setZetaDer[6, IdentityMatrix@2, {1, 2}/10, {0, 0}, {1, 1}]}
-	,Flatten@{2, 8., N@IdentityMatrix@2, {0.1, 0.2}, {0., 0.}, {2, 2}, {N@Re@#, N@Im@#} &@ setZetaDer[8, IdentityMatrix@2, {1, 2}/10, {0, 0}, {2, 2}]}
-	,Flatten@{2, 6., N@IdentityMatrix@2, {0., 0.}, {0., smallVal}, {2, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[6, IdentityMatrix@2, {0, 0}, {0, smallVal}, {2, 0}]}
-	,Flatten@{2, 6., N@IdentityMatrix@2, {0., 0.}, {smallVal, 0.}, {2, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[6, IdentityMatrix@2, {0, 0}, {smallVal, 0}, {2, 0}]}
-	,Flatten@{2, 6., N@AHex, {0., 0.}, {0., 0.}, {2, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[6, AHex, {0, 0}, {0, 0}, {2, 0}]}
-	,Flatten@{2, 6., N@AHex, {0., 0.}, {0., 0.}, {1, 1}, {N@Re@#, N@Im@#} &@ setZetaDer[6, AHex, {0, 0}, {0, 0}, {1, 1}]}
-	,Flatten@{2, 8., N@AHex, {0., 0.}, {0., 0.}, {2, 2}, {N@Re@#, N@Im@#} &@ setZetaDer[8, AHex, {0, 0}, {0, 0}, {2, 2}]}
-	,Flatten@{2, 6., N@AHex, {0.1, 0.2}, {0., 0.}, {2, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[6, AHex, {1, 2}/10, {0, 0}, {2, 0}]}
-	,Flatten@{2, 6., N@AHex, {0., 0.}, {0., smallVal}, {2, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[6, AHex, {0, 0}, {0, smallVal}, {2, 0}]}
-	(* 3D: nu = 3 + Total[alpha] + 2, Total[alpha] even => nu odd *)
-	,Flatten@{3, 7., N@IdentityMatrix@3, {0., 0., 0.}, {0., 0., 0.}, {2, 0, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[7, IdentityMatrix@3, {0, 0, 0}, {0, 0, 0}, {2, 0, 0}]}
-	,Flatten@{3, 7., N@IdentityMatrix@3, {0., 0., 0.}, {0., 0., 0.}, {1, 1, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[7, IdentityMatrix@3, {0, 0, 0}, {0, 0, 0}, {1, 1, 0}]}
-	,Flatten@{3, 7., N@IdentityMatrix@3, {0., 0., 0.}, {0., 0., 0.}, {0, 2, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[7, IdentityMatrix@3, {0, 0, 0}, {0, 0, 0}, {0, 2, 0}]}
-	,Flatten@{3, 7., N@IdentityMatrix@3, {0., 0., 0.}, {0., 0., 0.}, {0, 0, 2}, {N@Re@#, N@Im@#} &@ setZetaDer[7, IdentityMatrix@3, {0, 0, 0}, {0, 0, 0}, {0, 0, 2}]}
-	,Flatten@{3, 9., N@IdentityMatrix@3, {0., 0., 0.}, {0., 0., 0.}, {4, 0, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[9, IdentityMatrix@3, {0, 0, 0}, {0, 0, 0}, {4, 0, 0}]}
-	,Flatten@{3, 9., N@IdentityMatrix@3, {0., 0., 0.}, {0., 0., 0.}, {2, 2, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[9, IdentityMatrix@3, {0, 0, 0}, {0, 0, 0}, {2, 2, 0}]}
-	,Flatten@{3, 7., N@IdentityMatrix@3, {0.1, 0.2, 0.3}, {0., 0., 0.}, {2, 0, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[7, IdentityMatrix@3, {1, 2, 3}/10, {0, 0, 0}, {2, 0, 0}]}
-	,Flatten@{3, 7., N@IdentityMatrix@3, {0.1, 0.2, 0.3}, {0., 0., 0.}, {1, 1, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[7, IdentityMatrix@3, {1, 2, 3}/10, {0, 0, 0}, {1, 1, 0}]}
-	,Flatten@{3, 7., N@IdentityMatrix@3, {0., 0., 0.}, {0., 0., smallVal}, {2, 0, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[7, IdentityMatrix@3, {0, 0, 0}, {0, 0, smallVal}, {2, 0, 0}]}
-	,Flatten@{3, 7., N@IdentityMatrix@3, {0., 0., 0.}, {smallVal, 0., 0.}, {2, 0, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[7, IdentityMatrix@3, {0, 0, 0}, {smallVal, 0, 0}, {2, 0, 0}]}
-	,Flatten@{3, 7., N@BMat[1/10], {0., 0., 0.}, {0., 0., 0.}, {2, 0, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[7, BMat[1/10], {0, 0, 0}, {0, 0, 0}, {2, 0, 0}]}
-	,Flatten@{3, 7., N@BMat[1/2], {0., 0., 0.}, {0., 0., 0.}, {2, 0, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[7, BMat[1/2], {0, 0, 0}, {0, 0, 0}, {2, 0, 0}]}
-	,Flatten@{3, 7., N@BMat[1/2], {0.1, 0.2, 0.3}, {0., 0., 0.}, {2, 0, 0}, {N@Re@#, N@Im@#} &@ setZetaDer[7, BMat[1/2], {1, 2, 3}/10, {0, 0, 0}, {2, 0, 0}]}
+	(* 1D: nu = 1 + Total[alpha] + 2Total[alpha] even => nu odd *)
+	Flatten@{15.N@{{1}}{0.}{0.}{2}{N@Re@#N@Im@#} &@ setZetaDer[5{{1}}{0}{0}{2}]}
+	,Flatten@{17.N@{{1}}{0.}{0.}{4}{N@Re@#N@Im@#} &@ setZetaDer[7{{1}}{0}{0}{4}]}
+	,Flatten@{15.N@{{1}}{0.1}{0.}{2}{N@Re@#N@Im@#} &@ setZetaDer[5{{1}}{1/10}{0}{2}]}
+	,Flatten@{17.N@{{1}}{0.1}{0.}{4}{N@Re@#N@Im@#} &@ setZetaDer[7{{1}}{1/10}{0}{4}]}
+	,Flatten@{15.N@{{1}}{0.}{N@smallVal}{2}{N@Re@#N@Im@#} &@ setZetaDer[5{{1}}{0}{smallVal}{2}]}
+	,Flatten@{15.N@{{1/2}}{0.}{0.}{2}{N@Re@#N@Im@#} &@ setZetaDer[5{{1/2}}{0}{0}{2}]}
+	,Flatten@{15.N@{{2}}{0.}{0.}{2}{N@Re@#N@Im@#} &@ setZetaDer[5{{2}}{0}{0}{2}]}
+	(* 2D: nu = 2 + Total[alpha] + 2Total[alpha] even => nu even *)
+	,Flatten@{26.N@IdentityMatrix@2{0.0 .}{0.0 .}{20}{N@Re@#N@Im@#} &@ setZetaDer[6IdentityMatrix@2{00}{00}{20}]}
+	,Flatten@{26.N@IdentityMatrix@2{0.0 .}{0.0 .}{11}{N@Re@#N@Im@#} &@ setZetaDer[6IdentityMatrix@2{00}{00}{11}]}
+	,Flatten@{26.N@IdentityMatrix@2{0.0 .}{0.0 .}{02}{N@Re@#N@Im@#} &@ setZetaDer[6IdentityMatrix@2{00}{00}{02}]}
+	,Flatten@{28.N@IdentityMatrix@2{0.0 .}{0.0 .}{40}{N@Re@#N@Im@#} &@ setZetaDer[8IdentityMatrix@2{00}{00}{40}]}
+	,Flatten@{28.N@IdentityMatrix@2{0.0 .}{0.0 .}{22}{N@Re@#N@Im@#} &@ setZetaDer[8IdentityMatrix@2{00}{00}{22}]}
+	,Flatten@{26.N@IdentityMatrix@2{0.10.2}{0.0 .}{20}{N@Re@#N@Im@#} &@ setZetaDer[6IdentityMatrix@2{12}/10{00}{20}]}
+	,Flatten@{26.N@IdentityMatrix@2{0.10.2}{0.0 .}{11}{N@Re@#N@Im@#} &@ setZetaDer[6IdentityMatrix@2{12}/10{00}{11}]}
+	,Flatten@{28.N@IdentityMatrix@2{0.10.2}{0.0 .}{22}{N@Re@#N@Im@#} &@ setZetaDer[8IdentityMatrix@2{12}/10{00}{22}]}
+	,Flatten@{26.N@IdentityMatrix@2{0.0 .}{0.N@smallVal}{20}{N@Re@#N@Im@#} &@ setZetaDer[6IdentityMatrix@2{00}{0smallVal}{20}]}
+	,Flatten@{26.N@IdentityMatrix@2{0.0 .}{N@smallVal,0.}{20}{N@Re@#N@Im@#} &@ setZetaDer[6IdentityMatrix@2{00}{smallVal,0}{20}]}
+	,Flatten@{26.N@AHex{0.0 .}{0.0 .}{20}{N@Re@#N@Im@#} &@ setZetaDer[6AHex{00}{00}{20}]}
+	,Flatten@{26.N@AHex{0.0 .}{0.0 .}{11}{N@Re@#N@Im@#} &@ setZetaDer[6AHex{00}{00}{11}]}
+	,Flatten@{28.N@AHex{0.0 .}{0.0 .}{22}{N@Re@#N@Im@#} &@ setZetaDer[8AHex{00}{00}{22}]}
+	,Flatten@{26.N@AHex{0.10.2}{0.0 .}{20}{N@Re@#N@Im@#} &@ setZetaDer[6AHex {12}/10{00}{20}]}
+	,Flatten@{26.N@AHex{0.0 .}{0.N@smallVal}{20}{N@Re@#N@Im@#} &@ setZetaDer[6AHex{00}{0smallVal}{20}]}
+	,Flatten@{28.N@AHex{0.0 .}{0.0 .}{40}{N@Re@#N@Im@#} &@ setZetaDer[8AHex{00}{00}{40}]}
+	,Flatten@{28.N@AHex{0.0 .}{0.0 .}{31}{N@Re@#N@Im@#} &@ setZetaDer[8AHex{00}{00}{31}]}
+	,Flatten@{210.N@AHex{0.0 .}{0.0 .}{42}{N@Re@#N@Im@#} &@ setZetaDer[10AHex{00}{00}{42}]}
+	,Flatten@{28.N@AHex{0.10.2}{0.0 .}{40}{N@Re@#N@Im@#} &@ setZetaDer[8AHex {12}/10{00}{40}]}
+	,Flatten@{28.N@AHex{0.0 .}{0.N@smallVal}{40}{N@Re@#N@Im@#} &@ setZetaDer[8AHex{00}{0smallVal}{40}]}
+	(* 3D: nu = 3 + Total[alpha] + 2Total[alpha] even => nu odd *)
+	,Flatten@{37.N@IdentityMatrix@3{0.0.0 .}{0.0.0 .}{200}{N@Re@#N@Im@#} &@ setZetaDer[7IdentityMatrix@3{000}{000}{200}]}
+	,Flatten@{37.N@IdentityMatrix@3{0.0.0 .}{0.0.0 .}{110}{N@Re@#N@Im@#} &@ setZetaDer[7IdentityMatrix@3{000}{000}{110}]}
+	,Flatten@{37.N@IdentityMatrix@3{0.0.0 .}{0.0.0 .}{020}{N@Re@#N@Im@#} &@ setZetaDer[7IdentityMatrix@3{000}{000}{020}]}
+	,Flatten@{37.N@IdentityMatrix@3{0.0.0 .}{0.0.0 .}{002}{N@Re@#N@Im@#} &@ setZetaDer[7IdentityMatrix@3{000}{000}{002}]}
+	,Flatten@{39.N@IdentityMatrix@3{0.0.0 .}{0.0.0 .}{400}{N@Re@#N@Im@#} &@ setZetaDer[9IdentityMatrix@3{000}{000}{400}]}
+	,Flatten@{39.N@IdentityMatrix@3{0.0.0 .}{0.0.0 .}{220}{N@Re@#N@Im@#} &@ setZetaDer[9IdentityMatrix@3{000}{000}{220}]}
+	,Flatten@{37.N@IdentityMatrix@3{0.10.20.3}{0.0.0 .}{200}{N@Re@#N@Im@#} &@ setZetaDer[7IdentityMatrix@3{123}/10{000}{200}]}
+	,Flatten@{37.N@IdentityMatrix@3{0.10.20.3}{0.0.0 .}{110}{N@Re@#N@Im@#} &@ setZetaDer[7IdentityMatrix@3{123}/10{000}{110}]}
+	,Flatten@{37.N@IdentityMatrix@3{0.0.0 .}{0.0 . N@smallVal}{200}{N@Re@#N@Im@#} &@ setZetaDer[7IdentityMatrix@3{000}{00smallVal}{200}]}
+	,Flatten@{37.N@IdentityMatrix@3{0.0.0 .}{N@smallVal,0.0 .}{200}{N@Re@#N@Im@#} &@ setZetaDer[7IdentityMatrix@3{000}{smallVal,00}{200}]}
+	,Flatten@{37.N@BMat[1/10]{0.0.0 .}{0.0.0 .}{200}{N@Re@#N@Im@#} &@ setZetaDer[7BMat[1/10]{000}{000}{200}]}
+	,Flatten@{37.N@BMat[1/2]{0.0.0 .}{0.0.0 .}{200}{N@Re@#N@Im@#} &@ setZetaDer[7BMat[1/2]{000}{000}{200}]}
+	,Flatten@{37.N@BMat[1/2]{0.10.20.3}{0.0.0 .}{200}{N@Re@#N@Im@#} &@ setZetaDer[7BMat[1/2]{123}/10{000}{200}]}
 };
-
-
-zetaSpecialTab
 
 
 (* ::Text:: *)

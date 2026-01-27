@@ -927,13 +927,12 @@ int test_setZetaDer_specialCase(void) { // NOLINT
  * @return number of failed tests.
  */
 int main() {
-    //    int failed1 = test_setZetaDer1D();
-    //    int failed2 = test_setZetaDer_prototype();
-    //    int failed3 = test_setZetaDer_taylor();
-    //    int failed4 = test_setZetaDer_directional();
-    //    int failed5 = test_setZetaDer_odd();
-    //    int failed6 = test_setZetaDer_laplace();
+    int failed1 = test_setZetaDer1D();
+    int failed2 = test_setZetaDer_prototype();
+    int failed3 = test_setZetaDer_taylor();
+    int failed4 = test_setZetaDer_directional();
+    int failed5 = test_setZetaDer_odd();
+    int failed6 = test_setZetaDer_laplace();
     int failed7 = test_setZetaDer_specialCase();
-    return failed7;
-    //    return failed1 + failed2 + failed3 + failed4 + failed5 + failed6 + failed7;
+    return failed1 + failed2 + failed3 + failed4 + failed5 + failed6 + failed7;
 }
