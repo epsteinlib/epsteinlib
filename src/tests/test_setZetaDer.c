@@ -780,6 +780,8 @@ int test_setZetaDer_specialCase(void) { // NOLINT
     double errMax = NAN;
     double errSum = 0.;
 
+    unsigned int max_test_dim = 4;
+
     printf("\n\t ... ");
     printf("processing %s ", path);
 
@@ -801,97 +803,67 @@ int test_setZetaDer_specialCase(void) { // NOLINT
         }
         ptr = endptr + 1;
 
-        // Allocate arrays based on dimension
-        double *a = malloc((size_t)(dim * dim) * sizeof(double));
-        double *x = malloc((size_t)dim * sizeof(double));
-        double *y = malloc((size_t)dim * sizeof(double));
-        unsigned int *alpha = malloc((size_t)dim * sizeof(unsigned int));
-
-        if (a == NULL || x == NULL || y == NULL || alpha == NULL) {
-            free(a);
-            free(x);
-            free(y);
-            free(alpha);
-            fprintf(stderr, "Memory allocation failed\n");
-            continue;
+        // Bounds check on dimension
+        if (dim < 1 || dim > max_test_dim) {
+            (void)fclose(data);
+            return fprintf(stderr, "Invalid dimension: %u\n", dim);
         }
+
+        // Use stack allocation with fixed max size
+        double a[max_test_dim * max_test_dim];
+        double x[max_test_dim];
+        double y[max_test_dim];
+        unsigned int alpha[max_test_dim];
 
         // Parse a (dim x dim matrix, flattened)
         int parseOk = 1;
-        for (unsigned int i = 0; i < dim * dim; i++) {
+        for (unsigned int i = 0; i < dim * dim && parseOk; i++) {
             a[i] = strtod(ptr, &endptr);
             if (*endptr != ',') {
                 parseOk = 0;
-                break;
+            } else {
+                ptr = endptr + 1;
             }
-            ptr = endptr + 1;
-        }
-        if (!parseOk) {
-            free(a);
-            free(x);
-            free(y);
-            free(alpha);
-            continue;
         }
 
         // Parse x (dim values)
-        for (unsigned int i = 0; i < dim; i++) {
+        for (unsigned int i = 0; i < dim && parseOk; i++) {
             x[i] = strtod(ptr, &endptr);
             if (*endptr != ',') {
                 parseOk = 0;
-                break;
+            } else {
+                ptr = endptr + 1;
             }
-            ptr = endptr + 1;
-        }
-        if (!parseOk) {
-            free(a);
-            free(x);
-            free(y);
-            free(alpha);
-            continue;
         }
 
         // Parse y (dim values)
-        for (unsigned int i = 0; i < dim; i++) {
+        for (unsigned int i = 0; i < dim && parseOk; i++) {
             y[i] = strtod(ptr, &endptr);
             if (*endptr != ',') {
                 parseOk = 0;
-                break;
+            } else {
+                ptr = endptr + 1;
             }
-            ptr = endptr + 1;
-        }
-        if (!parseOk) {
-            free(a);
-            free(x);
-            free(y);
-            free(alpha);
-            continue;
         }
 
         // Parse alpha (dim unsigned int values)
-        for (unsigned int i = 0; i < dim; i++) {
+        for (unsigned int i = 0; i < dim && parseOk; i++) {
             alpha[i] = (unsigned int)strtoul(ptr, &endptr, 10);
-            if (*endptr != ',' && i < dim - 1) {
-                parseOk = 0;
-                break;
+            if (*endptr != ',') {
+                if (i < dim - 1) {
+                    parseOk = 0;
+                }
             }
             ptr = endptr + 1;
         }
+
         if (!parseOk) {
-            free(a);
-            free(x);
-            free(y);
-            free(alpha);
             continue;
         }
 
         // Parse reference result (Re, Im)
         double refRe = strtod(ptr, &endptr);
         if (*endptr != ',') {
-            free(a);
-            free(x);
-            free(y);
-            free(alpha);
             continue;
         }
         ptr = endptr + 1;
@@ -932,11 +904,6 @@ int test_setZetaDer_specialCase(void) { // NOLINT
         }
 
         totalTests++;
-
-        free(a);
-        free(x);
-        free(y);
-        free(alpha);
     }
 
     if (fclose(data) != 0) {
