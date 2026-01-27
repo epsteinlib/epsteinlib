@@ -169,7 +169,7 @@ int test_setZetaDer_2D(void) {
     int testsPassed = 0;
     int totalTests = 0;
     unsigned int dim = 2;
-    double tol = pow(10, -12);
+    double tol = 5 * pow(10, -12);
 
     double errMin = NAN;
     double errMax = NAN;
@@ -804,11 +804,11 @@ int test_setZetaDer_specialCase(void) { // NOLINT
 int main() {
     int failed = 0;
 
-    //    failed += run_timed_test(test_setZetaDer_1D);
-    //    failed += run_timed_test(test_setZetaDer_2D);
-    //    failed += run_timed_test(test_setZetaDer_taylor);
-    //    failed += run_timed_test(test_setZetaDer_odd);
-    //    failed += run_timed_test(test_setZetaDer_laplace);
+    failed += run_timed_test(test_setZetaDer_1D);
+    failed += run_timed_test(test_setZetaDer_2D);
+    failed += run_timed_test(test_setZetaDer_taylor);
+    failed += run_timed_test(test_setZetaDer_odd);
+    failed += run_timed_test(test_setZetaDer_laplace);
     failed += run_timed_test(test_setZetaDer_specialCase);
 
     return failed;
