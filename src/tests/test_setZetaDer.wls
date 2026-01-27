@@ -424,7 +424,6 @@ zetaSpecialTab = {
     ,Flatten@{2,8.,N@IdentityMatrix@2,{0.1,0.2},{0.,0.},{2,2},{N@Re@#,N@Im@#}  &/@ {setZetaDer[8,IdentityMatrix@2,{1,2}/10,{0,0},{2,2}]}}
     ,Flatten@{2,6.,N@IdentityMatrix@2,{0.,0.},{0.,N@smallVal},{2,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[6,IdentityMatrix@2,{0,0},{0,smallVal},{2,0}]}}
     ,Flatten@{2,6.,N@IdentityMatrix@2,{0.,0.},{N@smallVal,0.},{2,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[6,IdentityMatrix@2,{0,0},{smallVal,0},{2,0}]}}
-    (*
     ,Flatten@{2,6.,N@AHex,{0.,0.},{0.,0.},{2,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[6,AHex,{0,0},{0,0},{2,0}]}}
     ,Flatten@{2,6.,N@AHex,{0.,0.},{0.,0.},{1,1},{N@Re@#,N@Im@#}  &/@ {setZetaDer[6,AHex,{0,0},{0,0},{1,1}]}}
     ,Flatten@{2,8.,N@AHex,{0.,0.},{0.,0.},{2,2},{N@Re@#,N@Im@#}  &/@ {setZetaDer[8,AHex,{0,0},{0,0},{2,2}]}}
@@ -435,7 +434,7 @@ zetaSpecialTab = {
     ,Flatten@{2,10.,N@AHex,{0.,0.},{0.,0.},{4,2},{N@Re@#,N@Im@#}  &/@ {setZetaDer[10,AHex,{0,0},{0,0},{4,2}]}}
     ,Flatten@{2,8.,N@AHex,{0.1,0.2},{0.,0.},{4,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[8,AHex,{1,2}/10,{0,0},{4,0}]}}
     ,Flatten@{2,8.,N@AHex,{0.,0.},{0.,N@smallVal},{4,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[8,AHex,{0,0},{0,smallVal},{4,0}]}}
-(* 3D: nu = 3 + Total[alpha] + 2Total[alpha] even => nu odd *)
+	(* 3D: nu = 3 + Total[alpha] + 2Total[alpha] even => nu odd *)
 	,Flatten@{3,7.,N@IdentityMatrix@3,{0.,0.,0.},{0.,0.,0.},{2,0,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[7,IdentityMatrix@3,{0,0,0},{0,0,0},{2,0,0}]}}
     ,Flatten@{3,7.,N@IdentityMatrix@3,{0.,0.,0.},{0.,0.,0.},{1,1,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[7,IdentityMatrix@3,{0,0,0},{0,0,0},{1,1,0}]}}
     ,Flatten@{3,7.,N@IdentityMatrix@3,{0.,0.,0.},{0.,0.,0.},{2,0,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[7,IdentityMatrix@3,{0,0,0},{0,0,0},{2,0,0}]}}
@@ -449,7 +448,6 @@ zetaSpecialTab = {
     ,Flatten@{3,7.,N@BMat[1/10],{0.,0.,0.},{0.,0.,0.},{2,0,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[7,BMat[1/10],{0,0,0},{0,0,0},{2,0,0}]}}
     ,Flatten@{3,7.,N@BMat[1/2],{0.,0.,0.},{0.,0.,0.},{2,0,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[7,BMat[1/2],{0,0,0},{0,0,0},{2,0,0}]}}
     ,Flatten@{3,7.,N@BMat[1/2],{0.1,0.2,0.3},{0.,0.,0.},{2,0,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[7,BMat[1/2],{1,2,3}/10,{0,0,0},{2,0,0}]}}
-   *)
 };
 
 
