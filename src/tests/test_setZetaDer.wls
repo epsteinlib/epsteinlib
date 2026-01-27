@@ -60,6 +60,20 @@ randDerivative := RandomInteger[{0,6}]
 SetZeta[\[Nu]_,a_,x_,y_]:=Exp[2 Pi I x . y]EpsteinZeta[\[Nu],a,x,y]
 
 
+(* ::Text:: *)
+(*Hexagonal lattice.*)
+
+
+AHex={{1,1/2},{0,Sqrt@3/2}};
+
+
+(* ::Text:: *)
+(*Bain-path lattice matrix.*)
+
+
+BMat[a_] = 1/Sqrt[a + 1]*DiagonalMatrix[{Sqrt[a], 1, 1}] . {{1, 1, 0}, {1, 0, 1}, {0, 1, 1}};
+
+
 (* ::Subsection:: *)
 (*Reference functions*)
 
@@ -76,16 +90,30 @@ SetZetaDerAnalytic[\[Nu]_,{{a_}},{x_},{y_},{n_?EvenQ}]:=(-4 Pi^2)^Floor[n/2] Set
 
 
 p[y_,\[Alpha]_,\[Beta]_]:=Apply[Times,(-\[Pi])^(\[Alpha]-\[Beta])Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2y)^(\[Alpha]-2\[Beta])]
-g[\[Nu]_,y_]=Piecewise[{{0,Norm[y]>=4},{ -2/\[Nu],Norm[y]<10^(-64)},{ExpIntegralE[1-\[Nu]/2,Pi y . y],Norm[y]>=10^(-64)&&Norm[y]<4}}];
-gDer[\[Nu]_,y_,\[Alpha]_]:=Total[Flatten[Table[p[y,\[Alpha],\[Beta]]g[\[Nu]+2Total[\[Alpha]-\[Beta]],y],{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}]]]
+g[\[Nu]_,y_]=Piecewise[{
+	{-2/\[Nu],Norm[y]<10^(-64)}
+	,{ExpIntegralE[1-\[Nu]/2,Pi y . y],Norm[y]<4}
+	},0
+];
+gDer[\[Nu]_,y_,\[Alpha]_]:=Total[Flatten[Table[
+	Module[
+		{pol}
+		,pol=p[y,\[Alpha],\[Beta]]
+		;If[Abs[pol]<10^-60
+			,0
+			,pol g[\[Nu]+2Total[\[Alpha]-\[Beta]],y]
+		]
+	]
+	,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}
+]]]
 
 
 (* ::Text:: *)
 (*Derivatives of sums in real and reciprocal space.*)
 
 
-sumRealDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[Apply[Times,(-2Pi I z)^\[Alpha]]g[\[Nu],z]Exp[-2Pi I y . z],{z,(A . #-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}]
-sumFourierDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[gDer[Length[\[Alpha]]-\[Nu],k+y,\[Alpha]]Exp[-2Pi I x . k],{k,(Inverse[Transpose[A]] . #)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}]
+SumRealDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[Apply[Times,(-2Pi I z)^\[Alpha]]g[\[Nu],z]Exp[-2Pi I y . z],{z,(A . #-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}]
+SumFourierDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[gDer[Length[\[Alpha]]-\[Nu],k+y,\[Alpha]]Exp[-2Pi I x . k],{k,(Inverse[Transpose[A]] . #)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}]
 
 
 (* ::Text:: *)
@@ -100,7 +128,7 @@ setZetaDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Module[
 	;\[Nu]N=N[\[Nu]Ext,prec]
 	;AN=N[AExt,prec]
 	;\[Mu]=Abs[Det[AN]]^(1/Length[AN])
-	;AN=1/\[Mu] N[AExt,prec]
+	;AN=1/\[Mu] AN
 	;xN=1/\[Mu] N[xExt,prec]
 	;yN=\[Mu] N[yExt,prec]
 	;If[\[Nu]N<0.5&&PossibleZeroQ[\[Nu]N/2-Round[\[Nu]N/2]]
@@ -321,7 +349,7 @@ Export["csv/setZetaDer_odd_Ref.csv",zOddTab];
 
 
 (* ::Subsection:: *)
-(*Create laplacian derivative set zeta reference values*)
+(*Create Laplacian derivative set zeta reference values*)
 
 
 (* ::Text:: *)
@@ -365,3 +393,67 @@ zLaplaceTab=ParallelTable[
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_laplace_Ref.csv",zLaplaceTab];
+
+
+(* ::Subsection:: *)
+(*Check behavior in nu = d + |\[Alpha]|*)
+
+
+(* ::Text:: *)
+(*Generate reverence values.*)
+
+
+smallVal = 10^-200;
+zetaSpecialTab = {
+	(* 1D: nu = 1 + Total[alpha] + 2Total[alpha] even => nu odd *)
+	Flatten@{15.N@{{1}}{0.}{0.}{2}{N@Re@#N@Im@#} &@ setZetaDer[5{{1}}{0}{0}{2}]}
+	,Flatten@{17.N@{{1}}{0.}{0.}{4}{N@Re@#N@Im@#} &@ setZetaDer[7{{1}}{0}{0}{4}]}
+	,Flatten@{15.N@{{1}}{0.1}{0.}{2}{N@Re@#N@Im@#} &@ setZetaDer[5{{1}}{1/10}{0}{2}]}
+	,Flatten@{17.N@{{1}}{0.1}{0.}{4}{N@Re@#N@Im@#} &@ setZetaDer[7{{1}}{1/10}{0}{4}]}
+	,Flatten@{15.N@{{1}}{0.}{N@smallVal}{2}{N@Re@#N@Im@#} &@ setZetaDer[5{{1}}{0}{smallVal}{2}]}
+	,Flatten@{15.N@{{1/2}}{0.}{0.}{2}{N@Re@#N@Im@#} &@ setZetaDer[5{{1/2}}{0}{0}{2}]}
+	,Flatten@{15.N@{{2}}{0.}{0.}{2}{N@Re@#N@Im@#} &@ setZetaDer[5{{2}}{0}{0}{2}]}
+	(* 2D: nu = 2 + Total[alpha] + 2Total[alpha] even => nu even *)
+	,Flatten@{26.N@IdentityMatrix@2{0.0 .}{0.0 .}{20}{N@Re@#N@Im@#} &@ setZetaDer[6IdentityMatrix@2{00}{00}{20}]}
+	,Flatten@{26.N@IdentityMatrix@2{0.0 .}{0.0 .}{11}{N@Re@#N@Im@#} &@ setZetaDer[6IdentityMatrix@2{00}{00}{11}]}
+	,Flatten@{26.N@IdentityMatrix@2{0.0 .}{0.0 .}{02}{N@Re@#N@Im@#} &@ setZetaDer[6IdentityMatrix@2{00}{00}{02}]}
+	,Flatten@{28.N@IdentityMatrix@2{0.0 .}{0.0 .}{40}{N@Re@#N@Im@#} &@ setZetaDer[8IdentityMatrix@2{00}{00}{40}]}
+	,Flatten@{28.N@IdentityMatrix@2{0.0 .}{0.0 .}{22}{N@Re@#N@Im@#} &@ setZetaDer[8IdentityMatrix@2{00}{00}{22}]}
+	,Flatten@{26.N@IdentityMatrix@2{0.10.2}{0.0 .}{20}{N@Re@#N@Im@#} &@ setZetaDer[6IdentityMatrix@2{12}/10{00}{20}]}
+	,Flatten@{26.N@IdentityMatrix@2{0.10.2}{0.0 .}{11}{N@Re@#N@Im@#} &@ setZetaDer[6IdentityMatrix@2{12}/10{00}{11}]}
+	,Flatten@{28.N@IdentityMatrix@2{0.10.2}{0.0 .}{22}{N@Re@#N@Im@#} &@ setZetaDer[8IdentityMatrix@2{12}/10{00}{22}]}
+	,Flatten@{26.N@IdentityMatrix@2{0.0 .}{0.N@smallVal}{20}{N@Re@#N@Im@#} &@ setZetaDer[6IdentityMatrix@2{00}{0smallVal}{20}]}
+	,Flatten@{26.N@IdentityMatrix@2{0.0 .}{N@smallVal,0.}{20}{N@Re@#N@Im@#} &@ setZetaDer[6IdentityMatrix@2{00}{smallVal,0}{20}]}
+	,Flatten@{26.N@AHex{0.0 .}{0.0 .}{20}{N@Re@#N@Im@#} &@ setZetaDer[6AHex{00}{00}{20}]}
+	,Flatten@{26.N@AHex{0.0 .}{0.0 .}{11}{N@Re@#N@Im@#} &@ setZetaDer[6AHex{00}{00}{11}]}
+	,Flatten@{28.N@AHex{0.0 .}{0.0 .}{22}{N@Re@#N@Im@#} &@ setZetaDer[8AHex{00}{00}{22}]}
+	,Flatten@{26.N@AHex{0.10.2}{0.0 .}{20}{N@Re@#N@Im@#} &@ setZetaDer[6AHex {12}/10{00}{20}]}
+	,Flatten@{26.N@AHex{0.0 .}{0.N@smallVal}{20}{N@Re@#N@Im@#} &@ setZetaDer[6AHex{00}{0smallVal}{20}]}
+	,Flatten@{28.N@AHex{0.0 .}{0.0 .}{40}{N@Re@#N@Im@#} &@ setZetaDer[8AHex{00}{00}{40}]}
+	,Flatten@{28.N@AHex{0.0 .}{0.0 .}{31}{N@Re@#N@Im@#} &@ setZetaDer[8AHex{00}{00}{31}]}
+	,Flatten@{210.N@AHex{0.0 .}{0.0 .}{42}{N@Re@#N@Im@#} &@ setZetaDer[10AHex{00}{00}{42}]}
+	,Flatten@{28.N@AHex{0.10.2}{0.0 .}{40}{N@Re@#N@Im@#} &@ setZetaDer[8AHex {12}/10{00}{40}]}
+	,Flatten@{28.N@AHex{0.0 .}{0.N@smallVal}{40}{N@Re@#N@Im@#} &@ setZetaDer[8AHex{00}{0smallVal}{40}]}
+	(* 3D: nu = 3 + Total[alpha] + 2Total[alpha] even => nu odd *)
+	,Flatten@{37.N@IdentityMatrix@3{0.0.0 .}{0.0.0 .}{200}{N@Re@#N@Im@#} &@ setZetaDer[7IdentityMatrix@3{000}{000}{200}]}
+	,Flatten@{37.N@IdentityMatrix@3{0.0.0 .}{0.0.0 .}{110}{N@Re@#N@Im@#} &@ setZetaDer[7IdentityMatrix@3{000}{000}{110}]}
+	,Flatten@{37.N@IdentityMatrix@3{0.0.0 .}{0.0.0 .}{020}{N@Re@#N@Im@#} &@ setZetaDer[7IdentityMatrix@3{000}{000}{020}]}
+	,Flatten@{37.N@IdentityMatrix@3{0.0.0 .}{0.0.0 .}{002}{N@Re@#N@Im@#} &@ setZetaDer[7IdentityMatrix@3{000}{000}{002}]}
+	,Flatten@{39.N@IdentityMatrix@3{0.0.0 .}{0.0.0 .}{400}{N@Re@#N@Im@#} &@ setZetaDer[9IdentityMatrix@3{000}{000}{400}]}
+	,Flatten@{39.N@IdentityMatrix@3{0.0.0 .}{0.0.0 .}{220}{N@Re@#N@Im@#} &@ setZetaDer[9IdentityMatrix@3{000}{000}{220}]}
+	,Flatten@{37.N@IdentityMatrix@3{0.10.20.3}{0.0.0 .}{200}{N@Re@#N@Im@#} &@ setZetaDer[7IdentityMatrix@3{123}/10{000}{200}]}
+	,Flatten@{37.N@IdentityMatrix@3{0.10.20.3}{0.0.0 .}{110}{N@Re@#N@Im@#} &@ setZetaDer[7IdentityMatrix@3{123}/10{000}{110}]}
+	,Flatten@{37.N@IdentityMatrix@3{0.0.0 .}{0.0 . N@smallVal}{200}{N@Re@#N@Im@#} &@ setZetaDer[7IdentityMatrix@3{000}{00smallVal}{200}]}
+	,Flatten@{37.N@IdentityMatrix@3{0.0.0 .}{N@smallVal,0.0 .}{200}{N@Re@#N@Im@#} &@ setZetaDer[7IdentityMatrix@3{000}{smallVal,00}{200}]}
+	,Flatten@{37.N@BMat[1/10]{0.0.0 .}{0.0.0 .}{200}{N@Re@#N@Im@#} &@ setZetaDer[7BMat[1/10]{000}{000}{200}]}
+	,Flatten@{37.N@BMat[1/2]{0.0.0 .}{0.0.0 .}{200}{N@Re@#N@Im@#} &@ setZetaDer[7BMat[1/2]{000}{000}{200}]}
+	,Flatten@{37.N@BMat[1/2]{0.10.20.3}{0.0.0 .}{200}{N@Re@#N@Im@#} &@ setZetaDer[7BMat[1/2]{123}/10{000}{200}]}
+};
+
+
+(* ::Text:: *)
+(*Export reference values.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/setZetaDer_specialCase_Ref.csv", zetaSpecialTab];

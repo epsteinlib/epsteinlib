@@ -629,6 +629,174 @@ int test_setZetaDer_laplace(void) {
 }
 
 /*!
+ * @brief Tests setZetaDer function for special case nu = dim + Total[alpha] + 2
+ * with y = 0, comparing against Mathematica reference values.
+ *
+ * @return number of failed tests.
+ */
+int test_setZetaDer_specialCase(void) { // NOLINT
+    printf("%s ", __func__);
+    char path[MAX_PATH_LENGTH];
+    int result =
+        snprintf(path, sizeof(path), "%s/setZetaDer_specialCase_Ref.csv", BASE_PATH);
+    if (result < 0 || result >= sizeof(path)) {
+        return fprintf(stderr, "Error creating file path\n");
+    }
+    FILE *data = fopen(path, "r");
+    if (data == NULL) {
+        return fprintf(stderr, "Error opening file: %s\n", path);
+    }
+
+    char line[4096];
+    int testsPassed = 0;
+    int totalTests = 0;
+    double tol = 5 * pow(10, -15);
+    double errMin = NAN;
+    double errMax = NAN;
+    double errSum = 0.;
+
+    unsigned int max_test_dim = 4;
+
+    printf("\n\t ... ");
+    printf("processing %s ", path);
+
+    while (fgets(line, sizeof(line), data) != NULL) {
+        totalTests++;
+
+        char *ptr = line;
+        char *endptr;
+
+        // Parse dimension
+        unsigned int dim = (unsigned int)strtoul(ptr, &endptr, 10);
+        if (*endptr != ',') {
+            continue;
+        }
+        ptr = endptr + 1;
+
+        // Parse nu
+        double nu = strtod(ptr, &endptr);
+        if (*endptr != ',') {
+            continue;
+        }
+        ptr = endptr + 1;
+
+        // Bounds check on dimension
+        if (dim < 1 || dim > max_test_dim) {
+            (void)fclose(data);
+            return fprintf(stderr, "Invalid dimension: %u\n", dim);
+        }
+
+        // Use stack allocation with fixed max size
+        double a[max_test_dim * max_test_dim];
+        double x[max_test_dim];
+        double y[max_test_dim];
+        unsigned int alpha[max_test_dim];
+
+        // Parse a (dim x dim matrix, flattened)
+        int parseOk = 1;
+        for (unsigned int i = 0; i < dim * dim && parseOk; i++) {
+            a[i] = strtod(ptr, &endptr);
+            if (*endptr != ',') {
+                parseOk = 0;
+            } else {
+                ptr = endptr + 1;
+            }
+        }
+
+        // Parse x (dim values)
+        for (unsigned int i = 0; i < dim && parseOk; i++) {
+            x[i] = strtod(ptr, &endptr);
+            if (*endptr != ',') {
+                parseOk = 0;
+            } else {
+                ptr = endptr + 1;
+            }
+        }
+
+        // Parse y (dim values)
+        for (unsigned int i = 0; i < dim && parseOk; i++) {
+            y[i] = strtod(ptr, &endptr);
+            if (*endptr != ',') {
+                parseOk = 0;
+            } else {
+                ptr = endptr + 1;
+            }
+        }
+
+        // Parse alpha (dim unsigned int values)
+        for (unsigned int i = 0; i < dim && parseOk; i++) {
+            alpha[i] = (unsigned int)strtoul(ptr, &endptr, 10);
+            if (*endptr != ',') {
+                if (i < dim - 1) {
+                    parseOk = 0;
+                }
+            }
+            ptr = endptr + 1;
+        }
+
+        if (!parseOk) {
+            continue;
+        }
+
+        // Parse reference result (Re, Im)
+        double refRe = strtod(ptr, &endptr);
+        if (*endptr != ',') {
+            continue;
+        }
+        ptr = endptr + 1;
+        double refIm = strtod(ptr, &endptr);
+
+        // Compute result
+        double complex num = setZetaDer(nu, dim, a, x, y, alpha);
+        double complex ref = refRe + (refIm * I);
+
+        // Compute errors
+        double errorAbs = errAbs(ref, num);
+        double errorRel = errRel(ref, num);
+        double errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
+
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
+            printf("\n\n");
+            printf("Warning! ");
+            printf("setZetaDer: ");
+            printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
+                   "%.16lf %+.16lf I (reference implementation)\n",
+                   4, creal(num), cimag(num), creal(ref), cimag(ref));
+            printf("Min(Eabs, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
+                   tol);
+            printf("\n");
+            printf("dim:\t\t %u\n", dim);
+            printf("nu:\t\t %.16lf\n", nu);
+            printMatrixUnitTest("a:", a, dim);
+            printVectorUnitTest("x:\t\t", x, dim);
+            printVectorUnitTest("y:\t\t", y, dim);
+            printMultiindexUnitTest("alpha:\t\t", alpha, dim);
+            printf("\n");
+        }
+    }
+
+    if (fclose(data) != 0) {
+        return fprintf(stderr, "Error closing file: %d", errno);
+    }
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
+           tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
+
+    return totalTests - testsPassed;
+}
+
+/*!
  * @brief Main function to run all set zeta derivatives function tests.
  *
  * @return number of failed tests.
@@ -641,6 +809,7 @@ int main() {
     failed += run_timed_test(test_setZetaDer_taylor);
     failed += run_timed_test(test_setZetaDer_odd);
     failed += run_timed_test(test_setZetaDer_laplace);
+    failed += run_timed_test(test_setZetaDer_specialCase);
 
     return failed;
 }
