@@ -558,15 +558,14 @@ static double complex sum_fourier_harmonic(
             lv[i] = lv[i] + y[i];
         }
         double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
-        double h = harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
-                              coeffs, exponents);
-        if (h) {
-            auxy =
-                rot * h * crandall_g(dim, dim - nu, lv, lambda, zArgBound) - epsilon;
-            auxt = sum + auxy;
-            epsilon = (auxt - sum) - auxy;
-            sum = auxt;
-        }
+        auxy = rot *
+                   harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
+                              coeffs, exponents) *
+                   crandall_g(dim, dim - nu, lv, lambda, zArgBound) -
+               epsilon;
+        auxt = sum + auxy;
+        epsilon = (auxt - sum) - auxy;
+        sum = auxt;
         // symmerict addition to catch +- identical terms in y = 0
         for (int k = 0; k < dim; k++) {
             zv[k] = (((int)((totalSummands - 1 - n) / totalCutoffs[k])) %
@@ -578,15 +577,14 @@ static double complex sum_fourier_harmonic(
             lv[i] = lv[i] + y[i];
         }
         rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
-        h = harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count, coeffs,
-                       exponents);
-        if (h) {
-            auxy =
-                rot * h * crandall_g(dim, dim - nu, lv, lambda, zArgBound) - epsilon;
-            auxt = sum + auxy;
-            epsilon = (auxt - sum) - auxy;
-            sum = auxt;
-        }
+        auxy = rot *
+                   harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
+                              coeffs, exponents) *
+                   crandall_g(dim, dim - nu, lv, lambda, zArgBound) -
+               epsilon;
+        auxt = sum + auxy;
+        epsilon = (auxt - sum) - auxy;
+        sum = auxt;
     }
     return sum;
 }
@@ -848,15 +846,21 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                 // calculate set zeta derivative function values.
                 rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
 
-                if (equals(dim, y_t1, y_t2)) {
-                    nc = harmonic_h(k, dim, y_t1, alphaAbs, chunk_offset,
-                                    valid_count, coeffs, exponents) *
-                         crandall_g(dim, dim - nuReci, y_t1, lambda, zArgBoundReci);
+                // skip zero summand if harmonic polynomial vanishes
+                double h = harmonic_h(k, dim, y_t2, alphaAbs, chunk_offset,
+                                      valid_count, coeffs, exponents);
+                if (h) {
+                    if (equals(dim, y_t1, y_t2)) {
+                        nc = h * crandall_g(dim, dim - nuReci, y_t1, lambda,
+                                            zArgBoundReci);
+                    } else {
+                        nc = h *
+                             crandall_g(dim, dim - nuReci, y_t2, lambda,
+                                        zArgBoundReci) *
+                             cexp(-2 * M_PI * I * dot(dim, y_t2, x_t1)) * rot;
+                    }
                 } else {
-                    nc = harmonic_h(k, dim, y_t2, alphaAbs, chunk_offset,
-                                    valid_count, coeffs, exponents) *
-                         crandall_g(dim, dim - nuReci, y_t2, lambda, zArgBoundReci) *
-                         cexp(-2 * M_PI * I * dot(dim, y_t2, x_t1)) * rot;
+                    nc = 0;
                 }
 
                 s2 = sum_fourier_harmonic(nuReci, k, dim, m_fourier, x_t1, y_t2,
@@ -870,6 +874,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                        zArgBound, alphaAbs, chunk_offset,
                                        valid_count, coeffs, exponents) *
                      rot * xfactor;
+
                 resIt = pow(lambda * lambda / M_PI, -nuIt / 2.) / tgamma(nuIt / 2.) *
                         (s1 + pow(lambda, dim) * s2);
                 resIt *= int_pow(-2 * M_PI * I, 2 * k) *
