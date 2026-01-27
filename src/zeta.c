@@ -558,14 +558,15 @@ static double complex sum_fourier_harmonic(
             lv[i] = lv[i] + y[i];
         }
         double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
-        auxy = rot *
-                   harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
-                              coeffs, exponents) *
-                   crandall_g(dim, dim - nu, lv, lambda, zArgBound) -
-               epsilon;
-        auxt = sum + auxy;
-        epsilon = (auxt - sum) - auxy;
-        sum = auxt;
+        double h = harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
+                              coeffs, exponents);
+        if (h) {
+            auxy =
+                rot * h * crandall_g(dim, dim - nu, lv, lambda, zArgBound) - epsilon;
+            auxt = sum + auxy;
+            epsilon = (auxt - sum) - auxy;
+            sum = auxt;
+        }
         // symmerict addition to catch +- identical terms in y = 0
         for (int k = 0; k < dim; k++) {
             zv[k] = (((int)((totalSummands - 1 - n) / totalCutoffs[k])) %
@@ -577,14 +578,15 @@ static double complex sum_fourier_harmonic(
             lv[i] = lv[i] + y[i];
         }
         rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
-        auxy = rot *
-                   harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
-                              coeffs, exponents) *
-                   crandall_g(dim, dim - nu, lv, lambda, zArgBound) -
-               epsilon;
-        auxt = sum + auxy;
-        epsilon = (auxt - sum) - auxy;
-        sum = auxt;
+        h = harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count, coeffs,
+                       exponents);
+        if (h) {
+            auxy =
+                rot * h * crandall_g(dim, dim - nu, lv, lambda, zArgBound) - epsilon;
+            auxt = sum + auxy;
+            epsilon = (auxt - sum) - auxy;
+            sum = auxt;
+        }
     }
     return sum;
 }

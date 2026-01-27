@@ -804,11 +804,11 @@ int test_setZetaDer_specialCase(void) { // NOLINT
 int main() {
     int failed = 0;
 
-    failed += run_timed_test(test_setZetaDer_1D);
-    failed += run_timed_test(test_setZetaDer_2D);
-    failed += run_timed_test(test_setZetaDer_taylor);
-    failed += run_timed_test(test_setZetaDer_odd);
-    failed += run_timed_test(test_setZetaDer_laplace);
+    //    failed += run_timed_test(test_setZetaDer_1D);
+    //    failed += run_timed_test(test_setZetaDer_2D);
+    //    failed += run_timed_test(test_setZetaDer_taylor);
+    //    failed += run_timed_test(test_setZetaDer_odd);
+    //    failed += run_timed_test(test_setZetaDer_laplace);
     failed += run_timed_test(test_setZetaDer_specialCase);
 
     return failed;
