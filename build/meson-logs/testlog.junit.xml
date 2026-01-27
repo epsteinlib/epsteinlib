@@ -1,22 +1,4 @@
 <?xml version='1.0' encoding='utf-8'?>
-<testsuites tests="1" errors="0" failures="0"><testsuite name="epsteinlib" tests="1" errors="0" failures="0" skipped="0" time="2.740288496017456"><testcase name="test_setZetaDer" classname="epsteinlib" time="2.740288496017456"><system-out>test_setZetaDer1D 
-	 ... processing csv/setZetaDer_1D_Ref.csv 
-	 ... 100 out of 100 tests passed with tolerance 1.000000E-12.	    [ Error →  min: 0.000000E+00 | max: 7.237383E-13 | avg: 1.490323E-14 ]
-test_setZetaDer_prototype 
-	 ... processing csv/setZetaDer_prototype_Ref.csv 
-	 ... 100 out of 100 tests passed with tolerance 1.000000E-12.	    [ Error →  min: 5.610934E-17 | max: 7.704835E-14 | avg: 6.167269E-15 ]
-test_setZetaDer_taylor 
-	 ... generating test values
-	 ... 100 out of 100 tests passed with tolerance 5.000000E-12.	    [ Error →  min: 2.775558E-17 | max: 3.136952E-12 | avg: 5.016291E-14 ]
-test_setZetaDer_directional 
-	 ... processing csv/setZetaDer_directional_Ref.csv 
-	 ... 100 out of 100 tests passed with tolerance 1.000000E-08.	    [ Error →  min: 1.652427E-14 | max: 9.304462E-09 | avg: 1.101408E-10 ]
-test_setZetaDer_odd 
-	 ... processing csv/setZetaDer_odd_Ref.csv 
-	 ... 100 out of 100 tests passed with tolerance 1.000000E-10.	    [ Error →  min: 1.547104E-19 | max: 4.317303E-12 | avg: 2.563570E-13 ]
-test_setZetaDer_laplace 
-	 ... processing csv/setZetaDer_laplace_Ref.csv 
-	 ... 100 out of 100 tests passed with tolerance 1.000000E-13.	    [ Error →  min: 9.412197E-23 | max: 1.300723E-14 | avg: 9.190204E-16 ]
-test_setZetaDer_specialCase 
+<testsuites tests="1" errors="0" failures="0"><testsuite name="epsteinlib" tests="1" errors="0" failures="0" skipped="0" time="0.01207113265991211"><testcase name="test_setZetaDer" classname="epsteinlib" time="0.01207113265991211"><system-out>test_setZetaDer_specialCase 
 	 ... processing csv/setZetaDer_specialCase_Ref.csv 
-	 ... 16 out of 16 tests passed with tolerance 1.000000E-12.	    [ Error →  min: 0.000000E+00 | max: 8.658705E-16 | avg: 3.739681E-16 ]</system-out></testcase></testsuite></testsuites>
+	 ... 35 out of 35 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.300218E-15 | avg: 3.845347E-16 ]</system-out></testcase></testsuite></testsuites>

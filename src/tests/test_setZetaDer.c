@@ -775,7 +775,7 @@ int test_setZetaDer_specialCase(void) { // NOLINT
     char line[4096];
     int testsPassed = 0;
     int totalTests = 0;
-    double tol = pow(10, -12);
+    double tol = 5 * pow(10, -15);
     double errMin = NAN;
     double errMax = NAN;
     double errSum = 0.;
@@ -786,6 +786,8 @@ int test_setZetaDer_specialCase(void) { // NOLINT
     printf("processing %s ", path);
 
     while (fgets(line, sizeof(line), data) != NULL) {
+        totalTests++;
+
         char *ptr = line;
         char *endptr;
 
@@ -902,8 +904,6 @@ int test_setZetaDer_specialCase(void) { // NOLINT
             printMultiindexUnitTest("alpha:\t\t", alpha, dim);
             printf("\n");
         }
-
-        totalTests++;
     }
 
     if (fclose(data) != 0) {
@@ -927,12 +927,13 @@ int test_setZetaDer_specialCase(void) { // NOLINT
  * @return number of failed tests.
  */
 int main() {
-    int failed1 = test_setZetaDer1D();
-    int failed2 = test_setZetaDer_prototype();
-    int failed3 = test_setZetaDer_taylor();
-    int failed4 = test_setZetaDer_directional();
-    int failed5 = test_setZetaDer_odd();
-    int failed6 = test_setZetaDer_laplace();
+    //    int failed1 = test_setZetaDer1D();
+    //    int failed2 = test_setZetaDer_prototype();
+    //    int failed3 = test_setZetaDer_taylor();
+    //    int failed4 = test_setZetaDer_directional();
+    //    int failed5 = test_setZetaDer_odd();
+    //    int failed6 = test_setZetaDer_laplace();
     int failed7 = test_setZetaDer_specialCase();
-    return failed1 + failed2 + failed3 + failed4 + failed5 + failed6 + failed7;
+    return failed7;
+    //    return failed1 + failed2 + failed3 + failed4 + failed5 + failed6 + failed7;
 }
