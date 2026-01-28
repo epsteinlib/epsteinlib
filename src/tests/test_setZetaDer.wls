@@ -188,8 +188,9 @@ SumFourierHarmonic[\[Nu]_,A_,x_,y_,\[Alpha]_,kIndex_,sumLim_]:=Total[Table[
 
 Options[setZetaDerHarmonic]={InputPrecision->100,SumLim->10};
 setZetaDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Module[
-	{prec,sumLim,\[Nu]True,\[Nu]N,AN,xN,yN,\[Mu],sumReal,sumReci,res,resk,n}
-	,prec=OptionValue[InputPrecision]
+	{EPS,prec,sumLim,\[Nu]True,AN,xN,yN,\[Mu],res,n}
+	,EPS=10^-50
+	;prec=OptionValue[InputPrecision]
 	;sumLim=OptionValue[SumLim]
 	;n = Total[\[Alpha]]
 	;\[Nu]True=N[\[Nu]Ext,prec]
@@ -199,11 +200,25 @@ setZetaDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modu
 	;xN=1/\[Mu] N[xExt,prec]
 	;yN=\[Mu] N[yExt,prec]
 	;res=Total@Table[
-		\[Nu]N=\[Nu]True-2k
-		;sumReal=SumRealHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
-		;sumReci=SumFourierHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
-		;resk=\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci)
-		;(-2Pi I)^(2k) (-2\[Pi])^(Total[\[Alpha]]-2k) resk
+		Module[
+			{\[Nu]N,sumReal,sumReci,resk}
+			,\[Nu]N=\[Nu]True-2k
+			;If[\[Nu]N<-1&&Abs[\[Nu]N/2-Round[\[Nu]N/2]]<EPS
+				,0
+				,If[Abs[\[Nu]N]<EPS
+					,If[Norm[xN]>EPS
+						,0
+						,sumReal=-hHarmonic[k][yN,\[Alpha]]
+						;resk=\[Pi]^(\[Nu]N/2)sumReal
+						;(-2Pi I)^(2k) (-2\[Pi])^(Total[\[Alpha]]-2k) resk
+					]
+					,sumReal=SumRealHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+					;sumReci=SumFourierHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+					;resk=\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci)
+					;(-2Pi I)^(2k) (-2\[Pi])^(Total[\[Alpha]]-2k) resk
+				]
+			]
+		]
 	,{k,0,Floor[n/2]}
 	]
 	;\[Mu]^(Total[\[Alpha]]-\[Nu]True)res
@@ -462,21 +477,6 @@ zetaSpecialNuBiggerDim = {
 
 
 (* ::Text:: *)
-(*Generate nu = dim reference values.*)
-
-
-zetaSpecialNuEqualsDim=Flatten[
-	Table[
-		Flatten@{d,N@nu,N@IdentityMatrix@d,N@ConstantArray[0,d],N[PadRight[{yoffset},d]],n UnitVector[d,1],{N@Re@#,N@Im@#}  &/@ {setZetaDer[nu,IdentityMatrix@d,ConstantArray[0,d],PadRight[{yoffset},d],n UnitVector[d,1]]}}
-		,{d,{1,2}}
-		,{yoffset,{0,smallVal,2^-20}}
-		,{nu,{2}}
-		,{n,{2,4}}
-	]
-,3]
-
-
-(* ::Text:: *)
 (*Generate nu = dim - even natural reference values.*)
 
 
@@ -485,7 +485,7 @@ zetaSpecialNuEqualsDimMinus2k=Flatten[
 		Flatten@{d,N@nu,N@IdentityMatrix@d,N@ConstantArray[0,d],N[PadRight[{yoffset},d]],n UnitVector[d,1],{N@Re@#,N@Im@#}  &/@ {setZetaDerHarmonic[nu,IdentityMatrix@d,ConstantArray[0,d],PadRight[{yoffset},d],n UnitVector[d,1]]}}
 		,{d,{1,2}}
 		,{yoffset,{0,smallVal,2^-20}}
-		,{nu,{0}}
+		,{nu,{0,2}}
 		,{n,{2,4}}
 	]
 ,3]
@@ -495,7 +495,7 @@ zetaSpecialNuEqualsDimMinus2k=Flatten[
 (*Combine reference values.*)
 
 
-zetaSpecialTab = Join[zetaSpecialNuBiggerDim,zetaSpecialNuEqualsDim,zetaSpecialNuEqualsDimMinus2k];
+zetaSpecialTab = Join[zetaSpecialNuBiggerDim,zetaSpecialNuEqualsDimMinus2k];
 
 
 (* ::Text:: *)
@@ -504,28 +504,3 @@ zetaSpecialTab = Join[zetaSpecialNuBiggerDim,zetaSpecialNuEqualsDim,zetaSpecialN
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_special_exponents_Ref.csv", zetaSpecialTab];
-
-
-(* ::Subsection:: *)
-(*Delme*)
-
-
-tab={#,Abs@SetZetaDer[#,{{1}},{0},{0},{2}]}&/@Range[-1,2.4,0.1]
-
-
-ListPlot[tab]
-
-
-tab={#,Abs@SetZetaDer[#,IdentityMatrix@2,{0,0},{0,0},{4,0}]}&/@Range[-1,3.4,0.1]
-
-
-ListPlot[tab]
-
-
-tab={#,Abs@SetZetaDer[#,{{1}},{0},{0.0000009536743164},{4}]}&/@Range[-.1,2.4,0.05]
-
-
-tab={#,Abs@setZetaDer[#,{{1}},{0},{0.0000009536743164},{4}]}&/@Range[-.1,2.4,0.05]
-
-
-ListPlot[tab]
