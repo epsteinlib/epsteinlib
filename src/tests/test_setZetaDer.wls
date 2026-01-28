@@ -485,13 +485,13 @@ zetaSpecialNuBiggerDim = {
 
 
 zetaSpecialNuEqualsDimMinus2k=Flatten[
-	Table[
+	ParallelTable[
 		Flatten@{d,N@nu,N@IdentityMatrix@d,N@PadRight[{xoffset},d],N[PadRight[{yoffset},d]],n UnitVector[d,1],{N@Re@#,N@Im@#}  &/@ {setZetaDerHarmonic[nu,IdentityMatrix@d,PadRight[{xoffset},d],PadRight[{yoffset},d],n UnitVector[d,1]]}}
 		,{d,{1,2}}
 		,{yoffset,{0,smallVal,2^-20,1/10}}
 		,{xoffset,{0,smallVal,2^-20,1/10}}
-		,{nu,{0,2}}
 		,{n,{2,4}}
+		,{nu,-10,2,1}
 	]
 ,4];
 
