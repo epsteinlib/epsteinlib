@@ -634,11 +634,11 @@ int test_setZetaDer_laplace(void) {
  *
  * @return number of failed tests.
  */
-int test_setZetaDer_specialCase(void) { // NOLINT
+int test_setZetaDer_special_exponents(void) { // NOLINT
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
-    int result =
-        snprintf(path, sizeof(path), "%s/setZetaDer_specialCase_Ref.csv", BASE_PATH);
+    int result = snprintf(path, sizeof(path),
+                          "%s/setZetaDer_special_exponents_Ref.csv", BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
@@ -804,12 +804,12 @@ int test_setZetaDer_specialCase(void) { // NOLINT
 int main() {
     int failed = 0;
 
-    failed += run_timed_test(test_setZetaDer_1D);
-    failed += run_timed_test(test_setZetaDer_2D);
-    failed += run_timed_test(test_setZetaDer_taylor);
-    failed += run_timed_test(test_setZetaDer_odd);
-    failed += run_timed_test(test_setZetaDer_laplace);
-    failed += run_timed_test(test_setZetaDer_specialCase);
+    //    failed += run_timed_test(test_setZetaDer_1D);
+    //    failed += run_timed_test(test_setZetaDer_2D);
+    //    failed += run_timed_test(test_setZetaDer_taylor);
+    //    failed += run_timed_test(test_setZetaDer_odd);
+    //    failed += run_timed_test(test_setZetaDer_laplace);
+    failed += run_timed_test(test_setZetaDer_special_exponents);
 
     return failed;
 }

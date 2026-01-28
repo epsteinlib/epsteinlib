@@ -9,7 +9,7 @@
 (*Unit tests for epsteinZetaDer in epsteinZeta.c*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Setup*)
 
 
@@ -170,7 +170,10 @@ hHarmonic[k_/;Element[k,NonNegativeIntegers]][x_List,\[Alpha]_List]:=Module[
 
 
 SumRealHarmonic[\[Nu]_,A_,x_,y_,\[Alpha]_,kIndex_,sumLim_]:=Total[Table[
-	(I)^(Total[\[Alpha]]-2kIndex) hHarmonic[kIndex][z,\[Alpha]]g[\[Nu],z]Exp[-2\[Pi] I y . z]
+	Module[{h}
+		,h=hHarmonic[kIndex][z,\[Alpha]]
+		;If[PossibleZeroQ[h],0,(I)^(Total[\[Alpha]]-2kIndex)h g[\[Nu],z]Exp[-2\[Pi] I y . z]]
+	]
 	,{z,(A . #-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}
 ]]
 SumFourierHarmonic[\[Nu]_,A_,x_,y_,\[Alpha]_,kIndex_,sumLim_]:=Total[Table[
@@ -198,8 +201,8 @@ setZetaDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modu
 	;res=Total@Table[
 	\[Nu]N=\[Nu]True-2k
 		;sumReal=SumRealHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
-			;sumReci=SumFourierHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
-			;resk=\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci)
+		;sumReci=SumFourierHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+		;resk=\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci)
 		;(-2Pi I)^(2k) (-2\[Pi])^(Total[\[Alpha]]-2k) resk
 	,{k,0,Floor[n/2]}
 	]
@@ -257,6 +260,13 @@ Export["csv/setZetaDer_1D_Ref.csv",zDerTab1D];
 
 
 (* ::Text:: *)
+(*Restrict x and y to their lattice cells.*)
+
+
+randomElemLatticeVector[a_]:=a . Table[RandomInteger[{-10^(16)/2,10^(16)/2}]/10^(16),{Length[a]}]
+
+
+(* ::Text:: *)
 (*Setup test parameters.*)
 
 
@@ -266,8 +276,8 @@ AHex={{1,1/2},{0,Sqrt[3]/2}};
 Do[
 	\[Nu]0[i]=10 randRational
 	;a0[i]=AHex
-	;x0[i]=If[i<10,{0,0},{randRational,randRational}]
-	;y0[i]={randRational,randRational}
+	;x0[i]=If[i<10,{0,0},randomElemLatticeVector[AHex]]
+	;y0[i]=randomElemLatticeVector[Inverse[Transpose[AHex]]]
 	;\[Alpha]0[i]={RandomInteger[{0,15}],RandomInteger[{0,15}]}
 	,{i,range}
 ]
@@ -451,9 +461,19 @@ zetaSpecialTab = {
 };
 
 
+zetaSpecialTab = {
+   (* 2D: nu = dim - k for even natual numbers k *)
+	Flatten@{2,2.,N@IdentityMatrix@2,{0.,0.},{0.,0.},{2,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[2,IdentityMatrix@2,{0,0},{0,0},{2,0}]}}
+	,Flatten@{2,N[2+2^-10],N@IdentityMatrix@2,{0.,0.},{0.,0.},{4,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[2+2^-10,IdentityMatrix@2,{0,0},{0,0},{4,0}]}}
+	,Flatten@{2,N[2+2^-50],N@IdentityMatrix@2,{0.,0.},{0.,0.},{4,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[2+2^-50,IdentityMatrix@2,{0,0},{0,0},{4,0}]}}
+	,Flatten@{2,2.,N@IdentityMatrix@2,{0.,0.},{0.,0.},{4,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[2,IdentityMatrix@2,{0,0},{0,0},{4,0}]}}
+	,Flatten@{2,2.,N@IdentityMatrix@2,{0.,0.},{0.,N@smallVal},{4,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[2,IdentityMatrix@2,{0,0},{0,smallVal},{4,0}]}}
+}
+
+
 (* ::Text:: *)
 (*Export reference values.*)
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/setZetaDer_specialCase_Ref.csv", zetaSpecialTab];
+Export["csv/setZetaDer_special_exponents_Ref.csv", zetaSpecialTab];

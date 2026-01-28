@@ -200,6 +200,9 @@ static double complex sum_real_harmonic(
     double complex auxt;
     double complex auxy;
     double complex rot;
+
+    double h;
+
     // First Sum (in real space)
     for (long n = 0; n < totalSummands; n++) {
         for (int k = 0; k < dim; k++) {
@@ -212,10 +215,11 @@ static double complex sum_real_harmonic(
             lv[i] = lv[i] - x[i];
         }
 
+        h = harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count, coeffs,
+                       exponents);
+
         // summing using Kahan's method
-        auxy = rot * int_pow(I, alphaAbs - (2 * kIndex)) *
-                   harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
-                              coeffs, exponents) *
+        auxy = rot * int_pow(I, alphaAbs - (2 * kIndex)) * h *
                    crandall_g(dim, nu, lv, 1. / lambda, zArgBound) -
                epsilon;
         auxt = sum + auxy;
@@ -840,6 +844,12 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             for (unsigned int k = 0; k <= kMax; k++) {
 
                 nuIt = nu - (2 * k);
+
+                // skip iteration if 1/gamma(nuIt) = 0
+                if (nuIt < 1 && fabs((nuIt / 2.) - nearbyint(nuIt / 2.)) < EPS) {
+                    continue;
+                }
+
                 nuReci = nuIt - (2 * alphaAbs) + (4 * k);
                 double zArgBoundReci = assignzArgBound(dim - nuReci);
 
