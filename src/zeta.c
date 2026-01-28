@@ -739,8 +739,8 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     // handle special case of non-positive integer values nu.
     double complex res = 0.;
     double y_t2_squared = dot(dim, y_t2, y_t2);
-    if (variant < 3 && nu < 1 && fabs((nu / 2.) - nearbyint(nu / 2.)) < EPS) {
-        if ((variant == 0 || variant == 1) && dot(dim, x_t2, x_t2) == 0 && nu == 0) {
+    if (variant < 2 && nu < 1 && fabs((nu / 2.) - nearbyint(nu / 2.)) < EPS) {
+        if (dot(dim, x_t2, x_t2) == 0 && nu == 0) {
             res = -1 * cexp(-2 * M_PI * I * dot(dim, x_t1, y_t2));
         } else {
             res = 0;
@@ -792,14 +792,23 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             // Compute set zeta derivatives by harmonic method
 
             unsigned int k = alphaAbs / 2;
-
+            double complex resIt;
             double nuIt = nu - (2 * k);
 
-            // keep res = 0 if iteration if |y| > 0 and 1/gamma(nuIt) = 0
-            if (!(nuIt < 1 && fabs((nuIt / 2.) - nearbyint(nuIt / 2.)) < EPS &&
-                  y_t2_squared > EPS_ZERO_Y)) {
+            // skip iterartions where nuIt is a negative even integer, as
+            // 1/gamma(nIt) = 0
+            if (nuIt < -1 && fabs((nuIt / 2.) - nearbyint(nuIt / 2.)) < EPS) {
+                resIt = 0;
+                // if nu = 0, everything except the zero summand in the real sum
+                // vanishes
+            } else if (fabs(nuIt / 2) < EPS) {
+                if (dot(dim, x_t2, x_t2) > EPS_ZERO_Y) {
+                    resIt = 0.;
+                } else {
+                    resIt = -harmonic_h_1D_kMax(x_t2, alphaAbs);
+                }
+            } else {
 
-                double complex resIt;
                 double nuReci = nuIt - (2 * alphaAbs) + (4 * k);
                 double zArgBoundReci = assignzArgBound(dim - nuReci);
 
@@ -824,13 +833,13 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                 s1 = sum_real_harmonic_1D(nuIt, k, dim, m_real, x_t2, y_t2,
                                           cutoffsReal, zArgBound, alphaAbs) *
                      rot * xfactor;
-                resIt = pow(lambda * lambda / M_PI, -nuIt / 2.) / tgamma(nuIt / 2.) *
-                        (s1 + pow(lambda, dim) * s2);
-                resIt *= int_pow(-2 * M_PI * I, 2 * k) *
-                         int_pow(-2 * M_PI, alphaAbs - (2 * k));
-                res += resIt;
-                res *= 1. / int_pow(ms, alphaAbs);
+                resIt = (s1 + pow(lambda, dim) * s2) / tgamma(nuIt / 2.);
             }
+            resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.) *
+                     int_pow(-2 * M_PI * I, 2 * k) *
+                     int_pow(-2 * M_PI, alphaAbs - (2 * k));
+            res += resIt;
+            res *= 1. / int_pow(ms, alphaAbs);
         } else if (variant == 2 && alphaAbs > 3) {
             // Compute set zeta derivatives by harmonic method
 
