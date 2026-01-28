@@ -805,7 +805,8 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                 if (dot(dim, x_t2, x_t2) > EPS_ZERO_Y) {
                     resIt = 0.;
                 } else {
-                    resIt = -harmonic_h_1D_kMax(x_t2, alphaAbs);
+                    resIt = -int_pow(I, alphaAbs - (2 * k)) *
+                            harmonic_h_1D_kMax(x_t2, alphaAbs);
                 }
             } else {
 
@@ -877,8 +878,9 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                     if (dot(dim, x_t2, x_t2) > EPS_ZERO_Y) {
                         resIt = 0.;
                     } else {
-                        resIt = -harmonic_h(k, dim, x_t2, alphaAbs, chunk_offset,
-                                            valid_count, coeffs, exponents);
+                        resIt = -int_pow(I, alphaAbs - (2 * k)) *
+                                harmonic_h(k, dim, x_t2, alphaAbs, chunk_offset,
+                                           valid_count, coeffs, exponents);
                     }
                 } else {
                     nuReci = nuIt - (2 * alphaAbs) + (4 * k);

@@ -211,7 +211,7 @@ setZetaDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modu
 					,If[Abs[\[Nu]N]<EPS
 						,If[Norm[xN]>EPS
 							,0
-							,sumReal=-hHarmonic[k][yN,\[Alpha]]
+							,sumReal=-(I)^(Total[\[Alpha]]-2k)hHarmonic[k][xN,\[Alpha]]
 							;resk=\[Pi]^(\[Nu]N/2)sumReal
 							;(-2Pi I)^(2k) (-2\[Pi])^(Total[\[Alpha]]-2k) resk
 						]
@@ -486,13 +486,14 @@ zetaSpecialNuBiggerDim = {
 
 zetaSpecialNuEqualsDimMinus2k=Flatten[
 	Table[
-		Flatten@{d,N@nu,N@IdentityMatrix@d,N@ConstantArray[0,d],N[PadRight[{yoffset},d]],n UnitVector[d,1],{N@Re@#,N@Im@#}  &/@ {setZetaDerHarmonic[nu,IdentityMatrix@d,ConstantArray[0,d],PadRight[{yoffset},d],n UnitVector[d,1]]}}
+		Flatten@{d,N@nu,N@IdentityMatrix@d,N@PadRight[{xoffset},d],N[PadRight[{yoffset},d]],n UnitVector[d,1],{N@Re@#,N@Im@#}  &/@ {setZetaDerHarmonic[nu,IdentityMatrix@d,PadRight[{xoffset},d],PadRight[{yoffset},d],n UnitVector[d,1]]}}
 		,{d,{1,2}}
-		,{yoffset,{0,smallVal,2^-20}}
+		,{yoffset,{0,smallVal,2^-20,1/10}}
+		,{xoffset,{0,smallVal,2^-20,1/10}}
 		,{nu,{0,2}}
 		,{n,{2,4}}
 	]
-,3]
+,4];
 
 
 (* ::Text:: *)
