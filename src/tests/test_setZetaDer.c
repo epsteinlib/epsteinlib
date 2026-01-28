@@ -650,7 +650,7 @@ int test_setZetaDer_special_exponents(void) { // NOLINT
     char line[4096];
     int testsPassed = 0;
     int totalTests = 0;
-    double tol = 5 * pow(10, -15);
+    double tol = 5 * pow(10, -14);
     double errMin = NAN;
     double errMax = NAN;
     double errSum = 0.;

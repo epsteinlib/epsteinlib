@@ -6,7 +6,7 @@ SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
 SPDX-License-Identifier: AGPL-3.0-only
 -->
 
-<testsuites tests="1" errors="0" failures="0"><testsuite name="epsteinlib" tests="1" errors="0" failures="0" skipped="0" time="0.004858255386352539"><testcase name="test_setZetaDer" classname="epsteinlib" time="0.004858255386352539"><system-out>test_setZetaDer_special_exponents 
+<testsuites tests="1" errors="0" failures="0"><testsuite name="epsteinlib" tests="1" errors="0" failures="0" skipped="0" time="0.011618614196777344"><testcase name="test_setZetaDer" classname="epsteinlib" time="0.011618614196777344"><system-out>test_setZetaDer_special_exponents 
 	 ... processing csv/setZetaDer_special_exponents_Ref.csv 
-	 ... 7 out of 7 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 7.177327E-16 | avg: 1.708887E-16 ]
-									    [ Time  →  sec: 0.000252     ]</system-out></testcase></testsuite></testsuites>
+	 ... 52 out of 52 tests passed with tolerance 5.000000E-14.	    [ Error →  min: 0.000000E+00 | max: 1.469180E-15 | avg: 2.194630E-16 ]
+									    [ Time  →  sec: 0.007397     ]</system-out></testcase></testsuite></testsuites>

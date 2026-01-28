@@ -406,15 +406,15 @@ Export["csv/setZetaDer_laplace_Ref.csv",zLaplaceTab];
 
 
 (* ::Subsection:: *)
-(*Check behavior in nu = d + |\[Alpha]|*)
+(*Check behavior in critical nu values*)
 
 
 (* ::Text:: *)
-(*Generate reverence values.*)
+(*Generate reverence values for nu = dim + |\[Alpha]| + even natural.*)
 
 
 smallVal = 10^-200;
-zetaSpecialTab = {
+zetaSpecialNuBiggerDim = {
 	(* 1D: nu = 1 + Total[alpha] + 2Total[alpha] even => nu odd *)
 	Flatten@{1,5.,N@{{1}},{0.},{0.},{2},{N@Re@#,N@Im@#}  &/@ {setZetaDer[5,{{1}},{0},{0},{2}]}}
     ,Flatten@{1,7.,N@{{1}},{0.},{0.},{4},{N@Re@#,N@Im@#}  &/@ {setZetaDer[7,{{1}},{0},{0},{4}]}}
@@ -461,16 +461,41 @@ zetaSpecialTab = {
 };
 
 
-zetaSpecialTab = {
-   (* 2D: nu = dim - k for even natual numbers k *)
-	Flatten@{2,2.,N@IdentityMatrix@2,{0.,0.},{0.,0.},{2,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[2,IdentityMatrix@2,{0,0},{0,0},{2,0}]}}
-	,Flatten@{2,N[2+2^-10],N@IdentityMatrix@2,{0.,0.},{0.,0.},{4,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[2+2^-10,IdentityMatrix@2,{0,0},{0,0},{4,0}]}}
-	,Flatten@{2,N[2+2^-50],N@IdentityMatrix@2,{0.,0.},{0.,0.},{4,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[2+2^-50,IdentityMatrix@2,{0,0},{0,0},{4,0}]}}
-	,Flatten@{2,2.,N@IdentityMatrix@2,{0.,0.},{0.,0.},{4,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[2,IdentityMatrix@2,{0,0},{0,0},{4,0}]}}
-	,Flatten@{2,2.,N@IdentityMatrix@2,{0.,0.},{0.,N@smallVal},{4,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[2,IdentityMatrix@2,{0,0},{0,smallVal},{4,0}]}}
-	,Flatten@{2,0.,N@IdentityMatrix@2,{0.,0.},{0.,0.},{2,0},{N@Re@#,N@Im@#}  &/@ {setZetaDerHarmonic[0,IdentityMatrix@2,{0,0},{0,0},{2,0}]}}
-	,Flatten@{2,0.,N@IdentityMatrix@2,{0.,0.},{0.,N@smallVal},{4,0},{N@Re@#,N@Im@#}  &/@ {setZetaDerHarmonic[0,IdentityMatrix@2,{0,0},{0,smallVal},{4,0}]}}
-}
+(* ::Text:: *)
+(*Generate nu = dim reference values.*)
+
+
+zetaSpecialNuEqualsDim=Flatten[
+	Table[
+		Flatten@{d,N@nu,N@IdentityMatrix@d,N@ConstantArray[0,d],N[PadRight[{yoffset},d]],n UnitVector[d],{N@Re@#,N@Im@#}  &/@ {setZetaDer[nu,IdentityMatrix@d,ConstantArray[0,d],PadRight[{yoffset},d],n UnitVector[d]]}}
+		,{d,{2}}
+		,{yoffset,{0,smallVal,2^-20}}
+		,{nu,{2}}
+		,{n,{2,4}}
+	]
+,3]
+
+
+(* ::Text:: *)
+(*Generate nu = dim - even natural reference values.*)
+
+
+zetaSpecialNuEqualsDimMinus2k=Flatten[
+	Table[
+		Flatten@{d,N@nu,N@IdentityMatrix@d,N@ConstantArray[0,d],N[PadRight[{yoffset},d]],n UnitVector[d],{N@Re@#,N@Im@#}  &/@ {setZetaDerHarmonic[nu,IdentityMatrix@d,ConstantArray[0,d],PadRight[{yoffset},d],n UnitVector[d]]}}
+		,{d,{2}}
+		,{yoffset,{0,smallVal,2^-20}}
+		,{nu,{0}}
+		,{n,{2,4}}
+	]
+,3]
+
+
+(* ::Text:: *)
+(*Combine reference values.*)
+
+
+zetaSpecialTab = Join[zetaSpecialNuBiggerDim,zetaSpecialNuEqualsDim,zetaSpecialNuEqualsDimMinus2k];
 
 
 (* ::Text:: *)
