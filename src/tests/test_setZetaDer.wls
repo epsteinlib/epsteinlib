@@ -122,8 +122,9 @@ SumFourierDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[gDer[Length[\[Alph
 
 Options[setZetaDer]={InputPrecision->100,SumLim->10};
 setZetaDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Module[
-	{prec,sumLim,\[Nu]N,AN,xN,yN,\[Mu],sumReal,sumReci,res}
-	,prec=OptionValue[InputPrecision]
+	{EPS,prec,sumLim,\[Nu]N,AN,xN,yN,\[Mu],sumReal,sumReci,res}
+	,EPS=10^-50
+	;prec=OptionValue[InputPrecision]
 	;sumLim=OptionValue[SumLim]
 	;\[Nu]N=N[\[Nu]Ext,prec]
 	;AN=N[AExt,prec]
@@ -131,8 +132,8 @@ setZetaDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Module[
 	;AN=1/\[Mu] AN
 	;xN=1/\[Mu] N[xExt,prec]
 	;yN=\[Mu] N[yExt,prec]
-	;If[\[Nu]N<0.5&&PossibleZeroQ[\[Nu]N/2-Round[\[Nu]N/2]]
-		,Print["No early return"];res = None
+	;If[Abs[\[Nu]N]<EPS&&Total[\[Alpha]]>0
+		,res = 0
 		,sumReal=SetPrecision[SumRealDer[\[Nu]N,AN,xN,yN,\[Alpha],sumLim],prec]
 		;sumReci=SetPrecision[SumFourierDer[\[Nu]N,AN,xN,yN,\[Alpha],sumLim],prec]
 		;res=SetPrecision[\[Mu]^(Total[\[Alpha]]-\[Nu]N)\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci),prec]
@@ -152,15 +153,15 @@ hHarmonic[k_/;Element[k,NonNegativeIntegers]][x_List,\[Alpha]_List]:=Module[
 	,d=Length[\[Alpha]]
 	;n=Total[\[Alpha]]
 	;res=cOuter[n,k,d]Total@Table[
-	Apply[Times,Power[x,2\[Gamma]-\[Alpha]]]
-	Total[Table[
-		(-1)^Total[\[Beta]]/cInner[n,Total[\[Beta]],k,d]
-		 Binomial[Total[\[Beta]]+k,k]Total[\[Beta]]!/Apply[Times,Factorial[\[Beta]]]
-		Apply[Times,Binomial[\[Alpha],\[Alpha]+\[Beta]-\[Gamma]](\[Gamma]-\[Beta])!/(2\[Gamma]-\[Alpha]-2\[Beta])!]
-		,{\[Beta],Tuples[Range[MapThread[Max,{0\[Alpha],\[Gamma]-\[Alpha]}],\[Gamma]-\[Alpha]/2]]}
-		]]
-	,{\[Gamma],Select[Tuples[Range[Ceiling[\[Alpha]/2],0\[Alpha]+Total[\[Alpha]]-k]],Total[#]==Total[\[Alpha]]-k&]}
-	]
+		Apply[Times,Power[x,2\[Gamma]-\[Alpha]]]
+		Total[Table[
+			(-1)^Total[\[Beta]]/cInner[n,Total[\[Beta]],k,d]
+			 Binomial[Total[\[Beta]]+k,k]Total[\[Beta]]!/Apply[Times,Factorial[\[Beta]]]
+			Apply[Times,Binomial[\[Alpha],\[Alpha]+\[Beta]-\[Gamma]](\[Gamma]-\[Beta])!/(2\[Gamma]-\[Alpha]-2\[Beta])!]
+			,{\[Beta],Tuples[Range[MapThread[Max,{0\[Alpha],\[Gamma]-\[Alpha]}],\[Gamma]-\[Alpha]/2]]}
+			]]
+		,{\[Gamma],Select[Tuples[Range[Ceiling[\[Alpha]/2],0\[Alpha]+Total[\[Alpha]]-k]],Total[#]==Total[\[Alpha]]-k&]}
+		]
 	;res
 ]
 
@@ -199,27 +200,30 @@ setZetaDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modu
 	;AN=1/\[Mu] N[AExt,prec]
 	;xN=1/\[Mu] N[xExt,prec]
 	;yN=\[Mu] N[yExt,prec]
-	;res=Total@Table[
-		Module[
-			{\[Nu]N,sumReal,sumReci,resk}
-			,\[Nu]N=\[Nu]True-2k
-			;If[\[Nu]N<-1&&Abs[\[Nu]N/2-Round[\[Nu]N/2]]<EPS
-				,0
-				,If[Abs[\[Nu]N]<EPS
-					,If[Norm[xN]>EPS
-						,0
-						,sumReal=-hHarmonic[k][yN,\[Alpha]]
-						;resk=\[Pi]^(\[Nu]N/2)sumReal
+	;If[Abs[\[Nu]Ext]<EPS&&n>0
+		,res = 0
+		,res=Total@Table[
+			Module[
+				{\[Nu]N,sumReal,sumReci,resk}
+				,\[Nu]N=\[Nu]True-2k
+				;If[\[Nu]N<-1&&Abs[\[Nu]N/2-Round[\[Nu]N/2]]<EPS
+					,0
+					,If[Abs[\[Nu]N]<EPS
+						,If[Norm[xN]>EPS
+							,0
+							,sumReal=-hHarmonic[k][yN,\[Alpha]]
+							;resk=\[Pi]^(\[Nu]N/2)sumReal
+							;(-2Pi I)^(2k) (-2\[Pi])^(Total[\[Alpha]]-2k) resk
+						]
+						,sumReal=SumRealHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+						;sumReci=SumFourierHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+						;resk=\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci)
 						;(-2Pi I)^(2k) (-2\[Pi])^(Total[\[Alpha]]-2k) resk
 					]
-					,sumReal=SumRealHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
-					;sumReci=SumFourierHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
-					;resk=\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci)
-					;(-2Pi I)^(2k) (-2\[Pi])^(Total[\[Alpha]]-2k) resk
 				]
 			]
+		,{k,0,Floor[n/2]}
 		]
-	,{k,0,Floor[n/2]}
 	]
 	;\[Mu]^(Total[\[Alpha]]-\[Nu]True)res
 ]
