@@ -199,7 +199,7 @@ setZetaDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modu
 	;xN=1/\[Mu] N[xExt,prec]
 	;yN=\[Mu] N[yExt,prec]
 	;res=Total@Table[
-	\[Nu]N=\[Nu]True-2k
+		\[Nu]N=\[Nu]True-2k
 		;sumReal=SumRealHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
 		;sumReci=SumFourierHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
 		;resk=\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci)
@@ -467,8 +467,8 @@ zetaSpecialNuBiggerDim = {
 
 zetaSpecialNuEqualsDim=Flatten[
 	Table[
-		Flatten@{d,N@nu,N@IdentityMatrix@d,N@ConstantArray[0,d],N[PadRight[{yoffset},d]],n UnitVector[d],{N@Re@#,N@Im@#}  &/@ {setZetaDer[nu,IdentityMatrix@d,ConstantArray[0,d],PadRight[{yoffset},d],n UnitVector[d]]}}
-		,{d,{2}}
+		Flatten@{d,N@nu,N@IdentityMatrix@d,N@ConstantArray[0,d],N[PadRight[{yoffset},d]],n UnitVector[d,1],{N@Re@#,N@Im@#}  &/@ {setZetaDer[nu,IdentityMatrix@d,ConstantArray[0,d],PadRight[{yoffset},d],n UnitVector[d,1]]}}
+		,{d,{1,2}}
 		,{yoffset,{0,smallVal,2^-20}}
 		,{nu,{2}}
 		,{n,{2,4}}
@@ -482,8 +482,8 @@ zetaSpecialNuEqualsDim=Flatten[
 
 zetaSpecialNuEqualsDimMinus2k=Flatten[
 	Table[
-		Flatten@{d,N@nu,N@IdentityMatrix@d,N@ConstantArray[0,d],N[PadRight[{yoffset},d]],n UnitVector[d],{N@Re@#,N@Im@#}  &/@ {setZetaDerHarmonic[nu,IdentityMatrix@d,ConstantArray[0,d],PadRight[{yoffset},d],n UnitVector[d]]}}
-		,{d,{2}}
+		Flatten@{d,N@nu,N@IdentityMatrix@d,N@ConstantArray[0,d],N[PadRight[{yoffset},d]],n UnitVector[d,1],{N@Re@#,N@Im@#}  &/@ {setZetaDerHarmonic[nu,IdentityMatrix@d,ConstantArray[0,d],PadRight[{yoffset},d],n UnitVector[d,1]]}}
+		,{d,{1,2}}
 		,{yoffset,{0,smallVal,2^-20}}
 		,{nu,{0}}
 		,{n,{2,4}}
@@ -504,3 +504,28 @@ zetaSpecialTab = Join[zetaSpecialNuBiggerDim,zetaSpecialNuEqualsDim,zetaSpecialN
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_special_exponents_Ref.csv", zetaSpecialTab];
+
+
+(* ::Subsection:: *)
+(*Delme*)
+
+
+tab={#,Abs@SetZetaDer[#,{{1}},{0},{0},{2}]}&/@Range[-1,2.4,0.1]
+
+
+ListPlot[tab]
+
+
+tab={#,Abs@SetZetaDer[#,IdentityMatrix@2,{0,0},{0,0},{4,0}]}&/@Range[-1,3.4,0.1]
+
+
+ListPlot[tab]
+
+
+tab={#,Abs@SetZetaDer[#,{{1}},{0},{0.0000009536743164},{4}]}&/@Range[-.1,2.4,0.05]
+
+
+tab={#,Abs@setZetaDer[#,{{1}},{0},{0.0000009536743164},{4}]}&/@Range[-.1,2.4,0.05]
+
+
+ListPlot[tab]

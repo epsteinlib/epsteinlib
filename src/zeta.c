@@ -22,6 +22,8 @@
 #include "zeta.h"
 #include <assert.h>
 
+#include <stdio.h>
+
 /*!
    @brief Smallest value z such that G(nu, z) is negligible for
    nu < 10.
@@ -269,6 +271,9 @@ static double complex sum_real_harmonic_1D(double nu, unsigned int kIndex,
     double complex auxt;
     double complex auxy;
     double complex rot;
+
+    double h;
+
     // First Sum (in real space)
     for (long n = 0; n < totalSummands; n++) {
         for (int k = 0; k < dim; k++) {
@@ -281,14 +286,18 @@ static double complex sum_real_harmonic_1D(double nu, unsigned int kIndex,
             lv[i] = lv[i] - x[i];
         }
 
+        h = harmonic_h_1D_kMax(lv, alphaAbs);
+
+        //        if(h){
         // summing using Kahan's method
-        auxy = rot * int_pow(I, alphaAbs - (2 * kIndex)) *
-                   harmonic_h_1D_kMax(lv, alphaAbs) *
+        auxy = rot * int_pow(I, alphaAbs - (2 * kIndex)) * h *
                    crandall_g(dim, nu, lv, 1. / lambda, zArgBound) -
                epsilon;
         auxt = sum + auxy;
         epsilon = (auxt - sum) - auxy;
         sum = auxt;
+
+        //        }
     }
     return sum;
 }
@@ -731,6 +740,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     }
     // handle special case of non-positive integer values nu.
     double complex res = 0.;
+    double y_t2_squared = dot(dim, y_t2, y_t2);
     if (variant < 3 && nu < 1 && fabs((nu / 2.) - nearbyint(nu / 2.)) < EPS) {
         if ((variant == 0 || variant == 1) && dot(dim, x_t2, x_t2) == 0 && nu == 0) {
             res = -1 * cexp(-2 * M_PI * I * dot(dim, x_t1, y_t2));
@@ -738,7 +748,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             res = 0;
         }
     } else if ((variant == 0 || variant == 2) && fabs(nu - dim - alphaAbs) < EPS &&
-               dot(dim, y_t2, y_t2) < EPS_ZERO_Y) {
+               y_t2_squared < EPS_ZERO_Y) {
         res = NAN;
     } else {
         double zArgBound = assignzArgBound(nu);
@@ -783,42 +793,49 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         } else if (variant == 2 && dim == 1) {
             // Compute set zeta derivatives by harmonic method
 
-            double nuIt;
-            double nuReci;
-            double complex resIt;
-
             unsigned int k = alphaAbs / 2;
 
-            nuIt = nu - (2 * k);
-            nuReci = nuIt - (2 * alphaAbs) + (4 * k);
-            double zArgBoundReci = assignzArgBound(dim - nuReci);
+            double nuIt = nu - (2 * k);
 
-            // calculate set zeta derivative function values.
-            rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
+            // keep res = 0 if iteration if |y| > 0 and 1/gamma(nuIt) = 0
+            if (!(nuIt < 1 && fabs((nuIt / 2.) - nearbyint(nuIt / 2.)) < EPS &&
+                  y_t2_squared > EPS_ZERO_Y)) {
 
-            if (equals(dim, y_t1, y_t2)) {
-                nc = harmonic_h_1D_kMax(y_t1, alphaAbs) *
-                     crandall_g(dim, dim - nuReci, y_t1, lambda, zArgBoundReci);
-            } else {
-                nc = harmonic_h_1D_kMax(y_t2, alphaAbs) *
-                     crandall_g(dim, dim - nuReci, y_t2, lambda, zArgBoundReci) *
-                     cexp(-2 * M_PI * I * dot(dim, y_t2, x_t1)) * rot;
+                double complex resIt;
+                double nuReci = nuIt - (2 * alphaAbs) + (4 * k);
+                double zArgBoundReci = assignzArgBound(dim - nuReci);
+
+                // calculate set zeta derivative function values.
+                rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
+
+                if (equals(dim, y_t1, y_t2)) {
+                    nc = harmonic_h_1D_kMax(y_t1, alphaAbs) *
+                         crandall_g(dim, dim - nuReci, y_t1, lambda, zArgBoundReci);
+                } else {
+                    nc = harmonic_h_1D_kMax(y_t2, alphaAbs) *
+                         crandall_g(dim, dim - nuReci, y_t2, lambda, zArgBoundReci) *
+                         cexp(-2 * M_PI * I * dot(dim, y_t2, x_t1)) * rot;
+                }
+                printf("nc: %.16lf \n", (double)nc);
+
+                s2 =
+                    sum_fourier_harmonic_1D(nuReci, dim, m_fourier, x_t1, y_t2,
+                                            cutoffsFourier, zArgBoundReci, alphaAbs);
+                printf("s2: %.16lf \n", (double)s2);
+
+                s2 = s2 * rot + nc;
+
+                s1 = sum_real_harmonic_1D(nuIt, k, dim, m_real, x_t2, y_t2,
+                                          cutoffsReal, zArgBound, alphaAbs) *
+                     rot * xfactor;
+                printf("s1: %.16lf \n", (double)s1);
+                resIt = pow(lambda * lambda / M_PI, -nuIt / 2.) / tgamma(nuIt / 2.) *
+                        (s1 + pow(lambda, dim) * s2);
+                resIt *= int_pow(-2 * M_PI * I, 2 * k) *
+                         int_pow(-2 * M_PI, alphaAbs - (2 * k));
+                res += resIt;
+                res *= 1. / int_pow(ms, alphaAbs);
             }
-
-            s2 = sum_fourier_harmonic_1D(nuReci, dim, m_fourier, x_t1, y_t2,
-                                         cutoffsFourier, zArgBoundReci, alphaAbs);
-
-            s2 = s2 * rot + nc;
-
-            s1 = sum_real_harmonic_1D(nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal,
-                                      zArgBound, alphaAbs) *
-                 rot * xfactor;
-            resIt = pow(lambda * lambda / M_PI, -nuIt / 2.) / tgamma(nuIt / 2.) *
-                    (s1 + pow(lambda, dim) * s2);
-            resIt *= int_pow(-2 * M_PI * I, 2 * k) *
-                     int_pow(-2 * M_PI, alphaAbs - (2 * k));
-            res += resIt;
-            res *= 1. / int_pow(ms, alphaAbs);
         } else if (variant == 2 && alphaAbs > 3) {
             // Compute set zeta derivatives by harmonic method
 
@@ -844,8 +861,9 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
 
                 nuIt = nu - (2 * k);
 
-                // skip iteration if 1/gamma(nuIt) = 0
-                if (nuIt < 1 && fabs((nuIt / 2.) - nearbyint(nuIt / 2.)) < EPS) {
+                // skip iteration if |y| > 0 and 1/gamma(nuIt) = 0
+                if (nuIt < 1 && fabs((nuIt / 2.) - nearbyint(nuIt / 2.)) < EPS &&
+                    y_t2_squared > EPS_ZERO_Y) {
                     continue;
                 }
 
