@@ -468,6 +468,8 @@ zetaSpecialTab = {
 	,Flatten@{2,N[2+2^-50],N@IdentityMatrix@2,{0.,0.},{0.,0.},{4,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[2+2^-50,IdentityMatrix@2,{0,0},{0,0},{4,0}]}}
 	,Flatten@{2,2.,N@IdentityMatrix@2,{0.,0.},{0.,0.},{4,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[2,IdentityMatrix@2,{0,0},{0,0},{4,0}]}}
 	,Flatten@{2,2.,N@IdentityMatrix@2,{0.,0.},{0.,N@smallVal},{4,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[2,IdentityMatrix@2,{0,0},{0,smallVal},{4,0}]}}
+	,Flatten@{2,0.,N@IdentityMatrix@2,{0.,0.},{0.,0.},{2,0},{N@Re@#,N@Im@#}  &/@ {setZetaDerHarmonic[0,IdentityMatrix@2,{0,0},{0,0},{2,0}]}}
+	,Flatten@{2,0.,N@IdentityMatrix@2,{0.,0.},{0.,N@smallVal},{4,0},{N@Re@#,N@Im@#}  &/@ {setZetaDerHarmonic[0,IdentityMatrix@2,{0,0},{0,smallVal},{4,0}]}}
 }
 
 

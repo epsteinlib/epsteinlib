@@ -731,9 +731,8 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     }
     // handle special case of non-positive integer values nu.
     double complex res = 0.;
-    if (nu < 1 && fabs((nu / 2.) - nearbyint(nu / 2.)) < EPS &&
-        (variant == 0 || variant == 1)) {
-        if (dot(dim, x_t2, x_t2) == 0 && nu == 0) {
+    if (variant < 3 && nu < 1 && fabs((nu / 2.) - nearbyint(nu / 2.)) < EPS) {
+        if ((variant == 0 || variant == 1) && dot(dim, x_t2, x_t2) == 0 && nu == 0) {
             res = -1 * cexp(-2 * M_PI * I * dot(dim, x_t1, y_t2));
         } else {
             res = 0;
