@@ -37,6 +37,81 @@ typedef struct {
     unsigned int limb[APINT_MAX_LIMBS];
 } apint_t;
 
+/**
+ * @brief Compute the integer power of a double by squaring.
+ * Uses switch for small exponents to avoid loop overhead.
+ * @param[in] base: the base value.
+ * @param[in] exp: non-negative integer exponent.
+ * @return base ** exp.
+ */
+static inline double real_int_pow(double base, unsigned int exp) {
+    double b2;
+    switch (exp) {
+    case 0:
+        return 1.0;
+    case 1:
+        return base;
+    case 2:
+        return base * base;
+    case 3:
+        return base * base * base;
+    case 4:
+        b2 = base * base;
+        return b2 * b2;
+    case 5:
+        b2 = base * base;
+        return b2 * b2 * base;
+    case 6:
+        b2 = base * base;
+        return b2 * b2 * b2;
+    case 7:
+        b2 = base * base;
+        return b2 * b2 * b2 * base;
+    case 8:
+        b2 = base * base;
+        b2 = b2 * b2;
+        return b2 * b2;
+    default:
+        break;
+    }
+    double res = 1.0;
+    while (1) {
+        if (exp & 1) {
+            res *= base;
+        }
+        exp >>= 1;
+        if (!exp) {
+            break;
+        }
+        base *= base;
+    }
+    return res;
+}
+
+/**
+ * @brief Compute integer powers of the imaginary unit I.
+ * Uses the fact that I^4 = 1, so only exp % 4 matters.
+ * @param[in] exp: non-negative integer exponent.
+ * @return I ** exp.
+ */
+static inline double complex imaginary_int_pow(unsigned int exp) {
+    static const double complex powers[4] = {1.0, I, -1.0, -I};
+    return powers[exp & 3];
+}
+
+/**
+ * @brief Compute integer powers of -1.
+ * Uses the fact that (-1)^exp alternates between 1 and -1.
+ * @param[in] exp: non-negative integer exponent.
+ * @return (-1) ** exp.
+ */
+static inline double negative_one_pow(unsigned int exp) {
+    if (exp & 1) {
+        return -1.;
+    }
+    return 1.;
+}
+
 /** @brief Count trailing zero bits in a 64-bit unsigned integer.
  * @param[in] x: input value
  * @return number of trailing zeros (0..63); returns 64 if x == 0
@@ -111,5 +186,4 @@ void invert(unsigned int dim, double *m, int *p, double *r);
 double inf_norm(unsigned int dim, const double *m);
 unsigned int mult_abs(unsigned int dim, const unsigned int *alpha);
 unsigned long long binom(unsigned long long n, unsigned long long k);
-double complex int_pow(double complex base, unsigned int exp);
 #endif

@@ -105,7 +105,7 @@ int benchmark_setZetaDer_timing() { // NOLINT
 
             alpha[0] = j;
 
-            for (int i = -5; i < 5 + 1; i++) {
+            for (int i = -3; i < 3 + 1; i++) {
                 y[0] = (double)i * 0.1;
                 for (int n = 0; n < iterations; n++) {
                     timeStart = clock();

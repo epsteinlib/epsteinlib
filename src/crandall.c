@@ -169,10 +169,10 @@ double polynomial_p(unsigned int dim, const double *z, const unsigned int *alpha
             factFrac *= j;
         }
         res *= (double)binom((long long)ai, (long long)bi) * (double)factFrac *
-               int_pow(2 * z[i], ai - (2 * bi));
+               real_int_pow(2 * z[i], ai - (2 * bi));
     }
 
-    res *= int_pow(-M_PI, aMinusb);
+    res *= real_int_pow(-M_PI, aMinusb);
 
     return res;
 }
@@ -554,57 +554,6 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, // NOLINT
     }
 }
 
-/**
- * @brief Compute the integer power of a double by squaring.
- * Uses switch for small exponents to avoid loop overhead.
- * @param[in] base: the base value.
- * @param[in] exp: non-negative integer exponent.
- * @return base ** exp.
- */
-static inline double real_int_pow(double base, unsigned int exp) {
-    double b2;
-    switch (exp) {
-    case 0:
-        return 1.0;
-    case 1:
-        return base;
-    case 2:
-        return base * base;
-    case 3:
-        return base * base * base;
-    case 4:
-        b2 = base * base;
-        return b2 * b2;
-    case 5:
-        b2 = base * base;
-        return b2 * b2 * base;
-    case 6:
-        b2 = base * base;
-        return b2 * b2 * b2;
-    case 7:
-        b2 = base * base;
-        return b2 * b2 * b2 * base;
-    case 8:
-        b2 = base * base;
-        b2 = b2 * b2;
-        return b2 * b2;
-    default:
-        break;
-    }
-    double res = 1.0;
-    while (1) {
-        if (exp & 1) {
-            res *= base;
-        }
-        exp >>= 1;
-        if (!exp) {
-            break;
-        }
-        base *= base;
-    }
-    return res;
-}
-
 /** @brief Calculates the homogeneous harmonic polynomial h₍α,k₎
  * of degree |α|−2k such that y^α = ∑ₖ (y·y)^k h₍α,k₎(y);
  * explicitly, h₍α,k₎(y)=c_{|α|,k} ∑{|γ|=|α|−k} y^{2γ−α} h_inner(α,γ,k).
@@ -770,7 +719,7 @@ double polynomial_l(unsigned int dim, const double *z, const unsigned int *alpha
             factFrac *= j;
         }
         res *= (double)binom((long long)ai, (long long)bi) * (double)factFrac *
-               (double)int_pow(2 * z[i], ai - (2 * bi));
+               real_int_pow(2 * z[i], ai - (2 * bi));
     }
 
     unsigned long long factorial = 1;
@@ -822,7 +771,7 @@ double complex log_l_der(unsigned int dim, const double *z,
     while (1) {
 
         // summing using Kahan's method
-        auxy = polynomial_l(dim, z, alpha, beta) / (double)int_pow(zArg, aMinusb) -
+        auxy = polynomial_l(dim, z, alpha, beta) / real_int_pow(zArg, aMinusb) -
                epsilon;
         auxt = sum + auxy;
         epsilon = (auxt - sum) - auxy;
@@ -862,7 +811,7 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
 
     // Return function if there is no derivative
     if (!alphaAbs) {
-        return int_pow(M_PI * dot(dim, z, z), k);
+        return real_int_pow(M_PI * dot(dim, z, z), k);
     }
 
     unsigned int betaMin[dim];
@@ -924,7 +873,7 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
             for (int i = 0; i < dim; i++) {
                 summand *=
                     (double)binom((long long)(2 * beta[i]), (long long)alpha[i]) *
-                    int_pow(z[i], (2 * beta[i]) - alpha[i]);
+                    real_int_pow(z[i], (2 * beta[i]) - alpha[i]);
             }
 
             summand = summand / (double)betaFact;
@@ -969,7 +918,7 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
         factorial *= j;
     }
 
-    res = (double)factorial * int_pow(M_PI, k) * sum;
+    res = (double)factorial * real_int_pow(M_PI, k) * sum;
 
     return res;
 }
@@ -1007,7 +956,7 @@ double complex singularity_s_der(unsigned int k, unsigned int dim, const double 
     // Return function if there is no derivative
     if (!alphaAbs) {
         double zArg = M_PI * dot(dim, z, z);
-        res = prefactor * int_pow(zArg, k) * log(zArg);
+        res = prefactor * real_int_pow(zArg, k) * log(zArg);
         return res;
     }
 
@@ -1106,7 +1055,7 @@ double complex crandall_gReg_nuequalsdimplus2k_der(
 
         res = ((k % 2) ? -1. : 1.) *
               (harmonic - eulerGamma -
-               (double)int_pow(lambda, 2 * k) * log(lambda * lambda)) *
+               real_int_pow(lambda, 2 * k) * log(lambda * lambda)) *
               polynomial_y_der(k, dim, z, alpha, alphaAbs, k);
 
         // summand n = 0

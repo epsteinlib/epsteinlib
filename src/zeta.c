@@ -142,8 +142,10 @@ static double complex sum_real_der(double nu, unsigned int dim, double lambda,
         // Calculate (- 2 PI I (z - x)) ** alpha
         mon = 1.;
         for (int i = 0; i < dim; i++) {
-            if (alpha[i]) {
-                mon *= int_pow(-2 * M_PI * I * lv[i], alpha[i]);
+            unsigned int alphai = alpha[i];
+            if (alphai) {
+                mon *= imaginary_int_pow(alphai) *
+                       real_int_pow(-2 * M_PI * lv[i], alphai);
             }
         }
         // summing using Kahan's method
@@ -219,7 +221,7 @@ static double complex sum_real_harmonic(
                        exponents);
 
         // summing using Kahan's method
-        auxy = rot * int_pow(I, alphaAbs - (2 * kIndex)) * h *
+        auxy = rot * imaginary_int_pow(alphaAbs - (2 * kIndex)) * h *
                    crandall_g(dim, nu, lv, 1. / lambda, zArgBound) -
                epsilon;
         auxt = sum + auxy;
@@ -288,7 +290,7 @@ static double complex sum_real_harmonic_1D(double nu, unsigned int kIndex,
 
         //        if(h){
         // summing using Kahan's method
-        auxy = rot * int_pow(I, alphaAbs - (2 * kIndex)) * h *
+        auxy = rot * imaginary_int_pow(alphaAbs - (2 * kIndex)) * h *
                    crandall_g(dim, nu, lv, 1. / lambda, zArgBound) -
                epsilon;
         auxt = sum + auxy;
@@ -737,7 +739,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         }
     }
     // Use harmonic method
-    unsigned int harmonicMethod = (dim == 1 || alphaAbs > 2) && (variant == 2);
+    unsigned int harmonicMethod = (dim == 1 || alphaAbs > 0) && (variant == 2);
     // handle special case of non-positive integer values nu.
     double complex res = 0.;
     double y_t2_squared = dot(dim, y_t2, y_t2);
@@ -807,7 +809,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                 if (dot(dim, x_t2, x_t2) > EPS_ZERO_Y) {
                     resIt = 0.;
                 } else {
-                    resIt = -int_pow(I, alphaAbs - (2 * k)) *
+                    resIt = -imaginary_int_pow(alphaAbs - (2 * k)) *
                             harmonic_h_1D_kMax(x_t2, alphaAbs);
                 }
             } else {
@@ -839,10 +841,10 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                 resIt = (s1 + pow(lambda, dim) * s2) / tgamma(nuIt / 2.);
             }
             resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.) *
-                     int_pow(-2 * M_PI * I, 2 * k) *
-                     int_pow(-2 * M_PI, alphaAbs - (2 * k));
+                     imaginary_int_pow(2 * k) * real_int_pow(-2 * M_PI, 2 * k) *
+                     real_int_pow(-2 * M_PI, alphaAbs - (2 * k));
             res += resIt;
-            res *= 1. / int_pow(ms, alphaAbs);
+            res *= 1. / real_int_pow(ms, alphaAbs);
         } else if (harmonicMethod) {
             // Compute set zeta derivatives by harmonic method
 
@@ -880,7 +882,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                     if (dot(dim, x_t2, x_t2) > EPS_ZERO_Y) {
                         resIt = 0.;
                     } else {
-                        resIt = -int_pow(I, alphaAbs - (2 * k)) *
+                        resIt = -imaginary_int_pow(alphaAbs - (2 * k)) *
                                 harmonic_h(k, dim, x_t2, alphaAbs, chunk_offset,
                                            valid_count, coeffs, exponents);
                     }
@@ -924,11 +926,11 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                     resIt = (s1 + pow(lambda, dim) * s2) / tgamma(nuIt / 2.);
                 }
                 resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.) *
-                         int_pow(-2 * M_PI * I, 2 * k) *
-                         int_pow(-2 * M_PI, alphaAbs - (2 * k));
+                         imaginary_int_pow(2 * k) * real_int_pow(-2 * M_PI, 2 * k) *
+                         real_int_pow(-2 * M_PI, alphaAbs - (2 * k));
                 res += resIt;
             }
-            res *= 1. / int_pow(ms, alphaAbs);
+            res *= 1. / real_int_pow(ms, alphaAbs);
         } else if (variant == 2) {
             // Compute set zeta derivatives by polynomial p method
             rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
@@ -942,11 +944,11 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             }
             s2 = sum_fourier_der(nu, dim, lambda, m_fourier, x_t1, y_t2,
                                  cutoffsFourier, zArgBoundReci, alpha, alphaAbs);
-            s2 = int_pow(lambda, alphaAbs) * (s2 * rot + nc);
+            s2 = real_int_pow(lambda, alphaAbs) * (s2 * rot + nc);
             s1 = sum_real_der(nu, dim, lambda, m_real, x_t2, y_t2, cutoffsReal,
                               zArgBound, alpha) *
                  rot * xfactor;
-            xfactor = 1. / int_pow(ms, alphaAbs);
+            xfactor = 1. / real_int_pow(ms, alphaAbs);
         } else if (variant == 3) {
             // calculate Epstein zeta reg derivative function values.
             nc = crandall_gReg_der(dim, dim - nu, y_t1, lambda, alpha, alphaAbs,
@@ -963,11 +965,11 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                      alpha, alphaAbs) *
                           cexp(-2 * M_PI * I * dot(dim, x_t1, y_t1));
             }
-            s2 = int_pow(lambda, alphaAbs) * (s2 * rot + nc);
+            s2 = real_int_pow(lambda, alphaAbs) * (s2 * rot + nc);
             s1 = sum_real_der(nu, dim, lambda, m_real, x_t2, y_t2, cutoffsReal,
                               zArgBound, alpha) *
                  rot * xfactor;
-            xfactor = 1. / int_pow(ms, alphaAbs);
+            xfactor = 1. / real_int_pow(ms, alphaAbs);
         }
         // In the harmonic method, the res is already set as there is no global
         // nu-dependent coefficient there
@@ -984,7 +986,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     if ((variant == 1 || variant == 3) && (nu == (dim + 2 * (double)k))) {
         if (alphaAbs) {
             res -= pow(M_PI, (double)k + ((double)dim / 2)) /
-                   tgamma((double)k + ((double)dim / 2)) * int_pow(-1, k + 1) *
+                   tgamma((double)k + ((double)dim / 2)) * negative_one_pow(k + 1) *
                    polynomial_y_der(k, dim, y, alpha, alphaAbs, k) * log(ms * ms) /
                    vol;
         } else {
@@ -995,9 +997,9 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                 }
 
                 res -= pow(M_PI, (double)(2 * k) + ((double)dim / 2)) *
-                       tgamma((double)k + ((double)dim / 2)) * int_pow(-1, k + 1) /
-                       tgamma((double)k + 1) * int_pow(ySquared, k) * log(ms * ms) /
-                       vol;
+                       tgamma((double)k + ((double)dim / 2)) *
+                       negative_one_pow(k + 1) / tgamma((double)k + 1) *
+                       real_int_pow(ySquared, k) * log(ms * ms) / vol;
             } else {
                 res += pow(M_PI, (double)dim / 2) / tgamma((double)dim / 2) *
                        log(ms * ms) / vol;
