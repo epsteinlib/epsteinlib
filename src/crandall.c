@@ -185,9 +185,14 @@ double polynomial_p(unsigned int dim, const double *z, const unsigned int *alpha
  * @return cₙ,ᵢ,ₖ.
  */
 double coeffs_c_inner(long long n, long long i, long long k, long long dim) {
-    double res = 1.;
-    for (long long j = i + 1; j <= n / 2 - k; j++) {
-        res *= (double)((2 * n) + dim - 2 - (4 * k) - (2 * j));
+    long long end = (n / 2) - k;
+
+    double res = 1.0;
+    long long term = (2 * n) + dim - 4 - (4 * k) - (2 * i); // value at j = i+1
+
+    for (long long j = i + 1; j <= end; j++) {
+        res *= (double)term;
+        term -= 2;
     }
     return res;
 }
@@ -199,21 +204,26 @@ double coeffs_c_inner(long long n, long long i, long long k, long long dim) {
  * @return cₙ,ₖ.
  */
 double coeffs_c_outer(long long n, long long k, long long dim) {
-
-    long long num;
-    long long den;
     long long a = (2 * n) + dim;
 
-    double res = ldexp(1.0, -(int)k);
-    for (long long j = 1; j < k + 1; j++) {
-        num = a - (2 * j);
-        den = (a + 2 - (4 * j)) * (a - (4 * j));
-        res *= (double)num / (double)den;
+    double num_prod = 1.0;
+    double den_prod = 1.0;
+
+    long long num_term = a - 2;  // a - 2j  at j=1
+    long long den1_term = a - 2; // a + 2 - 4j at j=1
+    long long den2_term = a - 4; // a - 4j at j=1
+
+    for (long long j = 0; j < k; j++) {
+        num_prod *= (double)num_term;
+        den_prod *= (double)den1_term * (double)den2_term;
+        num_term -= 2;
+        den1_term -= 4;
+        den2_term -= 4;
     }
 
-    res /= coeffs_c_inner(n, 0, k, dim);
+    double inner = coeffs_c_inner(n, 0, k, dim);
 
-    return res;
+    return ldexp(num_prod / (den_prod * inner), -(int)k);
 }
 
 /** @brief Computes cₙ,ᵢ,ₖ＝ ∏_{j=i+1}^{⌊n/2⌋-k} (2n＋d−2−4k−2j) as apint.
