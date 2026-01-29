@@ -303,10 +303,10 @@ Do[
 
 
 (* ::Text:: *)
-(*Generate reference values.*)
+(*Generate random reference values.*)
 
 
-zDerTab=ParallelTable[
+zDerRandom=ParallelTable[
 	Flatten@{N@\[Nu]0[i],N@a0[i],N@x0[i],N@y0[i],\[Alpha]0[i],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu]0[i],a0[i],x0[i],y0[i],\[Alpha]0[i]]}}
 	,{i,range}
 ];
@@ -316,7 +316,7 @@ zDerTab=ParallelTable[
 (*Append specific test values.*)
 
 
-zDerTab=Join[zDerTab,{
+zDerSpecialTab={
 	Flatten@{N@1/2,N@IdentityMatrix@2,{0.,0.},{0.,0.},{2,0},N@setZetaDer[1/2,IdentityMatrix@2,{0,0},{0,0},{2,0}],0.}
 	,Flatten@{N@1/2,N@IdentityMatrix@2,{0.,0.},{.1,.2},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{0,0},{1,2}/10,{2,0}]}}
 	,Flatten@{N@1/2,N@IdentityMatrix@2,{.1,.2},{0.,0.},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{1,2}/10,{0,0},{2,0}]}}
@@ -331,7 +331,14 @@ zDerTab=Join[zDerTab,{
 	,Flatten@{N@1/2,N@IdentityMatrix@2,1.+{.1,.2},{.1,.0},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,1+{1,2}/10,{1,0}/10,{2,0}]}}
 	,Flatten@{N@1/2,N@IdentityMatrix@2,1.+{.1,.2},3+{.1,.0},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,1+{1,2}/10,3+{1,0}/10,{2,0}]}}
 	,Flatten@{N@1/2,N@IdentityMatrix@2,1.+{.1,.2},3+{.1,.0},{2,4},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,1+{1,2}/10,3+{1,0}/10,{2,4}]}}
-}];
+};
+
+
+(* ::Text:: *)
+(*Combine reference values.*)
+
+
+zDerTab=Join[zDerRandomTab,zDerSpecialTab]
 
 
 (* ::Text:: *)

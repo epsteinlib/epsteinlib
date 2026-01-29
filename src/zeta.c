@@ -736,6 +736,8 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             cutoffsFourier[k] = floor(cutoff_id * ev_abs_max);
         }
     }
+    // Use harmonic method
+    unsigned int harmonicMethod = (dim == 1 || alphaAbs > 2) && (variant == 2);
     // handle special case of non-positive integer values nu.
     double complex res = 0.;
     double y_t2_squared = dot(dim, y_t2, y_t2);
@@ -788,7 +790,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                           zArgBound) *
                  rot * xfactor;
             xfactor = 1;
-        } else if (variant == 2 && dim == 1) {
+        } else if (dim == 1 && harmonicMethod) {
             // Compute set zeta derivatives by harmonic method
 
             unsigned int k = alphaAbs / 2;
@@ -841,7 +843,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                      int_pow(-2 * M_PI, alphaAbs - (2 * k));
             res += resIt;
             res *= 1. / int_pow(ms, alphaAbs);
-        } else if (variant == 2 && alphaAbs > 3) {
+        } else if (harmonicMethod) {
             // Compute set zeta derivatives by harmonic method
 
             // Precompute coefficients for harmonic polynomials once
@@ -969,7 +971,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         }
         // In the harmonic method, the res is already set as there is no global
         // nu-dependent coefficient there
-        if (!(variant == 2 && (alphaAbs > 3 || dim == 1))) {
+        if (!(harmonicMethod)) {
             res = xfactor * pow(lambda * lambda / M_PI, -nu / 2.) / tgamma(nu / 2.) *
                   (s1 + pow(lambda, dim) * s2);
         }
