@@ -306,7 +306,7 @@ Do[
 (*Generate random reference values.*)
 
 
-zDerRandom=ParallelTable[
+zDerRandomTab=ParallelTable[
 	Flatten@{N@\[Nu]0[i],N@a0[i],N@x0[i],N@y0[i],\[Alpha]0[i],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu]0[i],a0[i],x0[i],y0[i],\[Alpha]0[i]]}}
 	,{i,range}
 ];
@@ -338,7 +338,7 @@ zDerSpecialTab={
 (*Combine reference values.*)
 
 
-zDerTab=Join[zDerRandomTab,zDerSpecialTab]
+zDerTab=Join[zDerRandomTab,zDerSpecialTab];
 
 
 (* ::Text:: *)
