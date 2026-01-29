@@ -272,7 +272,7 @@ int test_setZetaDer_taylor(void) { // NOLINT
     double complex valRef;
     double complex valTaylor;
 
-    double tol = 5 * pow(10, -12);
+    double tol = 5 * pow(10, -15);
     unsigned int dim = 2;
     unsigned int order = 12;
 
@@ -413,7 +413,7 @@ int test_setZetaDer_odd(void) {
     int testsPassed = 0;
     int totalTests = 0;
     unsigned int dim = 3;
-    double tol = pow(10, -10);
+    double tol = pow(10, -16);
 
     double errMin = NAN;
     double errMax = NAN;
@@ -538,7 +538,7 @@ int test_setZetaDer_laplace(void) {
     int testsPassed = 0;
     int totalTests = 0;
     unsigned int dim = 2;
-    double tol = pow(10, -13);
+    double tol = 5 * pow(10, -15);
 
     double errMin = NAN;
     double errMax = NAN;

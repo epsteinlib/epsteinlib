@@ -51,7 +51,7 @@ int test_epsteinZetaRegDer_prototype(void) {
     int testsPassed = 0;
     int totalTests = 0;
     unsigned int dim = 2;
-    double tol = 5 * pow(10, -12);
+    double tol = 5 * pow(10, -13);
 
     double errMin = NAN;
     double errMax = NAN;
@@ -403,7 +403,7 @@ int test_epsteinZetaRegDer_taylor(void) { // NOLINT
     double complex valRef;
     double complex valTaylor;
 
-    double tol = 5 * pow(10, -12);
+    double tol = 5 * pow(10, -15);
     unsigned int dim = 2;
     unsigned int order = 12;
 

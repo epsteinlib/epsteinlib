@@ -426,7 +426,7 @@ int test_crandall_gReg_der_taylor(void) { // NOLINT
     double errorMaxAbsRel;
     double complex valRef;
     double complex valTaylor;
-    double tol = pow(10, -14);
+    double tol = pow(10, -15);
     unsigned int dim = 2;
     unsigned int order = 12;
     double zDiff[] = {0.005, 0.01};
@@ -573,7 +573,7 @@ int test_polynomial_y_der(void) {
     int testsPassed = 0;
     int totalTests = 0;
     int dim = 3;
-    double tol = 5 * pow(10, -13);
+    double tol = 5 * pow(10, -15);
 
     unsigned int *kRef = malloc(sizeof(unsigned int));
     double *z = malloc(dim * sizeof(double));
@@ -794,7 +794,7 @@ int test_coeffs_c_inner(void) {
 
     int testsPassed = 0;
     int totalTests = 0;
-    double tol = 5 * pow(10, -15);
+    double tol = pow(10, -16);
 
     unsigned int *n = malloc(sizeof(unsigned int));
     unsigned int *i = malloc(sizeof(unsigned int));
@@ -900,7 +900,7 @@ int test_harmonic_h_inner(void) {
 
     int testsPassed = 0;
     int totalTests = 0;
-    double tol = 5 * pow(10, -15);
+    double tol = pow(10, -16);
 
     unsigned int n;
     unsigned int i;
@@ -1026,7 +1026,7 @@ int test_harmonic_h_1D(void) {
 
     int testsPassed = 0;
     int totalTests = 0;
-    double tol = 5 * pow(10, -11);
+    double tol = pow(10, -16);
 
     unsigned int alphaAbs;
 
@@ -1136,7 +1136,7 @@ int test_harmonic_h_3D(void) {
 
     int testsPassed = 0;
     int totalTests = 0;
-    double tol = 5 * pow(10, -10);
+    double tol = 5 * pow(10, -14);
 
     unsigned int alphaAbs;
 
@@ -1385,7 +1385,7 @@ int test_crandall_g_der(void) {
     int totalTests = 0;
     int dim = 3;
     double prefactor = 1.;
-    double tol = 5 * pow(10, -12);
+    double tol = 5 * pow(10, -14);
 
     double *nuRef = malloc(sizeof(double));
     double *z = malloc(dim * sizeof(double));
