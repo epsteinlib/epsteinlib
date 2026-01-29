@@ -738,8 +738,8 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             cutoffsFourier[k] = floor(cutoff_id * ev_abs_max);
         }
     }
-    // Use harmonic method
-    unsigned int harmonicMethod = (dim == 1 || alphaAbs > 0) && (variant == 2);
+    // Always use harmonic method, this silences polynomial_p approach
+    unsigned int harmonicMethod = (variant == 2);
     // handle special case of non-positive integer values nu.
     double complex res = 0.;
     double y_t2_squared = dot(dim, y_t2, y_t2);
