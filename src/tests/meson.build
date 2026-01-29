@@ -39,6 +39,15 @@ test_epsteinZetaRegDer = executable('epsteinlib_test_epsteinZetaRegDer',
     link_with : epsteinlib
 )
 
+test_tools= executable('epsteinlib_test_tools',
+    ['../tools.c','utils.c','test_tools.c'],
+    include_directories : incdir,
+    dependencies: deps,
+    install: false,
+    override_options: override_options,
+    link_with : epsteinlib
+)
+
 test_crandall_der = executable('epsteinlib_test_crandall_derivatives',
     ['utils.c','test_crandall_der.c'],
     include_directories : incdir,
@@ -66,6 +75,16 @@ benchmark_gamma = executable('epsteinlib_benchmark_gamma',
     link_with : epsteinlib
 )
 
+benchmark_derivatives_timing = executable('epsteinlib_benchmark_derivatives_timing',
+    ['utils.c','benchmark_derivatives_timing.c'],
+    include_directories : incdir,
+    dependencies: deps,
+    install: false,
+    override_options: override_options,
+    link_with : epsteinlib
+)
+
+
 test('test_epsteinZeta',
     test_epsteinZeta,
     workdir: meson.current_source_dir()
@@ -88,5 +107,10 @@ test('test_epsteinZetaRegDer',
 
 test('test_crandall_derivatives',
     test_crandall_der,
+    workdir: meson.current_source_dir()
+)
+
+test('test_tools',
+    test_tools,
     workdir: meson.current_source_dir()
 )

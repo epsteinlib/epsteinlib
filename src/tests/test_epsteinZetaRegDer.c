@@ -51,7 +51,7 @@ int test_epsteinZetaRegDer_prototype(void) {
     int testsPassed = 0;
     int totalTests = 0;
     unsigned int dim = 2;
-    double tol = 5 * pow(10, -12);
+    double tol = 4 * pow(10, -12);
 
     double errMin = NAN;
     double errMax = NAN;
@@ -403,7 +403,7 @@ int test_epsteinZetaRegDer_taylor(void) { // NOLINT
     double complex valRef;
     double complex valTaylor;
 
-    double tol = 5 * pow(10, -12);
+    double tol = 5 * pow(10, -15);
     unsigned int dim = 2;
     unsigned int order = 12;
 
@@ -518,11 +518,14 @@ int test_epsteinZetaRegDer_taylor(void) { // NOLINT
  *
  * @return number of failed tests.
  */
-int main() {
+
+int main(void) {
     int failed = 0;
-    failed += test_epsteinZetaRegDer_prototype();
-    failed += test_epsteinZetaRegDer_d2k_prototype();
-    failed += test_epsteinZetaRegDer_bain_prototype();
-    failed += test_epsteinZetaRegDer_taylor();
+
+    failed += run_timed_test(test_epsteinZetaRegDer_prototype);
+    failed += run_timed_test(test_epsteinZetaRegDer_d2k_prototype);
+    failed += run_timed_test(test_epsteinZetaRegDer_bain_prototype);
+    failed += run_timed_test(test_epsteinZetaRegDer_taylor);
+
     return failed;
 }
