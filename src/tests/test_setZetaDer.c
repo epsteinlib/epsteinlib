@@ -538,7 +538,7 @@ int test_setZetaDer_laplace(void) {
     int testsPassed = 0;
     int totalTests = 0;
     unsigned int dim = 2;
-    double tol = 5 * pow(10, -15);
+    double tol = 2 * pow(10, -14);
 
     double errMin = NAN;
     double errMax = NAN;

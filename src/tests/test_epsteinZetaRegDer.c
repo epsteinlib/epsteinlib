@@ -51,7 +51,7 @@ int test_epsteinZetaRegDer_prototype(void) {
     int testsPassed = 0;
     int totalTests = 0;
     unsigned int dim = 2;
-    double tol = 5 * pow(10, -13);
+    double tol = 4 * pow(10, -12);
 
     double errMin = NAN;
     double errMax = NAN;

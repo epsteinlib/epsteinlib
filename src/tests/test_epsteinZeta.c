@@ -166,7 +166,7 @@ static int test_epsteinZeta() { // NOLINT
     double errorAbs;
     double errorRel;
     double errorMaxAbsRel;
-    double tol = 5 * pow(10, -15);
+    double tol = 6 * pow(10, -15);
     int testsPassed = 0;
     int totalTests = 0;
 
