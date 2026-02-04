@@ -933,6 +933,11 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                 res += resIt;
             }
             res *= 1. / real_int_pow(ms, alphaAbs);
+
+            free(chunk_offset);
+            free(valid_count);
+            free(coeffs);
+            free(exponents);
         } else if (variant == 2) {
             // Compute set zeta derivatives by polynomial p method
             rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
