@@ -1162,9 +1162,10 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             }
 
             double complex s1_singularity =
-                rot * sum_real_harmonic_large_exp_singularity_sum(
-                          nu, kMax, dim, m_real, x_t2, y_t2, alphaAbs, chunk_offset,
-                          valid_count, coeffs, exponents);
+                xfactor * rot *
+                sum_real_harmonic_large_exp_singularity_sum(
+                    nu, kMax, dim, m_real, x_t2, y_t2, alphaAbs, chunk_offset,
+                    valid_count, coeffs, exponents);
 
             res += s1_singularity;
 
