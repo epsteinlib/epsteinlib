@@ -963,8 +963,13 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         }
     }
     // choose harmonic method for setZetaDer in most cases
-    unsigned int harmonicMethod =
-        variant == 2 && ((dim != 2 || alphaAbs > 2 || nu < 4.5));
+    bool harmonicMethod = (variant == 2);
+    bool harmonicMethod1D = harmonicMethod && (dim == 1);
+    bool harmonicMethodHighExp = harmonicMethod && (nu > 10);
+    bool polynomialMethod =
+        (variant == 1) && !harmonicMethod; // currently never used, works for low
+                                           // derivatives and arbitrary nu, slightly
+                                           // faster than harmonic Methods in d > 1
 
     // handle special case of non-positive integer values nu.
     double complex res = 0.;
@@ -1019,7 +1024,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                           zArgBound) *
                  rot * xfactor;
             xfactor = 1;
-        } else if (dim == 1 && harmonicMethod) {
+        } else if (harmonicMethod1D) {
             // Compute set zeta derivatives by harmonic method
 
             unsigned int k = alphaAbs / 2;
@@ -1072,7 +1077,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                      real_int_pow(-2 * M_PI, alphaAbs - (2 * k));
             res += resIt;
             res *= 1. / real_int_pow(ms, alphaAbs);
-        } else if (harmonicMethod && nu > 10) {
+        } else if (harmonicMethodHighExp) {
             // Compute set zeta derivatives by harmonic method for large nu,
             // Isolate singularities in fourier sum
 
@@ -1268,7 +1273,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             free(valid_count);
             free(coeffs);
             free(exponents);
-        } else if (variant == 2) {
+        } else if (polynomialMethod) {
             // Compute set zeta derivatives by polynomial p method
             rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
             if (equals(dim, y_t1, y_t2)) {
