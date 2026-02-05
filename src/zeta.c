@@ -22,6 +22,8 @@
 #include "zeta.h"
 #include <assert.h>
 
+#include <stdio.h>
+
 /*!
    @brief Smallest value z such that G(nu, z) is negligible for
    nu < 10.
@@ -34,7 +36,8 @@
 #define EPS ldexp(1, -30)
 
 /*!
- * @brief epsilon for the cutoff around x = 0 and y = 0
+ * @brief epsilon for the cutoff around x = 0 and y = 0.
+ * It holds that M_PI * EPS_ZERO_Y = EPS_ZERO_PIY
  */
 #define EPS_ZERO_Y 1e-64
 
@@ -304,7 +307,7 @@ static double complex sum_real_harmonic_large_exp(
 
             specialCase = (zv_1_norm <= 1);
             if (specialCase) {
-                crandall = crandall_gReg(dim, nu, lv, 1. / lambda);
+                crandall = - crandall_g_lower(dim, nu, lv, 1. / lambda);
             } else {
                 crandall = crandall_g(dim, nu, lv, 1. / lambda, zArgBound);
             }
@@ -414,7 +417,7 @@ static double complex sum_real_harmonic_large_exp_singularity_sum( // NOLINT
                                coeffs, exponents);
 
                 // summing using Kahan's method
-                if (h) {
+                if (h && lvSquared > EPS_ZERO_Y) {
                     auxyInner = h * real_int_pow(lvSquared, k) - epsilonInner;
                     auxtInner = sumInner + auxyInner;
                     epsilonInner = (auxtInner - sumInner) - auxyInner;
@@ -896,6 +899,8 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     if (variant == 3 && !alphaAbs) {
         return epsteinZetaInternal(nu, dim, m, x, y, 1, 1, alpha);
     }
+
+    printf("\n");
     // Odd derivatives in zero
     if (variant == 2) {
         for (int i = 0; i < dim; i++) {
@@ -1069,9 +1074,11 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                      real_int_pow(-2 * M_PI, alphaAbs - (2 * k));
             res += resIt;
             res *= 1. / real_int_pow(ms, alphaAbs);
-        } else if (harmonicMethod && x_t2_squared > EPS_ZERO_Y && nu > -10) {
+        } else if (harmonicMethod && nu > -10) {
             // Compute set zeta derivatives by harmonic method for large nu,
             // Isolate singularities in fourier sum
+
+            double complex fulls1 = 0;
 
             // Precompute coefficients for harmonic polynomials once
             unsigned int kMax = alphaAbs / 2;
@@ -1090,6 +1097,8 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             double nuIt;
             double nuReci;
             double complex resIt;
+
+            rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
 
             // Main loop without singularities around the origin in real sum
             for (unsigned int k = 0; k <= kMax; k++) {
@@ -1117,7 +1126,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                     double zArgBoundReci = assignzArgBound(dim - nuReci);
 
                     // calculate set zeta derivative function values.
-                    rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
 
                     // skip zero summand if harmonic polynomial vanishes
                     double h = harmonic_h(k, dim, y_t2, alphaAbs, chunk_offset,
@@ -1149,6 +1157,8 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                             alphaAbs, chunk_offset, valid_count, coeffs, exponents) *
                         rot * xfactor;
 
+                    fulls1 += s1;
+
                     resIt = (s1 + pow(lambda, dim) * s2) / tgamma(nuIt / 2.);
                 }
                 resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.) *
@@ -1156,13 +1166,21 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                          real_int_pow(-2 * M_PI, alphaAbs - (2 * k));
                 res += resIt;
             }
+            printf("s1 full first: %.16lf \n",cimag(fulls1));
+            printf("xfactor: %.16lf + %.16lf I \n", creal(xfactor), cimag(xfactor));
+            printf("rot: %.16lf + %.16lf I \n", creal(rot), cimag(rot));
 
-            double complex singularity_contribution =
+            double complex s1_singularity = 
                 sum_real_harmonic_large_exp_singularity_sum(
                     nu, kMax, dim, m_real, x_t2, y_t2, alphaAbs, chunk_offset,
                     valid_count, coeffs, exponents);
 
-            res += singularity_contribution;
+            res += s1_singularity;
+
+            fulls1 += s1_singularity;
+
+            printf("singularity : %.16lf \n", cimag( s1_singularity));
+            printf("res old: %.16lf + %.16lf \n", creal(res ), cimag(res));
 
             res *= 1. / real_int_pow(ms, alphaAbs);
 
@@ -1171,6 +1189,9 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             free(coeffs);
             free(exponents);
         } else if (harmonicMethod) {
+
+            double complex fulls1 = 0;
+
             // Compute set zeta derivatives by harmonic method
 
             // Precompute coefficients for harmonic polynomials once
@@ -1248,6 +1269,8 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                            exponents) *
                          rot * xfactor;
 
+                    fulls1 += s1;
+
                     resIt = (s1 + pow(lambda, dim) * s2) / tgamma(nuIt / 2.);
                 }
                 resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.) *
@@ -1255,6 +1278,12 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                          real_int_pow(-2 * M_PI, alphaAbs - (2 * k));
                 res += resIt;
             }
+
+
+            printf("fulls1 old: %.16lf \n", cimag(fulls1));
+
+            printf("res old: %.16lf + %.16lf \n", creal(res ), cimag(res));
+
             res *= 1. / real_int_pow(ms, alphaAbs);
 
             free(chunk_offset);

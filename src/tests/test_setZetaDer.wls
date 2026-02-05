@@ -95,7 +95,11 @@ g[\[Nu]_,y_]=Piecewise[{
 	,{ExpIntegralE[1-\[Nu]/2,Pi y . y],Norm[y]<4}
 	},0
 ];
-gLower[\[Nu]_,y_]=Gamma[\[Nu]/2,0,Pi y . y]/(Pi y . y)^(\[Nu]/2);
+gLower[\[Nu]_,y_]=Piecewise[{
+	{2/\[Nu],Norm[y]<10^(-64)}
+	,{Gamma[\[Nu]/2,0,Pi y . y]/(Pi y . y)^(\[Nu]/2),Norm[y]<4}
+	}
+];
 gDer[\[Nu]_,y_,\[Alpha]_]:=Total[Flatten[Table[
 	Module[
 		{pol}
@@ -308,7 +312,7 @@ setZetaDerHighExp[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modul
 							,Module[
 								{h}
 								,h=hHarmonic[k][z,\[Alpha]]
-								;If[PossibleZeroQ[h]
+								;If[PossibleZeroQ[h]||PossibleZeroQ[Norm[z]]
 									,0
 									,h (z . z)^k
 								]
@@ -442,8 +446,23 @@ zDerTab=Join[zDerRandomTab,zDerSpecialTab];
 
 
 zDerTab={
-Flatten@{N@1/2,N@IdentityMatrix@2,{.1,.2},{0.,0.},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{1,2}/10,{0,0},{2,0}]}}
+Flatten@{N@1/2,N@IdentityMatrix@2,{0.1,0.2},{.1,.1},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{0,0}+{1,2}/10,{1,1}/10,{2,0}]}}
+,Flatten@{N@1/2,N@IdentityMatrix@2,{0.1,0.2},{5.1,5.1},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{0,0}+{1,2}/10,5+{1,1}/10,{2,0}]}}
 }
+
+
+zDerTab={
+Flatten@{N@1/2,N@IdentityMatrix@2,{0.,0.},{.1,.1},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{0,0},{1,1}/10,{2,0}]}}
+,Flatten@{N@1/2,N@IdentityMatrix@2,{0.,0.},{5.1,5.1},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{0,0},5+{1,1}/10,{2,0}]}}
+}
+
+
+setZetaDerHighExp[1/2,IdentityMatrix@2,{0,0},{1,1}/10,{2,0}]
+
+
+202.86820756211858`
+-202.86820756211858`
+Abs[%+%%]
 
 
 (* ::Text:: *)

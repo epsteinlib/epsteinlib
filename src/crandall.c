@@ -127,7 +127,8 @@ double assignzArgBound(double nu) {
  *      Crandall's formula
  * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
  * expansion in the calculation of the Crandall function.
- * @return upperGamma(nu / 2,pi prefactor * z**2) / (pi * prefactor z**2)^(nu / 2).
+ * @return upperGamma(nu / 2,pi prefactor * z**2) / (pi * prefactor z**2)^(nu / 2) if
+ * |z| > 0 and - 2 / nu otherwise.
  */
 double complex crandall_g(unsigned int dim, double nu, const double *z,
                           double prefactor, double zArgBound) {
@@ -142,6 +143,30 @@ double complex crandall_g(unsigned int dim, double nu, const double *z,
                (2 * zArgument * zArgument);
     }
     return egf_ugamma(nu / 2, zArgument) / pow(zArgument, nu / 2);
+}
+
+/**
+ * @brief Calculates the lower Crandall function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] nu: exponent of the regularized Epstein zeta function.
+ * @param[in] z: input vector of the function.
+ * @param[in] prefactor: prefactor of the vector, e. g. lambda or 1/lambda in
+ *      Crandall's formula
+ * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
+ * expansion in the calculation of the Crandall function.
+ * @return lowerGamma(nu / 2,pi prefactor * z**2) / (pi * prefactor z**2)^(nu / 2) if
+ * |z| > 0 and 2 / nu otherwise.
+ */
+double complex crandall_g_lower(unsigned int dim, double nu, const double *z,
+                                double prefactor) {
+    double zArgument = dot(dim, z, z);
+    zArgument *= M_PI * prefactor * prefactor;
+
+    if (zArgument < EPS_ZERO_PIY) {
+        return 2. / nu;
+    }
+
+    return tgamma(nu / 2) * egf_gammaStar(nu / 2, zArgument);
 }
 
 /** @brief Computes p_(alpha,beta)(y) = (-pi)^(alpha - beta) * (alpha choose beta)
