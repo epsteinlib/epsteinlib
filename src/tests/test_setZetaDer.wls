@@ -439,30 +439,30 @@ zDerSpecialTab={
 
 
 (* ::Text:: *)
+(*Add reference values for large nu.*)
+
+
+zDerLargeNu =Flatten[
+	ParallelTable[{
+			Flatten@{N@{\[Nu],{{1,0},{0,1}},{0,0},{0,0}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,0},{0,0},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.},{0,.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,0},{0,3/10},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.3},{0,.0}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,3/10},{0,0},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.2},{0,.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,2/10},{0,3/10},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,1.2},{0,.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},1+{0,2/10},{0,3/10},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.2},{0,1.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,2/10},1+{0,3/10},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,1.2},{0,1.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},1+{0,2/10},1+{0,3/10},\[Alpha]]}}
+		}
+		,{\[Nu],{1/2,30,83/3}}
+		,{\[Alpha],{{2,0},{6,8},{6,8}}}
+	]
+,2];
+
+
+(* ::Text:: *)
 (*Combine reference values.*)
 
 
-zDerTab=Join[zDerRandomTab,zDerSpecialTab];
-
-
-zDerTab={
-Flatten@{N@1/2,N@IdentityMatrix@2,{0.1,0.2},{.1,.1},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{0,0}+{1,2}/10,{1,1}/10,{2,0}]}}
-,Flatten@{N@1/2,N@IdentityMatrix@2,{0.1,0.2},{5.1,5.1},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{0,0}+{1,2}/10,5+{1,1}/10,{2,0}]}}
-}
-
-
-zDerTab={
-Flatten@{N@1/2,N@IdentityMatrix@2,{0.,0.},{.1,.1},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{0,0},{1,1}/10,{2,0}]}}
-,Flatten@{N@1/2,N@IdentityMatrix@2,{0.,0.},{5.1,5.1},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{0,0},5+{1,1}/10,{2,0}]}}
-}
-
-
-setZetaDerHighExp[1/2,IdentityMatrix@2,{0,0},{1,1}/10,{2,0}]
-
-
-202.86820756211858`
--202.86820756211858`
-Abs[%+%%]
+zDerTab=Join[zDerRandomTab,zDerSpecialTab,zDerLargeNu];
 
 
 (* ::Text:: *)

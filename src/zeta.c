@@ -1072,7 +1072,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                      real_int_pow(-2 * M_PI, alphaAbs - (2 * k));
             res += resIt;
             res *= 1. / real_int_pow(ms, alphaAbs);
-        } else if (harmonicMethod && nu > -10) {
+        } else if (harmonicMethod && nu > 10) {
             // Compute set zeta derivatives by harmonic method for large nu,
             // Isolate singularities in fourier sum
 
