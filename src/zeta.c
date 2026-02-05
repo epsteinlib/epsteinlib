@@ -22,8 +22,6 @@
 #include "zeta.h"
 #include <assert.h>
 
-#include <stdio.h>
-
 /*!
    @brief Smallest value z such that G(nu, z) is negligible for
    nu < 10.
@@ -304,10 +302,9 @@ static double complex sum_real_harmonic_large_exp(
         if (h) {
 
             // use lower Crandall for origin and its the nearest neighbors
-
             specialCase = (zv_1_norm <= 1);
             if (specialCase) {
-                crandall = - crandall_g_lower(dim, nu, lv, 1. / lambda);
+                crandall = -crandall_g_lower(dim, nu, lv, 1. / lambda);
             } else {
                 crandall = crandall_g(dim, nu, lv, 1. / lambda, zArgBound);
             }
@@ -389,6 +386,7 @@ static double complex sum_real_harmonic_large_exp_singularity_sum( // NOLINT
         if (specialCase) {
 
             matrix_intVector(dim, m, zv, lv);
+            rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
             for (int i = 0; i < dim; i++) {
                 lv[i] = lv[i] - x[i];
             }
@@ -426,8 +424,6 @@ static double complex sum_real_harmonic_large_exp_singularity_sum( // NOLINT
             }
 
             if (sumInner) {
-
-                rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
 
                 auxy = rot * sumInner * pow(lvSquared, -nu / 2) - epsilon;
                 auxt = sum + auxy;
@@ -556,6 +552,7 @@ static double complex sum_fourier(double nu, unsigned int dim, double lambda,
         totalSummands *= 2 * cutoffs[k] + 1;
     };
     long zeroIndex = (totalSummands - 1) / 2;
+    double complex rot;
     double complex sum = 0.0;
     double complex epsilon = 0.0;
     double complex auxt;
@@ -570,7 +567,7 @@ static double complex sum_fourier(double nu, unsigned int dim, double lambda,
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] + y[i];
         }
-        double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
+        rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
         auxy = rot * crandall_g(dim, dim - nu, lv, lambda, zArgBound) - epsilon;
         auxt = sum + auxy;
         epsilon = (auxt - sum) - auxy;
@@ -586,7 +583,7 @@ static double complex sum_fourier(double nu, unsigned int dim, double lambda,
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] + y[i];
         }
-        double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
+        rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
         auxy = rot * crandall_g(dim, dim - nu, lv, lambda, zArgBound) - epsilon;
         auxt = sum + auxy;
         epsilon = (auxt - sum) - auxy;
@@ -626,6 +623,7 @@ static double complex sum_fourier_der(double nu, unsigned int dim, double lambda
         totalSummands *= 2 * cutoffs[k] + 1;
     };
     long zeroIndex = (totalSummands - 1) / 2;
+    double complex rot;
     double complex sum = 0.0;
     double complex epsilon = 0.0;
     double complex auxt;
@@ -640,7 +638,7 @@ static double complex sum_fourier_der(double nu, unsigned int dim, double lambda
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] + y[i];
         }
-        double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
+        rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
         auxy = rot * crandall_g_der(dim, dim - nu, lv, lambda, zArgBound, alpha,
                                     alphaAbs) -
                epsilon;
@@ -658,7 +656,7 @@ static double complex sum_fourier_der(double nu, unsigned int dim, double lambda
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] + y[i];
         }
-        double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
+        rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
         auxy = rot * crandall_g_der(dim, dim - nu, lv, lambda, zArgBound, alpha,
                                     alphaAbs) -
                epsilon;
@@ -703,6 +701,7 @@ static double complex sum_fourier_harmonic_1D(double nu, unsigned int dim,
         totalSummands *= 2 * cutoffs[k] + 1;
     };
     long zeroIndex = (totalSummands - 1) / 2;
+    double complex rot;
     double complex sum = 0.0;
     double complex epsilon = 0.0;
     double complex auxt;
@@ -717,7 +716,7 @@ static double complex sum_fourier_harmonic_1D(double nu, unsigned int dim,
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] + y[i];
         }
-        double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
+        rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
         // symmetric addition of terms to catch same - same cancellation errors
         auxy = rot * harmonic_h_1D_kMax(lv, alphaAbs) *
                crandall_g(dim, dim - nu, lv, lambda, zArgBound);
@@ -780,6 +779,7 @@ static double complex sum_fourier_harmonic(
         totalSummands *= 2 * cutoffs[k] + 1;
     };
     long zeroIndex = (totalSummands - 1) / 2;
+    double complex rot;
     double complex sum = 0.0;
     double complex epsilon = 0.0;
     double complex auxt;
@@ -794,7 +794,7 @@ static double complex sum_fourier_harmonic(
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] + y[i];
         }
-        double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
+        rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
         auxy = rot *
                    harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
                               coeffs, exponents) *
@@ -899,8 +899,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     if (variant == 3 && !alphaAbs) {
         return epsteinZetaInternal(nu, dim, m, x, y, 1, 1, alpha);
     }
-
-    printf("\n");
     // Odd derivatives in zero
     if (variant == 2) {
         for (int i = 0; i < dim; i++) {
@@ -1078,8 +1076,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             // Compute set zeta derivatives by harmonic method for large nu,
             // Isolate singularities in fourier sum
 
-            double complex fulls1 = 0;
-
             // Precompute coefficients for harmonic polynomials once
             unsigned int kMax = alphaAbs / 2;
             unsigned long long *chunk_offset =
@@ -1157,8 +1153,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                             alphaAbs, chunk_offset, valid_count, coeffs, exponents) *
                         rot * xfactor;
 
-                    fulls1 += s1;
-
                     resIt = (s1 + pow(lambda, dim) * s2) / tgamma(nuIt / 2.);
                 }
                 resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.) *
@@ -1166,21 +1160,13 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                          real_int_pow(-2 * M_PI, alphaAbs - (2 * k));
                 res += resIt;
             }
-            printf("s1 full first: %.16lf \n",cimag(fulls1));
-            printf("xfactor: %.16lf + %.16lf I \n", creal(xfactor), cimag(xfactor));
-            printf("rot: %.16lf + %.16lf I \n", creal(rot), cimag(rot));
 
-            double complex s1_singularity = 
-                sum_real_harmonic_large_exp_singularity_sum(
-                    nu, kMax, dim, m_real, x_t2, y_t2, alphaAbs, chunk_offset,
-                    valid_count, coeffs, exponents);
+            double complex s1_singularity =
+                rot * sum_real_harmonic_large_exp_singularity_sum(
+                          nu, kMax, dim, m_real, x_t2, y_t2, alphaAbs, chunk_offset,
+                          valid_count, coeffs, exponents);
 
             res += s1_singularity;
-
-            fulls1 += s1_singularity;
-
-            printf("singularity : %.16lf \n", cimag( s1_singularity));
-            printf("res old: %.16lf + %.16lf \n", creal(res ), cimag(res));
 
             res *= 1. / real_int_pow(ms, alphaAbs);
 
@@ -1189,8 +1175,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             free(coeffs);
             free(exponents);
         } else if (harmonicMethod) {
-
-            double complex fulls1 = 0;
 
             // Compute set zeta derivatives by harmonic method
 
@@ -1269,8 +1253,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                            exponents) *
                          rot * xfactor;
 
-                    fulls1 += s1;
-
                     resIt = (s1 + pow(lambda, dim) * s2) / tgamma(nuIt / 2.);
                 }
                 resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.) *
@@ -1278,11 +1260,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                          real_int_pow(-2 * M_PI, alphaAbs - (2 * k));
                 res += resIt;
             }
-
-
-            printf("fulls1 old: %.16lf \n", cimag(fulls1));
-
-            printf("res old: %.16lf + %.16lf \n", creal(res ), cimag(res));
 
             res *= 1. / real_int_pow(ms, alphaAbs);
 
