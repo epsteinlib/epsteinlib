@@ -6,11 +6,11 @@ SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
 SPDX-License-Identifier: AGPL-3.0-only
 -->
 
-<testsuites tests="8" errors="0" failures="0"><testsuite name="epsteinlib" tests="8" errors="0" failures="0" skipped="0" time="0.024428367614746094"><testcase name="test_crandall" classname="epsteinlib" time="0.024428367614746094"><system-out>test_crandall_g 
+<testsuites tests="8" errors="0" failures="1"><testsuite name="epsteinlib" tests="8" errors="0" failures="1" skipped="0" time="0.031743526458740234"><testcase name="test_crandall" classname="epsteinlib" time="0.031743526458740234"><system-out>test_crandall_g 
 	 ... processing csv/crandall_g_Ref.csv 
-	 ... 200 out of 200 tests passed with tolerance 1.000000E-13.	    [ Error →  min: 0.000000E+00 | max: 1.128955E-14 | avg: 1.307951E-16 ]</system-out></testcase><testcase name="Minimal working example" classname="epsteinlib" time="0.010593891143798828"><system-out>Madelung sum in 3 dimensions:	 -1.7475645946331821
+	 ... 200 out of 200 tests passed with tolerance 1.000000E-13.	    [ Error →  min: 0.000000E+00 | max: 1.128955E-14 | avg: 1.307951E-16 ]</system-out></testcase><testcase name="Minimal working example" classname="epsteinlib" time="0.016524553298950195"><system-out>Madelung sum in 3 dimensions:	 -1.7475645946331821
 Reference value:		 -1.7475645946331821
-Relative error:			 +0.00e+00</system-out></testcase><testcase name="test_tools" classname="epsteinlib" time="0.027309417724609375"><system-out>test_ctzmsb 
+Relative error:			 +0.00e+00</system-out></testcase><testcase name="test_tools" classname="epsteinlib" time="0.024475812911987305"><system-out>test_ctzmsb 
 	 ... processing csv/ctzmsb_Ref.csv 
 	 ... 999 out of 999 tests passed.
 test_apint_set_ull 
@@ -33,114 +33,1138 @@ test_apint_add_fractional
 	 ... 999 out of 999 tests passed.
 test_apint_to_double 
 	 ... processing csv/apint_to_double_Ref.csv 
-	 ... 999 out of 999 tests passed.</system-out></testcase><testcase name="test_epsteinZeta" classname="epsteinlib" time="0.047266244888305664"><system-out>test_epsteinZeta 
+	 ... 999 out of 999 tests passed.</system-out></testcase><testcase name="test_epsteinZeta" classname="epsteinlib" time="0.05104565620422363"><system-out>test_epsteinZeta 
 	 ... processing csv/epsteinZeta_Ref.csv 
 	 ... 300 out of 300 tests passed with tolerance 6.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.822089E-15 | avg: 2.766178E-16 ]
-									    [ Time  →  sec: 0.004438     ]
+									    [ Time  →  sec: 0.005141     ]
 test_epsteinZetaReg 
 	 ... processing file: csv/epsteinZetaReg_Ref.csv 
 	 ... 200 out of 200 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.133043E-15 | avg: 1.747445E-16 ]
-									    [ Time  →  sec: 0.003068     ]
+									    [ Time  →  sec: 0.003241     ]
 test_epsteinZeta_epsteinZetaReg_represent_as_each_other 
 	 ... 200 out of 200 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 9.424515E-16 | avg: 1.707986E-16 ]
-									    [ Time  →  sec: 0.007321     ]
+									    [ Time  →  sec: 0.012340     ]
 test_epsteinZeta_cutoff 
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-15.
-									    [ Time  →  sec: 0.027998     ]</system-out></testcase><testcase name="test_crandall_derivatives" classname="epsteinlib" time="0.7929868698120117"><system-out>test_polynomial_p 
+									    [ Time  →  sec: 0.026070     ]</system-out></testcase><testcase name="test_crandall_derivatives" classname="epsteinlib" time="0.6528327465057373"><system-out>test_polynomial_p 
 	 ... processing csv/polynomial_p_Ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 7.486101E-16 | avg: 2.143548E-16 ]
-									    [ Time  →  sec: 0.000220     ]
+									    [ Time  →  sec: 0.000466     ]
 test_polynomial_l 
 	 ... processing csv/polynomial_l_Ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 8.548077E-16 | avg: 1.494514E-16 ]
-									    [ Time  →  sec: 0.000214     ]
+									    [ Time  →  sec: 0.000359     ]
 test_polynomial_y_der 
 	 ... processing csv/polynomial_y_der_Ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.081439E-15 | avg: 1.747025E-16 ]
-									    [ Time  →  sec: 0.000273     ]
+									    [ Time  →  sec: 0.000500     ]
 test_coeffs_c_inner 
 	 ... processing csv/coeffs_c_inner_Ref.csv 
 	 ... 999 out of 999 tests passed with tolerance 1.000000E-16.	    [ Error →  min: 0.000000E+00 | max: 0.000000E+00 | avg: 0.000000E+00 ]
-									    [ Time  →  sec: 0.000472     ]
+									    [ Time  →  sec: 0.000731     ]
 test_harmonic_h_inner 
 	 ... processing csv/harmonic_h_inner_Ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-16.	    [ Error →  min: 0.000000E+00 | max: 0.000000E+00 | avg: 0.000000E+00 ]
-									    [ Time  →  sec: 0.000519     ]
+									    [ Time  →  sec: 0.000786     ]
 test_harmonic_h_1D 
 	 ... processing csv/harmonic_h_1D_Ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-16.	    [ Error →  min: 0.000000E+00 | max: 0.000000E+00 | avg: 0.000000E+00 ]
-									    [ Time  →  sec: 0.000094     ]
+									    [ Time  →  sec: 0.000128     ]
 test_harmonic_h_3D 
 	 ... processing csv/harmonic_h_3D_Ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-14.	    [ Error →  min: 0.000000E+00 | max: 1.123220E-14 | avg: 2.469984E-16 ]
-									    [ Time  →  sec: 0.598138     ]
+									    [ Time  →  sec: 0.525114     ]
 test_log_l_der 
 	 ... processing csv/log_l_der_Ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-12.	    [ Error →  min: 0.000000E+00 | max: 1.531882E-12 | avg: 3.771422E-14 ]
-									    [ Time  →  sec: 0.000283     ]
+									    [ Time  →  sec: 0.000218     ]
 test_singularity_s_der 
 	 ... processing csv/singularity_s_der_Ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-11.	    [ Error →  min: 0.000000E+00 | max: 1.632727E-11 | avg: 4.399605E-13 ]
-									    [ Time  →  sec: 0.003865     ]
+									    [ Time  →  sec: 0.003260     ]
 test_crandall_g_der 
 	 ... processing csv/crandall_g_der_Ref.csv 
 	 ... 10 out of 10 tests passed with tolerance 5.000000E-14.	    [ Error →  min: 3.913984E-16 | max: 2.431066E-14 | avg: 7.936357E-15 ]
-									    [ Time  →  sec: 0.000099     ]
+									    [ Time  →  sec: 0.000063     ]
 test_crandall_gReg_der 
 	 ... processing csv/crandall_gReg_der_Ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-11.	    [ Error →  min: 0.000000E+00 | max: 8.235915E-12 | avg: 1.292117E-13 ]
-									    [ Time  →  sec: 0.000575     ]
+									    [ Time  →  sec: 0.000469     ]
 test_crandall_gReg_der_d2k_prototype 
 	 ... processing csv/crandall_gReg_der_d2k_prototype_Ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-10.	    [ Error →  min: 0.000000E+00 | max: 7.883412E-11 | avg: 8.475243E-13 ]
-									    [ Time  →  sec: 0.001744     ]
+									    [ Time  →  sec: 0.001506     ]
 test_crandall_g_der_taylor 
 	 ... generating test values
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-14.	    [ Error →  min: 0.000000E+00 | max: 7.490270E-15 | avg: 3.891047E-16 ]
-									    [ Time  →  sec: 0.071050     ]
+									    [ Time  →  sec: 0.060036     ]
 test_crandall_gReg_der_taylor 
 	 ... generating test values
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 7.880421E-16 | avg: 1.069885E-16 ]
-									    [ Time  →  sec: 0.110228     ]</system-out></testcase><testcase name="test_setZetaDer" classname="epsteinlib" time="0.8912971019744873"><system-out>test_setZetaDer_1D 
+									    [ Time  →  sec: 0.052178     ]</system-out></testcase><testcase name="test_setZetaDer" classname="epsteinlib" time="0.8475594520568848"><failure /><system-out>test_setZetaDer_1D 
 	 ... processing csv/setZetaDer_1D_Ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-13.	    [ Error →  min: 0.000000E+00 | max: 3.121163E-13 | avg: 7.158838E-15 ]
-									    [ Time  →  sec: 0.000770     ]
+									    [ Time  →  sec: 0.000623     ]
 test_setZetaDer_2D 
 	 ... processing csv/setZetaDer_2D_Ref.csv 
-	 ... 200 out of 200 tests passed with tolerance 5.000000E-12.	    [ Error →  min: 0.000000E+00 | max: 4.247600E-12 | avg: 4.698729E-14 ]
-									    [ Time  →  sec: 0.128909     ]
+
+Warning! setZetaDer:  1824.8057634553395019 -1369.6753812049810222 I (this implementation) 
+		!= 1830.6378167877367105 -1329.6169204766881649 I (reference implementation)
+Min(Emax, Erel):      1.789169E-02 !&lt; 5.000000E-12  (tolerance)
+
+nu:		 0.5000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[1.1000000000000001, 1.2000000000000000]
+y:		[3.1000000000000001, 3.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  2746894795.3004608154296875 -1995736884.6342992782592773 I (this implementation) 
+		!= 2746895031.3807816505432129 -1995735921.9117434024810791 I (reference implementation)
+Min(Emax, Erel):      2.919423E-07 !&lt; 5.000000E-12  (tolerance)
+
+nu:		 0.5000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[1.1000000000000001, 1.2000000000000000]
+y:		[3.1000000000000001, 3.0000000000000000]
+alpha:		[2, 4]
+
+
+	 ... 198 out of 200 tests passed with tolerance 5.000000E-12.	    [ Error →  min: 0.000000E+00 | max: 1.789169E-02 | avg: 8.945990E-05 ]
+									    [ Time  →  sec: 0.183327     ]
 test_setZetaDer_taylor 
 	 ... generating test values
-	 ... 10  out of 10  tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.008703E-15 | avg: 2.689972E-16 ]
-									    [ Time  →  sec: 0.722888     ]
+Warning! setZetaDer:  -0.1313240326510370 -0.0011477504958460 I (as a taylor series) 
+		!= -0.1313426267125456 -0.0014745074514776 I (reference implementation)
+Min(Emax, Erel):      3.272856E-04 !&lt; 5.000000E-15  (tolerance)
+
+nu:		 -5.8399999999999999
+x:		[0.0030000000000000, -0.0020000000000000]
+y0:		[-1.0000000000000000, -1.9700000000000000]
+yPlus:		[-0.9900000000000000, -1.9650000000000001]
+yDiff:		[0.0100000000000000, 0.0050000000000000]
+
+Warning! setZetaDer:  0.2571328224256124 +0.0023881420592706 I (as a taylor series) 
+		!= 0.2572057196584422 +0.0064282511894342 I (reference implementation)
+Min(Emax, Erel):      4.040767E-03 !&lt; 5.000000E-15  (tolerance)
+
+nu:		 -2.5099999999999998
+x:		[0.0060000000000000, -0.0040000000000000]
+y0:		[-0.9000000000000001, -1.9199999999999999]
+yPlus:		[-0.8900000000000001, -1.9150000000000000]
+yDiff:		[0.0100000000000000, 0.0050000000000000]
+
+Warning! setZetaDer:  40.1448934743912105 +1.0403900993635617 I (as a taylor series) 
+		!= 40.1441342714543481 +1.0481350079694962 I (reference implementation)
+Min(Emax, Erel):      1.937862E-04 !&lt; 5.000000E-15  (tolerance)
+
+nu:		 0.8200000000000003
+x:		[0.0090000000000000, -0.0060000000000000]
+y0:		[-0.8000000000000000, -1.8700000000000001]
+yPlus:		[-0.7900000000000000, -1.8650000000000002]
+yDiff:		[0.0100000000000000, 0.0050000000000000]
+
+Warning! setZetaDer:  43621238.1269803866744041 +1711097.4057224886491895 I (as a taylor series) 
+		!= 43619905.1370639279484749 +1711085.9825306569691747 I (reference implementation)
+Min(Emax, Erel):      3.053685E-05 !&lt; 5.000000E-15  (tolerance)
+
+nu:		 4.1499999999999986
+x:		[0.0120000000000000, -0.0080000000000000]
+y0:		[-0.7000000000000001, -1.8200000000000001]
+yPlus:		[-0.6900000000000001, -1.8150000000000002]
+yDiff:		[0.0100000000000000, 0.0050000000000000]
+
+Warning! setZetaDer:  11088990897358.7871093750000000 +613758415194.7255859375000000 I (as a taylor series) 
+		!= 11088990897393.6445312500000000 +613758415195.3128662109375000 I (reference implementation)
+Min(Emax, Erel):      3.139068E-12 !&lt; 5.000000E-15  (tolerance)
+
+nu:		 7.4800000000000004
+x:		[0.0150000000000000, -0.0100000000000000]
+y0:		[-0.6000000000000001, -1.7700000000000000]
+yPlus:		[-0.5900000000000001, -1.7650000000000001]
+yDiff:		[0.0100000000000000, 0.0050000000000000]
+
+Warning! setZetaDer:  991138872809540096.0000000000000000 +73369082970445248.0000000000000000 I (as a taylor series) 
+		!= 991138872816006016.0000000000000000 +73369082970624768.0000000000000000 I (reference implementation)
+Min(Emax, Erel):      6.508434E-12 !&lt; 5.000000E-15  (tolerance)
+
+nu:		 10.8100000000000023
+x:		[0.0180000000000000, -0.0120000000000000]
+y0:		[-0.5000000000000000, -1.7200000000000000]
+yPlus:		[-0.4900000000000000, -1.7150000000000001]
+yDiff:		[0.0100000000000000, 0.0050000000000000]
+
+Warning! setZetaDer:  39153575841389982253056.0000000000000000 +3730889622669643743232.0000000000000000 I (as a taylor series) 
+		!= 39153575841863770832896.0000000000000000 +3730889622689166131200.0000000000000000 I (reference implementation)
+Min(Emax, Erel):      1.205643E-11 !&lt; 5.000000E-15  (tolerance)
+
+nu:		 14.1400000000000006
+x:		[0.0210000000000000, -0.0140000000000000]
+y0:		[-0.4000000000000000, -1.6699999999999999]
+yPlus:		[-0.3900000000000000, -1.6650000000000000]
+yDiff:		[0.0100000000000000, 0.0050000000000000]
+
+Warning! setZetaDer:  793706248731444811074109440.0000000000000000 +94598781217339652454744064.0000000000000000 I (as a taylor series) 
+		!= 793706248747856533947154432.0000000000000000 +94598781218277965369966592.0000000000000000 I (reference implementation)
+Min(Emax, Erel):      2.056554E-11 !&lt; 5.000000E-15  (tolerance)
+
+nu:		 17.4699999999999989
+x:		[0.0240000000000000, -0.0160000000000000]
+y0:		[-0.3000000000000000, -1.6200000000000001]
+yPlus:		[-0.2900000000000000, -1.6150000000000002]
+yDiff:		[0.0100000000000000, 0.0050000000000000]
+
+Warning! setZetaDer:  9165966111162410316132534714368.0000000000000000 +1336254925142841103044592009216.0000000000000000 I (as a taylor series) 
+		!= 9165966111466620589662063820800.0000000000000000 +1336254925165871667114034593792.0000000000000000 I (reference implementation)
+Min(Emax, Erel):      3.293593E-11 !&lt; 5.000000E-15  (tolerance)
+
+nu:		 20.7999999999999972
+x:		[0.0270000000000000, -0.0180000000000000]
+y0:		[-0.2000000000000001, -1.5700000000000001]
+yPlus:		[-0.1900000000000001, -1.5650000000000002]
+yDiff:		[0.0100000000000000, 0.0050000000000000]
+
+	 ... 1  out of 10  tests passed with tolerance 5.000000E-15.	    [ Error →  min: 1.008703E-15 | max: 4.040767E-03 | avg: 4.592375E-04 ]
+									    [ Time  →  sec: 0.628425     ]
 test_setZetaDer_odd 
 	 ... processing csv/setZetaDer_odd_Ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-16.	    [ Error →  min: 0.000000E+00 | max: 0.000000E+00 | avg: 0.000000E+00 ]
-									    [ Time  →  sec: 0.000257     ]
+									    [ Time  →  sec: 0.000207     ]
 test_setZetaDer_laplace 
 	 ... processing csv/setZetaDer_laplace_Ref.csv 
-	 ... 100 out of 100 tests passed with tolerance 2.000000E-14.	    [ Error →  min: 0.000000E+00 | max: 3.012029E-15 | avg: 6.805887E-16 ]
-									    [ Time  →  sec: 0.012775     ]
+
+Warning! setZetaDer:  789.4616020520493294 +17.9155218666106855 I (this implementation) 
+		!= 792.9925827757109573 +16.6585701274170610 I (reference implementation)
+Min(Emax, Erel):      4.725399E-03 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -6.3561929797406993
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[0.7229224240635372, -0.0027153987783458]
+y:		[-0.1839392139289156, -0.7521972327071259]
+
+
+
+Warning! setZetaDer:  135971.1208240823762026 -486240.3156275209039450 I (this implementation) 
+		!= 135265.0906453340430744 -486659.7513138875947334 I (reference implementation)
+Min(Emax, Erel):      1.625833E-03 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -9.1603943630929319
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[0.7147048734964750, -0.7301443633675067]
+y:		[0.8988677135982057, 0.2129239796826396]
+
+
+
+Warning! setZetaDer:  -4.6473506758415724 -7.0941430096767242 I (this implementation) 
+		!= -5.1300111795307863 -0.2140938847332605 I (reference implementation)
+Min(Emax, Erel):      1.343264E+00 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -1.8083538471131870
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[0.1356158709922770, -0.2228297015297287]
+y:		[0.6004079911884960, 0.3258388379323473]
+
+
+
+Warning! setZetaDer:  -4.8505163312763937 -10.8936734119540404 I (this implementation) 
+		!= -4.8505163312761779 -10.8936734119542287 I (reference implementation)
+Min(Emax, Erel):      2.401890E-14 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -4.3199462634495864
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[0.9348698643198224, -0.4351775501246342]
+y:		[0.4462883976721926, -0.5670701445835710]
+
+
+
+Warning! setZetaDer:  4.1949836473038244 -1.7063933293601188 I (this implementation) 
+		!= 4.1949836473039266 -1.7063933293601283 I (reference implementation)
+Min(Emax, Erel):      2.265208E-14 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -1.4476371915159709
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.5078283011119314, -0.4606488795800260]
+y:		[-0.2269903873680096, 0.6765232474850363]
+
+
+
+Warning! setZetaDer:  450.6344302953751821 -349.8675136359823341 I (this implementation) 
+		!= -25.5453733654230888 -2.2432533623743196 I (reference implementation)
+Min(Emax, Erel):      2.299075E+01 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -3.4501469431388219
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.2810106727236766, -0.4064418251063400]
+y:		[-0.8566754111450016, -0.1137301042950501]
+
+
+
+Warning! setZetaDer:  -0.9307911235306121 -2.4977827857240973 I (this implementation) 
+		!= -0.9307911235305241 -2.4977827857242478 I (reference implementation)
+Min(Emax, Erel):      6.542675E-14 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -4.0670265775443646
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[0.2439439741129079, 0.6611873013732507]
+y:		[0.1225380907223640, -0.6261584493109664]
+
+
+
+Warning! setZetaDer:  13.8237750941623467 -22.7577518421075027 I (this implementation) 
+		!= 9.7788597871240075 +5.2449202403391499 I (reference implementation)
+Min(Emax, Erel):      2.549719E+00 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 1.7534984716222439
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.3005504230483070, 0.6771821283039426]
+y:		[0.6678858168024085, 0.3832920549583297]
+
+
+
+Warning! setZetaDer:  73.9491178515684737 -64.5680743911757560 I (this implementation) 
+		!= -4.0655539729515295 +21.7178089481529888 I (reference implementation)
+Min(Emax, Erel):      5.264757E+00 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -0.9337871313226910
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[0.4873502270309227, 0.4511856957497013]
+y:		[-0.7198406580824037, 0.2803971060799475]
+
+
+
+Warning! setZetaDer:  3.3837911298687224 -0.2973413523607746 I (this implementation) 
+		!= -4.0398565102024646 -2.8957824482870347 I (reference implementation)
+Min(Emax, Erel):      1.582386E+00 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -0.3898854256430100
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.6124533461718631, -0.8026438686418625]
+y:		[-0.5646834082465840, 0.2688447620102750]
+
+
+
+Warning! setZetaDer:  -92.8771404193452952 +138.2174651241692800 I (this implementation) 
+		!= -43.7675086121825458 -72.6854003934885498 I (reference implementation)
+Min(Emax, Erel):      2.552228E+00 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 2.7769401764084058
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.6647225944213226, -0.7378479937440950]
+y:		[-0.6771426284459362, 0.2661378221915607]
+
+
+
+Warning! setZetaDer:  74.0811549571638892 +509.3383659214198929 I (this implementation) 
+		!= 123.1837284680533458 +374.3369507877656019 I (reference implementation)
+Min(Emax, Erel):      3.645259E-01 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 0.8333276630831450
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[0.7473432758143965, 0.7833162456116007]
+y:		[0.8863996777999013, 0.4820409471348264]
+
+
+
+Warning! setZetaDer:  -685.7751012728474507 -369.3978319581323717 I (this implementation) 
+		!= -616.7294444981275774 +427.7911528917273927 I (reference implementation)
+Min(Emax, Erel):      1.066083E+00 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 3.9751882402250658
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.7042579986116030, 0.7986849156526954]
+y:		[0.5448542428409540, -0.2079684033309575]
+
+
+
+Warning! setZetaDer:  -66.9817256317028438 +23.4242635067779617 I (this implementation) 
+		!= -79.5734805002611978 +23.6511549472078428 I (reference implementation)
+Min(Emax, Erel):      1.517070E-01 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -4.5839492268946911
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[0.8796438175545611, 0.1368580666822076]
+y:		[0.8665478046231400, 0.1156485270957063]
+
+
+
+Warning! setZetaDer:  4331994.7854992561042309 +1807914.7239291807636619 I (this implementation) 
+		!= 4333161.5756792332977057 +1806401.2894243821501732 I (reference implementation)
+Min(Emax, Erel):      4.070604E-04 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -5.8901124595494574
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.5571182608833380, -0.0099478670320453]
+y:		[-1.1202782659427897, -0.6752200044163553]
+
+
+
+Warning! setZetaDer:  51.9956866729834815 +128.4681604390784173 I (this implementation) 
+		!= 69.4625820826682627 +371.4629162250612922 I (reference implementation)
+Min(Emax, Erel):      6.446694E-01 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -5.3529102786006284
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.7722012274357755, 0.8531319668410624]
+y:		[0.9721080370758186, 0.1329093048012291]
+
+
+
+Warning! setZetaDer:  11.5483762861541379 -3.0161791248173353 I (this implementation) 
+		!= 11.4439133279914227 +1.4154558828412982 I (reference implementation)
+Min(Emax, Erel):      3.844264E-01 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 0.7155498004534430
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[0.4617259085207314, 0.8344253198125527]
+y:		[-0.6432636651475991, 0.1132616510176105]
+
+
+
+Warning! setZetaDer:  -62.5832872516862153 +394.9769686487659328 I (this implementation) 
+		!= 156.0052145403928705 -126.5042168810861227 I (reference implementation)
+Min(Emax, Erel):      2.815233E+00 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -3.2943075939986408
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.1659742926175325, 0.4750711431859519]
+y:		[-0.6516963036373027, -0.7078968102895060]
+
+
+
+Warning! setZetaDer:  33.6837157928269519 -112.1383948425928452 I (this implementation) 
+		!= -4.3252577798079406 -22.2646736578293805 I (reference implementation)
+Min(Emax, Erel):      4.302322E+00 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 0.6384051597891280
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[0.6108476976679814, -0.5546111285491929]
+y:		[-0.9439199061199565, -0.2338627007057197]
+
+
+
+Warning! setZetaDer:  2645.4363014633572675 +4026.3279196289613537 I (this implementation) 
+		!= 838.4783052457178201 +2399.2372150951246113 I (reference implementation)
+Min(Emax, Erel):      9.567330E-01 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -4.9494488623842718
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[0.0306037630757362, 0.4727416807499528]
+y:		[-0.8174577580385444, -0.2803882446083328]
+
+
+
+Warning! setZetaDer:  6029221.6822636295109987 -546444.6858332795090973 I (this implementation) 
+		!= 6030421.2206043321639299 -548797.6262495445553213 I (reference implementation)
+Min(Emax, Erel):      4.361545E-04 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -5.9716518470531152
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.5226068651232109, 0.0641741295716498]
+y:		[-1.1067420784746764, -0.6590674855543743]
+
+
+
+Warning! setZetaDer:  0.1631379127782648 +1.5145833444240924 I (this implementation) 
+		!= 0.1631379127783083 +1.5145833444241297 I (reference implementation)
+Min(Emax, Erel):      3.764172E-14 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -0.1475556992861280
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.7643884641129065, -0.1663342003925487]
+y:		[-0.4586439260564667, 0.7104196615072741]
+
+
+
+Warning! setZetaDer:  159425.3701636152982246 -115496.5324057485559024 I (this implementation) 
+		!= 139779.7523713036789559 -108826.1939368991588708 I (reference implementation)
+Min(Emax, Erel):      1.171173E-01 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -9.2456122946944514
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.5764923146710301, -0.3148282167055442]
+y:		[-0.5924964935909730, 0.5147772352736888]
+
+
+
+Warning! setZetaDer:  -502.8642102560416447 +246.9696424701541844 I (this implementation) 
+		!= -307.8746976955495143 -429.2993642910325889 I (reference implementation)
+Min(Emax, Erel):      1.332271E+00 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 3.6750038220338381
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.3088640189186026, 0.8090181915561773]
+y:		[0.8117126930218869, 0.0979121338190867]
+
+
+
+Warning! setZetaDer:  -120.4429418099560394 +339.2531988322264738 I (this implementation) 
+		!= -228.4536513689874084 +243.7768452504296022 I (reference implementation)
+Min(Emax, Erel):      4.314958E-01 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -5.2812157988923518
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.1687475008675465, 0.0645820158480290]
+y:		[0.6755838676252202, 0.2650483440497705]
+
+
+
+Warning! setZetaDer:  28.4201592637694844 -81.1264117509033724 I (this implementation) 
+		!= -2.2561949609136147 -1.8038321150345618 I (reference implementation)
+Min(Emax, Erel):      2.944215E+01 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -1.7180074858261469
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.3324145807415812, -0.7917319032401172]
+y:		[0.4258468327832656, 0.4236392466293628]
+
+
+
+Warning! setZetaDer:  -304221524.5180654525756836 -150634319.5105720162391663 I (this implementation) 
+		!= -304221143.7175427675247192 -150631474.8778111040592194 I (reference implementation)
+Min(Emax, Erel):      8.454361E-06 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -7.2962770792492693
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.2935921418485918, -0.4842457700397196]
+y:		[-0.8516078812837106, -0.5091461068842874]
+
+
+
+Warning! setZetaDer:  -266.8384928604057222 -214.9630913314908298 I (this implementation) 
+		!= -227.7469995582100637 +198.1476560021166335 I (reference implementation)
+Min(Emax, Erel):      1.374576E+00 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 4.1605927911584404
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.8190421678316180, 0.6919722646397390]
+y:		[-0.0734950275024798, 0.6769495806071986]
+
+
+
+Warning! setZetaDer:  -755.4839542320978580 +532.2539658226004349 I (this implementation) 
+		!= -550.0499591786222027 +330.1760723743101948 I (reference implementation)
+Min(Emax, Erel):      4.491770E-01 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 0.8313265018430320
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[0.0482632567249553, 0.9314082953182358]
+y:		[-0.8944732841242077, -0.5066142763398283]
+
+
+
+Warning! setZetaDer:  1333.3354658421135355 -765.8181236546881792 I (this implementation) 
+		!= 157.0939208088746284 -62.2452615932763536 I (reference implementation)
+Min(Emax, Erel):      8.111231E+00 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -4.1006442514075179
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[0.4221070586454435, 0.2389163476832075]
+y:		[-0.6699141631437645, -0.4929141173289947]
+
+
+
+Warning! setZetaDer:  -15.7544875873193000 +9.1659923185799812 I (this implementation) 
+		!= 0.8324902248560946 +1.3079900391303763 I (reference implementation)
+Min(Emax, Erel):      1.183801E+01 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 2.0697908638772820
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[0.4944660203953224, -0.2921919605495712]
+y:		[-0.5496833741351541, -0.6589824065567067]
+
+
+
+Warning! setZetaDer:  -352.3055722810108819 -41.7678259264674665 I (this implementation) 
+		!= 282.6377115839434282 +111.0372000997403887 I (reference implementation)
+Min(Emax, Erel):      2.150621E+00 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 4.1722526049370101
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[0.2832829503197000, 0.3209340580063901]
+y:		[-0.6675664816023559, -0.6240655561578746]
+
+
+
+Warning! setZetaDer:  -566.7976798523422985 +611.0011622113877365 I (this implementation) 
+		!= 590.9657272667463985 -18.6149197314791621 I (reference implementation)
+Min(Emax, Erel):      2.228955E+00 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -6.9616296384090832
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.4695353838670627, 0.1215341666646869]
+y:		[-0.1650629416044629, -0.4898381013068616]
+
+
+
+Warning! setZetaDer:  -15.3822826441129497 +58.6347172574722038 I (this implementation) 
+		!= -25.3965128724836227 +22.1909094806457361 I (reference implementation)
+Min(Emax, Erel):      1.120650E+00 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -4.6627908046308768
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.4042969355433741, -0.7069281122655192]
+y:		[0.0199863594714255, -0.5923651482790530]
+
+
+
+Warning! setZetaDer:  8917.9456225134836131 -24374.2050355643223156 I (this implementation) 
+		!= -3783.1739689697064932 -23077.9671396423618717 I (reference implementation)
+Min(Emax, Erel):      5.459289E-01 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -9.0625003084801214
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.4587259099625779, 0.4063652166464965]
+y:		[-0.8361146099532899, -0.1330649476426617]
+
+
+
+Warning! setZetaDer:  38.3896799759585505 -81.1852561342774095 I (this implementation) 
+		!= 20.8105987452949321 -22.1285631739372164 I (reference implementation)
+Min(Emax, Erel):      2.028435E+00 !&lt; 2.000000E-14  (tolerance)
+
+nu:		 -2.5701283064135252
+a:		 [1.0000000000000000, 0.5000000000000000]
+		 [0.0000000000000000, 0.8660254037844386]
+x:		[-0.1723435784042657, -0.7503634524942470]
+y:		[-0.0639360403492345, -0.7195725995134167]
+
+
+	 ... 64 out of 100 tests passed with tolerance 2.000000E-14.	    [ Error →  min: 1.005275E-38 | max: 2.944215E+01 | avg: 1.081466E+00 ]
+									    [ Time  →  sec: 0.011204     ]
 test_setZetaDer_special_exponents 
 	 ... processing csv/setZetaDer_special_exponents_Ref.csv 
-	 ... 872 out of 872 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.546177E-15 | avg: 1.416825E-16 ]
-									    [ Time  →  sec: 0.021207     ]</system-out></testcase><testcase name="test_epsteinlib" classname="epsteinlib" time="2.668344020843506"><system-err>.................
-----------------------------------------------------------------------
-Ran 17 tests in 2.492s
 
-OK</system-err></testcase><testcase name="test_epsteinZetaRegDer" classname="epsteinlib" time="2.96455979347229"><system-out>test_epsteinZetaRegDer_prototype 
+Warning! setZetaDer:  -2.2789275425241300 +0.0000000000000000 I (this implementation) 
+		!= -2.2789275425241589 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      1.266640E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -9.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.0000009536743164, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  -0.3755042540851434 +0.0000000000000000 I (this implementation) 
+		!= -0.3755042540851631 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      1.970646E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -5.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.0000009536743164, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  0.3192725300460921 +0.0000000000000000 I (this implementation) 
+		!= 0.3192725300461005 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      8.382184E-15 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -3.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.0000009536743164, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  -0.5802198629207567 +0.0000000000000000 I (this implementation) 
+		!= -0.5802198629207719 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      1.521006E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -1.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.0000009536743164, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  20.6958722908252639 +0.0000000000000000 I (this implementation) 
+		!= 20.6958722908258821 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      2.986935E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -3.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.0000009536743164, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[4, 0]
+
+
+
+Warning! setZetaDer:  -20.4314493268993829 +0.0000000000000000 I (this implementation) 
+		!= -20.4314493268997666 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      1.877953E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -1.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.0000009536743164, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[4, 0]
+
+
+
+Warning! setZetaDer:  -1.8043483791196309 +0.0000000000000000 I (this implementation) 
+		!= -1.8043483791196653 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      1.907443E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -9.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  0.5925591591057326 +0.0000000000000000 I (this implementation) 
+		!= 0.5925591591057073 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      2.531308E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -7.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  -0.2932829008445879 +0.0000000000000000 I (this implementation) 
+		!= -0.2932829008446298 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      4.196643E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -5.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  0.2441197799823271 +0.0000000000000000 I (this implementation) 
+		!= 0.2441197799822911 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      3.599898E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -3.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  -0.4050638627938241 +0.0000000000000000 I (this implementation) 
+		!= -0.4050638627938376 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      1.348921E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -1.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  0.8983825852310616 +0.0000000000000000 I (this implementation) 
+		!= 0.8983825852310692 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      7.549517E-15 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 1.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  -370.5042102586776309 +0.0000000000000000 I (this implementation) 
+		!= -370.5042102586748456 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      7.517668E-15 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -9.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[4, 0]
+
+
+
+Warning! setZetaDer:  -31.3052870145302222 +0.0000000000000000 I (this implementation) 
+		!= -31.3052870145277140 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      8.012116E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -5.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[4, 0]
+
+
+
+Warning! setZetaDer:  16.9471236774320460 +0.0000000000000000 I (this implementation) 
+		!= 16.9471236774328951 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      5.010281E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -3.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[4, 0]
+
+
+
+Warning! setZetaDer:  -16.8469480405392460 +0.0000000000000000 I (this implementation) 
+		!= -16.8469480405379741 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      7.549566E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -1.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[4, 0]
+
+
+
+Warning! setZetaDer:  51.9278753329062965 +0.0000000000000000 I (this implementation) 
+		!= 51.9278753329057920 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      9.715116E-15 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 1.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[4, 0]
+
+
+
+Warning! setZetaDer:  -2.2789275425241300 -0.0000000000000000 I (this implementation) 
+		!= -2.2789275425241589 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      1.266640E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -9.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.0000009536743164, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  -0.3755042540851434 -0.0000000000000000 I (this implementation) 
+		!= -0.3755042540851631 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      1.970646E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -5.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.0000009536743164, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  0.3192725300460921 +0.0000000000000000 I (this implementation) 
+		!= 0.3192725300461005 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      8.382184E-15 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -3.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.0000009536743164, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  -0.5802198629207567 -0.0000000000000000 I (this implementation) 
+		!= -0.5802198629207719 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      1.521006E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -1.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.0000009536743164, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  20.6958722908252639 +0.0000000000000000 I (this implementation) 
+		!= 20.6958722908258821 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      2.986935E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -3.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.0000009536743164, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[4, 0]
+
+
+
+Warning! setZetaDer:  -20.4314493268993829 -0.0000000000000000 I (this implementation) 
+		!= -20.4314493268997666 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      1.877953E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -1.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.0000009536743164, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[4, 0]
+
+
+
+Warning! setZetaDer:  -1.8043483791196309 -0.0000000000000000 I (this implementation) 
+		!= -1.8043483791196653 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      1.907443E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -9.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  0.5925591591057326 +0.0000000000000000 I (this implementation) 
+		!= 0.5925591591057073 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      2.531308E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -7.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  -0.2932829008445879 -0.0000000000000000 I (this implementation) 
+		!= -0.2932829008446298 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      4.196643E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -5.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  0.2441197799823271 +0.0000000000000000 I (this implementation) 
+		!= 0.2441197799822911 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      3.599898E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -3.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  -0.4050638627938241 -0.0000000000000000 I (this implementation) 
+		!= -0.4050638627938376 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      1.348921E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -1.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  0.8983825852310616 +0.0000000000000000 I (this implementation) 
+		!= 0.8983825852310692 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      7.549517E-15 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 1.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[2, 0]
+
+
+
+Warning! setZetaDer:  -370.5042102586776309 -0.0000000000000000 I (this implementation) 
+		!= -370.5042102586748456 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      7.517668E-15 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -9.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[4, 0]
+
+
+
+Warning! setZetaDer:  -31.3052870145302222 -0.0000000000000000 I (this implementation) 
+		!= -31.3052870145277140 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      8.012116E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -5.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[4, 0]
+
+
+
+Warning! setZetaDer:  16.9471236774320460 +0.0000000000000000 I (this implementation) 
+		!= 16.9471236774328951 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      5.010281E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -3.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[4, 0]
+
+
+
+Warning! setZetaDer:  -16.8469480405392460 -0.0000000000000000 I (this implementation) 
+		!= -16.8469480405379741 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      7.549566E-14 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 -1.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[4, 0]
+
+
+
+Warning! setZetaDer:  51.9278753329062965 +0.0000000000000000 I (this implementation) 
+		!= 51.9278753329057920 +0.0000000000000000 I (reference implementation)
+Min(Eabs, Erel):      9.715116E-15 !&lt; 5.000000E-15  (tolerance)
+
+dim:		 2
+nu:		 1.0000000000000000
+a:		 [1.0000000000000000, 0.0000000000000000]
+		 [0.0000000000000000, 1.0000000000000000]
+x:		[0.1000000000000000, 0.0000000000000000]
+y:		[0.0000000000000000, 0.0000000000000000]
+alpha:		[4, 0]
+
+
+	 ... 838 out of 872 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 8.012116E-14 | avg: 1.251801E-15 ]
+									    [ Time  →  sec: 0.018583     ]</system-out></testcase><testcase name="test_epsteinlib" classname="epsteinlib" time="2.2855587005615234"><system-err>.................
+----------------------------------------------------------------------
+Ran 17 tests in 2.113s
+
+OK</system-err></testcase><testcase name="test_epsteinZetaRegDer" classname="epsteinlib" time="2.579418659210205"><system-out>test_epsteinZetaRegDer_prototype 
 	 ... processing csv/epsteinZetaRegDer_prototype_Ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 4.000000E-12.	    [ Error →  min: 6.795859E-18 | max: 2.446785E-13 | avg: 7.394031E-15 ]
-									    [ Time  →  sec: 0.013064     ]
+									    [ Time  →  sec: 0.010584     ]
 test_epsteinZetaRegDer_d2k_prototype 
 	 ... processing csv/epsteinZetaRegDer_d2k_prototype_Ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-11.	    [ Error →  min: 6.370986E-19 | max: 3.539860E-13 | avg: 9.150650E-15 ]
-									    [ Time  →  sec: 0.012603     ]
+									    [ Time  →  sec: 0.010093     ]
 test_epsteinZetaRegDer_bain_prototype 
 	 ... processing csv/epsteinZetaRegDer_bain_prototype_Ref.csv 
 	 ... 12 out of 12 tests passed with tolerance 5.000000E-08.	    [ Error →  min: 4.755118E-16 | max: 2.147164E-09 | avg: 1.962444E-10 ]
-									    [ Time  →  sec: 0.027087     ]
+									    [ Time  →  sec: 0.020759     ]
 test_epsteinZetaRegDer_taylor 
 	 ... generating test values
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 2.074108E-15 | avg: 1.713415E-16 ]
-									    [ Time  →  sec: 2.907124     ]</system-out></testcase></testsuite></testsuites>
+									    [ Time  →  sec: 2.534534     ]</system-out></testcase></testsuite></testsuites>

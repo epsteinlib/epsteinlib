@@ -95,6 +95,7 @@ g[\[Nu]_,y_]=Piecewise[{
 	,{ExpIntegralE[1-\[Nu]/2,Pi y . y],Norm[y]<4}
 	},0
 ];
+gLower[\[Nu]_,y_]=Gamma[\[Nu]/2,0,Pi y . y]/(Pi y . y)^(\[Nu]/2);
 gDer[\[Nu]_,y_,\[Alpha]_]:=Total[Flatten[Table[
 	Module[
 		{pol}
@@ -229,6 +230,105 @@ setZetaDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modu
 ]
 
 
+(* ::Text:: *)
+(*Isolate singularities in real sum.*)
+
+
+SumRealHarmonicHighExp[\[Nu]_,A_,x_,y_,\[Alpha]_,kIndex_,sumLim_]:=Total[Table[
+	Module[{h,crandall}
+		,h=hHarmonic[kIndex][z,\[Alpha]]
+		;If[
+			PossibleZeroQ[h]
+			,0
+			,(I)^(Total[\[Alpha]]-2kIndex)h g[\[Nu],z] Exp[-2\[Pi] I y . z]
+		]
+	]
+	,{z,(A . #-x)&/@Select[Tuples[Range[-sumLim,sumLim],Length[A]],Not[MemberQ[{0,1},Norm[#]]]&]}
+]]+Total[Table[
+	Module[{h,crandall}
+		,h=hHarmonic[kIndex][z,\[Alpha]]
+		;If[PossibleZeroQ[h]
+			,0
+			,(I)^(Total[\[Alpha]]-2kIndex)h (-gLower[\[Nu],z])Exp[-2\[Pi] I y . z]
+		]
+	]
+	,{z,(A . #-x)&/@Select[Tuples[Range[-sumLim,sumLim],Length[A]],MemberQ[{0,1},Norm[#]]&]}
+]]
+
+
+(* ::Text:: *)
+(*Prototype for large nu values.*)
+
+
+Options[setZetaDerHighExp]={InputPrecision->100,SumLim->10};
+setZetaDerHighExp[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Module[
+	{EPS,prec,sumLim,\[Nu]True,AN,xN,yN,\[Mu],res,n}
+	,EPS=10^-50
+	;prec=OptionValue[InputPrecision]
+	;sumLim=OptionValue[SumLim]
+	;n=Total[\[Alpha]]
+	;\[Nu]True=N[\[Nu]Ext,prec]
+	;AN=N[AExt,prec]
+	;\[Mu]=Abs[Det[AN]]^(1/Length[AN])
+	;AN=1/\[Mu] N[AExt,prec]
+	;xN=1/\[Mu] N[xExt,prec]
+	;yN=\[Mu] N[yExt,prec]
+	;If[Abs[\[Nu]Ext]<EPS&&n>0
+		,res=0
+		,res=Total@Table[
+			Module[
+				{\[Nu]N,sumReal,sumReci,resk}
+				,\[Nu]N=\[Nu]True-2k
+				;If[\[Nu]N<-1&&Abs[\[Nu]N/2-Round[\[Nu]N/2]]<EPS
+					,0
+					,If[Abs[\[Nu]N]<EPS
+						,If[Norm[xN]>EPS
+							,0
+							,resk=-hHarmonic[k][xN,\[Alpha]]
+							;resk*=(-2 Pi I)^n \[Pi]^(\[Nu]N/2)
+							;resk
+						]
+						,sumReal=SumRealHarmonicHighExp[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+						;sumReci=SumFourierHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+						;resk=sumReal+1/Abs[Det[AN]]sumReci
+						;resk*=\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](-2 Pi I)^(2k)(-2\[Pi])^(Total[\[Alpha]]-2k)
+						;resk
+					]
+				]
+			]
+			,{k,0,Floor[n/2]}
+		]
+		;res+=(-2 Pi I)^n Total[Table[
+			Module[{resk}
+				,resk=Total[Table[
+					If[(\[Nu]True-2k)<-1&&Abs[(\[Nu]True-2k)/2-Round[(\[Nu]True-2k)/2]]<EPS
+						,0
+						,If[Abs[\[Nu]True-2k]<EPS
+							,0
+							,Module[
+								{h}
+								,h=hHarmonic[k][z,\[Alpha]]
+								;If[PossibleZeroQ[h]
+									,0
+									,h (z . z)^k
+								]
+							]
+						]
+					]
+					,{k,0,Floor[n/2]}
+				]]
+				;If[PossibleZeroQ[resk]
+					,0
+					,resk Exp[-2\[Pi] I yN . z](z . z)^(-\[Nu]True/2)
+				]
+			]
+			,{z,(AN . #-xN)&/@Select[Tuples[Range[-sumLim,sumLim],Length[AN]],MemberQ[{0,1},Norm[#]]&]}
+		]]
+	]
+	;\[Mu]^(Total[\[Alpha]]-\[Nu]True)res
+]
+
+
 (* ::Subsection:: *)
 (*Create Epstein zeta 1D analytic reference values in x = 0*)
 
@@ -339,6 +439,11 @@ zDerSpecialTab={
 
 
 zDerTab=Join[zDerRandomTab,zDerSpecialTab];
+
+
+zDerTab={
+Flatten@{N@1/2,N@IdentityMatrix@2,{.1,.2},{0.,0.},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,{1,2}/10,{0,0},{2,0}]}}
+}
 
 
 (* ::Text:: *)
