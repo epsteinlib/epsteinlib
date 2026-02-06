@@ -222,7 +222,7 @@ setZetaDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modu
 							;resk
 						]
 						,sumReal=I^n SumRealHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
-						;sumReci=I^(2k)SumFourierHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+						;sumReci=(-1)^k SumFourierHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
 						;resk=\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci)
 						;resk
 					]
@@ -295,7 +295,7 @@ setZetaDerHighExp[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modul
 							;resk
 						]
 						,sumReal=I^n SumRealHarmonicHighExp[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
-						;sumReci=I^(2k)SumFourierHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+						;sumReci=(-1)^k SumFourierHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
 						;resk=sumReal+1/Abs[Det[AN]]sumReci
 						;resk*=\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2]
 						;resk

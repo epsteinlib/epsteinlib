@@ -934,7 +934,7 @@ static double complex summation_harmonic_1D(
         s2 = sum_fourier_harmonic_1D(nuReci, dim, m_fourier, x_t1, y_t2,
                                      cutoffsFourier, zArgBoundReci, alphaAbs);
 
-        s2 = imaginary_int_pow(2 * k) * (s2 * rot + nc);
+        s2 = negative_one_pow(k) * (s2 * rot + nc);
 
         s1 = sum_real_harmonic_1D(nuIt, dim, m_real, x_t2, y_t2, cutoffsReal,
                                   zArgBound, alphaAbs) *
@@ -1053,7 +1053,7 @@ static double complex summation_harmonic_high_exp(
                                       cutoffsFourier, zArgBoundReci, alphaAbs,
                                       chunk_offset, valid_count, coeffs, exponents);
 
-            s2 = imaginary_int_pow(2 * k) * (s2 * rot + nc);
+            s2 = negative_one_pow(k) * (s2 * rot + nc);
 
             s1 = sum_real_harmonic_large_exp(
                      nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal, zArgBound,
@@ -1183,7 +1183,7 @@ static double complex summation_harmonic(
                                       cutoffsFourier, zArgBoundReci, alphaAbs,
                                       chunk_offset, valid_count, coeffs, exponents);
 
-            s2 = imaginary_int_pow(2 * k) * (s2 * rot + nc);
+            s2 = negative_one_pow(k) * (s2 * rot + nc);
 
             s1 = sum_real_harmonic(nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal,
                                    zArgBound, alphaAbs, chunk_offset, valid_count,
