@@ -967,7 +967,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     bool harmonicMethod1D = harmonicMethod && (dim == 1);
     bool harmonicMethodHighExp = harmonicMethod && (nu > 10);
     bool polynomialMethod =
-        (variant == 1) && !harmonicMethod; // currently never used, works for low
+        (variant == 2) && !harmonicMethod; // currently never used, works for low
                                            // derivatives and arbitrary nu, slightly
                                            // faster than harmonic Methods in d > 1
 

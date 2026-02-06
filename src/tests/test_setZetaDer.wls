@@ -448,14 +448,32 @@ zDerLargeNu =Flatten[
 			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.},{0,.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,0},{0,3/10},\[Alpha]]}}
 			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.3},{0,.0}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,3/10},{0,0},\[Alpha]]}}
 			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.2},{0,.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,2/10},{0,3/10},\[Alpha]]}}
-			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,1.2},{0,.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},1+{0,2/10},{0,3/10},\[Alpha]]}}
-			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.2},{0,1.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,2/10},1+{0,3/10},\[Alpha]]}}
-			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,1.2},{0,1.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},1+{0,2/10},1+{0,3/10},\[Alpha]]}}
 		}
-		,{\[Nu],{1/2,30,83/3}}
-		,{\[Alpha],{{2,0},{6,8},{6,8}}}
+		,{\[Nu],{1/2,30,83/3,11}}
+		,{\[Alpha],{{2,0},{6,8},{6,9}}}
 	]
 ,2];
+(* 
+Note: we observe catastrophic errors for large nu and x and y not in elementary lattice cell. 
+This seems to be a floating point arithmatic error, where the small error of projecting x gets amplified.
+To test this, add above:
+	,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.2},{0,1.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,2/10},1+{0,3/10},\[Alpha]]}}
+	,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,1.2},{0,.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},1+{0,2/10},{0,3/10},\[Alpha]]}}
+	,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,1.2},{0,1.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},1+{0,2/10},1+{0,3/10},\[Alpha]]}}
+*)
+
+
+setZetaDer[30,{{1,0},{0,1}},{0,2/10},{0,3/10},{6,9}]
+setZetaDerHighExp[N@30,N@{{1,0},{0,1}},N@{0,2/10},N@{0,3/10},{6,9},InputPrecision->MachinePrecision]
+Error[%,%%]
+
+
+setZetaDer[30,{{1,0},{0,1}},{0,2/10},{0,3/10},{6,8}]
+setZetaDerHighExp[N@30,N@{{1,0},{0,1}},N@{0,2/10},N@{0,3/10},{6,8},InputPrecision->MachinePrecision]
+Error[%,%%]
+
+
+Error[%,%%]
 
 
 (* ::Text:: *)
