@@ -321,7 +321,7 @@ setZetaDerHighExp[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modul
 					]
 					,{k,0,Floor[n/2]}
 				]]
-				;If[PossibleZeroQ[resk]
+				;If[Abs[resk]<10^-16
 					,0
 					,resk Exp[-2\[Pi] I yN . z](z . z)^(-\[Nu]True/2)
 				]
@@ -453,27 +453,14 @@ zDerLargeNu =Flatten[
 		,{\[Alpha],{{2,0},{6,8},{6,9}}}
 	]
 ,2];
-(* 
-Note: we observe catastrophic errors for large nu and x and y not in elementary lattice cell. 
-This seems to be a floating point arithmatic error, where the small error of projecting x gets amplified.
+(*
+Note: we observe catastrophic errors for large nu and x and y not in elementary lattice cell.
+This seems to be a floating point arithmetic error, where the small error of projecting x gets amplified.
 To test this, add above:
 	,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.2},{0,1.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,2/10},1+{0,3/10},\[Alpha]]}}
 	,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,1.2},{0,.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},1+{0,2/10},{0,3/10},\[Alpha]]}}
 	,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,1.2},{0,1.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},1+{0,2/10},1+{0,3/10},\[Alpha]]}}
 *)
-
-
-setZetaDer[30,{{1,0},{0,1}},{0,2/10},{0,3/10},{6,9}]
-setZetaDerHighExp[N@30,N@{{1,0},{0,1}},N@{0,2/10},N@{0,3/10},{6,9},InputPrecision->MachinePrecision]
-Error[%,%%]
-
-
-setZetaDer[30,{{1,0},{0,1}},{0,2/10},{0,3/10},{6,8}]
-setZetaDerHighExp[N@30,N@{{1,0},{0,1}},N@{0,2/10},N@{0,3/10},{6,8},InputPrecision->MachinePrecision]
-Error[%,%%]
-
-
-Error[%,%%]
 
 
 (* ::Text:: *)
