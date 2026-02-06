@@ -178,7 +178,7 @@ hHarmonic[k_/;Element[k,NonNegativeIntegers]][x_List,\[Alpha]_List]:=Module[
 SumRealHarmonic[\[Nu]_,A_,x_,y_,\[Alpha]_,kIndex_,sumLim_]:=Total[Table[
 	Module[{h}
 		,h=hHarmonic[kIndex][z,\[Alpha]]
-		;If[PossibleZeroQ[h],0,(I)^(Total[\[Alpha]]-2kIndex)h g[\[Nu],z]Exp[-2\[Pi] I y . z]]
+		;If[PossibleZeroQ[h],0,h g[\[Nu],z]Exp[-2\[Pi] I y . z]]
 	]
 	,{z,(A . #-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}
 ]]
@@ -216,14 +216,16 @@ setZetaDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modu
 					,If[Abs[\[Nu]N]<EPS
 						,If[Norm[xN]>EPS
 							,0
-							,sumReal=-(I)^(Total[\[Alpha]]-2k)hHarmonic[k][xN,\[Alpha]]
+							,sumReal=-I^n hHarmonic[k][xN,\[Alpha]]
 							;resk=\[Pi]^(\[Nu]N/2)sumReal
-							;(-2Pi I)^(2k) (-2\[Pi])^(Total[\[Alpha]]-2k) resk
+							;resk*=(-2Pi)^n
+							;resk
 						]
-						,sumReal=SumRealHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
-						;sumReci=SumFourierHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+						,sumReal=I^n SumRealHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+						;sumReci=I^(2k)SumFourierHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
 						;resk=\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci)
-						;(-2Pi I)^(2k) (-2\[Pi])^(Total[\[Alpha]]-2k) resk
+						;resk*=(-2Pi)^n
+						;resk
 					]
 				]
 			]
@@ -244,7 +246,7 @@ SumRealHarmonicHighExp[\[Nu]_,A_,x_,y_,\[Alpha]_,kIndex_,sumLim_]:=Total[Table[
 		;If[
 			PossibleZeroQ[h]
 			,0
-			,(I)^(Total[\[Alpha]]-2kIndex)h g[\[Nu],z] Exp[-2\[Pi] I y . z]
+			,h g[\[Nu],z] Exp[-2\[Pi] I y . z]
 		]
 	]
 	,{z,(A . #-x)&/@Select[Tuples[Range[-sumLim,sumLim],Length[A]],Not[MemberQ[{0,1},Norm[#]]]&]}
@@ -253,7 +255,7 @@ SumRealHarmonicHighExp[\[Nu]_,A_,x_,y_,\[Alpha]_,kIndex_,sumLim_]:=Total[Table[
 		,h=hHarmonic[kIndex][z,\[Alpha]]
 		;If[PossibleZeroQ[h]
 			,0
-			,(I)^(Total[\[Alpha]]-2kIndex)h (-gLower[\[Nu],z])Exp[-2\[Pi] I y . z]
+			,h (-gLower[\[Nu],z])Exp[-2\[Pi] I y . z]
 		]
 	]
 	,{z,(A . #-x)&/@Select[Tuples[Range[-sumLim,sumLim],Length[A]],MemberQ[{0,1},Norm[#]]&]}
@@ -293,10 +295,10 @@ setZetaDerHighExp[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modul
 							;resk*=(-2 Pi I)^n \[Pi]^(\[Nu]N/2)
 							;resk
 						]
-						,sumReal=SumRealHarmonicHighExp[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
-						;sumReci=SumFourierHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+						,sumReal=I^n SumRealHarmonicHighExp[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+						;sumReci=I^(2k)SumFourierHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
 						;resk=sumReal+1/Abs[Det[AN]]sumReci
-						;resk*=\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](-2 Pi I)^(2k)(-2\[Pi])^(Total[\[Alpha]]-2k)
+						;resk*=(-2Pi)^n  \[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2]
 						;resk
 					]
 				]
