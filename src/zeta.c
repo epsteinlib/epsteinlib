@@ -876,6 +876,95 @@ static double *vectorProj(unsigned int dim, const double *m, const double *m_inv
 }
 
 /**
+ * @brief calculates set zeta derivatives by the 1-D harmonic method.
+ * @param[in] res: accumulated result from prior computation.
+ * @param[in] nu: exponent for the Epstein zeta function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] alphaAbs: total |α| of the multi-index.
+ * @param[in] lambda: splitting parameter.
+ * @param[in] ms: lattice scaling factor, pow(vol, -1./dim).
+ * @param[in] m_real: matrix that transforms the lattice (real sum).
+ * @param[in] m_fourier: matrix that transforms the lattice (Fourier sum).
+ * @param[in] x_t1: first projection of x vector to elementary lattice cell.
+ * @param[in] x_t2: second projection of x vector to elementary lattice cell.
+ * @param[in] y_t1: first projection of y vector to elementary lattice cell.
+ * @param[in] y_t2: second projection of y vector to elementary lattice cell.
+ * @param[in] x_t2_squared: precomputed dot(dim, x_t2, x_t2).
+ * @param[in] cutoffsReal: how many summands in each direction (real sum).
+ * @param[in] cutoffsFourier: how many summands in each direction (Fourier sum).
+ * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
+ * the incomplete gamma evaluation.
+ * @param[in] xfactor: precomputed prefactor for the real sum.
+ * @return updated res after adding the 1-D harmonic contribution.
+ */
+static double complex summation_harmonic_1D(
+    double complex res, double nu, unsigned int dim, unsigned int alphaAbs,
+    double lambda, double ms, const double *m_real, const double *m_fourier,
+    const double *x_t1, const double *x_t2, const double *y_t1, const double *y_t2,
+    double x_t2_squared, const int cutoffsReal[], const int cutoffsFourier[],
+    double zArgBound, double complex xfactor) {
+
+    double complex s1 = 0;
+    double complex s2 = 0;
+    double complex nc = 0;
+    double complex rot = 1;
+
+    // Compute set zeta derivatives by harmonic method
+
+    unsigned int k = alphaAbs / 2;
+    double complex resIt;
+    double nuIt = nu - (2 * k);
+
+    // skip iterartions where nuIt is a negative even integer, as
+    // 1/gamma(nIt) = 0
+    if (nuIt < -1 && fabs((nuIt / 2.) - nearbyint(nuIt / 2.)) < EPS) {
+        resIt = 0;
+        // if nu = 0, everything except the zero summand in the real sum
+        // vanishes
+    } else if (fabs(nuIt / 2) < EPS) {
+        if (x_t2_squared > EPS_ZERO_Y) {
+            resIt = 0.;
+        } else {
+            resIt = -imaginary_int_pow(alphaAbs - (2 * k)) *
+                    harmonic_h_1D_kMax(x_t2, alphaAbs);
+        }
+    } else {
+
+        double nuReci = nuIt - (2 * alphaAbs) + (4 * k);
+        double zArgBoundReci = assignzArgBound(dim - nuReci);
+
+        // calculate set zeta derivative function values.
+        rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
+
+        if (equals(dim, y_t1, y_t2)) {
+            nc = harmonic_h_1D_kMax(y_t1, alphaAbs) *
+                 crandall_g(dim, dim - nuReci, y_t1, lambda, zArgBoundReci);
+        } else {
+            nc = harmonic_h_1D_kMax(y_t2, alphaAbs) *
+                 crandall_g(dim, dim - nuReci, y_t2, lambda, zArgBoundReci) *
+                 cexp(-2 * M_PI * I * dot(dim, y_t2, x_t1)) * rot;
+        }
+
+        s2 = sum_fourier_harmonic_1D(nuReci, dim, m_fourier, x_t1, y_t2,
+                                     cutoffsFourier, zArgBoundReci, alphaAbs);
+
+        s2 = s2 * rot + nc;
+
+        s1 = sum_real_harmonic_1D(nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal,
+                                  zArgBound, alphaAbs) *
+             rot * xfactor;
+        resIt = (s1 + pow(lambda, dim) * s2) / tgamma(nuIt / 2.);
+    }
+    resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.) * imaginary_int_pow(2 * k) *
+             real_int_pow(-2 * M_PI, 2 * k) *
+             real_int_pow(-2 * M_PI, alphaAbs - (2 * k));
+    res += resIt;
+    res *= 1. / real_int_pow(ms, alphaAbs);
+
+    return res;
+}
+
+/**
  * @brief calculates the (regularized) Epstein zeta function as well es the
  * derivatives of the set zeta function.
  * @param[in] nu: exponent for the Epstein zeta function.
@@ -1032,60 +1121,10 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             xfactor = 1;
         } else if (variant == 2) {
             if (harmonicMethod1D) {
-                // Compute set zeta derivatives by harmonic method
-
-                unsigned int k = alphaAbs / 2;
-                double complex resIt;
-                double nuIt = nu - (2 * k);
-
-                // skip iterartions where nuIt is a negative even integer, as
-                // 1/gamma(nIt) = 0
-                if (nuIt < -1 && fabs((nuIt / 2.) - nearbyint(nuIt / 2.)) < EPS) {
-                    resIt = 0;
-                    // if nu = 0, everything except the zero summand in the real sum
-                    // vanishes
-                } else if (fabs(nuIt / 2) < EPS) {
-                    if (x_t2_squared > EPS_ZERO_Y) {
-                        resIt = 0.;
-                    } else {
-                        resIt = -imaginary_int_pow(alphaAbs - (2 * k)) *
-                                harmonic_h_1D_kMax(x_t2, alphaAbs);
-                    }
-                } else {
-
-                    double nuReci = nuIt - (2 * alphaAbs) + (4 * k);
-                    double zArgBoundReci = assignzArgBound(dim - nuReci);
-
-                    // calculate set zeta derivative function values.
-                    rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
-
-                    if (equals(dim, y_t1, y_t2)) {
-                        nc = harmonic_h_1D_kMax(y_t1, alphaAbs) *
-                             crandall_g(dim, dim - nuReci, y_t1, lambda,
-                                        zArgBoundReci);
-                    } else {
-                        nc = harmonic_h_1D_kMax(y_t2, alphaAbs) *
-                             crandall_g(dim, dim - nuReci, y_t2, lambda,
-                                        zArgBoundReci) *
-                             cexp(-2 * M_PI * I * dot(dim, y_t2, x_t1)) * rot;
-                    }
-
-                    s2 = sum_fourier_harmonic_1D(nuReci, dim, m_fourier, x_t1, y_t2,
-                                                 cutoffsFourier, zArgBoundReci,
-                                                 alphaAbs);
-
-                    s2 = s2 * rot + nc;
-
-                    s1 = sum_real_harmonic_1D(nuIt, k, dim, m_real, x_t2, y_t2,
-                                              cutoffsReal, zArgBound, alphaAbs) *
-                         rot * xfactor;
-                    resIt = (s1 + pow(lambda, dim) * s2) / tgamma(nuIt / 2.);
-                }
-                resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.) *
-                         imaginary_int_pow(2 * k) * real_int_pow(-2 * M_PI, 2 * k) *
-                         real_int_pow(-2 * M_PI, alphaAbs - (2 * k));
-                res += resIt;
-                res *= 1. / real_int_pow(ms, alphaAbs);
+                res = summation_harmonic_1D(res, nu, dim, alphaAbs, lambda, ms,
+                                            m_real, m_fourier, x_t1, x_t2, y_t1,
+                                            y_t2, x_t2_squared, cutoffsReal,
+                                            cutoffsFourier, zArgBound, xfactor);
             } else if (harmonicMethodHighExp) {
                 // Compute set zeta derivatives by harmonic method for large nu,
                 // Isolate singularities in fourier sum
