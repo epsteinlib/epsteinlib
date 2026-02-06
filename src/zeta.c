@@ -458,7 +458,6 @@ static double complex sum_real_harmonic_large_exp_singularity_sum( // NOLINT
  * @brief calculates the an harmonic polynomial applied to the summands in real
  * space.
  * @param[in] nu: exponent for the Epstein zeta function.
- * @param[in] kIndex: specifies degree |alpha| - 2k.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] m: matrix that transforms the lattice in the Epstein zeta
  * function.
@@ -472,11 +471,10 @@ static double complex sum_real_harmonic_large_exp_singularity_sum( // NOLINT
  * sum_{z in m whole_numbers ** dim} I ** (|α| - 2k) h₍α,kIndex₎(y) * G_{nu}(z - x) *
  * exp(-2 * PI * I * (z * y)
  */
-static double complex sum_real_harmonic_1D(double nu, unsigned int kIndex,
-                                           unsigned int dim, const double *m,
-                                           const double *x, const double *y,
-                                           const int cutoffs[], double zArgBound,
-                                           unsigned int alphaAbs) {
+static double complex sum_real_harmonic_1D(double nu, unsigned int dim,
+                                           const double *m, const double *x,
+                                           const double *y, const int cutoffs[],
+                                           double zArgBound, unsigned int alphaAbs) {
 
     double lambda = 1.; // parameter that decides the weight of each sum
 
@@ -513,9 +511,7 @@ static double complex sum_real_harmonic_1D(double nu, unsigned int kIndex,
 
         //        if(h){
         // summing using Kahan's method
-        auxy = rot * imaginary_int_pow(alphaAbs - (2 * kIndex)) * h *
-                   crandall_g(dim, nu, lv, 1. / lambda, zArgBound) -
-               epsilon;
+        auxy = rot * h * crandall_g(dim, nu, lv, 1. / lambda, zArgBound) - epsilon;
         auxt = sum + auxy;
         epsilon = (auxt - sum) - auxy;
         sum = auxt;
@@ -921,8 +917,8 @@ static double complex summation_harmonic_1D(
         if (x_t2_squared > EPS_ZERO_Y) {
             resIt = 0.;
         } else {
-            resIt = -imaginary_int_pow(alphaAbs - (2 * k)) *
-                    harmonic_h_1D_kMax(x_t2, alphaAbs);
+            resIt =
+                -imaginary_int_pow(alphaAbs) * harmonic_h_1D_kMax(x_t2, alphaAbs);
         }
     } else {
 
@@ -944,16 +940,17 @@ static double complex summation_harmonic_1D(
         s2 = sum_fourier_harmonic_1D(nuReci, dim, m_fourier, x_t1, y_t2,
                                      cutoffsFourier, zArgBoundReci, alphaAbs);
 
-        s2 = s2 * rot + nc;
+        s2 = imaginary_int_pow(2 * k) * (s2 * rot + nc);
 
-        s1 = sum_real_harmonic_1D(nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal,
+        s1 = sum_real_harmonic_1D(nuIt, dim, m_real, x_t2, y_t2, cutoffsReal,
                                   zArgBound, alphaAbs) *
-             rot * xfactor;
+             imaginary_int_pow(alphaAbs) * rot * xfactor;
         resIt = (s1 + pow(lambda, dim) * s2) / tgamma(nuIt / 2.);
     }
-    resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.) * imaginary_int_pow(2 * k) *
+    resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.) *
              real_int_pow(-2 * M_PI, 2 * k) *
              real_int_pow(-2 * M_PI, alphaAbs - (2 * k));
+
     res += resIt;
     res *= 1. / real_int_pow(ms, alphaAbs);
 
