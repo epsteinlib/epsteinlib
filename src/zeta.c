@@ -313,8 +313,7 @@ static double complex sum_real_harmonic_large_exp(
                 crandall = crandall_g(dim, nu, lv, 1. / lambda, zArgBound);
             }
             // summing using Kahan's method
-            auxy = rot * imaginary_int_pow(alphaAbs - (2 * kIndex)) * h * crandall -
-                   epsilon;
+            auxy = rot * h * crandall - epsilon;
             auxt = sum + auxy;
             epsilon = (auxt - sum) - auxy;
             sum = auxt;
@@ -1035,7 +1034,7 @@ static double complex summation_harmonic_high_exp(
             if (x_t2_squared > EPS_ZERO_Y) {
                 resIt = 0.;
             } else {
-                resIt = -imaginary_int_pow(alphaAbs - (2 * k)) *
+                resIt = -imaginary_int_pow(alphaAbs) *
                         harmonic_h(k, dim, x_t2, alphaAbs, chunk_offset, valid_count,
                                    coeffs, exponents);
             }
@@ -1065,16 +1064,16 @@ static double complex summation_harmonic_high_exp(
                                       cutoffsFourier, zArgBoundReci, alphaAbs,
                                       chunk_offset, valid_count, coeffs, exponents);
 
-            s2 = s2 * rot + nc;
+            s2 = imaginary_int_pow(2 * k) * (s2 * rot + nc);
 
             s1 = sum_real_harmonic_large_exp(
                      nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal, zArgBound,
                      alphaAbs, chunk_offset, valid_count, coeffs, exponents) *
-                 rot * xfactor;
+                 imaginary_int_pow(alphaAbs) * rot * xfactor;
 
             resIt = (s1 + pow(lambda, dim) * s2) / tgamma(nuIt / 2.);
         }
-        resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.) * imaginary_int_pow(2 * k) *
+        resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.) *
                  real_int_pow(-2 * M_PI, 2 * k) *
                  real_int_pow(-2 * M_PI, alphaAbs - (2 * k));
         res += resIt;
