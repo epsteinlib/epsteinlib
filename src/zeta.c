@@ -449,8 +449,6 @@ static double complex sum_real_harmonic_large_exp_singularity_sum( // NOLINT
         }
     }
 
-    sum *= imaginary_int_pow(alphaAbs) * real_int_pow(-2 * M_PI, alphaAbs);
-
     return sum;
 }
 
@@ -509,14 +507,10 @@ static double complex sum_real_harmonic_1D(double nu, unsigned int dim,
 
         h = harmonic_h_1D_kMax(lv, alphaAbs);
 
-        //        if(h){
-        // summing using Kahan's method
         auxy = rot * h * crandall_g(dim, nu, lv, 1. / lambda, zArgBound) - epsilon;
         auxt = sum + auxy;
         epsilon = (auxt - sum) - auxy;
         sum = auxt;
-
-        //        }
     }
     return sum;
 }
@@ -947,12 +941,10 @@ static double complex summation_harmonic_1D(
              imaginary_int_pow(alphaAbs) * rot * xfactor;
         resIt = (s1 + pow(lambda, dim) * s2) / tgamma(nuIt / 2.);
     }
-    resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.) *
-             real_int_pow(-2 * M_PI, 2 * k) *
-             real_int_pow(-2 * M_PI, alphaAbs - (2 * k));
+    resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.);
 
     res += resIt;
-    res *= 1. / real_int_pow(ms, alphaAbs);
+    res *= real_int_pow(-2 * M_PI, alphaAbs) / real_int_pow(ms, alphaAbs);
 
     return res;
 }
@@ -1070,21 +1062,19 @@ static double complex summation_harmonic_high_exp(
 
             resIt = (s1 + pow(lambda, dim) * s2) / tgamma(nuIt / 2.);
         }
-        resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.) *
-                 real_int_pow(-2 * M_PI, 2 * k) *
-                 real_int_pow(-2 * M_PI, alphaAbs - (2 * k));
+        resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.);
         res += resIt;
     }
 
     double complex s1_singularity =
-        xfactor * rot *
+        xfactor * rot * imaginary_int_pow(alphaAbs) *
         sum_real_harmonic_large_exp_singularity_sum(nu, kMax, dim, m_real, x_t2,
                                                     y_t2, alphaAbs, chunk_offset,
                                                     valid_count, coeffs, exponents);
 
     res += s1_singularity;
 
-    res *= 1. / real_int_pow(ms, alphaAbs);
+    res *= real_int_pow(-2 * M_PI, alphaAbs) / real_int_pow(ms, alphaAbs);
 
     free(chunk_offset);
     free(valid_count);
@@ -1202,13 +1192,11 @@ static double complex summation_harmonic(
 
             resIt = (s1 + pow(lambda, dim) * s2) / tgamma(nuIt / 2.);
         }
-        resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.) *
-                 real_int_pow(-2 * M_PI, 2 * k) *
-                 real_int_pow(-2 * M_PI, alphaAbs - (2 * k));
+        resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.);
         res += resIt;
     }
 
-    res *= 1. / real_int_pow(ms, alphaAbs);
+    res *= real_int_pow(-2 * M_PI, alphaAbs) / real_int_pow(ms, alphaAbs);
 
     free(chunk_offset);
     free(valid_count);
