@@ -39,6 +39,12 @@
  */
 #define EPS_ZERO_Y 1e-64
 
+/*!
+ * @brief Epsilon to catch exact cancellation to zero in inner sum of the singular
+ * sum in real space for the set Zeta derivatives.
+ */
+#define EPS_CANCELLATION 1e-16
+
 /**
  * @brief calculates the first sum in Crandall's formula.
  * @param[in] nu: exponent for the Epstein zeta function.
@@ -423,7 +429,7 @@ static double complex sum_real_harmonic_large_exp_singularity_sum( // NOLINT
                 }
             }
 
-            if (sumInner) {
+            if (fabs(sumInner) > EPS_CANCELLATION) {
 
                 auxy = rot * sumInner * pow(lvSquared, -nu / 2) - epsilon;
                 auxt = sum + auxy;
@@ -967,9 +973,9 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     bool harmonicMethod1D = harmonicMethod && (dim == 1);
     bool harmonicMethodHighExp = harmonicMethod && (nu > 10);
     bool polynomialMethod =
-        (variant == 2) && !harmonicMethod; // currently never used, works for low
-                                           // derivatives and arbitrary nu, slightly
-                                           // faster than harmonic Methods in d > 1
+        (variant == 2) &&
+        !harmonicMethod; // works for low derivatives and arbitrary nu, slightly
+                         // faster than harmonic Methods in d > 1
 
     // handle special case of non-positive integer values nu.
     double complex res = 0.;

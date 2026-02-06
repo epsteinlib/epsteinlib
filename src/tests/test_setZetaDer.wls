@@ -264,10 +264,11 @@ SumRealHarmonicHighExp[\[Nu]_,A_,x_,y_,\[Alpha]_,kIndex_,sumLim_]:=Total[Table[
 (*Prototype for large nu values.*)
 
 
-Options[setZetaDerHighExp]={InputPrecision->100,SumLim->10};
+Options[setZetaDerHighExp]={InputPrecision->100,SumLim->10,EPSCANCELLATION->10^-16};
 setZetaDerHighExp[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Module[
-	{EPS,prec,sumLim,\[Nu]True,AN,xN,yN,\[Mu],res,n}
+	{EPS,EPSCANC,prec,sumLim,\[Nu]True,AN,xN,yN,\[Mu],res,n}
 	,EPS=10^-50
+	;EPSCANC=OptionValue[EPSCANCELLATION]
 	;prec=OptionValue[InputPrecision]
 	;sumLim=OptionValue[SumLim]
 	;n=Total[\[Alpha]]
@@ -321,7 +322,7 @@ setZetaDerHighExp[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modul
 					]
 					,{k,0,Floor[n/2]}
 				]]
-				;If[Abs[resk]<10^-16
+				;If[Abs[resk]<EPSCANC
 					,0
 					,resk Exp[-2\[Pi] I yN . z](z . z)^(-\[Nu]True/2)
 				]
@@ -445,9 +446,9 @@ zDerSpecialTab={
 zDerLargeNu =Flatten[
 	ParallelTable[{
 			Flatten@{N@{\[Nu],{{1,0},{0,1}},{0,0},{0,0}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,0},{0,0},\[Alpha]]}}
-			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.},{0,.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,0},{0,3/10},\[Alpha]]}}
-			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.3},{0,.0}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,3/10},{0,0},\[Alpha]]}}
-			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.2},{0,.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,2/10},{0,3/10},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.},{0,.4}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,0},{0,4/10},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.4},{0,.0}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,4/10},{0,0},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.2},{0,.4}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,2/10},{0,4/10},\[Alpha]]}}
 		}
 		,{\[Nu],{1/2,30,83/3,11}}
 		,{\[Alpha],{{2,0},{6,8},{6,9}}}
