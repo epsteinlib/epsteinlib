@@ -183,7 +183,7 @@ static double complex sum_real_der(double nu, unsigned int dim, double lambda,
  * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
  * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
  * @return helper function for the first sum in crandalls formula. Calculates
- * sum_{z in m whole_numbers ** dim} I ** (|α| - 2k) h₍α,kIndex₎(y) * G_{nu}(z - x) *
+ * sum_{z in m whole_numbers ** dim} h₍α,kIndex₎(y) * G_{nu}(z - x) *
  * exp(-2 * PI * I * (z * y)
  */
 static double complex sum_real_harmonic(
@@ -228,9 +228,7 @@ static double complex sum_real_harmonic(
                        exponents);
 
         // summing using Kahan's method
-        auxy = rot * imaginary_int_pow(alphaAbs - (2 * kIndex)) * h *
-                   crandall_g(dim, nu, lv, 1. / lambda, zArgBound) -
-               epsilon;
+        auxy = rot * h * crandall_g(dim, nu, lv, 1. / lambda, zArgBound) - epsilon;
         auxt = sum + auxy;
         epsilon = (auxt - sum) - auxy;
         sum = auxt;
@@ -1168,7 +1166,7 @@ static double complex summation_harmonic(
             if (dot(dim, x_t2, x_t2) > EPS_ZERO_Y) {
                 resIt = 0.;
             } else {
-                resIt = -imaginary_int_pow(alphaAbs - (2 * k)) *
+                resIt = -imaginary_int_pow(alphaAbs) *
                         harmonic_h(k, dim, x_t2, alphaAbs, chunk_offset, valid_count,
                                    coeffs, exponents);
             }
@@ -1199,16 +1197,16 @@ static double complex summation_harmonic(
                                       cutoffsFourier, zArgBoundReci, alphaAbs,
                                       chunk_offset, valid_count, coeffs, exponents);
 
-            s2 = s2 * rot + nc;
+            s2 = imaginary_int_pow(2 * k) * (s2 * rot + nc);
 
             s1 = sum_real_harmonic(nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal,
                                    zArgBound, alphaAbs, chunk_offset, valid_count,
                                    coeffs, exponents) *
-                 rot * xfactor;
+                 imaginary_int_pow(alphaAbs) * rot * xfactor;
 
             resIt = (s1 + pow(lambda, dim) * s2) / tgamma(nuIt / 2.);
         }
-        resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.) * imaginary_int_pow(2 * k) *
+        resIt *= pow(lambda * lambda / M_PI, -nuIt / 2.) *
                  real_int_pow(-2 * M_PI, 2 * k) *
                  real_int_pow(-2 * M_PI, alphaAbs - (2 * k));
         res += resIt;
