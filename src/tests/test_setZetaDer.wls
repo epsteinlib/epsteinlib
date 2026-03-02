@@ -95,6 +95,11 @@ g[\[Nu]_,y_]=Piecewise[{
 	,{ExpIntegralE[1-\[Nu]/2,Pi y . y],Norm[y]<4}
 	},0
 ];
+gLower[\[Nu]_,y_]=Piecewise[{
+	{2/\[Nu],Norm[y]<10^(-64)}
+	,{Gamma[\[Nu]/2,0,Pi y . y]/(Pi y . y)^(\[Nu]/2),Norm[y]<4}
+	}
+];
 gDer[\[Nu]_,y_,\[Alpha]_]:=Total[Flatten[Table[
 	Module[
 		{pol}
@@ -173,7 +178,7 @@ hHarmonic[k_/;Element[k,NonNegativeIntegers]][x_List,\[Alpha]_List]:=Module[
 SumRealHarmonic[\[Nu]_,A_,x_,y_,\[Alpha]_,kIndex_,sumLim_]:=Total[Table[
 	Module[{h}
 		,h=hHarmonic[kIndex][z,\[Alpha]]
-		;If[PossibleZeroQ[h],0,(I)^(Total[\[Alpha]]-2kIndex)h g[\[Nu],z]Exp[-2\[Pi] I y . z]]
+		;If[PossibleZeroQ[h],0,h g[\[Nu],z]Exp[-2\[Pi] I y . z]]
 	]
 	,{z,(A . #-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}
 ]]
@@ -202,7 +207,7 @@ setZetaDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modu
 	;yN=\[Mu] N[yExt,prec]
 	;If[Abs[\[Nu]Ext]<EPS&&n>0
 		,res = 0
-		,res=Total@Table[
+		,res=(-2Pi)^n Total@Table[
 			Module[
 				{\[Nu]N,sumReal,sumReci,resk}
 				,\[Nu]N=\[Nu]True-2k
@@ -211,19 +216,120 @@ setZetaDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modu
 					,If[Abs[\[Nu]N]<EPS
 						,If[Norm[xN]>EPS
 							,0
-							,sumReal=-(I)^(Total[\[Alpha]]-2k)hHarmonic[k][xN,\[Alpha]]
+							,sumReal=-I^n hHarmonic[k][xN,\[Alpha]]
 							;resk=\[Pi]^(\[Nu]N/2)sumReal
-							;(-2Pi I)^(2k) (-2\[Pi])^(Total[\[Alpha]]-2k) resk
+							;resk*=(-2Pi)^n
+							;resk
 						]
-						,sumReal=SumRealHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
-						;sumReci=SumFourierHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+						,sumReal=I^n SumRealHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+						;sumReci=(-1)^k SumFourierHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
 						;resk=\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci)
-						;(-2Pi I)^(2k) (-2\[Pi])^(Total[\[Alpha]]-2k) resk
+						;resk
 					]
 				]
 			]
 		,{k,0,Floor[n/2]}
 		]
+	]
+	;\[Mu]^(Total[\[Alpha]]-\[Nu]True)res
+]
+
+
+(* ::Text:: *)
+(*Isolate singularities in real sum.*)
+
+
+SumRealHarmonicHighExp[\[Nu]_,A_,x_,y_,\[Alpha]_,kIndex_,sumLim_]:=Total[Table[
+	Module[{h,crandall}
+		,h=hHarmonic[kIndex][z,\[Alpha]]
+		;If[
+			PossibleZeroQ[h]
+			,0
+			,h g[\[Nu],z] Exp[-2\[Pi] I y . z]
+		]
+	]
+	,{z,(A . #-x)&/@Select[Tuples[Range[-sumLim,sumLim],Length[A]],Not[MemberQ[{0,1},Norm[#]]]&]}
+]]+Total[Table[
+	Module[{h,crandall}
+		,h=hHarmonic[kIndex][z,\[Alpha]]
+		;If[PossibleZeroQ[h]
+			,0
+			,h (-gLower[\[Nu],z])Exp[-2\[Pi] I y . z]
+		]
+	]
+	,{z,(A . #-x)&/@Select[Tuples[Range[-sumLim,sumLim],Length[A]],MemberQ[{0,1},Norm[#]]&]}
+]]
+
+
+(* ::Text:: *)
+(*Prototype for large nu values.*)
+
+
+Options[setZetaDerHighExp]={InputPrecision->100,SumLim->10,EPSCANCELLATION->10^-16};
+setZetaDerHighExp[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Module[
+	{EPS,EPSCANC,prec,sumLim,\[Nu]True,AN,xN,yN,\[Mu],res,n}
+	,EPS=10^-50
+	;EPSCANC=OptionValue[EPSCANCELLATION]
+	;prec=OptionValue[InputPrecision]
+	;sumLim=OptionValue[SumLim]
+	;n=Total[\[Alpha]]
+	;\[Nu]True=N[\[Nu]Ext,prec]
+	;AN=N[AExt,prec]
+	;\[Mu]=Abs[Det[AN]]^(1/Length[AN])
+	;AN=1/\[Mu] N[AExt,prec]
+	;xN=1/\[Mu] N[xExt,prec]
+	;yN=\[Mu] N[yExt,prec]
+	;If[Abs[\[Nu]Ext]<EPS&&n>0
+		,res=0
+		,res=(-2Pi)^n Total@Table[
+			Module[
+				{\[Nu]N,sumReal,sumReci,resk}
+				,\[Nu]N=\[Nu]True-2k
+				;If[\[Nu]N<-1&&Abs[\[Nu]N/2-Round[\[Nu]N/2]]<EPS
+					,0
+					,If[Abs[\[Nu]N]<EPS
+						,If[Norm[xN]>EPS
+							,0
+							,resk=-hHarmonic[k][xN,\[Alpha]]
+							;resk*=(-2 Pi I)^n \[Pi]^(\[Nu]N/2)
+							;resk
+						]
+						,sumReal=I^n SumRealHarmonicHighExp[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+						;sumReci=(-1)^k SumFourierHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+						;resk=sumReal+1/Abs[Det[AN]]sumReci
+						;resk*=\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2]
+						;resk
+					]
+				]
+			]
+			,{k,0,Floor[n/2]}
+		]
+		;res+=(-2 Pi I)^n Total[Table[
+			Module[{resk}
+				,resk=Total[Table[
+					If[(\[Nu]True-2k)<-1&&Abs[(\[Nu]True-2k)/2-Round[(\[Nu]True-2k)/2]]<EPS
+						,0
+						,If[Abs[\[Nu]True-2k]<EPS
+							,0
+							,Module[
+								{h}
+								,h=hHarmonic[k][z,\[Alpha]]
+								;If[PossibleZeroQ[h]||PossibleZeroQ[Norm[z]]
+									,0
+									,h (z . z)^k
+								]
+							]
+						]
+					]
+					,{k,0,Floor[n/2]}
+				]]
+				;If[Abs[resk]<EPSCANC
+					,0
+					,resk Exp[-2\[Pi] I yN . z](z . z)^(-\[Nu]True/2)
+				]
+			]
+			,{z,(AN . #-xN)&/@Select[Tuples[Range[-sumLim,sumLim],Length[AN]],MemberQ[{0,1},Norm[#]]&]}
+		]]
 	]
 	;\[Mu]^(Total[\[Alpha]]-\[Nu]True)res
 ]
@@ -335,10 +441,35 @@ zDerSpecialTab={
 
 
 (* ::Text:: *)
+(*Add reference values for large nu.*)
+
+
+zDerLargeNu =Flatten[
+	ParallelTable[{
+			Flatten@{N@{\[Nu],{{1,0},{0,1}},{0,0},{0,0}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,0},{0,0},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.},{0,.4}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,0},{0,4/10},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.4},{0,.0}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,4/10},{0,0},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.2},{0,.4}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,2/10},{0,4/10},\[Alpha]]}}
+		}
+		,{\[Nu],{1/2,30,83/3,11}}
+		,{\[Alpha],{{2,0},{6,8},{6,9}}}
+	]
+,2];
+(*
+Note: we observe catastrophic errors for large nu and x and y not in elementary lattice cell.
+This seems to be a floating point arithmetic error, where the small error of projecting x gets amplified.
+To test this, add above:
+	,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.2},{0,1.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,2/10},1+{0,3/10},\[Alpha]]}}
+	,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,1.2},{0,.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},1+{0,2/10},{0,3/10},\[Alpha]]}}
+	,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,1.2},{0,1.3}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},1+{0,2/10},1+{0,3/10},\[Alpha]]}}
+*)
+
+
+(* ::Text:: *)
 (*Combine reference values.*)
 
 
-zDerTab=Join[zDerRandomTab,zDerSpecialTab];
+zDerTab=Join[zDerRandomTab,zDerSpecialTab,zDerLargeNu];
 
 
 (* ::Text:: *)
