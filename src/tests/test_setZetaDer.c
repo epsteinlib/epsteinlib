@@ -699,7 +699,7 @@ int test_setZetaDer_poly_laplace(void) { // NOLINT
     int testsPassed = 0;
     int totalTests = 0;
 
-    int n = 6; // For n'th power of the Laplace operator
+    int maxn = 6; // For n'th power of the Laplace operator
     unsigned int dim = 4;
     double errMin = NAN;
     double errMax = NAN;
@@ -709,11 +709,6 @@ int test_setZetaDer_poly_laplace(void) { // NOLINT
     double *x = malloc(dim * sizeof(double));
     double *y = malloc(dim * sizeof(double));
     unsigned int *alpha0 = malloc(dim * sizeof(unsigned int));
-
-    unsigned long long nFact = 1;
-    for (int i = 2; i < n + 1; i++) {
-        nFact *= i;
-    }
 
     unsigned int beta[dim];
     for (int i = 0; i < dim; i++) {
@@ -737,8 +732,14 @@ int test_setZetaDer_poly_laplace(void) { // NOLINT
     unsigned int betaAbs = 0;
 
     printf("\n\t ... ");
-    printf("calculating the %u-Laplace operator in %uD", n, dim);
-    for (int i = 0; i < 1; i++) {
+    printf("building the %uD PolyLaplace operator Δⁿ, n = 1,2,...,%u", dim, maxn);
+    for (int n = 1; n <= maxn; n++) {
+
+        unsigned long long nFact = 1;
+        for (int i = 2; i < n + 1; i++) {
+            nFact *= i;
+        }
+
         nu = 0.5;
 
         // Reference value via shifted Epstein zeta
