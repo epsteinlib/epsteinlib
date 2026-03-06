@@ -9,7 +9,6 @@
 
 #include "../tools.h"
 #include "epsteinZeta.h"
-#include "stdbool.h"
 #include "utils.h"
 #include <complex.h>
 #include <errno.h>
@@ -134,18 +133,128 @@ void reportEpsteinZetaCutoffError(const char *testCase, double complex zeta1,
 }
 
 /*!
- * @brief Test function for Epstein zeta and Regularized Epstein zeta functions.
+ * @brief Test function for Epstein zeta function.
  *
- * This function tests both the epsteinZeta and epsteinZetaReg functions by comparing
- * their outputs with reference values read from data files. It performs multiple
- * test cases for each function and reports the number of passed tests.
+ * This function tests the epsteinZeta function by comparing its outputs with
+ * reference values read from data files. It performs multiple test cases and
+ * reports the number of passed tests.
  *
  * @return number of failed tests.
  */
-int test_epsteinZeta_epsteinZetaReg() { // NOLINT
+static int test_epsteinZeta() { // NOLINT
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/epsteinZeta_Ref.csv", // NOLINT
+                          BASE_PATH);
+    if (result < 0 || result >= sizeof(path)) {
+        return fprintf(stderr, "Error creating file path\n");
+    }
+    FILE *zetaRefData = fopen(path, "r");
+    if (zetaRefData == NULL) {
+        return fprintf(stderr, "Error opening file: %s\n", path);
+    }
+
+    int dim = 2;
+    double *a = malloc((int)(dim * dim) * sizeof(double)); // NOLINT
+    double *nu = malloc(2 * sizeof(double));
+    double *x = malloc(dim * sizeof(double));
+    double *y = malloc(dim * sizeof(double));
+    double *zetaRef = malloc(2 * sizeof(double));
+    double complex zetaComputed;
+    double complex zetaExpected;
+    double nuReal;
+    double errorAbs;
+    double errorRel;
+    double errorMaxAbsRel;
+    double tol = 6 * pow(10, -15);
+    int testsPassed = 0;
+    int totalTests = 0;
+
+    double errMin = NAN;
+    double errMax = NAN;
+    double errSum = 0.;
+
+    printf("\n\t ... ");
+    printf("processing %s ", path);
+
+    int scanResult;
+    char line[256];
+    while (fgets(line, sizeof(line), zetaRefData) != NULL) {
+        scanResult =
+            sscanf(line, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf", // NOLINT
+                   nu, nu + 1, a, a + 1, a + 2, a + 3, x, x + 1, y, y + 1, zetaRef,
+                   zetaRef + 1);
+
+        if (scanResult != 12) {
+            printf("Error reading line: %s\n", line);
+            printf("Scanned %d values instead of 12\n", scanResult);
+            continue;
+        }
+
+        nuReal = nu[0];
+        zetaComputed = epsteinZeta(nuReal, dim, a, x, y);
+        zetaExpected = zetaRef[0] + zetaRef[1] * I;
+        errorAbs = errAbs(zetaComputed, zetaExpected);
+        errorRel = errRel(zetaComputed, zetaExpected);
+        errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
+
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
+            printf("\n");
+            printf("Warning! ");
+            printf("zeta:   ");
+            printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
+                   "%.16lf "
+                   "%+.16lf I (reference implementation)\n",
+                   4, creal(zetaComputed), cimag(zetaComputed), creal(zetaExpected),
+                   cimag(zetaExpected));
+            printf("Min(Emax, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
+                   tol);
+            printf("\n");
+            printMatrixUnitTest("a:", a, dim);
+            printf("nu:\t\t %.16lf + %.16lf I\n", nu[0], nu[1]);
+            printVectorUnitTest("x:\t\t", x, dim);
+            printVectorUnitTest("y:\t\t", y, dim);
+        }
+        totalTests++;
+    }
+
+    if (fclose(zetaRefData) != 0) {
+        freeTestResources(a, nu, x, y, zetaRef);
+        return fprintf(stderr, "Error closing file: %d\n", errno);
+    }
+
+    freeTestResources(a, nu, x, y, zetaRef);
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
+           tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
+
+    return totalTests - testsPassed;
+}
+
+/*!
+ * @brief Test function for Regularized Epstein zeta function.
+ *
+ * This function tests the epsteinZetaReg function by comparing its outputs with
+ * reference values read from data files. It performs multiple test cases and
+ * reports the number of passed tests.
+ *
+ * @return number of failed tests.
+ */
+static int test_epsteinZetaReg() { // NOLINT
+    printf("%s ", __func__);
+    char path[MAX_PATH_LENGTH];
+    int result = snprintf(path, sizeof(path), "%s/epsteinZetaReg_Ref.csv", // NOLINT
                           BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
@@ -161,24 +270,22 @@ int test_epsteinZeta_epsteinZetaReg() { // NOLINT
     double *x = malloc(dim * sizeof(double));
     double *y = malloc(dim * sizeof(double));
     double *zetaRef = malloc(2 * sizeof(double));
-    double complex zetaC;
-    double complex zetaM;
+    double complex zetaComputed;
+    double complex zetaExpected;
     double nuReal;
     double errorAbs;
     double errorRel;
     double errorMaxAbsRel;
-    double tol = pow(10, -13);
+    double tol = 5 * pow(10, -15);
     int testsPassed = 0;
     int totalTests = 0;
-    int testsPassedOverall = 0;
-    int totalTestsOverall = 0;
 
     double errMin = NAN;
     double errMax = NAN;
     double errSum = 0.;
 
     printf("\n\t ... ");
-    printf("processing %s ", path);
+    printf("processing file: %s ", path);
 
     int scanResult;
     char line[256];
@@ -195,101 +302,10 @@ int test_epsteinZeta_epsteinZetaReg() { // NOLINT
         }
 
         nuReal = nu[0];
-        zetaC = epsteinZeta(nuReal, dim, a, x, y);
-        zetaM = zetaRef[0] + zetaRef[1] * I;
-        errorAbs = errAbs(zetaC, zetaM);
-        errorRel = errRel(zetaC, zetaM);
-        errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
-
-        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
-        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
-        errSum += errorMaxAbsRel;
-
-        if (errorMaxAbsRel < tol) {
-            testsPassed++;
-        } else {
-            printf("\n");
-            printf("Warning! ");
-            printf("zeta:   ");
-            printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
-                   "%.16lf "
-                   "%+.16lf I (reference implementation)\n",
-                   4, creal(zetaC), cimag(zetaC), creal(zetaM), cimag(zetaM));
-            printf("Min(Emax, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
-                   tol);
-            printf("\n");
-            printMatrixUnitTest("a:", a, dim);
-            printf("nu:\t\t %.16lf + %.16lf I\n", nu[0], nu[1]);
-            printVectorUnitTest("x:\t\t", x, dim);
-            printVectorUnitTest("y:\t\t", y, dim);
-        }
-        totalTests++;
-    }
-    printf("\n\t ... ");
-    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
-           tol);
-    printf("\t    ");
-    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
-           errSum / totalTests);
-
-    errMin = 0.;
-    errMax = 0.;
-    errSum = 0.;
-
-    testsPassedOverall += testsPassed;
-    totalTestsOverall += totalTests;
-
-    totalTests = 0;
-    testsPassed = 0;
-
-    if (fclose(zetaRegRefData) != 0) {
-        free(a);
-        free(nu);
-        free(x);
-        free(y);
-        free(zetaRef);
-        return fprintf(stderr, "Error closing file: %d\n", errno);
-    }
-    result = snprintf(path, sizeof(path), "%s/epsteinZetaReg_Ref.csv", // NOLINT
-                      BASE_PATH);
-    if (result < 0 || result >= sizeof(path)) {
-        free(a);
-        free(nu);
-        free(x);
-        free(y);
-        free(zetaRef);
-        return fprintf(stderr, "Error creating file path\n");
-    }
-    zetaRegRefData = fopen(path, "r");
-    if (zetaRegRefData == NULL) {
-        free(a);
-        free(nu);
-        free(x);
-        free(y);
-        free(zetaRef);
-        return fprintf(stderr, "Error opening file: %s\n", path);
-    }
-
-    printf("\n\t ... ");
-    printf("processing file: %s ", path);
-
-    while (fgets(line, sizeof(line), zetaRegRefData) != NULL) {
-        scanResult =
-            sscanf(line, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf", // NOLINT
-                   nu, nu + 1, a, a + 1, a + 2, a + 3, x, x + 1, y, y + 1, zetaRef,
-                   zetaRef + 1);
-
-        if (scanResult != 12) {
-            printf("Error reading line: %s\n", line);
-            printf("Scanned %d values instead of 12\n", scanResult);
-            continue;
-        }
-
-        nuReal = nu[0];
-        zetaC = epsteinZetaReg(nuReal, dim, a, x, y);
-        zetaM = zetaRef[0] + zetaRef[1] * I;
-        errorAbs = errAbs(zetaC, zetaM);
-        errorRel = errRel(zetaC, zetaM);
+        zetaComputed = epsteinZetaReg(nuReal, dim, a, x, y);
+        zetaExpected = zetaRef[0] + zetaRef[1] * I;
+        errorAbs = errAbs(zetaComputed, zetaExpected);
+        errorRel = errRel(zetaComputed, zetaExpected);
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
 
         errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
@@ -305,7 +321,8 @@ int test_epsteinZeta_epsteinZetaReg() { // NOLINT
             printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
                    "%.16lf "
                    "%+.16lf I (reference implementation)\n",
-                   4, creal(zetaC), cimag(zetaC), creal(zetaM), cimag(zetaM));
+                   4, creal(zetaComputed), cimag(zetaComputed), creal(zetaExpected),
+                   cimag(zetaExpected));
             printf("Min(Emax, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
                    tol);
             printf("\n");
@@ -332,10 +349,7 @@ int test_epsteinZeta_epsteinZetaReg() { // NOLINT
            errSum / totalTests);
     printf("\n");
 
-    testsPassedOverall += testsPassed;
-    totalTestsOverall += totalTests;
-
-    return (testsPassedOverall == totalTestsOverall) ? 0 : 1;
+    return totalTests - testsPassed;
 }
 
 /*!
@@ -346,7 +360,7 @@ int test_epsteinZeta_epsteinZetaReg() { // NOLINT
  * @return number of failed tests.
  * tests pass.
  */
-bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
+static int test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
     printf("%s ", __func__);
     double errorAbs;
     double errorRel;
@@ -362,7 +376,7 @@ bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
     double errMax = NAN;
     double errSum = 0.;
 
-    double tol = pow(10, -14);
+    double tol = 5 * pow(10, -15);
     unsigned int dim = 2;
     double m[] = {3. / 2, 1. / 5, 1. / 4, 1.};
     double x[] = {0.1, 0.2};
@@ -450,7 +464,7 @@ bool test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
  *
  * @return number of failed tests.
  */
-bool test_epsteinZeta_cutoff() {
+static int test_epsteinZeta_cutoff() {
     printf("%s ", __func__);
     double nu;
     unsigned int dim = 3;
@@ -504,8 +518,11 @@ bool test_epsteinZeta_cutoff() {
  * @return number of failed tests.
  */
 int main() {
-    int failedQ1 = test_epsteinZeta_epsteinZetaReg();
-    int failedQ2 = test_epsteinZeta_epsteinZetaReg_represent_as_each_other();
-    int failedQ3 = test_epsteinZeta_cutoff();
-    return failedQ1 + failedQ2 + failedQ3;
+    int failed = 0;
+    failed += run_timed_test(test_epsteinZeta);
+    failed += run_timed_test(test_epsteinZetaReg);
+    failed +=
+        run_timed_test(test_epsteinZeta_epsteinZetaReg_represent_as_each_other);
+    failed += run_timed_test(test_epsteinZeta_cutoff);
+    return failed;
 }
