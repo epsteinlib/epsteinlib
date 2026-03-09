@@ -1,5 +1,5 @@
 """
-Minimal working example for the Epstein Zeta Library.
+Minimal working example for the Epstein zeta Library.
 If the library is installed, run with `python lattice_sum.py`.
 """
 
