@@ -353,6 +353,316 @@ static int test_epsteinZetaReg() { // NOLINT
 }
 
 /*!
+ * @brief Tests Epstein zeta function for random matrices in multiple dimensions
+ * by comparing against Mathematica reference values.
+ *
+ * @return number of failed tests.
+ */
+int test_epsteinZeta_random_matrices(void) { // NOLINT
+    printf("%s ", __func__);
+    char path[MAX_PATH_LENGTH];
+    int result = snprintf(path, sizeof(path),
+                          "%s/epsteinZeta_random_matrices_Ref.csv", BASE_PATH);
+    if (result < 0 || result >= sizeof(path)) {
+        return fprintf(stderr, "Error creating file path\n");
+    }
+    FILE *data = fopen(path, "r");
+    if (data == NULL) {
+        return fprintf(stderr, "Error opening file: %s\n", path);
+    }
+
+    char line[4096];
+    int testsPassed = 0;
+    int totalTests = 0;
+    double tol = 5 * pow(10, -15);
+    double errMin = NAN;
+    double errMax = NAN;
+    double errSum = 0.;
+
+    unsigned int max_test_dim = 4;
+
+    printf("\n\t ... ");
+    printf("processing %s ", path);
+
+    while (fgets(line, sizeof(line), data) != NULL) {
+        totalTests++;
+
+        char *ptr = line;
+        char *endptr;
+
+        // Parse dimension
+        unsigned int dim = (unsigned int)strtoul(ptr, &endptr, 10);
+        if (*endptr != ',') {
+            continue;
+        }
+        ptr = endptr + 1;
+
+        // Parse nu
+        double nu = strtod(ptr, &endptr);
+        if (*endptr != ',') {
+            continue;
+        }
+        ptr = endptr + 1;
+
+        // Bounds check on dimension
+        if (dim < 1 || dim > max_test_dim) {
+            (void)fclose(data);
+            return fprintf(stderr, "Invalid dimension: %u\n", dim);
+        }
+
+        // Use stack allocation with fixed max size
+        double a[max_test_dim * max_test_dim];
+        double x[max_test_dim];
+        double y[max_test_dim];
+
+        // Parse a (dim x dim matrix, flattened)
+        int parseOk = 1;
+        for (unsigned int i = 0; i < dim * dim && parseOk; i++) {
+            a[i] = strtod(ptr, &endptr);
+            if (*endptr != ',') {
+                parseOk = 0;
+            } else {
+                ptr = endptr + 1;
+            }
+        }
+
+        // Parse x (dim values)
+        for (unsigned int i = 0; i < dim && parseOk; i++) {
+            x[i] = strtod(ptr, &endptr);
+            if (*endptr != ',') {
+                parseOk = 0;
+            } else {
+                ptr = endptr + 1;
+            }
+        }
+
+        // Parse y (dim values)
+        for (unsigned int i = 0; i < dim && parseOk; i++) {
+            y[i] = strtod(ptr, &endptr);
+            if (*endptr != ',') {
+                parseOk = 0;
+            } else {
+                ptr = endptr + 1;
+            }
+        }
+
+        if (!parseOk) {
+            continue;
+        }
+
+        // Parse reference result (Re, Im)
+        double refRe = strtod(ptr, &endptr);
+        if (*endptr != ',') {
+            continue;
+        }
+        ptr = endptr + 1;
+        double refIm = strtod(ptr, &endptr);
+
+        // Compute result
+        double complex num = epsteinZeta(nu, dim, a, x, y);
+        double complex ref = refRe + (refIm * I);
+
+        // Compute errors
+        double errorAbs = errAbs(ref, num);
+        double errorRel = errRel(ref, num);
+        double errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
+
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
+            printf("\n\n");
+            printf("Warning! ");
+            printf("epsteinZeta: ");
+            printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
+                   "%.16lf %+.16lf I (reference implementation)\n",
+                   4, creal(num), cimag(num), creal(ref), cimag(ref));
+            printf("Min(Eabs, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
+                   tol);
+            printf("\n");
+            printf("dim:\t\t %u\n", dim);
+            printf("nu:\t\t %.16lf\n", nu);
+            printMatrixUnitTest("a:", a, dim);
+            printVectorUnitTest("x:\t\t", x, dim);
+            printVectorUnitTest("y:\t\t", y, dim);
+            printf("\n");
+        }
+    }
+
+    if (fclose(data) != 0) {
+        return fprintf(stderr, "Error closing file: %d", errno);
+    }
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
+           tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
+
+    return totalTests - testsPassed;
+}
+
+/*!
+ * @brief Tests Epstein zeta function for random matrices in multiple dimensions
+ * by comparing against Mathematica reference values.
+ *
+ * @return number of failed tests.
+ */
+int test_epsteinZetaReg_random_matrices(void) { // NOLINT
+    printf("%s ", __func__);
+    char path[MAX_PATH_LENGTH];
+    int result = snprintf(path, sizeof(path),
+                          "%s/epsteinZetaReg_random_matrices_Ref.csv", BASE_PATH);
+    if (result < 0 || result >= sizeof(path)) {
+        return fprintf(stderr, "Error creating file path\n");
+    }
+    FILE *data = fopen(path, "r");
+    if (data == NULL) {
+        return fprintf(stderr, "Error opening file: %s\n", path);
+    }
+
+    char line[4096];
+    int testsPassed = 0;
+    int totalTests = 0;
+    double tol = 5 * pow(10, -15);
+    double errMin = NAN;
+    double errMax = NAN;
+    double errSum = 0.;
+
+    unsigned int max_test_dim = 4;
+
+    printf("\n\t ... ");
+    printf("processing %s ", path);
+
+    while (fgets(line, sizeof(line), data) != NULL) {
+        totalTests++;
+
+        char *ptr = line;
+        char *endptr;
+
+        // Parse dimension
+        unsigned int dim = (unsigned int)strtoul(ptr, &endptr, 10);
+        if (*endptr != ',') {
+            continue;
+        }
+        ptr = endptr + 1;
+
+        // Parse nu
+        double nu = strtod(ptr, &endptr);
+        if (*endptr != ',') {
+            continue;
+        }
+        ptr = endptr + 1;
+
+        // Bounds check on dimension
+        if (dim < 1 || dim > max_test_dim) {
+            (void)fclose(data);
+            return fprintf(stderr, "Invalid dimension: %u\n", dim);
+        }
+
+        // Use stack allocation with fixed max size
+        double a[max_test_dim * max_test_dim];
+        double x[max_test_dim];
+        double y[max_test_dim];
+
+        // Parse a (dim x dim matrix, flattened)
+        int parseOk = 1;
+        for (unsigned int i = 0; i < dim * dim && parseOk; i++) {
+            a[i] = strtod(ptr, &endptr);
+            if (*endptr != ',') {
+                parseOk = 0;
+            } else {
+                ptr = endptr + 1;
+            }
+        }
+
+        // Parse x (dim values)
+        for (unsigned int i = 0; i < dim && parseOk; i++) {
+            x[i] = strtod(ptr, &endptr);
+            if (*endptr != ',') {
+                parseOk = 0;
+            } else {
+                ptr = endptr + 1;
+            }
+        }
+
+        // Parse y (dim values)
+        for (unsigned int i = 0; i < dim && parseOk; i++) {
+            y[i] = strtod(ptr, &endptr);
+            if (*endptr != ',') {
+                parseOk = 0;
+            } else {
+                ptr = endptr + 1;
+            }
+        }
+
+        if (!parseOk) {
+            continue;
+        }
+
+        // Parse reference result (Re, Im)
+        double refRe = strtod(ptr, &endptr);
+        if (*endptr != ',') {
+            continue;
+        }
+        ptr = endptr + 1;
+        double refIm = strtod(ptr, &endptr);
+
+        // Compute result
+        double complex num = epsteinZetaReg(nu, dim, a, x, y);
+        double complex ref = refRe + (refIm * I);
+
+        // Compute errors
+        double errorAbs = errAbs(ref, num);
+        double errorRel = errRel(ref, num);
+        double errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
+
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
+            printf("\n\n");
+            printf("Warning! ");
+            printf("epstienZetaReg: ");
+            printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
+                   "%.16lf %+.16lf I (reference implementation)\n",
+                   4, creal(num), cimag(num), creal(ref), cimag(ref));
+            printf("Min(Eabs, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
+                   tol);
+            printf("\n");
+            printf("dim:\t\t %u\n", dim);
+            printf("nu:\t\t %.16lf\n", nu);
+            printMatrixUnitTest("a:", a, dim);
+            printVectorUnitTest("x:\t\t", x, dim);
+            printVectorUnitTest("y:\t\t", y, dim);
+            printf("\n");
+        }
+    }
+
+    if (fclose(data) != 0) {
+        return fprintf(stderr, "Error closing file: %d", errno);
+    }
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
+           tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
+
+    return totalTests - testsPassed;
+}
+
+/*!
  * @brief Test if the Epstein zeta function can be represented in terms of the
  * regularized function and the singularity, particularly focusing on cases where nu
  * = dim + 2k, where k is an integer.
@@ -521,6 +831,8 @@ int main() {
     int failed = 0;
     failed += run_timed_test(test_epsteinZeta);
     failed += run_timed_test(test_epsteinZetaReg);
+    failed += run_timed_test(test_epsteinZeta_random_matrices);
+    failed += run_timed_test(test_epsteinZetaReg_random_matrices);
     failed +=
         run_timed_test(test_epsteinZeta_epsteinZetaReg_represent_as_each_other);
     failed += run_timed_test(test_epsteinZeta_cutoff);

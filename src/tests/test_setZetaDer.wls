@@ -40,7 +40,7 @@ Protect[Power];
 ];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Auxiliary functions*)
 
 
@@ -74,7 +74,7 @@ AHex={{1,1/2},{0,Sqrt@3/2}};
 BMat[a_] = 1/Sqrt[a + 1]*DiagonalMatrix[{Sqrt[a], 1, 1}] . {{1, 1, 0}, {1, 0, 1}, {0, 1, 1}};
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Reference functions*)
 
 
@@ -335,7 +335,7 @@ setZetaDerHighExp[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modul
 ]
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create Epstein zeta 1D analytic reference values in x = 0*)
 
 
@@ -380,7 +380,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_1D_Ref.csv",zDerTab1D];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create set zeta 2D reference values*)
 
 
@@ -480,7 +480,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_2D_Ref.csv",zDerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create set zeta derivative reference values for odd derivatives*)
 
 
@@ -515,7 +515,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_odd_Ref.csv",zOddTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create Laplacian derivative set zeta reference values*)
 
 
@@ -562,7 +562,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_laplace_Ref.csv",zLaplaceTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Check behavior in critical nu values*)
 
 
