@@ -96,7 +96,7 @@ void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
         // column pivot search
         int r = i;
         for (int j = i + 1; j < dim; j++) {
-            if (fabs(m[(i * dim) + j]) > fabs(m[(i * dim) + r])) {
+            if (fabs(m[(i * dim) + r]) > fabs(m[(i * dim) + r])) {
                 r = j;
             }
         }
