@@ -94,22 +94,22 @@ void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
     }
     for (int i = 0; i < dim; i++) {
         // column pivot search
-        int r = i;
+        int pivot = i;
         for (int j = i + 1; j < dim; j++) {
-            if (fabs(m[(j * dim) + i]) > fabs(m[(r * dim) + i])) {
-                r = j;
+            if (fabs(m[(j * dim) + i]) > fabs(m[(pivot * dim) + i])) {
+                pivot = j;
             }
         }
-        if (i != r) {
+        if (i != pivot) {
             int zw = p[i];
-            p[i] = p[r];
-            p[r] = zw;
+            p[i] = p[pivot];
+            p[pivot] = zw;
         }
         // permute accordingly
         for (int k = 0; k < dim; k++) {
             double zw = m[(i * dim) + k];
-            m[(i * dim) + k] = m[(r * dim) + k];
-            m[(r * dim) + k] = zw;
+            m[(i * dim) + k] = m[(pivot * dim) + k];
+            m[(pivot * dim) + k] = zw;
         }
         // standard LU-decomposition
         for (int k = i + 1; k < dim; k++) {
