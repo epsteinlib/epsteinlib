@@ -80,5 +80,4 @@ int run_timed_test(int (*test_fn)(void));
  * @param size: The size of the array.
  */
 void sort(double *arr, int size);
-
 #endif
