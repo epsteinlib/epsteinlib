@@ -30,28 +30,58 @@ ConditionNumber[a_]:=Module[
 
 
 (* ::Text:: *)
-(*Generate 2D matrix reference values.*)
+(*Test case entries.*)
 
 
-matrixTestData2D={};
+matrixTestEntry[a_]:=Flatten[{Length[a],N@a,N@Inverse[Transpose[a]]}]
+
+
+(* ::Text:: *)
+(*Generate special 2D reference values.*)
+
+
+matrixTestData2D={
+	matrixTestEntry[{{1,2},{0,1}}]
+	,matrixTestEntry[{{1,0},{2,1}}]
+	,matrixTestEntry[{{0,2},{1,0}}]
+	,matrixTestEntry[{{0,1},{1,1}}]
+	,matrixTestEntry[{{1,1},{1,0}}]
+	,matrixTestEntry[{{0,2},{1,1}}]
+	,matrixTestEntry[{{1,1},{2,0}}]
+	,matrixTestEntry[{{0,1},{1,1}}]
+};
+
+
+(* ::Text:: *)
+(*Generate random 2D matrix reference values.*)
+
+
 While[Length[matrixTestData2D]<800
 	,temp=RandomReal[{-10,10},{2,2}]
 	;If[ConditionNumber[temp]<10
-		,AppendTo[matrixTestData2D,Flatten[Join[{2,temp,Transpose[Inverse[temp]]}]]]
+		,AppendTo[matrixTestData2D,matrixTestEntry[temp]]
 	]
 	;Clear[temp]
 ]
 
 
 (* ::Text:: *)
-(*Generate 3D matrix reference values.*)
+(*Generate special 3D matrix reference values.*)
 
 
-matrixTestData3D={};
+matrixTestData3D={
+	matrixTestEntry[{{0,2,3},{1,1,1},{4,5,6}}]
+};
+
+
+(* ::Text:: *)
+(*Generate random 3D matrix reference values.*)
+
+
 While[Length[matrixTestData3D]<100
 	,temp=RandomReal[{-10,10},{3,3}]
 	;If[ConditionNumber[temp]<10
-		,AppendTo[matrixTestData3D,Flatten[Join[{3,temp,Transpose[Inverse[temp]]}]]]
+		,AppendTo[matrixTestData3D,matrixTestEntry[temp]]
 	]
 	;Clear[temp]
 ]
@@ -65,7 +95,7 @@ matrixTestData4D={};
 While[Length[matrixTestData4D]<99
 	,temp=RandomReal[{-10,10},{4,4}]
 	;If[ConditionNumber[temp]<10
-		,AppendTo[matrixTestData4D,Flatten[Join[{4,temp,Transpose[Inverse[temp]]}]]]
+		,AppendTo[matrixTestData4D,matrixTestEntry[temp]]
 	]
 	;Clear[temp]
 ]
@@ -79,7 +109,7 @@ matrixTestData=Join[matrixTestData2D,matrixTestData3D,matrixTestData4D];
 
 
 (* ::Text:: *)
-(*Safe test cases.*)
+(*Safe reference values.*)
 
 
 SetDirectory[NotebookDirectory[]];
