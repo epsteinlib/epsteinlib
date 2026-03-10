@@ -136,6 +136,6 @@ int test_crandall_g(void) {
  * @return number of failed tests.
  */
 int main(void) {
-    int failed = run_timed_test(test_crandall_g);
+    int failed = test_crandall_g();
     return failed;
 }

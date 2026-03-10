@@ -25,7 +25,8 @@ The SEM of some order is calculated as:
 
     SEM(order) = ∑_{α ∈ {0, 2, …, order}} 1 / (α! (−2πi)^|α|) Z_{Λ,ν}^{reg,(α)}{x}{y=0} g^{(α)}(x)
 
-similar to equation (8) in (*), where (α) denotes differentiation with respect to y.
+similar to equation (8) in (*), where (α) denotes differentiation with respect to y, and the
+derivatives of the regularized Epstein zeta function are computed using finite differences.
 
 (*): Andreas A. Buchheit et al. “Exact Continuum Representation of Long-range Interacting Systems
 and Emerging Exotic Phases in Unconventional Superconductors”, Phys. Rev. Research 5, 043065 (2023)
@@ -54,7 +55,7 @@ from matplotlib.axes import Axes
 from mpmath import factorial, gamma, hyp1f1
 from numpy.typing import NDArray
 
-from epsteinlib import epstein_zeta_reg_der
+from epsteinlib import epstein_zeta_reg
 
 EPS_TAYLOR = 1e-8  # taylor expansion at nu = 1 - 2 EPS in integral and lattice_contribution
 EPS_IS_CLOSE = 1e-12
@@ -181,15 +182,14 @@ def lattice_contribution(
             lambda nu: lattice_contribution(x_val, nu, sigma, order), nu0
         )
 
-    def epstein_zeta_reg_wrapper(y: float, alpha: int) -> float:
+    def epstein_zeta_reg_wrapper(y: float) -> float:
         return float(
             np.real(
-                epstein_zeta_reg_der(
+                epstein_zeta_reg(
                     nu,
                     np.array([[1.0]]),
                     np.array([0.0]),
                     np.array([np.double(y)]),
-                    np.array([alpha]),
                 )
             )
         )
@@ -199,7 +199,12 @@ def lattice_contribution(
             sum(
                 (1 / factorial(j))
                 * (1j / (2 * np.pi)) ** j
-                * epstein_zeta_reg_wrapper(0, j)
+                * finite_differences(
+                    epstein_zeta_reg_wrapper,
+                    0,
+                    j,
+                    j + 1,
+                )
                 * gaussian_derivative(x_val, sigma, j)
                 for j in range(0, order + 1, 2)
             )
@@ -294,7 +299,6 @@ def plot_right(
     x_values: NDArray[np.float64],
     diff1: NDArray[np.float64],
     diff2: Union[NDArray[np.float64], None],
-    diff4: Union[NDArray[np.float64], None],
 ) -> None:
     """Plot the right subplot with error analysis."""
     ax.semilogy(
@@ -319,18 +323,6 @@ def plot_right(
             markerfacecolor="none",
             markeredgecolor="b",
             label="|Sum - SEM (order 2)|",
-        )
-    if diff4 is not None:
-        ax.semilogy(
-            x_values,
-            diff4,
-            "g-",
-            linewidth=2,
-            marker="s",
-            markersize=4,
-            markerfacecolor="none",
-            markeredgecolor="g",
-            label="|Sum - SEM (order 4)|",
         )
 
     ax.set_xlabel("x")
@@ -378,24 +370,18 @@ if __name__ == "__main__":
         ]
     )
 
-    # Calculate second order sem values
-    sem_order_2_values = np.array([sem(xx, NU0, SIGMA0, 2) for xx in x])
-    diff_order_2 = np.array(
-        [
-            min_abs_rel_error(s, s2)
-            for s, s2 in zip(sum_func_values, sem_order_2_values)
-        ]
-    )
+    # Calculate and plot sem_order_2 if NU0 != 1
+    if NU0 == 1:
+        diff_order_2: Union[NDArray[np.float64], None] = None
+    else:
+        sem_order_2_values = np.array([sem(xx, NU0, SIGMA0, 2) for xx in x])
 
-    # Calculate fourth order sem values
-    sem_order_4_values = np.array([sem(xx, NU0, SIGMA0, 4) for xx in x])
-    diff_order_4 = np.array(
-        [
-            min_abs_rel_error(s, s4)
-            for s, s4 in zip(sum_func_values, sem_order_4_values)
-        ]
-    )
-
+        diff_order_2 = np.array(
+            [
+                min_abs_rel_error(s, s2)
+                for s, s2 in zip(sum_func_values, sem_order_2_values)
+            ]
+        )
     # Plot left and right subplots
     plot_data = {
         "integral": integral_values,
@@ -403,7 +389,7 @@ if __name__ == "__main__":
         "sem_order_0": sem_order_0_values,
     }
     plot_left(ax1, x, plot_data, NU0)
-    plot_right(ax2, x, diff_order_0, diff_order_2, diff_order_4)
+    plot_right(ax2, x, diff_order_0, diff_order_2)
 
     plt.tight_layout()
     plt.show()

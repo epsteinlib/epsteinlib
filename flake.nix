@@ -52,9 +52,6 @@
             # ln -fs ${configFile} "''${GIT_WC}/.pre-commit-config.yaml"
             addGcRoot = false;
 
-            # Exclude only the single Meson JUnit log file as it gets auto-generated
-            excludes = ["build/meson-logs/testlog\\.junit\\.xml$"];
-
             hooks = let
               mypy_wrapper = pkgs.writeShellScript "mypy" ''
                 MYPYPATH=${self'.packages.epsteinlib_python}/lib/python3.12/site-packages/ ${self'.packages.pythonDevEnv}/bin/mypy "$@"
@@ -94,17 +91,6 @@
               pyupgrade.enable = true;
 
               # Misc
-
-              end-of-file-fixer = {
-                enable = true;
-                excludes = ["build/meson-logs/testlog\\.junit\\.xml$"];
-              };
-
-              trim-trailing-whitespace = {
-                enable = true;
-                excludes = ["build/meson-logs/testlog\\.junit\\.xml$"];
-              };
-
               check-added-large-files.enable = true;
               check-case-conflicts.enable = true;
               check-executables-have-shebangs.enable = true;
@@ -112,8 +98,10 @@
               check-symlinks.enable = true;
               check-vcs-permalinks.enable = true;
               detect-private-keys.enable = true;
+              end-of-file-fixer.enable = true;
               mixed-line-endings.enable = true;
               reuse.enable = true;
+              trim-trailing-whitespace.enable = true;
               typos = {
                 enable = true;
                 settings = {
