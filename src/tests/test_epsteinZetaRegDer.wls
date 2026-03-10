@@ -45,6 +45,13 @@ Protect[Power];
 
 
 (* ::Text:: *)
+(*Bain path lattice matrix.*)
+
+
+BMat[a_]=1/Sqrt[a+1]DiagonalMatrix[{Sqrt[a],1,1}] . {{1,1,0},{1,0,1},{0,1,1}}
+
+
+(* ::Text:: *)
 (*Generate random rational numbers and random integers between 0 and 6.*)
 
 
@@ -160,15 +167,16 @@ sumFourierNonZeroDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[GDer[Length
 (*Prototype for epsteinZetaDer without special cases such non-positive even integers nu.*)
 
 
-epsteinZetaRegDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:10]:=Module[
-	{dim,prec,\[Nu]N,AN,xN,yN,\[Mu],sumReal,sumReci,res}
+epsteinZetaRegDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:8]:=Module[
+	{dim,prec,\[Nu]N,AN,xN,yN,\[Mu],sumReal,sumReci,res,k,cor,vol}
 	,prec=120
 	;dim = Length[AExt]
-	;If[\[Nu]Ext>=2&&PossibleZeroQ[(\[Nu]Ext-dim)/2-Round[(\[Nu]Ext-dim)/2]]
+	;If[\[Nu]Ext>=dim&&PossibleZeroQ[(\[Nu]Ext-dim)/2-Round[(\[Nu]Ext-dim)/2]]
 		,\[Nu]N=Round[\[Nu]Ext];If[PossibleZeroQ[Total[\[Alpha]]],Return[" bug for no derivatives in nu equals dim plus 2k"]]
 		,\[Nu]N=N[\[Nu]Ext,prec]
 	]
 	;AN=N[AExt,prec]
+	;vol=Abs[Det[AN]]
 	;\[Mu]=Abs[Det[AN]]^(1/Length[AN])
 	;AN=1/\[Mu] N[AExt,prec]
 	;xN=1/\[Mu] N[xExt,prec]
@@ -176,6 +184,10 @@ epsteinZetaRegDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:10]:=Module[
 	;sumReal=SetPrecision[sumRealDer[\[Nu]N,AN,xN,yN,\[Alpha],sumLim],prec]
 	;sumReci=SetPrecision[sumFourierNonZeroDer[\[Nu]N,AN,xN,yN,\[Alpha],sumLim]+GRegDer[Length[AN]-\[Nu]N,yN,\[Alpha]],prec]
 	;res=SetPrecision[\[Mu]^(Total[\[Alpha]]-\[Nu]N)\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci),prec]
+	;k=Max[0,Round[(\[Nu]N-dim)/2]]
+	;If[PossibleZeroQ[k-(\[Nu]N-dim)/2]
+		,res+=Pi^(k+dim/2)/Gamma[k+dim/2](-1)^(k+1)/k!YDer[k,N[yExt],\[Alpha]]Log[\[Mu] \[Mu]]/Abs[Det[N[AExt]]]
+	]
 	;Return[res]
 ]
 
@@ -254,3 +266,48 @@ zDerd2kTab=ParallelTable[
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/epsteinZetaRegDer_d2k_prototype_Ref.csv",zDerd2kTab];
+
+
+(* ::Subsection:: *)
+(*Create Epstein zeta regularized derivative reference values for Bain type lattice matrix*)
+
+
+(* ::Text:: *)
+(*Setup test parameters.*)
+
+
+range = Range[12];
+Do[
+	\[Nu]Int[i]=2+2 RandomInteger[{0,6}]
+	;A0[i]=RandomReal[{1/10,1}]
+	;x0[i]=If[i<10,{0,0,0},{randRational,randRational,randRational}]
+	;y0[i]=If[i<5,{0,0,0},{randRational,randRational,randRational}]
+	;\[Alpha]0[i]={Max[1,randDerivative],randDerivative,randDerivative}
+	,{i,range}
+]
+
+
+range = Range[12];
+Do[
+	\[Nu]Int[i]=N[2+2 RandomInteger[{0,6}]]
+	;a0[i]=N[BMat[RandomReal[{1/10,1}]]]
+	;x0[i]=If[i<10,{0.,0.,0.},N@{randRational,randRational,randRational}]
+	;y0[i]=If[i<5,{0.,0.,0.},N@{randRational,randRational,randRational}]
+	;\[Alpha]0[i]={Max[1,randDerivative],randDerivative,randDerivative}
+	,{i,range}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+zDerBainTab=ParallelTable[
+	With[{result=epsteinZetaRegDer[N[\[Nu]Int[i]],a0[i],x0[i],y0[i],\[Alpha]0[i]]}
+	,Flatten[Join[{\[Nu]Int[i],a0[i],x0[i],y0[i]},\[Alpha]0[i],{If[PossibleZeroQ[Re[result]],0.,N[Re[result]]],N[Im[result]]}]]
+	],{i,range}
+];
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/epsteinZetaRegDer_bain_prototype_Ref.csv",zDerBainTab];

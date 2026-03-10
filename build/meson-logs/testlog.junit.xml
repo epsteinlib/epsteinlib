@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<!--
+SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
+
+SPDX-License-Identifier: AGPL-3.0-only
+-->
+
+<testsuites tests="1" errors="0" failures="0"><testsuite name="epsteinlib" tests="1" errors="0" failures="0" skipped="0" time="0.09627890586853027"><testcase name="test_epsteinZeta" classname="epsteinlib" time="0.09627890586853027"><system-out>test_epsteinZeta 
+	 ... processing csv/epsteinZeta_Ref.csv 
+	 ... 300 out of 300 tests passed with tolerance 6.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.822089E-15 | avg: 2.766178E-16 ]
+									    [ Time  →  sec: 0.003635     ]
+test_epsteinZetaReg 
+	 ... processing file: csv/epsteinZetaReg_Ref.csv 
+	 ... 200 out of 200 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.133043E-15 | avg: 1.747445E-16 ]
+									    [ Time  →  sec: 0.002753     ]
+test_epsteinZeta_random_matrices 
+	 ... processing csv/epsteinZeta_random_matrices_Ref.csv 
+	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 2.168404E-18 | max: 1.613647E-15 | avg: 2.249099E-16 ]
+									    [ Time  →  sec: 0.029808     ]
+test_epsteinZetaReg_random_matrices 
+	 ... processing csv/epsteinZetaReg_random_matrices_Ref.csv 
+	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 9.697399E-19 | max: 1.180183E-15 | avg: 1.530408E-16 ]
+									    [ Time  →  sec: 0.030164     ]
+test_epsteinZeta_epsteinZetaReg_represent_as_each_other 
+	 ... 200 out of 200 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 9.424515E-16 | avg: 1.707986E-16 ]
+									    [ Time  →  sec: 0.006646     ]
+test_epsteinZeta_cutoff 
+	 ... 100 out of 100 tests passed with tolerance 1.000000E-15.
+									    [ Time  →  sec: 0.018956     ]</system-out></testcase></testsuite></testsuites>

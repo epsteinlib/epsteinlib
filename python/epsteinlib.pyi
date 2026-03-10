@@ -21,6 +21,31 @@ def prepare_inputs(
     NDArray[np.float64],
     NDArray[np.float64],
 ]: ...
+def validate_inputs_der(
+    nu: Union[float, int],
+    A: NDArray[  # pylint: disable=invalid-name
+        Union[np.integer[Any], np.floating[Any]]
+    ],
+    x: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    y: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    alpha: NDArray[np.integer[Any]],
+) -> None: ...
+def prepare_inputs_der(
+    nu: Union[float, int],
+    A: NDArray[  # pylint: disable=invalid-name
+        Union[np.integer[Any], np.floating[Any]]
+    ],
+    x: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    y: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    alpha: NDArray[np.integer[Any]],
+) -> tuple[
+    np.float64,
+    int,
+    NDArray[np.float64],
+    NDArray[np.float64],
+    NDArray[np.float64],
+    NDArray[np.unsignedinteger[Any]],
+]: ...
 def epstein_zeta_c_call(
     nu: cython.double,
     dim: cython.int,
@@ -46,4 +71,34 @@ def epstein_zeta_reg(
     A: NDArray[Union[np.integer[Any], np.floating[Any]]],
     x: NDArray[Union[np.integer[Any], np.floating[Any]]],
     y: NDArray[Union[np.integer[Any], np.floating[Any]]],
+) -> complex: ...
+def set_zeta_der_c_call(
+    nu: cython.double,
+    dim: cython.int,
+    a: cython.double[::1],
+    x: cython.double[::1],
+    y: cython.double[::1],
+    alpha: cython.uint[::1],
+) -> complex: ...
+def set_zeta_der(
+    nu: Union[float, int],
+    A: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    x: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    y: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    alpha: NDArray[np.integer[Any]],
+) -> complex: ...
+def epstein_zeta_reg_der_c_call(
+    nu: cython.double,
+    dim: cython.int,
+    a: cython.double[::1],
+    x: cython.double[::1],
+    y: cython.double[::1],
+    alpha: cython.uint[::1],
+) -> complex: ...
+def epstein_zeta_reg_der(
+    nu: Union[float, int],
+    A: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    x: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    y: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    alpha: NDArray[np.integer[Any]],
 ) -> complex: ...

@@ -1,12 +1,16 @@
 #!/usr/bin/env wolframscript
 (* ::Package:: *)
 
-(* SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
+(* SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
    SPDX-License-Identifier: AGPL-3.0-only *)
 
 
 (* ::Section:: *)
 (*Unit tests for epsteinZeta . c*)
+
+
+(* ::Subsection::Closed:: *)
+(*Setup*)
 
 
 (* ::Text:: *)
@@ -27,8 +31,30 @@ Protect[Power];
 ];
 
 
-(* ::Subsection:: *)
-(*Setup reference functions*)
+(* ::Subsection::Closed:: *)
+(*Reference functions*)
+
+
+(* ::Text:: *)
+(*Harmonic polynomials.*)
+
+
+cInner[n_,i_,k_,d_]:= Product[2n+d-2-4k-2j,{j,i+1,n/2-k}]
+cOuter[n_,k_,d_]:=2^-k/cInner[n,0,k,d] Product[(2n+d-2ell)/((2n+d+2-4ell)(2n+d-4ell)),{ell,k}]
+hInner[\[Alpha]_,\[Beta]_,\[Gamma]_,n_,k_,d_]:=(-1/2)^Total[\[Beta]] cInner[n,Total[\[Beta]],k,d]Binomial[Total[\[Beta]]+k,k]Total[\[Beta]]!/Apply[Times,Factorial[\[Beta]]] Apply[Times,Binomial[\[Alpha],\[Alpha]+\[Beta]-\[Gamma]](\[Gamma]-\[Beta])!/(2\[Gamma]-\[Alpha]-2\[Beta])!]
+h[k_][x_,\[Alpha]_]:=Module[
+	{d,n}
+	,d=Length[\[Alpha]]
+	;n=Total[\[Alpha]]
+		;cOuter[n,k,d]Total@Table[
+		Apply[Times,Power[x,2\[Gamma]-\[Alpha]]]
+		Total[Table[
+		hInner[\[Alpha],\[Beta],\[Gamma],n,k,d]
+		,{\[Beta],Tuples[Range[MapThread[Max,{0\[Alpha],\[Gamma]-\[Alpha]}],\[Gamma]-\[Alpha]/2]]}
+		]]
+	,{\[Gamma],Select[Tuples[Range[Ceiling[\[Alpha]/2],0\[Alpha]+Total[\[Alpha]]-k]],Total[#]==Total[\[Alpha]]-k&]}
+	]
+]
 
 
 (* ::Text:: *)
@@ -75,6 +101,8 @@ sDer[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=(
 
 
 G[\[Nu]_,z_]=Piecewise[{{-2/\[Nu],Norm[z]<10^(-64)},{ExpIntegralE[1-\[Nu]/2,Pi z . z],Norm[z]>=10^(-64)}}];
+p[y_,\[Alpha]_,\[Beta]_]:=Apply[Times,(-\[Pi])^(\[Alpha]-\[Beta])Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2y)^(\[Alpha]-2\[Beta])];
+GDer[\[Nu]_,y_,\[Alpha]_]:=Total[Flatten[Table[p[y,\[Alpha],\[Beta]]G[\[Nu]+2Total[\[Alpha]-\[Beta]],y],{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}]]]
 GReg[\[Nu]_,z_]=Piecewise[{
 	{-2/\[Nu],Norm[z]<10^(-64)&&Not[Element[-\[Nu]/2,NonNegativeIntegers]]}
 	,{-Gamma[\[Nu]/2,0,Pi z . z]/(Pi z . z)^(\[Nu]/2),Norm[z]>=10^(-64)&&Not[Element[-\[Nu]/2,NonNegativeIntegers]]}}
@@ -96,7 +124,7 @@ GRegDerAnalytic[\[Nu]_,z_,\[Alpha]_]:=Derivative[0,\[Alpha]][GReg][\[Nu],z]
 GDerAnalytic[\[Nu]_,z_,\[Alpha]_]:=Derivative[0,\[Alpha]][G][\[Nu],z]
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Random Values*)
 
 
@@ -105,7 +133,7 @@ randDerivative := RandomInteger[{0,6}]
 randDerivativeBeta[a_] := RandomInteger[{0,Floor[a/2]}]
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create polynomial p reference values*)
 
 
@@ -137,7 +165,154 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/polynomial_p_Ref.csv",pTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
+(*Create coefficients c reference values*)
+
+
+(* ::Text:: *)
+(*Setup test parameters.*)
+
+
+range = Range[999];
+Do[
+	n0[j]=RandomInteger[{0,20}]
+	;i0[j]=RandomInteger[{0,Floor[n0[j]/2]}]
+	;k0[j]=RandomInteger[{0,i0[j]}]
+	;d0[j]=RandomInteger[{1,10}]
+	,{j,range}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+cInnerTab=ParallelTable[{n0[j],i0[j],k0[j],d0[j],N@cInner[n0[j],i0[j],k0[j],d0[j]]},{j,range}];
+cOuterTab=ParallelTable[{n0[j],k0[j],d0[j],N@cOuter[n0[j],k0[j],d0[j]]},{j,range}];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/coeffs_c_inner_Ref.csv",cInnerTab];
+Export["csv/coeffs_c_outer_Ref.csv",cOuterTab];
+
+
+(* ::Subsection::Closed:: *)
+(*Create references values for inner sum of harmonic polynomials*)
+
+
+(* ::Text:: *)
+(*Generate reference arguments.*)
+
+
+range = Range[100];
+j=1;
+maxn=60;
+While[j<=Last[range]
+	,
+	\[Alpha]0[j]={temp1=RandomInteger[{1,maxn}],temp2=RandomInteger[{0,maxn-temp1}],RandomInteger[{0,maxn-temp1-temp2}]}
+	;k0[j]=RandomInteger[{0,Floor[Total[\[Alpha]0[j]]/2]}]
+	;tups=Select[Tuples[Range[Ceiling[\[Alpha]0[j]/2],0 \[Alpha]0[j]+Total[\[Alpha]0[j]]-k0[j]]],Total[#]==Total[\[Alpha]0[j]]-k0[j]&]
+	;If[Length[tups]==0,Continue[]]
+	;\[Gamma]0[j]=RandomChoice@tups
+	;tups=Tuples[Range[MapThread[Max,{0\[Alpha]0[j],\[Gamma]0[j]-\[Alpha]0[j]}],\[Gamma]0[j]-\[Alpha]0[j]/2]]
+	;If[Length[tups]==0,Continue[]]
+	;\[Beta]0[j]=RandomChoice@tups
+	;z0[j]=2{randRational,randRational,randRational};
+	;j++
+]
+Clear[j,tups]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+hInnerTab=ParallelTable[Flatten@{\[Alpha]0[j],\[Beta]0[j],\[Gamma]0[j],k0[j],N@hInner[\[Alpha]0[j],\[Beta]0[j],\[Gamma]0[j],Total[\[Alpha]0[j]],k0[j],3]},{j,range}];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/harmonic_h_inner_Ref.csv",hInnerTab];
+
+
+(* ::Subsection::Closed:: *)
+(*Create 1D harmonic h reference values*)
+
+
+range=Range[100];
+Do[
+	\[Alpha]0[j]={RandomInteger[{0,50}]}
+	;k0[j]=RandomInteger[{0,Floor[First@\[Alpha]0[j]/2]}]
+	;z0[j]={randRational}
+,{j,range}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+h1DTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@h[k0[j]][z0[j],\[Alpha]0[j]]},{j,range}];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/harmonic_h_1D_Ref.csv",h1DTab];
+
+
+(* ::Subsection::Closed:: *)
+(*Create harmonic h reference values*)
+
+
+(* ::Text:: *)
+(*Generate reference arguments.*)
+
+
+range = Range[100];
+j=1;
+While[j<=Last[range]
+	,
+	\[Alpha]0[j]={RandomInteger[{0,20}],RandomInteger[{0,20}],RandomInteger[{0,20}]}
+	;If[Total[\[Alpha]0[j]]>30,Continue[]]
+	;k0[j]=RandomInteger[{0,Floor[Total[\[Alpha]0[j]]/2]}]
+	;tups=Select[Tuples[Range[Ceiling[\[Alpha]0[j]/2],0 \[Alpha]0[j]+Total[\[Alpha]0[j]]-k0[j]]],Total[#]==Total[\[Alpha]0[j]]-k0[j]&]
+	;If[Length[tups]==0,Continue[]]
+	;\[Gamma]0[j]=RandomChoice@tups
+	;tups=Tuples[Range[MapThread[Max,{0\[Alpha]0[j],\[Gamma]0[j]-\[Alpha]0[j]}],\[Gamma]0[j]-\[Alpha]0[j]/2]]
+	;If[Length[tups]==0,Continue[]]
+	;\[Beta]0[j]=RandomChoice@tups
+	;z0[j]=2{randRational,randRational,randRational};
+	;j++
+]
+Clear[j,tups]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+h3DTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@h[k0[j]][z0[j],\[Alpha]0[j]]},{j,range}];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/harmonic_h_3D_Ref.csv",h3DTab];
+
+
+(* ::Subsection::Closed:: *)
 (*Create upper Crandall derivatives reference values*)
 
 
@@ -149,7 +324,7 @@ randDerivative := RandomInteger[{0,6}]
 (*Setup test parameters.*)
 
 
-range = Range[100];
+range = Range[10];
 Do[
 	\[Nu]0[i]=With[{\[Nu]=10 randRational},If[PossibleZeroQ@(\[Nu]-2),1/2,\[Nu]]];
 	z0[i]={randRational,randRational,randRational};
@@ -173,7 +348,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/crandall_g_der_Ref.csv",crandallDerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create polynomial l reference values*)
 
 
@@ -205,7 +380,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/polynomial_l_Ref.csv",lTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create (\[Pi] y\.b2)^k derivatives reference values*)
 
 
@@ -237,7 +412,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/polynomial_y_der_Ref.csv",YDerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create Log[\[Pi] y\.b2] derivatives reference values*)
 
 
@@ -268,7 +443,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/log_l_der_Ref.csv",LDerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create singularity derivatives reference values*)
 
 
@@ -300,12 +475,8 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/singularity_s_der_Ref.csv",sDerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create regularized Crandall derivatives reference values*)
-
-
-randRational := RandomInteger[{-10^(16),10^(16)}]/10^(16)
-randDerivative := RandomInteger[{0,6}]
 
 
 (* ::Text:: *)
@@ -336,7 +507,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/crandall_gReg_der_Ref.csv",crandallgRegDerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create regularized Crandall function prototype reference values for nu = dim + 2*k*)
 
 
@@ -361,4 +532,4 @@ GRegKDerTab=ParallelTable[Flatten[Join[{\[Nu]0[i]},N[z0[i],16],\[Alpha]0[i],{N[S
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/crandall_gReg_der_d2k_prototype_Ref.csv",GRegKDerTab]
+Export["csv/crandall_gReg_der_d2k_prototype_Ref.csv",GRegKDerTab];

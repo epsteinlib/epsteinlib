@@ -19,7 +19,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 # EpsteinLib
 
-Authors: Andreas A. Buchheit, Jonathan Busse, Ruben Gutendorf, DevOps: Jan Schmitz
+Authors: Andreas A. Buchheit, Jonathan K. Busse, Ruben Gutendorf, DevOps: Jan Schmitz
 
 Contact: buchheit@num.uni-sb.de
 
@@ -50,6 +50,16 @@ def epstein_zeta(
     y: NDArray[Union[np.integer[Any], np.floating[Any]]],
 ) -> complex
 ```
+In the Julia package, it is implemented as
+```julia
+epsteinzeta(ν::Float64, A::Matrix{Float64}, x::Vector{Float64}, y::Vector{Float64})::Complex{Float64}
+```
+and with optional keyword arguments as
+```julia
+epsteinzeta(ν; d, A, x, y)
+```
+where at least one of the arguments `d`, `x`, `y`, or `A` must be provided. By default, `x` and `y` are zero vectors of length `d`, and `A` is the `d × d` identity matrix.
+
 In the Mathematica package, it is implemented as
 ```mathematica
 EpsteinZeta[\[Nu],A,x,y]
@@ -98,7 +108,15 @@ def epstein_zeta_reg(
     y: NDArray[Union[np.integer[Any], np.floating[Any]]],
 ) -> complex
 ```
-
+in the Julia package as
+```julia
+epsteinzetareg(ν::Float64, A::Matrix{Float64}, x::Vector{Float64}, y::Vector{Float64})::Complex{Float64}
+```
+and with optional keyword arguments as
+```julia
+epsteinzetareg(ν; d, A, x, y)
+```
+with defaults for `x`, `y`, and `A` identical to those used in `epsteinzeta`,
 and in the Mathematica package as
 ```mathematica
 EpsteinZetaReg[\[Nu],A,x,y]
@@ -107,6 +125,72 @@ EpsteinZetaReg[\[Nu],A,x,y]
 To ensure numerical stability when evaluating the regularized Epstein zeta function as a function of $\boldsymbol x$, we again implement the following cutoff:
 - If $(\boldsymbol x-\boldsymbol z)^2 < 10^{-64}$ for some $\boldsymbol z \in \Lambda$, we numerically set $\boldsymbol x = \boldsymbol z$.
 
+## In Development: Derivatives
+
+EpsteinLib offers the partial derivatives of the set zeta function and the regularized Epstein zeta function with respect to the multi-index $\boldsymbol{\alpha}$ and the vector argument $\boldsymbol y$.
+
+For some multi-index $\boldsymbol{\alpha}$ and $L=\Lambda -\boldsymbol x$, the partial derivatives of the set zeta function are defined as meromorphic continuation of
+
+$$
+Z_{L,\nu}^{(\boldsymbol\alpha)}(\boldsymbol y)
+=\sum_{\boldsymbol{z}\in L}{}^{'}
+(-2\pi i\boldsymbol z)^{\boldsymbol\alpha}
+\frac{e^{-2\pi i \boldsymbol{y}\cdot \boldsymbol{z}}}{|\boldsymbol{z}|^{\nu}}
+,\qquad\mathrm{Re}(\nu) > d-|\boldsymbol\alpha|
+$$
+
+to $\nu\in\mathbb C$. Note, that the derivatives of the set zeta function are the derivatives of the Epstein zeta function with respect to $\boldsymbol y$ with a phase factor
+
+$$
+Z_{L, \nu}^{(\boldsymbol\alpha)}(\boldsymbol y)
+=\partial_{\boldsymbol y}^{\boldsymbol\alpha}
+\Big(e^{2\pi i \boldsymbol x \cdot\boldsymbol y}Z_{\Lambda,\nu}\begin{vmatrix} \boldsymbol x \newline\boldsymbol y \end{vmatrix} \Big).
+$$
+
+The derivatives of the set zeta function are implemented in this library as
+```c
+double complex setZetaDer(double nu, unsigned int dim, const double *A, const double *x, const double *y, const unsigned int *alpha);
+```
+In the Python package, it is implemented as
+```python
+def set_zeta_der(
+    nu: Union[float, int],
+    A: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    x: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    y: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    alpha: NDArray[np.integer[Any]],
+) -> complex
+```
+In the Mathematica package, it is implemented as
+```mathematica
+SetZetaDer[\[Nu],A,x,y,\[alpha]]
+```
+
+In addition, the library includes the partial derivatives of the regularized Epstein zeta function
+
+$$
+Z_{\Lambda,\nu}^{\mathrm{reg},(\boldsymbol{\alpha})}\begin{vmatrix} \boldsymbol x \newline\boldsymbol y \end{vmatrix}
+=\partial_{\boldsymbol y}^{\boldsymbol\alpha}Z_{\Lambda,\nu}^{\mathrm{reg}}\begin{vmatrix} \boldsymbol x \newline\boldsymbol y \end{vmatrix}
+$$
+
+who are implemented in this library as
+```c
+double complex epsteinZetaRegDer(double nu, unsigned int dim, const double *A, const double *x, const double *y, const unsigned int *alpha);
+```
+In the Python package, it is implemented as
+```python
+def epstein_zeta_reg_der(
+    nu: Union[float, int],
+    A: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    x: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    y: NDArray[Union[np.integer[Any], np.floating[Any]]],
+    alpha: NDArray[np.integer[Any]],
+) -> complex
+```
+In the Mathematica package, it is implemented as
+```mathematica
+EpsteinZetaRegDer[\[Nu],A,x,y,\[alpha]]
+```
 
 ## Installation
 Install our required dependencies: meson, ninja, pkg-config, python3 e.g. with
@@ -227,9 +311,9 @@ In the `examples/python/` folder, you can find two more Python examples:
 1. `dispersion_relation_3d.py`: This script demonstrates how to use EpsteinLib to calculate quantum dispersion relations in 3D.
 2. `sem_gaussian_1d.py`: This script showcases the Singular Euler-Maclaurin (SEM) expansion for a Gaussian function in 1D. It has an optional argument `--nu` that can be used to set the value of nu. For example, you can run it with `python sem_gaussian_1d.py --nu 1`. If no value is provided, it defaults to nu = 1.5.
 
-These examples, along with the `lattice_sum.py` script, provide a comprehensive overview of how to use EpsteinLib in various scenarios.
+### in Julia
 
-
+The Julia wrapper `EpsteinLib.jl` by [David Gómez-Castro](https://github.com/dgomezcastro) and [Jonathan K. Busse](https://github.com/JoKaBus) can be used independently of our build system. A minimal example computing the Madelung constant is available in `examples/julia/lattice_sum.jl`, and installation instructions can be found in the [repository](https://github.com/epsteinlib/EpsteinLib.jl).
 
 ### in Mathematica
 
