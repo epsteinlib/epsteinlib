@@ -10,7 +10,7 @@
 (*Singular Euler-Maclaurin Expansion in 2D*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Setup*)
 
 
@@ -65,27 +65,12 @@ SetOptions[MaTeX,"Preamble"->{"\\usepackage{xcolor}","\\usepackage{bm}","\\usepa
 SetOptions[MaTeX,FontSize->18];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Define functions*)
 
 
 (* ::Text:: *)
-(*Compiled Sum \!\( *)
-(*\*SubscriptBox[\(\[Sum]\), \(\(( *)
-(*\*SubscriptBox[\(y\), \(\(1\)\(,\)\)] *)
-(*\*SubscriptBox[\(y\), \(2\)])\) \[Element] *)
-(*\*SuperscriptBox[\(Integers\), \(2\)]\)]\( *)
-(*\*SuperscriptBox[\(( *)
-(*\*SuperscriptBox[\(( *)
-(*\*SubscriptBox[\(y\), \(1\)] - *)
-(*\*SubscriptBox[\(x\), \(1\)])\), \(2\)] + *)
-(*\*SuperscriptBox[\(( *)
-(*\*SubscriptBox[\(y\), \(2\)] - *)
-(*\*SubscriptBox[\(x\), \(2\)])\), \(2\)])\), \(\(-\[Nu]\)/2\)] *)
-(*\*SuperscriptBox[\(e\), \(\(-\(\[Pi] \(( *)
-(*\*SubsuperscriptBox[\(y\), \(1\), \(2\)] + *)
-(*\*SubsuperscriptBox[\(y\), \(2\), \(2\)])\)\)\)/*)
-(*\*SuperscriptBox[\(\[Sigma]\), \(2\)]\)]\)\)*)
+(*Sum2DCompiled computes the sum  \[Sum]\:208dy\:2081,y\:2082\:208e\[Element]\:2124\.b2 ((y\:2081-x\:2081)\.b2 + (y\:2082-x\:2082)\.b2)^(-\[Nu]/2) \:22c5 exp(-\[Pi] (y\:2081\.b2 + y\:2082\.b2)/\[Sigma]\.b2)*)
 
 
 Sum2DCompiled=Compile[{
@@ -112,30 +97,14 @@ Sum2D[{x1_,x2_},\[Nu]_,\[Sigma]_,lim_:100]:=Sum2DCompiled[N[x1],N[x2],N[\[Nu]],N
 
 
 (* ::Text:: *)
-(*Analytic expression for the integral \!\( *)
-(*\*SubsuperscriptBox[\(\[Integral]\), \(-\[Infinity]\), \(\[Infinity]\)]\( *)
-(*\*SuperscriptBox[\(( *)
-(*\*SuperscriptBox[\(( *)
-(*\*SubscriptBox[\(y\), \(1\)] - *)
-(*\*SubscriptBox[\(x\), \(1\)])\), \(2\)] + *)
-(*\*SuperscriptBox[\(( *)
-(*\*SubscriptBox[\(y\), \(2\)] - *)
-(*\*SubscriptBox[\(x\), \(2\)])\), \(2\)])\), \(\(-\[Nu]\)/2\)] *)
-(*\*SuperscriptBox[\(e\), \(\(-\(\[Pi] \(( *)
-(*\*SubsuperscriptBox[\(y\), \(1\), \(2\)] + *)
-(*\*SubsuperscriptBox[\(y\), \(2\), \(2\)])\)\)\)/*)
-(*\*SuperscriptBox[\(\[Sigma]\), \(2\)]\)] \[DifferentialD]*)
-(*\*SubscriptBox[\(y\), \(1\)] \[DifferentialD]*)
-(*\*SubscriptBox[\(y\), \(2\)]\)\)*)
+(*Analytic expression for the indefinite integral \[Integral] \:208d\:208b\[Infinity],\[Infinity]\:208e ((y\:2081-x\:2081)\.b2 + (y\:2082-x\:2082)\.b2)^(-\[Nu]/2) \:22c5 exp(-\[Pi] (y\:2081\.b2 + y\:2082\.b2)/\[Sigma]\.b2) dy\:2081 dy\:2082*)
 
 
 Integral2D[{x1_,x2_},\[Nu]_,\[Sigma]_]:=\[Pi]^(\[Nu]/2) (\[Sigma]^2)^(1-\[Nu]/2) Gamma[1-\[Nu]/2] LaguerreL[-(\[Nu]/2),-((\[Pi] (x1^2+x2^2))/\[Sigma]^2)]
 
 
 (* ::Text:: *)
-(*Analytic expression for the partial derivatives of the gaussian e^(-((\[Pi] (\!\( *)
-(*\*SubsuperscriptBox[\(y\), \(1\), \(2\)] + *)
-(*\*SubsuperscriptBox[\(y\), \(2\), \(2\)]\)))/\[Sigma]^2))*)
+(*Analytic expression for the partial derivatives of the Gaussian exp(-(\[Pi] (y\:2081\.b2 + y\:2082\.b2)/\[Sigma]\.b2))*)
 
 
 Gaussian2D[{y1_,y2_},\[Sigma]_]=Exp[-((\[Pi] (y1^2+y2^2))/\[Sigma]^2)];
@@ -155,7 +124,7 @@ SEM2D[{x1_,x2_},\[Nu]_,\[Sigma]_,n_:0] := Integral2D[{x1,x2},\[Nu],\[Sigma]]+Tot
 	]]
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Error Analysis*)
 
 
@@ -170,7 +139,7 @@ SEM2D[{x1_,x2_},\[Nu]_,\[Sigma]_,n_:0] := Integral2D[{x1,x2},\[Nu],\[Sigma]]+Tot
 (*SEM and Error for chosen parameters.*)
 
 
-GraphicsRow[{
+plt=GraphicsRow[{
 	Show[
 	ListLinePlot[{
 		{#,SEM2D[{#,1},\[Nu]0,\[Sigma]0,0]}&/@Range[-2\[Sigma]0,2\[Sigma]0,\[Sigma]0/20]
@@ -200,3 +169,10 @@ GraphicsRow[{
 	]
 	},ImageSize->1150
 ]
+
+
+(* ::Subsection:: *)
+(*Show Result*)
+
+
+plt
