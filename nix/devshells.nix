@@ -19,7 +19,7 @@ _: {
                      meson compile -C build &&
                      meson test -v -C build $@
                      mkdir -p html &&
-                     gcovr --html-details html/coverage.html --txt --txt-metric branch --print-summary --exclude 'build/python/.*pyx.c' --exclude 'src/tests/.*.c' --gcov-ignore-parse-errors=suspicious_hits.warn &&
+                     gcovr --html-details html/coverage.html --txt --txt-metric branch --print-summary --exclude 'build/python/.*pyx.c' --exclude 'src/tests/.*.c' &&
                      popd
                     ";
           help = "run the unit tests (arguments are passed to meson test, e.g. for only running specific tests)";

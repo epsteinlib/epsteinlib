@@ -8,5 +8,3 @@
 cdef extern from "../include/epsteinZeta.h":
     double complex epsteinZeta(double nu, int dim, const double *a, const double *x, const double *y)
     double complex epsteinZetaReg(double nu, int dim, const double *a, const double *x, const double *y)
-    double complex setZetaDer(double nu, int dim, const double *a, const double *x, const double *y, const unsigned int *alpha)
-    double complex epsteinZetaRegDer(double nu, int dim, const double *a, const double *x, const double *y, const unsigned int *alpha)
