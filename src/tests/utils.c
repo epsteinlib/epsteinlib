@@ -5,6 +5,7 @@
 #include <complex.h>
 #include <math.h>
 #include <stdio.h>
+#include <time.h>
 
 #define EPSILON_REF (double)pow(10, -62)
 
@@ -99,5 +100,69 @@ void printMatrixUnitTest(const char *name, const double *mat, unsigned int dim) 
             }
         }
         printf("]\n");
+    }
+}
+
+/**
+ * @brief Compute the factorial of a multi-index.
+ * @param[in] alpha: multi-index.
+ * @return factorial of alpha.
+ */
+unsigned int mult_fac(unsigned int dim, const unsigned int *alpha) {
+    unsigned int res = 1;
+    for (int i = 0; i < dim; i++) {
+        for (int j = 0; j < alpha[i]; j++) {
+            res *= j + 1;
+        }
+    }
+    return res;
+}
+
+/**
+ * @brief Compute a vector to the power of a multi-index.
+ * @param[in] dim: dimension of alpha end vec.
+ * @param[in] alpha: multi-index.
+ * @param[in] vec: base vector.
+ * @param[in] prefactor: prefactor of the vector.
+ * @return (prefactor * vec) ** alpha.
+ */
+double mult_pow(unsigned int dim, const unsigned int *alpha, const double *vec) {
+    double res = 1;
+    for (int i = 0; i < dim; i++) {
+        for (int j = 0; j < alpha[i]; j++) {
+            res *= vec[i];
+        }
+    }
+    return res;
+}
+
+/** @brief Runs a test function and prints its runtime.
+ *
+ * @param[in] test_fn: pointer to test function returning number of failures.
+ * @return number of failures reported by the test.
+ */
+int run_timed_test(int (*test_fn)(void)) {
+    clock_t t0 = clock();
+    int failed = test_fn();
+    clock_t t1 = clock();
+    double dt = (double)(t1 - t0) / CLOCKS_PER_SEC;
+    printf("\t\t\t\t\t\t\t\t\t    [ Time  →  sec: %.6f     ]\n", dt);
+    return failed;
+}
+
+/**
+ * @brief Sorts an array of doubles in ascending order using bubble sort.
+ * @param arr: The array to be sorted.
+ * @param size: The size of the array.
+ */
+void sort(double *arr, int size) {
+    for (int i = 0; i < size - 1; i++) {
+        for (int j = 0; j < size - i - 1; j++) {
+            if (*(arr + j) > *(arr + j + 1)) {
+                double temp = *(arr + j);
+                *(arr + j) = *(arr + j + 1);
+                *(arr + j + 1) = temp;
+            }
+        }
     }
 }
