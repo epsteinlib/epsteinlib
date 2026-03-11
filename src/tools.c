@@ -128,7 +128,8 @@ void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
             for (int j = 0; j < k; j++) {
                 y[k] -= m[(k * dim) + j] * y[j];
             }
-        } // Solve Rx=y
+        }
+        // Solve Rx=y
         for (int j = (int)dim - 1; j >= 0; j--) {
             r[j * dim + i] = y[j]; // NOLINT every entry of p[i] < dim
             for (int k = j + 1; k < (int)dim; k++) {
