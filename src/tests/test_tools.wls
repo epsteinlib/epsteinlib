@@ -9,7 +9,7 @@
 (*Unit tests for tools . c*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Setup reference functions*)
 
 
@@ -71,6 +71,7 @@ While[Length[matrixTestData2D]<800
 
 matrixTestData3D={
 	matrixTestEntry[{{0,2,3},{1,1,1},{4,5,6}}]
+	,matrixTestEntry[{{0,0,1},{0,1,0},{1,0,0}}]
 };
 
 
@@ -88,10 +89,18 @@ While[Length[matrixTestData3D]<100
 
 
 (* ::Text:: *)
+(*Generate special 4D matrix reference value.*)
+
+
+matrixTestData4D=Map[matrixTestEntry,Permutations[
+	{{1,0,0,0},{0,1,0,0},{5,-7,1,0},{0,0,0,1}}
+]];
+
+
+(* ::Text:: *)
 (*Generate 4D matrix reference values.*)
 
 
-matrixTestData4D={};
 While[Length[matrixTestData4D]<99
 	,temp=RandomReal[{-10,10},{4,4}]
 	;If[ConditionNumber[temp]<10
@@ -102,7 +111,7 @@ While[Length[matrixTestData4D]<99
 
 
 (* ::Text:: *)
-(*Combine reference data.*)
+(*Combine reference values.*)
 
 
 matrixTestData=Join[matrixTestData2D,matrixTestData3D,matrixTestData4D];
@@ -112,5 +121,4 @@ matrixTestData=Join[matrixTestData2D,matrixTestData3D,matrixTestData4D];
 (*Safe reference values.*)
 
 
-SetDirectory[NotebookDirectory[]];
-Export["csv/sdv_Ref.csv", matrixTestData];
+Export[NotebookDirectory[]<>"csv/svd_Ref.csv", matrixTestData];
