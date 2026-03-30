@@ -12,6 +12,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 ## [0.5.1] - unreleased
 
 ### Added
+- Faster linear algebra for diagonal matrices
 - Standalone minimal Julia example `examples/julia/lattice_sum.jl`, independent of our build system
 
 ### Fixed
