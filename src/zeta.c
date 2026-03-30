@@ -37,18 +37,18 @@
 #define EPS_ZERO_Y 1e-64
 
 /**
- * @brief Computes the integer lattice vector corresponding to a linear index.
- * @param[in] n: linear index of the summand.
+ * @brief Increments the integer lattice vector to the next lattice point.
  * @param[in] dim: dimension of the lattice.
  * @param[in] cutoffs: number of summands in each direction.
- * @param[in] totalCutoffs: cumulative products of cutoff sizes per dimension.
- * @param[out] zv: integer lattice vector corresponding to index n.
+ * @param[in,out] zv: integer lattice vector, incremented in-place.
  */
-static inline void lattice_index_to_vector(long n, unsigned int dim,
-                                           const int cutoffs[],
-                                           const long totalCutoffs[], int zv[]) {
+static inline void lattice_vector_increment(unsigned int dim, const int cutoffs[],
+                                            int zv[]) {
     for (int k = 0; k < dim; k++) {
-        zv[k] = (((int)(n / totalCutoffs[k])) % (2 * cutoffs[k] + 1)) - cutoffs[k];
+        if (++zv[k] <= cutoffs[k]) {
+            break;
+        }
+        zv[k] = -cutoffs[k];
     }
 }
 
@@ -62,7 +62,7 @@ static inline void lattice_index_to_vector(long n, unsigned int dim,
  * @param[in] y: projection of y vector to elementary lattice cell.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
- * @return rot * crandall_g(lv - x), the real space summand.
+ * @return rot * G_{nu}(lv - x), the real space summand.
  */
 static inline double complex summand_real(double nu, unsigned int dim, double lambda,
                                           double lv[], const double *x,
@@ -97,9 +97,8 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
     double lv[dim]; // lattice vector
     // cuboid cutoffs
     long totalSummands = 1;
-    long totalCutoffs[dim + 1];
     for (int k = 0; k < dim; k++) {
-        totalCutoffs[k] = totalSummands;
+        zv[k] = -cutoffs[k]; // lattice vector initialized
         totalSummands *= 2 * cutoffs[k] + 1;
     }
     double complex sum = 0.0;
@@ -107,10 +106,10 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
 
     // Sum in real space
     for (long n = 0; n < totalSummands; n++) {
-        lattice_index_to_vector(n, dim, cutoffs, totalCutoffs, zv);
         matrix_intVector(dim, m, zv, lv);
         double complex summand = summand_real(nu, dim, lambda, lv, x, y, zArgBound);
         kahan_add(&sum, &epsilon, summand);
+        lattice_vector_increment(dim, cutoffs, zv);
     }
 
     return sum;
@@ -162,9 +161,8 @@ double complex sum_fourier(double nu, unsigned int dim, double lambda,
     double lv[dim]; // lattice vector
     // cuboid cutoffs
     long totalSummands = 1;
-    long totalCutoffs[dim + 1];
     for (int k = 0; k < dim; k++) {
-        totalCutoffs[k] = totalSummands;
+        zv[k] = -cutoffs[k]; // lattice vector initialized
         totalSummands *= 2 * cutoffs[k] + 1;
     };
     long zeroIndex = (totalSummands - 1) / 2;
@@ -172,19 +170,19 @@ double complex sum_fourier(double nu, unsigned int dim, double lambda,
     double complex epsilon = 0.0;
     // second sum (in fourier space)
     for (long n = 0; n < zeroIndex; n++) {
-        lattice_index_to_vector(n, dim, cutoffs, totalCutoffs, zv);
         matrix_intVector(dim, m_invt, zv, lv);
         double complex summand =
             summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
         kahan_add(&sum, &epsilon, summand);
+        lattice_vector_increment(dim, cutoffs, zv);
     }
-    // skips zero
+    lattice_vector_increment(dim, cutoffs, zv); // skips zero
     for (long n = zeroIndex + 1; n < totalSummands; n++) {
-        lattice_index_to_vector(n, dim, cutoffs, totalCutoffs, zv);
         matrix_intVector(dim, m_invt, zv, lv);
         double complex summand =
             summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
         kahan_add(&sum, &epsilon, summand);
+        lattice_vector_increment(dim, cutoffs, zv);
     }
     return sum;
 }
