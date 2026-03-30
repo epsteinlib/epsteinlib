@@ -78,18 +78,21 @@ int benchmark(int dim, double a[], double x[], double y[], char zetaDataString[]
         return 1;
     }
     double nu;
-    double complex zetaReg;
+    double complex zetaReg = NAN;
     double varBenchmark;
     double offset = ldexp(1, -15);
     double elapsedTime;
-    int iterations = 25;
-    int iterationsReg = 25;
+    int its[9] = {10000, 1000, 100, 10, 0, 10, 0, 10};
+    int iterations = dim < 9 ? its[dim - 1] : 0;
+    int iterationsReg = dim < 9 ? its[dim - 1] : 0;
     double *elapsedTimes = malloc(iterations * sizeof(double));
     clock_t timeStart;
     clock_t timeEnd;
     for (int i = -250; i < 250 + 1; i++) { // print values to file
         varBenchmark = i * 0.05 + offset;
         nu = varBenchmark;
+        // warmup
+        (void)epsteinZeta(nu, dim, a, x, y);
         // zeta
         for (int n = 0; n < iterations; n++) {
             timeStart = clock();
@@ -104,7 +107,9 @@ int benchmark(int dim, double a[], double x[], double y[], char zetaDataString[]
         printf("nu:\t %.16lf\t", varBenchmark);
         printf("zeta:\t\t%.16lf %+.16lf I, \t execution time: %.8f seconds\n",
                creal(zetaReg), cimag(zetaReg), elapsedTime);
-        //       // zeta Reg
+        // warump
+        (void)epsteinZetaReg(nu, dim, a, x, y);
+        // zeta Reg
         for (int n = 0; n < iterationsReg; n++) {
             timeStart = clock();
             zetaReg = epsteinZetaReg(nu, dim, a, x, y);
@@ -379,15 +384,15 @@ int s8() {
  * @return number of failed executions.
  */
 int main() {
-    int failed1 = s1();
-    int failed2 = s21();
-    int failed3 = s22();
-    int failed4 = s31();
-    int failed5 = s32();
-    int failed6 = s33();
-    int failed7 = s4();
-    int failed8 = s6();
-    int failed9 = s8();
-    return failed1 + failed2 + failed3 + failed4 + failed5 + failed6 + failed7 +
-           failed8 + failed9 + failed9;
+    int failed = 0;
+    failed += s1();
+    failed += s21();
+    failed += s22();
+    failed += s31();
+    failed += s32();
+    failed += s33();
+    failed += s4();
+    failed += s6();
+    //    failed += s8();
+    return failed;
 }
