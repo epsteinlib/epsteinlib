@@ -66,8 +66,6 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
     }
     double complex sum = 0.0;
     double complex epsilon = 0.0;
-    double complex auxt;
-    double complex auxy;
     // First Sum (in real space)
     for (long n = 0; n < totalSummands; n++) {
         for (int k = 0; k < dim; k++) {
@@ -79,11 +77,8 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] - x[i];
         }
-        // summing using Kahan's method
-        auxy = rot * crandall_g(dim, nu, lv, 1. / lambda, zArgBound) - epsilon;
-        auxt = sum + auxy;
-        epsilon = (auxt - sum) - auxy;
-        sum = auxt;
+        double complex res = rot * crandall_g(dim, nu, lv, 1. / lambda, zArgBound);
+        kahan_add(&sum, &epsilon, res);
     }
     return sum;
 }
@@ -119,8 +114,6 @@ double complex sum_fourier(double nu, unsigned int dim, double lambda,
     long zeroIndex = (totalSummands - 1) / 2;
     double complex sum = 0.0;
     double complex epsilon = 0.0;
-    double complex auxt;
-    double complex auxy;
     // second sum (in fourier space)
     for (long n = 0; n < zeroIndex; n++) {
         for (int k = 0; k < dim; k++) {
@@ -132,10 +125,8 @@ double complex sum_fourier(double nu, unsigned int dim, double lambda,
             lv[i] = lv[i] + y[i];
         }
         double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
-        auxy = rot * crandall_g(dim, dim - nu, lv, lambda, zArgBound) - epsilon;
-        auxt = sum + auxy;
-        epsilon = (auxt - sum) - auxy;
-        sum = auxt;
+        double complex res = rot * crandall_g(dim, dim - nu, lv, lambda, zArgBound);
+        kahan_add(&sum, &epsilon, res);
     }
     // skips zero
     for (long n = zeroIndex + 1; n < totalSummands; n++) {
@@ -148,10 +139,8 @@ double complex sum_fourier(double nu, unsigned int dim, double lambda,
             lv[i] = lv[i] + y[i];
         }
         double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
-        auxy = rot * crandall_g(dim, dim - nu, lv, lambda, zArgBound) - epsilon;
-        auxt = sum + auxy;
-        epsilon = (auxt - sum) - auxy;
-        sum = auxt;
+        double complex res = rot * crandall_g(dim, dim - nu, lv, lambda, zArgBound);
+        kahan_add(&sum, &epsilon, res);
     }
     return sum;
 }
