@@ -37,6 +37,44 @@
 #define EPS_ZERO_Y 1e-64
 
 /**
+ * @brief Computes the integer lattice vector corresponding to a linear index.
+ * @param[in] n: linear index of the summand.
+ * @param[in] dim: dimension of the lattice.
+ * @param[in] cutoffs: number of summands in each direction.
+ * @param[in] totalCutoffs: cumulative products of cutoff sizes per dimension.
+ * @param[out] zv: integer lattice vector corresponding to index n.
+ */
+static inline void lattice_index_to_vector(long n, unsigned int dim,
+                                           const int cutoffs[],
+                                           const long totalCutoffs[], int zv[]) {
+    for (int k = 0; k < dim; k++) {
+        zv[k] = (((int)(n / totalCutoffs[k])) % (2 * cutoffs[k] + 1)) - cutoffs[k];
+    }
+}
+
+/**
+ * @brief Computes one summand of the first sum in Crandall's formula.
+ * @param[in] nu: exponent for the Epstein zeta function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] lambda: parameter that decides the weight of each sum.
+ * @param[in,out] lv: lattice vector, shifted by x in-place.
+ * @param[in] x: projection of x vector to elementary lattice cell.
+ * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
+ * the incomplete gamma evaluation.
+ * @return rot * crandall_g(lv - x), the real space summand.
+ */
+static inline double complex summand_real(double nu, unsigned int dim, double lambda,
+                                          double lv[], const double *x,
+                                          const double *y, double zArgBound) {
+    double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
+    for (int i = 0; i < dim; i++) {
+        lv[i] -= x[i];
+    }
+    return rot * crandall_g(dim, nu, lv, 1. / lambda, zArgBound);
+}
+
+/**
  * @brief calculates the first sum in Crandall's formula.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
@@ -66,20 +104,15 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
     }
     double complex sum = 0.0;
     double complex epsilon = 0.0;
-    // First Sum (in real space)
+
+    // Sum in real space
     for (long n = 0; n < totalSummands; n++) {
-        for (int k = 0; k < dim; k++) {
-            zv[k] =
-                (((int)(n / totalCutoffs[k])) % (2 * cutoffs[k] + 1)) - cutoffs[k];
-        }
+        lattice_index_to_vector(n, dim, cutoffs, totalCutoffs, zv);
         matrix_intVector(dim, m, zv, lv);
-        double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
-        for (int i = 0; i < dim; i++) {
-            lv[i] = lv[i] - x[i];
-        }
-        double complex res = rot * crandall_g(dim, nu, lv, 1. / lambda, zArgBound);
-        kahan_add(&sum, &epsilon, res);
+        double complex summand = summand_real(nu, dim, lambda, lv, x, y, zArgBound);
+        kahan_add(&sum, &epsilon, summand);
     }
+
     return sum;
 }
 
