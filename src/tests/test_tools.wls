@@ -120,7 +120,7 @@ apintNormalize[{sign_,exp2_,limbs_}]:=Module[
 
 
 (* ::Text:: *)
-(*Define multiplication test function. Takes two unsigned long long values and their signs, returns product as double. Simulates: apint_set_ull \[RightArrow] apint_mul \[RightArrow] apint_to_double_trunc.*)
+(*Define multiplication test function. Takes two unsigned long long values and their signs, returns product as double. Simulates: apint_set_ull \[RightArrow] apint_mul \[RightArrow] hpdyad_to_double_trunc.*)
 
 
 apintMulTest[valA_,signA_,valB_,signB_]:=Module[{prod}
@@ -859,4 +859,4 @@ testData=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/apint_to_double_Ref.csv",testData];
+Export["csv/hpdyad_to_double_Ref.csv",testData];

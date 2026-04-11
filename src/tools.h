@@ -35,7 +35,7 @@ typedef struct {
     unsigned char n;  // number of used limbs (0 => zero)
     int exp2;         // global power of two (negative for dyadic rationals)
     unsigned int limb[APINT_MAX_LIMBS];
-} apint_t;
+} hpdyad_t;
 
 /**
  * @brief Compute the integer power of a double by squaring.
@@ -129,21 +129,21 @@ int msb32(unsigned int x);
  * @param[in] x: unsigned integer value
  * @param[in] sign: +1 or -1
  */
-void apint_set_ull(apint_t *a, unsigned long long x, signed char sign);
+void apint_set_ull(hpdyad_t *a, unsigned long long x, signed char sign);
 
 /** @brief Normalize apint: trim leading zeros and left-shift mantissa so MSB of top
  * limb is 1
  * @param[in,out] a: pointer to apint to normalize
  * @return void
  */
-void apint_normalize(apint_t *a);
+void apint_normalize(hpdyad_t *a);
 
 /** @brief Multiply two apints: out = a * b
  * @param[out] out: result (may alias a or b)
  * @param[in] a: first operand
  * @param[in] b: second operand
  */
-void apint_mul(apint_t *out, const apint_t *a, const apint_t *b);
+void apint_mul(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b);
 
 /** @brief Right-shift mantissa with sticky bit (value-preserving)
  *
@@ -154,7 +154,7 @@ void apint_mul(apint_t *out, const apint_t *a, const apint_t *b);
  * @param[in] src: source apint
  * @param[in] bits: number of bits to shift right
  */
-void apint_shr_bits_sticky(apint_t *dst, const apint_t *src, unsigned int bits);
+void apint_shr_bits_sticky(hpdyad_t *dst, const hpdyad_t *src, unsigned int bits);
 
 /** @brief Left-shift mantissa by specified number of bits (value-preserving)
  * @param[out] dst: destination apint
@@ -162,20 +162,20 @@ void apint_shr_bits_sticky(apint_t *dst, const apint_t *src, unsigned int bits);
  * @param[in] bits: number of bits to shift left
  * @return void
  */
-void apint_shl_bits(apint_t *dst, const apint_t *src, int bits);
+void apint_shl_bits(hpdyad_t *dst, const hpdyad_t *src, int bits);
 
 /** @brief Add two apints: out = a + b
  * @param[out] out: result (supports aliasing)
  * @param[in] a: first operand
  * @param[in] b: second operand
  */
-void apint_add(apint_t *out, const apint_t *a, const apint_t *b);
+void apint_add(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b);
 
 /** @brief Convert apint to double with round-to-nearest-even.
  * @param[in] a: pointer to normalized apint
  * @return closest double representation; ±DBL_MAX on overflow
  */
-double apint_to_double(const apint_t *a);
+double hpdyad_to_double(const hpdyad_t *a);
 
 double dot(unsigned int dim, const double *v1, const double *v2);
 void matrix_intVector(unsigned int dim, const double *m, const int *v, double *res);

@@ -74,7 +74,7 @@ int msb32(unsigned int x) {
  * @param[in] x: unsigned integer value
  * @param[in] sign: +1 or -1
  */
-void apint_set_ull(apint_t *a, unsigned long long x, signed char sign) {
+void apint_set_ull(hpdyad_t *a, unsigned long long x, signed char sign) {
     if (x == 0) {
         a->n = 0;
         a->exp2 = 0;
@@ -103,7 +103,7 @@ void apint_set_ull(apint_t *a, unsigned long long x, signed char sign) {
  * @param[in,out] a: pointer to apint to normalize
  * @return void
  */
-void apint_normalize(apint_t *a) {
+void apint_normalize(hpdyad_t *a) {
     int i;
     int s;
 
@@ -171,8 +171,8 @@ void apint_normalize(apint_t *a) {
  * @param[in] a: first operand
  * @param[in] b: second operand
  */
-void apint_mul(apint_t *out, const apint_t *a, const apint_t *b) {
-    apint_t result;
+void apint_mul(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) {
+    hpdyad_t result;
     unsigned int i;
     unsigned int j;
     unsigned int k;
@@ -246,10 +246,10 @@ void apint_mul(apint_t *out, const apint_t *a, const apint_t *b) {
  * @param[in] src: source apint
  * @param[in] bits: number of bits to shift right
  */
-void apint_shr_bits_sticky(apint_t *dst, const apint_t *src, // NOLINT
+void apint_shr_bits_sticky(hpdyad_t *dst, const hpdyad_t *src, // NOLINT
                            unsigned int bits) {
-    apint_t tmp;
-    apint_t *target = (dst == src) ? &tmp : dst;
+    hpdyad_t tmp;
+    hpdyad_t *target = (dst == src) ? &tmp : dst;
 
     // Handle zero source
     if (src->n == 0) {
@@ -345,7 +345,7 @@ void apint_shr_bits_sticky(apint_t *dst, const apint_t *src, // NOLINT
  * @param[in] b: second apint
  * @return 1 if |a| > |b|, -1 if |a| < |b|, 0 if equal
  */
-static int compare_magnitudes(const apint_t *a, const apint_t *b) {
+static int compare_magnitudes(const hpdyad_t *a, const hpdyad_t *b) {
     unsigned char max_n;
     int i;
 
@@ -372,8 +372,8 @@ static int compare_magnitudes(const apint_t *a, const apint_t *b) {
  * @param[in] a: first addend
  * @param[in] b: second addend
  */
-static void add_mantissas_unsigned(apint_t *result, const apint_t *a,
-                                   const apint_t *b) {
+static void add_mantissas_unsigned(hpdyad_t *result, const hpdyad_t *a,
+                                   const hpdyad_t *b) {
     unsigned char max_n;
     unsigned long long sum;
     unsigned int carry;
@@ -410,8 +410,8 @@ static void add_mantissas_unsigned(apint_t *result, const apint_t *a,
  * @param[in] larger: larger magnitude operand
  * @param[in] smaller: smaller magnitude operand (assumed |larger| >= |smaller|)
  */
-static void subtract_mantissas_unsigned(apint_t *result, const apint_t *larger,
-                                        const apint_t *smaller) {
+static void subtract_mantissas_unsigned(hpdyad_t *result, const hpdyad_t *larger,
+                                        const hpdyad_t *smaller) {
     long long diff;
     unsigned int borrow;
     unsigned char i;
@@ -452,7 +452,7 @@ static void subtract_mantissas_unsigned(apint_t *result, const apint_t *larger,
  * @param[in] bits: number of bits to shift left
  * @return void
  */
-void apint_shl_bits(apint_t *dst, const apint_t *src, int bits) {
+void apint_shl_bits(hpdyad_t *dst, const hpdyad_t *src, int bits) {
     unsigned int limb_shift;
     unsigned int bit_shift;
     unsigned char i;
@@ -515,13 +515,13 @@ void apint_shl_bits(apint_t *dst, const apint_t *src, int bits) {
  * @param[in] a: first operand
  * @param[in] b: second operand
  */
-void apint_add(apint_t *out, const apint_t *a, const apint_t *b) { // NOLINT
-    apint_t temp_result;
-    apint_t *result;
-    const apint_t *higher_exp;
-    const apint_t *lower_exp;
-    apint_t aligned_higher;
-    apint_t aligned_lower;
+void apint_add(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) { // NOLINT
+    hpdyad_t temp_result;
+    hpdyad_t *result;
+    const hpdyad_t *higher_exp;
+    const hpdyad_t *lower_exp;
+    hpdyad_t aligned_higher;
+    hpdyad_t aligned_lower;
     int d;
     unsigned char i;
     int bits_higher;
@@ -594,8 +594,9 @@ void apint_add(apint_t *out, const apint_t *a, const apint_t *b) { // NOLINT
             }
         } else {
             // Determine which has larger magnitude
-            const apint_t *larger_mag = (cmp > 0) ? &aligned_higher : &aligned_lower;
-            const apint_t *smaller_mag =
+            const hpdyad_t *larger_mag =
+                (cmp > 0) ? &aligned_higher : &aligned_lower;
+            const hpdyad_t *smaller_mag =
                 (cmp > 0) ? &aligned_lower : &aligned_higher;
 
             subtract_mantissas_unsigned(result, larger_mag, smaller_mag);
@@ -616,7 +617,7 @@ void apint_add(apint_t *out, const apint_t *a, const apint_t *b) { // NOLINT
  * @param[in] a: pointer to normalized apint
  * @return closest double representation; ±DBL_MAX on overflow
  */
-double apint_to_double(const apint_t *a) {
+double hpdyad_to_double(const hpdyad_t *a) {
     int i;
     int top_bit;
     int adj_exp;

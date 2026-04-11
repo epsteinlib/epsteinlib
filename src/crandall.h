@@ -140,7 +140,7 @@ double coeffs_c_outer(long long n, long long k, long long dim);
  * @param[out] out: result apint.
  */
 void coeffs_c_inner_apint(unsigned int n, unsigned int i, unsigned int k,
-                          unsigned int dim, apint_t *out);
+                          unsigned int dim, hpdyad_t *out);
 
 /** @brief Computes (-2)**(-i) · c_{n,i,k} · binom(i+k,k) as apint.
  * @param[in] n: index (total of alpha).
@@ -151,7 +151,7 @@ void coeffs_c_inner_apint(unsigned int n, unsigned int i, unsigned int k,
  */
 void harmonic_h_inner_term_scalar_apint(unsigned int n, unsigned int i,
                                         unsigned int k, unsigned int dim,
-                                        apint_t *out);
+                                        hpdyad_t *out);
 
 /** @brief Computes binom(i,β) × binom(α,θ₁) × θ₂!/(θ₂−θ₁)! as apint.
  * @param[in] dim: dimension of the multi-indices.
@@ -164,7 +164,7 @@ void harmonic_h_inner_term_scalar_apint(unsigned int n, unsigned int i,
 void harmonic_h_inner_term_multi_apint(unsigned int dim, const unsigned int *alpha,
                                        const unsigned int *beta,
                                        const unsigned int *theta1,
-                                       const unsigned int *theta2, apint_t *out);
+                                       const unsigned int *theta2, hpdyad_t *out);
 
 /** @brief Computes the inner sum h_inner(α,γ,k) using exact apint arithmetic.
  * @param[in] k: specifies degree |alpha| - 2k.

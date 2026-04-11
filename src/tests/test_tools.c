@@ -257,7 +257,7 @@ static int test_apint_add_from_file(const char *filename) { // NOLINT
         }
 
         // Build apint a
-        apint_t a;
+        hpdyad_t a;
         a.sign = (signed char)sign_a;
         a.exp2 = exp2_a;
         for (i = 0; i < APINT_MAX_LIMBS; i++) {
@@ -276,7 +276,7 @@ static int test_apint_add_from_file(const char *filename) { // NOLINT
         }
 
         // Build apint b
-        apint_t b;
+        hpdyad_t b;
         b.sign = (signed char)sign_b;
         b.exp2 = exp2_b;
         for (i = 0; i < APINT_MAX_LIMBS; i++) {
@@ -295,7 +295,7 @@ static int test_apint_add_from_file(const char *filename) { // NOLINT
         }
 
         // Build apint expected
-        apint_t expected;
+        hpdyad_t expected;
         expected.sign = (signed char)sign_expected;
         expected.exp2 = exp2_expected;
         for (i = 0; i < APINT_MAX_LIMBS; i++) {
@@ -314,7 +314,7 @@ static int test_apint_add_from_file(const char *filename) { // NOLINT
         }
 
         // Perform addition
-        apint_t result_apint;
+        hpdyad_t result_apint;
         apint_add(&result_apint, &a, &b);
 
         // Compare
@@ -468,7 +468,7 @@ int test_apint_set_ull(void) {
             continue;
         }
 
-        apint_t a;
+        hpdyad_t a;
         apint_set_ull(&a, x, (signed char)sign_input);
 
         int passed;
@@ -560,7 +560,7 @@ int test_apint_normalize(void) {
             printf("\t Scanned %d values instead of 68", scanResult);
             continue;
         }
-        apint_t a;
+        hpdyad_t a;
         a.sign = (signed char)sign_in;
         a.exp2 = exp2_in;
         a.n = APINT_MAX_LIMBS;
@@ -660,9 +660,9 @@ int test_apint_mul(void) {
             printf("\t Scanned %d values instead of 38", scanResult);
             continue;
         }
-        apint_t a;
-        apint_t b;
-        apint_t result;
+        hpdyad_t a;
+        hpdyad_t b;
+        hpdyad_t result;
         apint_set_ull(&a, valA, (signed char)signA);
         apint_set_ull(&b, valB, (signed char)signB);
         apint_mul(&result, &a, &b);
@@ -759,8 +759,8 @@ int test_apint_shr_bits_sticky(void) {
             printf("\t Scanned %d values instead of 69", scanResult);
             continue;
         }
-        apint_t src;
-        apint_t dst;
+        hpdyad_t src;
+        hpdyad_t dst;
         src.sign = (signed char)sign_in;
         src.exp2 = exp2_in;
         src.n = 0;
@@ -829,15 +829,15 @@ int test_apint_add_fractional(void) {
 }
 
 /*!
- * @brief Tests apint_to_double function against Mathematica reference values
+ * @brief Tests hpdyad_to_double function against Mathematica reference values
  *
  * @return number of failed tests.
  */
-int test_apint_to_double(void) { // NOLINT
+int test_hpdyad_to_double(void) { // NOLINT
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result =
-        snprintf(path, sizeof(path), "%s/apint_to_double_Ref.csv", BASE_PATH);
+        snprintf(path, sizeof(path), "%s/hpdyad_to_double_Ref.csv", BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
@@ -884,7 +884,7 @@ int test_apint_to_double(void) { // NOLINT
         // Parse reference double
         ref_double = strtod(ptr, &endptr);
         // Build apint
-        apint_t a;
+        hpdyad_t a;
         a.sign = (signed char)sign_input;
         a.exp2 = exp2_input;
         for (i = 0; i < APINT_MAX_LIMBS; i++) {
@@ -899,7 +899,7 @@ int test_apint_to_double(void) { // NOLINT
             }
         }
         // Test
-        double result_double = apint_to_double(&a);
+        double result_double = hpdyad_to_double(&a);
         int passed;
         if (ref_double == 0.0) {
             passed = (result_double == 0.0);
@@ -937,7 +937,7 @@ int main() {
     failed += test_apint_shr_bits_sticky();
     failed += test_apint_add();
     failed += test_apint_add_fractional();
-    failed += test_apint_to_double();
+    failed += test_hpdyad_to_double();
     failed += run_timed_test(test_matrix_transpose_inverse);
     return failed;
 }
