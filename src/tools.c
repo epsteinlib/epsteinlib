@@ -74,7 +74,7 @@ int msb32(unsigned int x) {
  * @param[in] x: unsigned integer value
  * @param[in] sign: +1 or -1
  */
-void apint_set_ull(hpdyad_t *a, unsigned long long x, signed char sign) {
+void hpdyad_set_ull(hpdyad_t *a, unsigned long long x, signed char sign) {
     if (x == 0) {
         a->n = 0;
         a->exp2 = 0;
@@ -103,7 +103,7 @@ void apint_set_ull(hpdyad_t *a, unsigned long long x, signed char sign) {
  * @param[in,out] a: pointer to apint to normalize
  * @return void
  */
-void apint_normalize(hpdyad_t *a) {
+void hpdyad_normalize(hpdyad_t *a) {
     int i;
     int s;
 
@@ -171,7 +171,7 @@ void apint_normalize(hpdyad_t *a) {
  * @param[in] a: first operand
  * @param[in] b: second operand
  */
-void apint_mul(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) {
+void hpdyad_mul(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) {
     hpdyad_t result;
     unsigned int i;
     unsigned int j;
@@ -231,7 +231,7 @@ void apint_mul(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) {
     result.exp2 = a->exp2 + b->exp2;
 
     // Normalize
-    apint_normalize(&result);
+    hpdyad_normalize(&result);
 
     // Copy to output (handles aliasing)
     *out = result;
@@ -246,8 +246,8 @@ void apint_mul(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) {
  * @param[in] src: source apint
  * @param[in] bits: number of bits to shift right
  */
-void apint_shr_bits_sticky(hpdyad_t *dst, const hpdyad_t *src, // NOLINT
-                           unsigned int bits) {
+void hpdyad_shr_bits_sticky(hpdyad_t *dst, const hpdyad_t *src, // NOLINT
+                            unsigned int bits) {
     hpdyad_t tmp;
     hpdyad_t *target = (dst == src) ? &tmp : dst;
 
@@ -452,7 +452,7 @@ static void subtract_mantissas_unsigned(hpdyad_t *result, const hpdyad_t *larger
  * @param[in] bits: number of bits to shift left
  * @return void
  */
-void apint_shl_bits(hpdyad_t *dst, const hpdyad_t *src, int bits) {
+void hpdyad_shl_bits(hpdyad_t *dst, const hpdyad_t *src, int bits) {
     unsigned int limb_shift;
     unsigned int bit_shift;
     unsigned char i;
@@ -515,7 +515,7 @@ void apint_shl_bits(hpdyad_t *dst, const hpdyad_t *src, int bits) {
  * @param[in] a: first operand
  * @param[in] b: second operand
  */
-void apint_add(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) { // NOLINT
+void hpdyad_add(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) { // NOLINT
     hpdyad_t temp_result;
     hpdyad_t *result;
     const hpdyad_t *higher_exp;
@@ -565,13 +565,13 @@ void apint_add(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) { // NOLINT
     if (d > 0 && d + bits_higher <= bits_available) {
         // Result of shift fits in available space - exact arithmetic
         aligned_lower = *lower_exp;
-        apint_shl_bits(&aligned_higher, higher_exp, d);
+        hpdyad_shl_bits(&aligned_higher, higher_exp, d);
         result->exp2 = lower_exp->exp2;
 
     } else {
         // Result wouldn't fit, use sticky bit approach
         aligned_higher = *higher_exp;
-        apint_shr_bits_sticky(&aligned_lower, lower_exp, d);
+        hpdyad_shr_bits_sticky(&aligned_lower, lower_exp, d);
         result->exp2 = higher_exp->exp2;
     }
 
@@ -605,7 +605,7 @@ void apint_add(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) { // NOLINT
     }
 
     // Normalize result
-    apint_normalize(result);
+    hpdyad_normalize(result);
 
     // Copy back if aliasing
     if (result == &temp_result) {

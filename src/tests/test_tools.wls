@@ -120,7 +120,7 @@ apintNormalize[{sign_,exp2_,limbs_}]:=Module[
 
 
 (* ::Text:: *)
-(*Define multiplication test function. Takes two unsigned long long values and their signs, returns product as double. Simulates: apint_set_ull \[RightArrow] apint_mul \[RightArrow] hpdyad_to_double_trunc.*)
+(*Define multiplication test function. Takes two unsigned long long values and their signs, returns product as double. Simulates: hpdyad_set_ull \[RightArrow] hpdyad_mul \[RightArrow] hpdyad_to_double_trunc.*)
 
 
 apintMulTest[valA_,signA_,valB_,signB_]:=Module[{prod}
@@ -152,7 +152,7 @@ toApintFull[x_,s_]:=Module[
 
 
 (* ::Text:: *)
-(*Simulate apint_mul: multiply two apints and return normalized result.*)
+(*Simulate hpdyad_mul: multiply two apints and return normalized result.*)
 (*	Input: valA, signA, valB, signB*)
 (*	Output: {limb0-7, exp2, sign} after normalization.*)
 
@@ -366,7 +366,7 @@ testCases = Join[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/apint_set_ull_Ref.csv", testCases];
+Export["csv/hpdyad_set_ull_Ref.csv", testCases];
 
 
 (* ::Subsection::Closed:: *)
@@ -442,7 +442,7 @@ results = Table[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/apint_normalize_Ref.csv", results];
+Export["csv/hpdyad_normalize_Ref.csv", results];
 
 
 (* ::Subsection::Closed:: *)
@@ -523,7 +523,7 @@ apintMulTestTable=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/apint_mul_Ref.csv",apintMulTestTable];
+Export["csv/hpdyad_mul_Ref.csv",apintMulTestTable];
 
 
 (* ::Subsection::Closed:: *)
@@ -619,7 +619,7 @@ shrStickyTab=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/apint_shr_sticky_Ref.csv", shrStickyTab];
+Export["csv/hpdyad_shr_sticky_Ref.csv", shrStickyTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -696,7 +696,7 @@ testData=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/apint_add_Ref.csv", testData];
+Export["csv/hpdyad_add_Ref.csv", testData];
 
 
 (* ::Subsection::Closed:: *)
@@ -782,7 +782,7 @@ fractionalTestData = ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/apint_add_fractional_Ref.csv", fractionalTestData];
+Export["csv/hpdyad_add_fractional_Ref.csv", fractionalTestData];
 
 
 (* ::Subsection::Closed:: *)

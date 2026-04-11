@@ -155,12 +155,12 @@ int test_matrix_transpose_inverse(void) { // NOLINT
 }
 
 /*!
- * @brief Helper function to test apint_add against a CSV reference file
+ * @brief Helper function to test hpdyad_add against a CSV reference file
  *
  * @param filename Name of the CSV file containing test data
  * @return Number of failed tests
  */
-static int test_apint_add_from_file(const char *filename) { // NOLINT
+static int test_hpdyad_add_from_file(const char *filename) { // NOLINT
     printf("\t ... processing %s ", filename);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/%s", BASE_PATH, filename);
@@ -315,7 +315,7 @@ static int test_apint_add_from_file(const char *filename) { // NOLINT
 
         // Perform addition
         hpdyad_t result_apint;
-        apint_add(&result_apint, &a, &b);
+        hpdyad_add(&result_apint, &a, &b);
 
         // Compare
         int passed =
@@ -429,14 +429,15 @@ int test_ctzmsb(void) {
 }
 
 /*!
- * @brief Tests apint_set_ull function against Mathematica reference values
+ * @brief Tests hpdyad_set_ull function against Mathematica reference values
  *
  * @return number of failed tests.
  * */
-int test_apint_set_ull(void) {
+int test_hpdyad_set_ull(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/apint_set_ull_Ref.csv", BASE_PATH);
+    int result =
+        snprintf(path, sizeof(path), "%s/hpdyad_set_ull_Ref.csv", BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
@@ -469,7 +470,7 @@ int test_apint_set_ull(void) {
         }
 
         hpdyad_t a;
-        apint_set_ull(&a, x, (signed char)sign_input);
+        hpdyad_set_ull(&a, x, (signed char)sign_input);
 
         int passed;
         if (x == 0) {
@@ -505,15 +506,15 @@ int test_apint_set_ull(void) {
 }
 
 /*!
- * @brief Tests apint_normalize function against Mathematica reference values
+ * @brief Tests hpdyad_normalize function against Mathematica reference values
  *
  * @return number of failed tests.
  */
-int test_apint_normalize(void) {
+int test_hpdyad_normalize(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result =
-        snprintf(path, sizeof(path), "%s/apint_normalize_Ref.csv", BASE_PATH);
+        snprintf(path, sizeof(path), "%s/hpdyad_normalize_Ref.csv", BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
@@ -567,7 +568,7 @@ int test_apint_normalize(void) {
         for (int i = 0; i < APINT_MAX_LIMBS; i++) {
             a.limb[i] = limbs_in[i];
         }
-        apint_normalize(&a);
+        hpdyad_normalize(&a);
         int passed = 1;
         if (a.sign != sign_out || a.exp2 != exp2_out) {
             passed = 0;
@@ -613,14 +614,14 @@ int test_apint_normalize(void) {
 }
 
 /*!
- * @brief Tests apint_mul function against Mathematica reference values
+ * @brief Tests hpdyad_mul function against Mathematica reference values
  *
  * @return number of failed tests.
  */
-int test_apint_mul(void) {
+int test_hpdyad_mul(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/apint_mul_Ref.csv", BASE_PATH);
+    int result = snprintf(path, sizeof(path), "%s/hpdyad_mul_Ref.csv", BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
@@ -663,9 +664,9 @@ int test_apint_mul(void) {
         hpdyad_t a;
         hpdyad_t b;
         hpdyad_t result;
-        apint_set_ull(&a, valA, (signed char)signA);
-        apint_set_ull(&b, valB, (signed char)signB);
-        apint_mul(&result, &a, &b);
+        hpdyad_set_ull(&a, valA, (signed char)signA);
+        hpdyad_set_ull(&b, valB, (signed char)signB);
+        hpdyad_mul(&result, &a, &b);
 
         int passed = 1;
         if (result.sign != sign_out || result.exp2 != exp2_out) {
@@ -703,15 +704,15 @@ int test_apint_mul(void) {
 }
 
 /*!
- * @brief Tests apint_shr_bits_sticky function against Mathematica reference values
+ * @brief Tests hpdyad_shr_bits_sticky function against Mathematica reference values
  *
  * @return number of failed tests.
  */
-int test_apint_shr_bits_sticky(void) {
+int test_hpdyad_shr_bits_sticky(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result =
-        snprintf(path, sizeof(path), "%s/apint_shr_sticky_Ref.csv", BASE_PATH);
+        snprintf(path, sizeof(path), "%s/hpdyad_shr_sticky_Ref.csv", BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
@@ -770,7 +771,7 @@ int test_apint_shr_bits_sticky(void) {
                 src.n = (unsigned char)(i + 1);
             }
         }
-        apint_shr_bits_sticky(&dst, &src, bits);
+        hpdyad_shr_bits_sticky(&dst, &src, bits);
         int passed = 1;
         if (dst.sign != sign_out || dst.exp2 != exp2_out) {
             passed = 0;
@@ -809,23 +810,23 @@ int test_apint_shr_bits_sticky(void) {
 }
 
 /*!
- * @brief Tests apint_add function against Mathematica reference values (integers)
+ * @brief Tests hpdyad_add function against Mathematica reference values (integers)
  *
  * @return Number of failed tests
  */
-int test_apint_add(void) {
+int test_hpdyad_add(void) {
     printf("%s\n", __func__);
-    return test_apint_add_from_file("apint_add_Ref.csv");
+    return test_hpdyad_add_from_file("hpdyad_add_Ref.csv");
 }
 
 /*!
- * @brief Tests apint_add function against Mathematica reference values (rationals)
+ * @brief Tests hpdyad_add function against Mathematica reference values (rationals)
  *
  * @return Number of failed tests
  */
-int test_apint_add_fractional(void) {
+int test_hpdyad_add_fractional(void) {
     printf("%s\n", __func__);
-    return test_apint_add_from_file("apint_add_fractional_Ref.csv");
+    return test_hpdyad_add_from_file("hpdyad_add_fractional_Ref.csv");
 }
 
 /*!
@@ -931,12 +932,12 @@ int test_hpdyad_to_double(void) { // NOLINT
 int main() {
     int failed = 0;
     failed += test_ctzmsb();
-    failed += test_apint_set_ull();
-    failed += test_apint_normalize();
-    failed += test_apint_mul();
-    failed += test_apint_shr_bits_sticky();
-    failed += test_apint_add();
-    failed += test_apint_add_fractional();
+    failed += test_hpdyad_set_ull();
+    failed += test_hpdyad_normalize();
+    failed += test_hpdyad_mul();
+    failed += test_hpdyad_shr_bits_sticky();
+    failed += test_hpdyad_add();
+    failed += test_hpdyad_add_fractional();
     failed += test_hpdyad_to_double();
     failed += run_timed_test(test_matrix_transpose_inverse);
     return failed;

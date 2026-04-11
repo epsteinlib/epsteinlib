@@ -50,7 +50,7 @@ static double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int
     hpdyad_t multi_term;
     harmonic_h_inner_term_multi_apint(dim, alpha, beta, theta1, theta2, &multi_term);
 
-    apint_mul(&numerator, &multi_term, &numerator);
+    hpdyad_mul(&numerator, &multi_term, &numerator);
 
     double res = hpdyad_to_double(&numerator);
 

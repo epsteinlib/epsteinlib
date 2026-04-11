@@ -129,21 +129,21 @@ int msb32(unsigned int x);
  * @param[in] x: unsigned integer value
  * @param[in] sign: +1 or -1
  */
-void apint_set_ull(hpdyad_t *a, unsigned long long x, signed char sign);
+void hpdyad_set_ull(hpdyad_t *a, unsigned long long x, signed char sign);
 
 /** @brief Normalize apint: trim leading zeros and left-shift mantissa so MSB of top
  * limb is 1
  * @param[in,out] a: pointer to apint to normalize
  * @return void
  */
-void apint_normalize(hpdyad_t *a);
+void hpdyad_normalize(hpdyad_t *a);
 
 /** @brief Multiply two apints: out = a * b
  * @param[out] out: result (may alias a or b)
  * @param[in] a: first operand
  * @param[in] b: second operand
  */
-void apint_mul(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b);
+void hpdyad_mul(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b);
 
 /** @brief Right-shift mantissa with sticky bit (value-preserving)
  *
@@ -154,7 +154,7 @@ void apint_mul(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b);
  * @param[in] src: source apint
  * @param[in] bits: number of bits to shift right
  */
-void apint_shr_bits_sticky(hpdyad_t *dst, const hpdyad_t *src, unsigned int bits);
+void hpdyad_shr_bits_sticky(hpdyad_t *dst, const hpdyad_t *src, unsigned int bits);
 
 /** @brief Left-shift mantissa by specified number of bits (value-preserving)
  * @param[out] dst: destination apint
@@ -162,14 +162,14 @@ void apint_shr_bits_sticky(hpdyad_t *dst, const hpdyad_t *src, unsigned int bits
  * @param[in] bits: number of bits to shift left
  * @return void
  */
-void apint_shl_bits(hpdyad_t *dst, const hpdyad_t *src, int bits);
+void hpdyad_shl_bits(hpdyad_t *dst, const hpdyad_t *src, int bits);
 
 /** @brief Add two apints: out = a + b
  * @param[out] out: result (supports aliasing)
  * @param[in] a: first operand
  * @param[in] b: second operand
  */
-void apint_add(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b);
+void hpdyad_add(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b);
 
 /** @brief Convert apint to double with round-to-nearest-even.
  * @param[in] a: pointer to normalized apint
