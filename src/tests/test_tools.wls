@@ -152,7 +152,7 @@ toApintFull[x_,s_]:=Module[
 
 
 (* ::Text:: *)
-(*Simulate hpdyad_mul: multiply two apints and return normalized result.*)
+(*Simulate hpdyad_mul: multiply two high precision dyadic numbers (hpdyad's) and return normalized result.*)
 (*	Input: valA, signA, valB, signB*)
 (*	Output: {limb0-7, exp2, sign} after normalization.*)
 

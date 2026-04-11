@@ -20,8 +20,8 @@
  * */
 #define APINT_MAX_LIMBS 32
 
-/** @brief Fixed-size arbitrary-precision integer with separate sign and binary
- * exponent.
+/** @brief Fixed-size high-precision dyadic number (hpdyad) with separate sign and
+ * binary exponent.
  *
  * Representation: value = sign × (mantissa in base 2^32) × 2^exp2
  * Supports both integers (exp2 ≥ 0) and dyadic rationals (exp2 < 0).
@@ -138,7 +138,7 @@ void hpdyad_set_ull(hpdyad_t *a, unsigned long long x, signed char sign);
  */
 void hpdyad_normalize(hpdyad_t *a);
 
-/** @brief Multiply two apints: out = a * b
+/** @brief Multiply two high precision dyadic numbers (hpdyad's): out = a * b
  * @param[out] out: result (may alias a or b)
  * @param[in] a: first operand
  * @param[in] b: second operand
@@ -164,7 +164,7 @@ void hpdyad_shr_bits_sticky(hpdyad_t *dst, const hpdyad_t *src, unsigned int bit
  */
 void hpdyad_shl_bits(hpdyad_t *dst, const hpdyad_t *src, int bits);
 
-/** @brief Add two apints: out = a + b
+/** @brief Add two high precision dyadic numbers (hpdyad's): out = a + b
  * @param[out] out: result (supports aliasing)
  * @param[in] a: first operand
  * @param[in] b: second operand
