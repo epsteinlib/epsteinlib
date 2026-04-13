@@ -6,6 +6,7 @@
 project('epsteinlib', 'c', 'cython', version: files('VERSION'), default_options: ['werror=true', 'c_std=gnu11', 'buildtype=release', 'default_library=shared'])
 
 add_project_arguments('-Wno-error=cpp', language: 'c')
+add_project_arguments('-Wno-error=maybe-uninitialized', language: 'c')
 
 cc = meson.get_compiler('c')
 
