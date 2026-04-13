@@ -194,15 +194,15 @@ static int test_hpdyad_add_from_file(const char *filename) { // NOLINT
         }
         ptr = endptr + 1;
 
-        unsigned int limb_a[APINT_MAX_LIMBS];
-        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+        unsigned int limb_a[HPDYAD_MAX_LIMBS];
+        for (i = 0; i < HPDYAD_MAX_LIMBS; i++) {
             limb_a[i] = (unsigned int)strtoul(ptr, &endptr, 10);
             if (*endptr != ',') {
                 break;
             }
             ptr = endptr + 1;
         }
-        if (i < APINT_MAX_LIMBS) {
+        if (i < HPDYAD_MAX_LIMBS) {
             continue;
         }
 
@@ -219,15 +219,15 @@ static int test_hpdyad_add_from_file(const char *filename) { // NOLINT
         }
         ptr = endptr + 1;
 
-        unsigned int limb_b[APINT_MAX_LIMBS];
-        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+        unsigned int limb_b[HPDYAD_MAX_LIMBS];
+        for (i = 0; i < HPDYAD_MAX_LIMBS; i++) {
             limb_b[i] = (unsigned int)strtoul(ptr, &endptr, 10);
             if (*endptr != ',') {
                 break;
             }
             ptr = endptr + 1;
         }
-        if (i < APINT_MAX_LIMBS) {
+        if (i < HPDYAD_MAX_LIMBS) {
             continue;
         }
 
@@ -244,15 +244,15 @@ static int test_hpdyad_add_from_file(const char *filename) { // NOLINT
         }
         ptr = endptr + 1;
 
-        unsigned int limb_expected[APINT_MAX_LIMBS];
-        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+        unsigned int limb_expected[HPDYAD_MAX_LIMBS];
+        for (i = 0; i < HPDYAD_MAX_LIMBS; i++) {
             limb_expected[i] = (unsigned int)strtoul(ptr, &endptr, 10);
-            if (i < APINT_MAX_LIMBS - 1 && *endptr != ',') {
+            if (i < HPDYAD_MAX_LIMBS - 1 && *endptr != ',') {
                 break;
             }
             ptr = endptr + 1;
         }
-        if (i < APINT_MAX_LIMBS - 1) {
+        if (i < HPDYAD_MAX_LIMBS - 1) {
             continue;
         }
 
@@ -260,11 +260,11 @@ static int test_hpdyad_add_from_file(const char *filename) { // NOLINT
         hpdyad_t a;
         a.sign = (signed char)sign_a;
         a.exp2 = exp2_a;
-        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+        for (i = 0; i < HPDYAD_MAX_LIMBS; i++) {
             a.limb[i] = limb_a[i];
         }
         a.n = 0;
-        for (i = APINT_MAX_LIMBS - 1; i >= 0; i--) {
+        for (i = HPDYAD_MAX_LIMBS - 1; i >= 0; i--) {
             if (a.limb[i] != 0) {
                 a.n = (unsigned char)(i + 1);
                 break;
@@ -279,11 +279,11 @@ static int test_hpdyad_add_from_file(const char *filename) { // NOLINT
         hpdyad_t b;
         b.sign = (signed char)sign_b;
         b.exp2 = exp2_b;
-        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+        for (i = 0; i < HPDYAD_MAX_LIMBS; i++) {
             b.limb[i] = limb_b[i];
         }
         b.n = 0;
-        for (i = APINT_MAX_LIMBS - 1; i >= 0; i--) {
+        for (i = HPDYAD_MAX_LIMBS - 1; i >= 0; i--) {
             if (b.limb[i] != 0) {
                 b.n = (unsigned char)(i + 1);
                 break;
@@ -298,11 +298,11 @@ static int test_hpdyad_add_from_file(const char *filename) { // NOLINT
         hpdyad_t expected;
         expected.sign = (signed char)sign_expected;
         expected.exp2 = exp2_expected;
-        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+        for (i = 0; i < HPDYAD_MAX_LIMBS; i++) {
             expected.limb[i] = limb_expected[i];
         }
         expected.n = 0;
-        for (i = APINT_MAX_LIMBS - 1; i >= 0; i--) {
+        for (i = HPDYAD_MAX_LIMBS - 1; i >= 0; i--) {
             if (expected.limb[i] != 0) {
                 expected.n = (unsigned char)(i + 1);
                 break;
@@ -322,7 +322,7 @@ static int test_hpdyad_add_from_file(const char *filename) { // NOLINT
             (result_hpdyad.sign == expected.sign &&
              result_hpdyad.exp2 == expected.exp2 && result_hpdyad.n == expected.n);
         if (passed) {
-            for (i = 0; i < APINT_MAX_LIMBS; i++) {
+            for (i = 0; i < HPDYAD_MAX_LIMBS; i++) {
                 if (result_hpdyad.limb[i] != expected.limb[i]) {
                     passed = 0;
                     break;
@@ -524,10 +524,10 @@ int test_hpdyad_normalize(void) {
     }
     int sign_in;
     int exp2_in;
-    unsigned int limbs_in[APINT_MAX_LIMBS];
+    unsigned int limbs_in[HPDYAD_MAX_LIMBS];
     int sign_out;
     int exp2_out;
-    unsigned int limbs_out[APINT_MAX_LIMBS];
+    unsigned int limbs_out[HPDYAD_MAX_LIMBS];
     int scanResult;
     char line[2048];
     int testsPassed = 0;
@@ -564,8 +564,8 @@ int test_hpdyad_normalize(void) {
         hpdyad_t a;
         a.sign = (signed char)sign_in;
         a.exp2 = exp2_in;
-        a.n = APINT_MAX_LIMBS;
-        for (int i = 0; i < APINT_MAX_LIMBS; i++) {
+        a.n = HPDYAD_MAX_LIMBS;
+        for (int i = 0; i < HPDYAD_MAX_LIMBS; i++) {
             a.limb[i] = limbs_in[i];
         }
         hpdyad_normalize(&a);
@@ -573,7 +573,7 @@ int test_hpdyad_normalize(void) {
         if (a.sign != sign_out || a.exp2 != exp2_out) {
             passed = 0;
         }
-        for (int i = 0; i < APINT_MAX_LIMBS; i++) {
+        for (int i = 0; i < HPDYAD_MAX_LIMBS; i++) {
             if (a.limb[i] != limbs_out[i]) {
                 passed = 0;
                 break;
@@ -635,7 +635,7 @@ int test_hpdyad_mul(void) {
     int signB;
     int sign_out;
     int exp2_out;
-    unsigned int limbs_out[APINT_MAX_LIMBS];
+    unsigned int limbs_out[HPDYAD_MAX_LIMBS];
     int scanResult;
     char line[1024];
     int testsPassed = 0;
@@ -672,7 +672,7 @@ int test_hpdyad_mul(void) {
         if (result.sign != sign_out || result.exp2 != exp2_out) {
             passed = 0;
         }
-        for (int i = 0; i < APINT_MAX_LIMBS; i++) {
+        for (int i = 0; i < HPDYAD_MAX_LIMBS; i++) {
             if (result.limb[i] != limbs_out[i]) {
                 passed = 0;
                 break;
@@ -722,11 +722,11 @@ int test_hpdyad_shr_bits_sticky(void) {
     }
     int sign_in;
     int exp2_in;
-    unsigned int limbs_in[APINT_MAX_LIMBS];
+    unsigned int limbs_in[HPDYAD_MAX_LIMBS];
     unsigned int bits;
     int sign_out;
     int exp2_out;
-    unsigned int limbs_out[APINT_MAX_LIMBS];
+    unsigned int limbs_out[HPDYAD_MAX_LIMBS];
     int scanResult;
     char line[1024];
     int testsPassed = 0;
@@ -765,7 +765,7 @@ int test_hpdyad_shr_bits_sticky(void) {
         src.sign = (signed char)sign_in;
         src.exp2 = exp2_in;
         src.n = 0;
-        for (int i = APINT_MAX_LIMBS - 1; i >= 0; i--) {
+        for (int i = HPDYAD_MAX_LIMBS - 1; i >= 0; i--) {
             src.limb[i] = limbs_in[i];
             if (limbs_in[i] != 0 && src.n == 0) {
                 src.n = (unsigned char)(i + 1);
@@ -776,7 +776,7 @@ int test_hpdyad_shr_bits_sticky(void) {
         if (dst.sign != sign_out || dst.exp2 != exp2_out) {
             passed = 0;
         }
-        for (int i = 0; i < APINT_MAX_LIMBS; i++) {
+        for (int i = 0; i < HPDYAD_MAX_LIMBS; i++) {
             if (dst.limb[i] != limbs_out[i]) {
                 passed = 0;
                 break;
@@ -848,7 +848,7 @@ int test_hpdyad_to_double(void) { // NOLINT
     }
     int sign_input;
     int exp2_input;
-    unsigned int limbs_input[APINT_MAX_LIMBS];
+    unsigned int limbs_input[HPDYAD_MAX_LIMBS];
     double ref_double;
     char line[4096];
     int testsPassed = 0;
@@ -872,14 +872,14 @@ int test_hpdyad_to_double(void) { // NOLINT
         }
         ptr = endptr + 1;
         // Parse 32 limbs
-        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+        for (i = 0; i < HPDYAD_MAX_LIMBS; i++) {
             limbs_input[i] = (unsigned int)strtoul(ptr, &endptr, 10);
             if (*endptr != ',') {
                 break;
             }
             ptr = endptr + 1;
         }
-        if (i < APINT_MAX_LIMBS) {
+        if (i < HPDYAD_MAX_LIMBS) {
             continue;
         }
         // Parse reference double
@@ -888,12 +888,12 @@ int test_hpdyad_to_double(void) { // NOLINT
         hpdyad_t a;
         a.sign = (signed char)sign_input;
         a.exp2 = exp2_input;
-        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+        for (i = 0; i < HPDYAD_MAX_LIMBS; i++) {
             a.limb[i] = limbs_input[i];
         }
         // Compute n (number of used limbs)
         a.n = 0;
-        for (i = APINT_MAX_LIMBS - 1; i >= 0; i--) {
+        for (i = HPDYAD_MAX_LIMBS - 1; i >= 0; i--) {
             if (a.limb[i] != 0) {
                 a.n = (unsigned char)(i + 1);
                 break;

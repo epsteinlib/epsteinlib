@@ -185,14 +185,14 @@ void hpdyad_mul(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) {
         out->n = 0;
         out->sign = 1;
         out->exp2 = 0;
-        for (k = 0; k < APINT_MAX_LIMBS; k++) {
+        for (k = 0; k < HPDYAD_MAX_LIMBS; k++) {
             out->limb[k] = 0;
         }
         return;
     }
 
     // Initialize result limbs to zero
-    for (k = 0; k < APINT_MAX_LIMBS; k++) {
+    for (k = 0; k < HPDYAD_MAX_LIMBS; k++) {
         result.limb[k] = 0;
     }
 
@@ -201,7 +201,7 @@ void hpdyad_mul(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) {
         carry = 0;
         for (j = 0; j < b->n; j++) {
             k = i + j;
-            if (k >= APINT_MAX_LIMBS) {
+            if (k >= HPDYAD_MAX_LIMBS) {
                 break; // Truncate high limbs
             }
 
@@ -212,7 +212,7 @@ void hpdyad_mul(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) {
         }
 
         // Propagate final carry
-        while (carry && k + 1 < APINT_MAX_LIMBS) {
+        while (carry && k + 1 < HPDYAD_MAX_LIMBS) {
             k++;
             acc = (unsigned long long)result.limb[k] + carry;
             result.limb[k] = (unsigned int)acc;
@@ -222,8 +222,8 @@ void hpdyad_mul(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) {
 
     // Set result size (min of natural size and max limbs)
     result.n = a->n + b->n;
-    if (result.n > APINT_MAX_LIMBS) {
-        result.n = APINT_MAX_LIMBS;
+    if (result.n > HPDYAD_MAX_LIMBS) {
+        result.n = HPDYAD_MAX_LIMBS;
     }
 
     // Set sign and exponent
@@ -256,7 +256,7 @@ void hpdyad_shr_bits_sticky(hpdyad_t *dst, const hpdyad_t *src, // NOLINT
         target->sign = 1;
         target->n = 0;
         target->exp2 = 0;
-        for (unsigned char i = 0; i < APINT_MAX_LIMBS; i++) {
+        for (unsigned char i = 0; i < HPDYAD_MAX_LIMBS; i++) {
             target->limb[i] = 0;
         }
         if (dst == src) {
@@ -271,7 +271,7 @@ void hpdyad_shr_bits_sticky(hpdyad_t *dst, const hpdyad_t *src, // NOLINT
         target->exp2 = src->exp2 + (int)bits;
         target->n = 1;
         target->limb[0] = 1;
-        for (unsigned char i = 1; i < APINT_MAX_LIMBS; i++) {
+        for (unsigned char i = 1; i < HPDYAD_MAX_LIMBS; i++) {
             target->limb[i] = 0;
         }
         if (dst == src) {
@@ -293,7 +293,7 @@ void hpdyad_shr_bits_sticky(hpdyad_t *dst, const hpdyad_t *src, // NOLINT
     }
 
     // Initialize target limbs to zero
-    for (unsigned char i = 0; i < APINT_MAX_LIMBS; i++) {
+    for (unsigned char i = 0; i < HPDYAD_MAX_LIMBS; i++) {
         target->limb[i] = 0;
     }
 
@@ -325,7 +325,7 @@ void hpdyad_shr_bits_sticky(hpdyad_t *dst, const hpdyad_t *src, // NOLINT
     }
 
     // Zero upper limbs
-    for (unsigned char i = src->n - limb_shift; i < APINT_MAX_LIMBS; i++) {
+    for (unsigned char i = src->n - limb_shift; i < HPDYAD_MAX_LIMBS; i++) {
         target->limb[i] = 0;
     }
 
@@ -384,7 +384,7 @@ static void add_mantissas_unsigned(hpdyad_t *result, const hpdyad_t *a,
     carry = 0;
 
     // Add limbs with carry propagation
-    for (i = 0; i < APINT_MAX_LIMBS; i++) {
+    for (i = 0; i < HPDYAD_MAX_LIMBS; i++) {
         // Stop when no more non-zero limbs and no carry
         if (i >= max_n && carry == 0) {
             break;
@@ -401,7 +401,7 @@ static void add_mantissas_unsigned(hpdyad_t *result, const hpdyad_t *a,
     result->n = i;
 
     // Zero out unused limbs (for cleanliness)
-    for (; i < APINT_MAX_LIMBS; i++) {
+    for (; i < HPDYAD_MAX_LIMBS; i++) {
         result->limb[i] = 0;
     }
 }
@@ -440,7 +440,7 @@ static void subtract_mantissas_unsigned(hpdyad_t *result, const hpdyad_t *larger
     result->n = larger->n;
 
     // Zero out unused limbs
-    for (i = larger->n; i < APINT_MAX_LIMBS; i++) {
+    for (i = larger->n; i < HPDYAD_MAX_LIMBS; i++) {
         result->limb[i] = 0;
     }
 
@@ -463,7 +463,7 @@ void hpdyad_shl_bits(hpdyad_t *dst, const hpdyad_t *src, int bits) {
         dst->sign = 1;
         dst->exp2 = 0;
         dst->n = 0;
-        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+        for (i = 0; i < HPDYAD_MAX_LIMBS; i++) {
             dst->limb[i] = 0;
         }
         return;
@@ -476,38 +476,38 @@ void hpdyad_shl_bits(hpdyad_t *dst, const hpdyad_t *src, int bits) {
     bit_shift = bits % 32;
 
     // Check if shift exceeds available space
-    if (limb_shift >= APINT_MAX_LIMBS) {
+    if (limb_shift >= HPDYAD_MAX_LIMBS) {
         // Complete overflow - saturate to max
-        dst->n = APINT_MAX_LIMBS;
-        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+        dst->n = HPDYAD_MAX_LIMBS;
+        for (i = 0; i < HPDYAD_MAX_LIMBS; i++) {
             dst->limb[i] = 0xFFFFFFFF;
         }
         return;
     }
     // Zero out destination
-    for (i = 0; i < APINT_MAX_LIMBS; i++) {
+    for (i = 0; i < HPDYAD_MAX_LIMBS; i++) {
         dst->limb[i] = 0;
     }
     // Shift by whole limbs first
     if (bit_shift == 0) {
         // Simple limb shift
-        for (i = 0; i < src->n && (i + limb_shift) < APINT_MAX_LIMBS; i++) {
+        for (i = 0; i < src->n && (i + limb_shift) < HPDYAD_MAX_LIMBS; i++) {
             dst->limb[i + limb_shift] = src->limb[i];
         }
-        dst->n = (src->n + limb_shift < APINT_MAX_LIMBS) ? src->n + limb_shift
-                                                         : APINT_MAX_LIMBS;
+        dst->n = (src->n + limb_shift < HPDYAD_MAX_LIMBS) ? src->n + limb_shift
+                                                          : HPDYAD_MAX_LIMBS;
     } else {
         // Shift with bit offset
-        for (i = 0; i < src->n && (i + limb_shift) < APINT_MAX_LIMBS; i++) {
+        for (i = 0; i < src->n && (i + limb_shift) < HPDYAD_MAX_LIMBS; i++) {
             unsigned long long temp = (unsigned long long)src->limb[i] << bit_shift;
             dst->limb[i + limb_shift] |= (unsigned int)temp;
-            if (i + limb_shift + 1 < APINT_MAX_LIMBS) {
+            if (i + limb_shift + 1 < HPDYAD_MAX_LIMBS) {
                 dst->limb[i + limb_shift + 1] = (unsigned int)(temp >> 32);
             }
         }
-        dst->n = (src->n + limb_shift + 1 < APINT_MAX_LIMBS)
+        dst->n = (src->n + limb_shift + 1 < HPDYAD_MAX_LIMBS)
                      ? src->n + limb_shift + 1
-                     : APINT_MAX_LIMBS;
+                     : HPDYAD_MAX_LIMBS;
     }
 }
 
@@ -561,7 +561,7 @@ void hpdyad_add(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) { // NOLINT
     // Smart alignment strategy
     bits_higher =
         32 * (higher_exp->n - 1) + msb32(higher_exp->limb[higher_exp->n - 1]) + 1;
-    bits_available = 32 * APINT_MAX_LIMBS;
+    bits_available = 32 * HPDYAD_MAX_LIMBS;
 
     if (d > 0 && d + bits_higher <= bits_available) {
         // Result of shift fits in available space - exact arithmetic
@@ -590,7 +590,7 @@ void hpdyad_add(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) { // NOLINT
             result->sign = 1;
             result->n = 0;
             result->exp2 = 0;
-            for (i = 0; i < APINT_MAX_LIMBS; i++) {
+            for (i = 0; i < HPDYAD_MAX_LIMBS; i++) {
                 result->limb[i] = 0;
             }
         } else {
