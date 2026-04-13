@@ -393,6 +393,6 @@ int main() {
     failed += s33();
     failed += s4();
     failed += s6();
-    //    failed += s8();
+    failed += s8();
     return failed;
 }
