@@ -47,7 +47,7 @@ msb32Ref[x_] := If[x == 0, 0, Floor[Log2[x]]]
 
 
 (* ::Text:: *)
-(*Convert unsigned 64-bit integer to apint representation.*)
+(*Convert unsigned 64-bit integer to high precision dyadic number (hpdyad) representation.*)
 (*	Input: x (unsigned long long), s (sign: \[PlusMinus]1)*)
 (*	Output: {x, s, limb[0], limb[1], n, exp2, sign}*)
 
@@ -90,7 +90,7 @@ shiftLimbsLeft[limbs_, s_] := Module[{n, result}
 
 
 (* ::Text:: *)
-(*Normalizes apint representation to canonical form.Removes leading zero limbs from high end. *)
+(*Normalizes hpdyad representation to canonical form. Removes leading zero limbs from high end. *)
 (*	If result is zero: returns sign=+1, exp2=0, all limbs=0.*)
 (* Otherwise: left-shifts entire mantissa so MSB of highest non-zero limb is 1. Adjusts exp2 to compensate for the shift.*)
 (* 	Returns {new_sign, new_exp2, new_limbs}.*)
