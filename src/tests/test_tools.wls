@@ -29,7 +29,7 @@ ConditionNumber[a_]:=Module[
 (*Maximum number of limbs, hard-coded here and in C as well.*)
 
 
-APINTMAXLIMBS = 32;
+HPDYADMAXLIMBS = 32;
 
 
 (* ::Text:: *)
@@ -47,12 +47,12 @@ msb32Ref[x_] := If[x == 0, 0, Floor[Log2[x]]]
 
 
 (* ::Text:: *)
-(*Convert unsigned 64-bit integer to apint representation.*)
+(*Convert unsigned 64-bit integer to high precision dyadic number (hpdyad) representation.*)
 (*	Input: x (unsigned long long), s (sign: \[PlusMinus]1)*)
 (*	Output: {x, s, limb[0], limb[1], n, exp2, sign}*)
 
 
-toApint[x_, s_] := Module[{tz, shifted, l0, l1, n, finalSign}
+toHpdyad[x_, s_] := Module[{tz, shifted, l0, l1, n, finalSign}
 	,If[x == 0
 		,Return[{x, s, 0, 0, 0, 0, 1}]
 	]
@@ -90,17 +90,17 @@ shiftLimbsLeft[limbs_, s_] := Module[{n, result}
 
 
 (* ::Text:: *)
-(*Normalizes apint representation to canonical form.Removes leading zero limbs from high end. *)
+(*Normalizes hpdyad representation to canonical form. Removes leading zero limbs from high end. *)
 (*	If result is zero: returns sign=+1, exp2=0, all limbs=0.*)
 (* Otherwise: left-shifts entire mantissa so MSB of highest non-zero limb is 1. Adjusts exp2 to compensate for the shift.*)
 (* 	Returns {new_sign, new_exp2, new_limbs}.*)
 
 
-apintNormalize[{sign_,exp2_,limbs_}]:=Module[
+hpdyadNormalize[{sign_,exp2_,limbs_}]:=Module[
 	{n,s,newLimbs,newExp2}
 	,n=Length[limbs]
 	;While[n>0&&limbs[[n]]==0,n=n-1]
-	;If[n==0,Return[{1,0,Table[0,{APINTMAXLIMBS}]}]]
+	;If[n==0,Return[{1,0,Table[0,{HPDYADMAXLIMBS}]}]]
 	;s=clz32[limbs[[n]]]
 	;If[s==0
 		,newLimbs=limbs
@@ -108,7 +108,7 @@ apintNormalize[{sign_,exp2_,limbs_}]:=Module[
 		,newLimbs=shiftLimbsLeft[limbs,s]
 		;newExp2=exp2-s
 	]
-	;newLimbs=Join[Take[newLimbs,n],Table[0,{APINTMAXLIMBS -n}]]
+	;newLimbs=Join[Take[newLimbs,n],Table[0,{HPDYADMAXLIMBS -n}]]
 	(* Trim low-end zeros *)
 	;While[n>0&&newLimbs[[1]]==0
 		,newLimbs=Join[Drop[newLimbs,1],{0}]
@@ -120,10 +120,10 @@ apintNormalize[{sign_,exp2_,limbs_}]:=Module[
 
 
 (* ::Text:: *)
-(*Define multiplication test function. Takes two unsigned long long values and their signs, returns product as double. Simulates: apint_set_ull \[RightArrow] apint_mul \[RightArrow] apint_to_double_trunc.*)
+(*Define multiplication test function. Takes two unsigned long long values and their signs, returns product as double. Simulates: hpdyad_set_ull \[RightArrow] hpdyad_mul \[RightArrow] hpdyad_to_double_trunc.*)
 
 
-apintMulTest[valA_,signA_,valB_,signB_]:=Module[{prod}
+hpdyadMulTest[valA_,signA_,valB_,signB_]:=Module[{prod}
 	,prod=signA*valA*signB*valB
 	;If[prod==0
 	,0.0
@@ -133,39 +133,39 @@ apintMulTest[valA_,signA_,valB_,signB_]:=Module[{prod}
 
 
 (* ::Text:: *)
-(*Convert arbitrary integer to full APINTMAXLIMBS-limb apint representation. Returns {limb0, limb1, ..., limb7, exp2, sign}.*)
+(*Convert arbitrary integer to full HPDYADMAXLIMBS-limb hpdyad representation. Returns {limb0, limb1, ..., limb7, exp2, sign}.*)
 
 
-toApintFull[x_,s_]:=Module[
+toHpdyadFull[x_,s_]:=Module[
 	{num,den,denExp,tz,shifted,limbs}
 	,If[x==0
-		,Return[Join[Table[0,{APINTMAXLIMBS}],{0,1}]]
+		,Return[Join[Table[0,{HPDYADMAXLIMBS}],{0,1}]]
 	]
 	;num=Numerator[x]
 	;den=Denominator[x]
 	;denExp=IntegerExponent[den,2]
 	;tz=IntegerExponent[num,2]-denExp
 	;shifted=Quotient[num,2^IntegerExponent[num,2]]
-	;limbs=Table[Mod[Quotient[shifted,2^(32*i)],2^32],{i,0,APINTMAXLIMBS-1}]
+	;limbs=Table[Mod[Quotient[shifted,2^(32*i)],2^32],{i,0,HPDYADMAXLIMBS-1}]
 	;Flatten[{limbs,tz,s}]
 ]
 
 
 (* ::Text:: *)
-(*Simulate apint_mul: multiply two apints and return normalized result.*)
+(*Simulate hpdyad_mul: multiply two high precision dyadic numbers (hpdyad's) and return normalized result.*)
 (*	Input: valA, signA, valB, signB*)
 (*	Output: {limb0-7, exp2, sign} after normalization.*)
 
 
-apintMulTest[valA_,signA_,valB_,signB_]:=Module[
-	{prod,prodApint,normalized,limbList}
+hpdyadMulTest[valA_,signA_,valB_,signB_]:=Module[
+	{prod,prodHpdyad,normalized,limbList}
 	,If[valA==0||valB==0
-	    ,Return[Join[Table[0,{APINTMAXLIMBS}],{0,1}]]
+	    ,Return[Join[Table[0,{HPDYADMAXLIMBS}],{0,1}]]
 	]
 	;prod=signA*valA*signB*valB
-	;prodApint=toApintFull[Abs[prod],Sign[prod]]
-	;limbList=Take[prodApint,APINTMAXLIMBS]
-	;normalized=apintNormalize[{prodApint[[APINTMAXLIMBS+2]],prodApint[[APINTMAXLIMBS+1]],limbList}]
+	;prodHpdyad=toHpdyadFull[Abs[prod],Sign[prod]]
+	;limbList=Take[prodHpdyad,HPDYADMAXLIMBS]
+	;normalized=hpdyadNormalize[{prodHpdyad[[HPDYADMAXLIMBS+2]],prodHpdyad[[HPDYADMAXLIMBS+1]],limbList}]
 	;Flatten[{normalized[[3]],normalized[[2]],normalized[[1]]}]
 ]
 
@@ -174,30 +174,30 @@ apintMulTest[valA_,signA_,valB_,signB_]:=Module[
 (*Arbitrary precision integer right-shift with sticky bit.*)
 
 
-apintShrStickyRef[{sign_, exp2_, limbs_}, bits_] := Module[
+hpdyadShrStickyRef[{sign_, exp2_, limbs_}, bits_] := Module[
 	{M, Mshifted, sticky, newLimbs, newExp2}
 	,M = FromDigits[Reverse[limbs], 2^32]
 	;If[M == 0
-		,{1, 0, Table[0, {APINTMAXLIMBS}]}
+		,{1, 0, Table[0, {HPDYADMAXLIMBS}]}
 		,sticky = If[Mod[M, 2^bits] != 0, 1, 0]
 		;Mshifted = BitOr[Floor[M / 2^bits], sticky]
 		;newExp2 = exp2 + bits
-		;newLimbs = Reverse[IntegerDigits[Mshifted, 2^32, APINTMAXLIMBS]]
+		;newLimbs = Reverse[IntegerDigits[Mshifted, 2^32, HPDYADMAXLIMBS]]
 		;{sign, newExp2, newLimbs}
 	]
 ]
 
 
 (* ::Text:: *)
-(*Convert  integer  to  apint.*)
+(*Convert  integer  to  hpdyad.*)
 
 
-ratToApint[n_] := Module[
+ratToHpdyad[n_] := Module[
 	{raw, sign, absN}
 	,absN = Abs[n]
 	;sign = If[n == 0, 1, Sign[n]]
-	;raw = toApintFull[absN, sign]
-	;apintNormalize[{raw[[APINTMAXLIMBS+2]], raw[[APINTMAXLIMBS+1]], raw[[1;;APINTMAXLIMBS]]}]
+	;raw = toHpdyadFull[absN, sign]
+	;hpdyadNormalize[{raw[[HPDYADMAXLIMBS+2]], raw[[HPDYADMAXLIMBS+1]], raw[[1;;HPDYADMAXLIMBS]]}]
 ]
 
 
@@ -340,7 +340,7 @@ Export["csv/ctzmsb_Ref.csv", ctzmsbTab];
 
 
 (* ::Subsection::Closed:: *)
-(*Test arbitrary precision integer apint*)
+(*Test arbitrary precision integer hpdyad*)
 
 
 (* ::Text:: *)
@@ -350,12 +350,12 @@ Export["csv/ctzmsb_Ref.csv", ctzmsbTab];
 SeedRandom[42];
 testCases = Join[
   (* Edge cases *)
-  {toApint[0, 1], toApint[0, -1], toApint[1, 1], toApint[1, -1],
-   toApint[2^32 - 1, 1], toApint[2^32, 1], toApint[2^64 - 1, 1]},
+  {toHpdyad[0, 1], toHpdyad[0, -1], toHpdyad[1, 1], toHpdyad[1, -1],
+   toHpdyad[2^32 - 1, 1], toHpdyad[2^32, 1], toHpdyad[2^64 - 1, 1]},
 
   (* Random cases *)
   ParallelTable[
-    toApint[RandomInteger[{0, 2^64 - 1}], RandomChoice[{-1, 1}]],
+    toHpdyad[RandomInteger[{0, 2^64 - 1}], RandomChoice[{-1, 1}]],
     {992}
   ]
 ];
@@ -366,7 +366,7 @@ testCases = Join[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/apint_set_ull_Ref.csv", testCases];
+Export["csv/hpdyad_set_ull_Ref.csv", testCases];
 
 
 (* ::Subsection::Closed:: *)
@@ -380,36 +380,36 @@ Export["csv/apint_set_ull_Ref.csv", testCases];
 SeedRandom[42];
 testCases = Join[{
 	(* 1. Zero *)
-	{1, 0, PadRight[{}, APINTMAXLIMBS, 0]}
-	,{-1, 5, PadRight[{}, APINTMAXLIMBS, 0]}
+	{1, 0, PadRight[{}, HPDYADMAXLIMBS, 0]}
+	,{-1, 5, PadRight[{}, HPDYADMAXLIMBS, 0]}
 	(* 2. Single limb *)
-	,{1, 0, PadRight[{1}, APINTMAXLIMBS, 0]}
-	,{-1, 10, PadRight[{1}, APINTMAXLIMBS, 0]}
+	,{1, 0, PadRight[{1}, HPDYADMAXLIMBS, 0]}
+	,{-1, 10, PadRight[{1}, HPDYADMAXLIMBS, 0]}
 	(* 3. Already normalized *)
-	,{1, 0, PadRight[{BitShiftLeft[1, 31]}, APINTMAXLIMBS, 0]}
-	,{1, 5, PadRight[{0, BitShiftLeft[1, 31]}, APINTMAXLIMBS, 0]}
+	,{1, 0, PadRight[{BitShiftLeft[1, 31]}, HPDYADMAXLIMBS, 0]}
+	,{1, 5, PadRight[{0, BitShiftLeft[1, 31]}, HPDYADMAXLIMBS, 0]}
 	(* 4. Middle zeros *)
-	,{1, 0, PadRight[{5, 0, 0, 7}, APINTMAXLIMBS, 0]}
-	,{-1, -3, PadRight[{100, 0, 200}, APINTMAXLIMBS, 0]}
+	,{1, 0, PadRight[{5, 0, 0, 7}, HPDYADMAXLIMBS, 0]}
+	,{-1, -3, PadRight[{100, 0, 200}, HPDYADMAXLIMBS, 0]}
 	(* 5. Multiple leading zeros *)
-	,{1, 0, PadRight[{42}, APINTMAXLIMBS, 0]}
-	,{1, 0, PadRight[{1234567, 9876543}, APINTMAXLIMBS, 0]}
+	,{1, 0, PadRight[{42}, HPDYADMAXLIMBS, 0]}
+	,{1, 0, PadRight[{1234567, 9876543}, HPDYADMAXLIMBS, 0]}
 	(* 6. Shift amounts *)
-	,{1, 0, PadRight[{BitShiftLeft[1, 15]}, APINTMAXLIMBS, 0]}
-	,{1, 0, PadRight[{BitShiftLeft[1, 30]}, APINTMAXLIMBS, 0]}
-	,{1, 0, PadRight[{0, BitShiftLeft[1, 7]}, APINTMAXLIMBS, 0]}
+	,{1, 0, PadRight[{BitShiftLeft[1, 15]}, HPDYADMAXLIMBS, 0]}
+	,{1, 0, PadRight[{BitShiftLeft[1, 30]}, HPDYADMAXLIMBS, 0]}
+	,{1, 0, PadRight[{0, BitShiftLeft[1, 7]}, HPDYADMAXLIMBS, 0]}
 	(* 7. Full mantissa *)
-	,{1, 100, PadRight[{16^^FFFFFFFF, 0, 16^^12345678, 0, 16^^ABCDEF00, 0, 0, 16^^80000000}, APINTMAXLIMBS, 0]}
+	,{1, 100, PadRight[{16^^FFFFFFFF, 0, 16^^12345678, 0, 16^^ABCDEF00, 0, 0, 16^^80000000}, HPDYADMAXLIMBS, 0]}
 	(* 8. Dangerous *)
-	,{1, 0, PadRight[{16^^FFFF0000, 16^^0000FFFF}, APINTMAXLIMBS, 0]}
-	,{1, 0, PadRight[{16^^80000001, 16^^00000001}, APINTMAXLIMBS, 0]}
+	,{1, 0, PadRight[{16^^FFFF0000, 16^^0000FFFF}, HPDYADMAXLIMBS, 0]}
+	,{1, 0, PadRight[{16^^80000001, 16^^00000001}, HPDYADMAXLIMBS, 0]}
 	(* 9. Large exp2 *)
-	,{1, 1000000, PadRight[{123}, APINTMAXLIMBS, 0]}
-	,{-1, -500000, PadRight[{16^^7FFFFFFF}, APINTMAXLIMBS, 0]}
+	,{1, 1000000, PadRight[{123}, HPDYADMAXLIMBS, 0]}
+	,{-1, -500000, PadRight[{16^^7FFFFFFF}, HPDYADMAXLIMBS, 0]}
 	}
 	,(* 10. Random values *)
 		Table[
-			{1, RandomInteger[{-1000, 1000}], RandomInteger[{0, 16^^FFFFFFFF}, APINTMAXLIMBS]}
+			{1, RandomInteger[{-1000, 1000}], RandomInteger[{0, 16^^FFFFFFFF}, HPDYADMAXLIMBS]}
 			,{i,981}
 		]
 ];
@@ -423,7 +423,7 @@ results = Table[
 	Module[
 		{input, output}
 		,input = testCases[[i]]
-		;output = apintNormalize[input]
+		;output = hpdyadNormalize[input]
 		;Join[
 			{input[[1]]}
 			,{input[[2]]}
@@ -442,7 +442,7 @@ results = Table[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/apint_normalize_Ref.csv", results];
+Export["csv/hpdyad_normalize_Ref.csv", results];
 
 
 (* ::Subsection::Closed:: *)
@@ -509,10 +509,10 @@ allCases=Join[specialCases,randomCases];
 (*Generate reference outputs,*)
 
 
-apintMulTestTable=ParallelTable[
+hpdyadMulTestTable=ParallelTable[
 	Flatten[Join[
 		allCases[[i]]
-		,apintMulTest@@allCases[[i]]
+		,hpdyadMulTest@@allCases[[i]]
 	]]
 	,{i,1,Length[allCases]}
 ];
@@ -523,7 +523,7 @@ apintMulTestTable=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/apint_mul_Ref.csv",apintMulTestTable];
+Export["csv/hpdyad_mul_Ref.csv",hpdyadMulTestTable];
 
 
 (* ::Subsection::Closed:: *)
@@ -545,25 +545,25 @@ nEdge = 100;
 
 edgeCases=Join[
 	(*Zeroinput*)
-	Table[{1,0,Table[0,{APINTMAXLIMBS}],RandomInteger[{0,300}]},{10}]
+	Table[{1,0,Table[0,{HPDYADMAXLIMBS}],RandomInteger[{0,300}]},{10}]
 	(*Noshift(bits=0)*)
-	,Table[Module[{n,limbs},n=RandomInteger[{1,APINTMAXLIMBS}];limbs=PadRight[Table[RandomInteger[{1,2^32-1}],{n}],APINTMAXLIMBS,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,0}],{10}]
+	,Table[Module[{n,limbs},n=RandomInteger[{1,HPDYADMAXLIMBS}];limbs=PadRight[Table[RandomInteger[{1,2^32-1}],{n}],HPDYADMAXLIMBS,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,0}],{10}]
 	(*Shiftwithinsinglelimb*)
-	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],PadRight[{RandomInteger[{1,2^32-1}]},APINTMAXLIMBS,0],RandomInteger[{1,31}]},{10}]
+	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],PadRight[{RandomInteger[{1,2^32-1}]},HPDYADMAXLIMBS,0],RandomInteger[{1,31}]},{10}]
 	(*Shiftexactlyonelimbboundary*)
-	,Table[Module[{n,limbs},n=RandomInteger[{2,APINTMAXLIMBS}];limbs=PadRight[Table[RandomInteger[{0,2^32-1}],{n}],APINTMAXLIMBS,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,32}],{10}]
+	,Table[Module[{n,limbs},n=RandomInteger[{2,HPDYADMAXLIMBS}];limbs=PadRight[Table[RandomInteger[{0,2^32-1}],{n}],HPDYADMAXLIMBS,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,32}],{10}]
 	(*Shiftacrosslimbboundary*)
-	,Table[Module[{n,limbs},n=RandomInteger[{2,APINTMAXLIMBS}];limbs=PadRight[Table[RandomInteger[{0,2^32-1}],{n}],APINTMAXLIMBS,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,RandomInteger[{33,63}]}],{10}]
+	,Table[Module[{n,limbs},n=RandomInteger[{2,HPDYADMAXLIMBS}];limbs=PadRight[Table[RandomInteger[{0,2^32-1}],{n}],HPDYADMAXLIMBS,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,RandomInteger[{33,63}]}],{10}]
 	(*Completeshift-out,nosticky*)
-	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],PadRight[{2^RandomInteger[{0,31}]},APINTMAXLIMBS,0],RandomInteger[{32,300}]},{10}]
+	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],PadRight[{2^RandomInteger[{0,31}]},HPDYADMAXLIMBS,0],RandomInteger[{32,300}]},{10}]
 	(*Completeshift-out,withsticky*)
-	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],PadRight[{RandomInteger[{1,2^32-1}]},APINTMAXLIMBS,0],RandomInteger[{32,300}]},{10}]
+	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],PadRight[{RandomInteger[{1,2^32-1}]},HPDYADMAXLIMBS,0],RandomInteger[{32,300}]},{10}]
 	(*Exactly256bitshift*)
-	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],Table[RandomInteger[{1,2^32-1}],{APINTMAXLIMBS}],256},{10}]
+	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],Table[RandomInteger[{1,2^32-1}],{HPDYADMAXLIMBS}],256},{10}]
 	(*Maxlimbs,smallshift*)
-	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],Table[RandomInteger[{1,2^32-1}],{APINTMAXLIMBS}],RandomInteger[{1,31}]},{10}]
+	,Table[{RandomChoice[{-1,1}],RandomInteger[{-100,100}],Table[RandomInteger[{1,2^32-1}],{HPDYADMAXLIMBS}],RandomInteger[{1,31}]},{10}]
 	(*All0xFFFFFFFFlimbs*)
-	,Table[Module[{n,limbs},n=RandomInteger[{1,APINTMAXLIMBS}];limbs=PadRight[Table[2^32-1,{n}],APINTMAXLIMBS,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,RandomInteger[{1,100}]}],{10}]
+	,Table[Module[{n,limbs},n=RandomInteger[{1,HPDYADMAXLIMBS}];limbs=PadRight[Table[2^32-1,{n}],HPDYADMAXLIMBS,0];{RandomChoice[{-1,1}],RandomInteger[{-100,100}],limbs,RandomInteger[{1,100}]}],{10}]
 ];
 
 
@@ -573,14 +573,14 @@ edgeCases=Join[
 
 Do[
 	sign0[i] = RandomChoice[{-1, 1}]
-	;n0[i] = RandomInteger[{0,APINTMAXLIMBS}]
+	;n0[i] = RandomInteger[{0,HPDYADMAXLIMBS}]
 	;exp0[i] = RandomInteger[{-1000, 1000}]
 	;limbs0[i] = If[n0[i] == 0
-		,Table[0, {APINTMAXLIMBS}]
+		,Table[0, {HPDYADMAXLIMBS}]
 		,Join[
 			Table[RandomInteger[{0, 2^32 - 1}], {n0[i] - 1}]
 			,{RandomInteger[{1, 2^32 - 1}]}
-			,Table[0, {APINTMAXLIMBS - n0[i]}]
+			,Table[0, {HPDYADMAXLIMBS - n0[i]}]
 		]
 	]
 	;bits0[i] = RandomInteger[{0, 300}]
@@ -594,20 +594,20 @@ Do[
 
 shrStickyTab=ParallelTable[
 	Module[
-		{apintIn,apintOut,sign,exp2,limbs,bits}
+		{hpdyadIn,hpdyadOut,sign,exp2,limbs,bits}
 		,{sign,exp2,limbs,bits}=If[i<=Length[edgeCases]
 			,edgeCases[[i]]
 			,{sign0[i-Length[edgeCases]],exp0[i-Length[edgeCases]]
 			,limbs0[i-Length[edgeCases]],bits0[i-Length[edgeCases]]}
 		]
-		;apintIn={sign,exp2,limbs}
-		;apintOut=apintShrStickyRef[apintIn,bits]
+		;hpdyadIn={sign,exp2,limbs}
+		;hpdyadOut=hpdyadShrStickyRef[hpdyadIn,bits]
 		;Flatten[Join[
 		{sign,exp2}
 		,limbs
 		,{bits}
-		,{apintOut[[1]],apintOut[[2]]}
-		,apintOut[[3]]
+		,{hpdyadOut[[1]],hpdyadOut[[2]]}
+		,hpdyadOut[[3]]
 		]]
 	]
 	,{i,Length[edgeCases]+nTests}
@@ -619,7 +619,7 @@ shrStickyTab=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/apint_shr_sticky_Ref.csv", shrStickyTab];
+Export["csv/hpdyad_shr_sticky_Ref.csv", shrStickyTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -679,13 +679,13 @@ allTests=Join[edgeCases,randomTests];
 
 
 testData=ParallelTable[
-	Module[{a,b,aApint,bApint,refApint,ref}
+	Module[{a,b,aHpdyad,bHpdyad,refHpdyad,ref}
 		,{a,b}={allTests[[i,1]],allTests[[i,2]]}
 		;ref=a+b
-		;aApint=ratToApint[a]
-		;bApint=ratToApint[b]
-		;refApint=ratToApint[ref]
-		;Flatten[{aApint[[1]],aApint[[2]],aApint[[3]],bApint[[1]],bApint[[2]],bApint[[3]],refApint[[1]],refApint[[2]],refApint[[3]]}]
+		;aHpdyad=ratToHpdyad[a]
+		;bHpdyad=ratToHpdyad[b]
+		;refHpdyad=ratToHpdyad[ref]
+		;Flatten[{aHpdyad[[1]],aHpdyad[[2]],aHpdyad[[3]],bHpdyad[[1]],bHpdyad[[2]],bHpdyad[[3]],refHpdyad[[1]],refHpdyad[[2]],refHpdyad[[3]]}]
 	]
 	,{i,Length[allTests]}
 ];
@@ -696,7 +696,7 @@ testData=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/apint_add_Ref.csv", testData];
+Export["csv/hpdyad_add_Ref.csv", testData];
 
 
 (* ::Subsection::Closed:: *)
@@ -765,13 +765,13 @@ allFractionalTests=Join[fractionalEdgeCases,randomFractionalTests];
 
 
 fractionalTestData = ParallelTable[
-	Module[{a,b,aApint,bApint,refApint,ref}
+	Module[{a,b,aHpdyad,bHpdyad,refHpdyad,ref}
 		,{a,b} = allFractionalTests[[i]]
 		;ref = a + b
-		;aApint = ratToApint[a]
-		;bApint = ratToApint[b]
-		;refApint = ratToApint[ref]
-		;Flatten[{aApint[[1]],aApint[[2]],aApint[[3]],bApint[[1]],bApint[[2]],bApint[[3]],refApint[[1]],refApint[[2]],refApint[[3]]}]
+		;aHpdyad = ratToHpdyad[a]
+		;bHpdyad = ratToHpdyad[b]
+		;refHpdyad = ratToHpdyad[ref]
+		;Flatten[{aHpdyad[[1]],aHpdyad[[2]],aHpdyad[[3]],bHpdyad[[1]],bHpdyad[[2]],bHpdyad[[3]],refHpdyad[[1]],refHpdyad[[2]],refHpdyad[[3]]}]
 	]
 	,{i,Length[allFractionalTests]}
 ];
@@ -782,11 +782,11 @@ fractionalTestData = ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/apint_add_fractional_Ref.csv", fractionalTestData];
+Export["csv/hpdyad_add_fractional_Ref.csv", fractionalTestData];
 
 
 (* ::Subsection::Closed:: *)
-(*Test apint to double conversion with round-to-nearest-even*)
+(*Test hpdyad to double conversion with round-to-nearest-even*)
 
 
 (* ::Text:: *)
@@ -844,11 +844,11 @@ allTests=Join[edgeCases,randomTests];
 
 testData=ParallelTable[
 	Module[
-		{x,xApint,refDouble}
+		{x,xHpdyad,refDouble}
 		,x=allTests[[i]]
-		;xApint=ratToApint[x]
+		;xHpdyad=ratToHpdyad[x]
 		;refDouble=N[x]
-		;Flatten[{xApint[[1]],xApint[[2]],xApint[[3]],refDouble}]
+		;Flatten[{xHpdyad[[1]],xHpdyad[[2]],xHpdyad[[3]],refDouble}]
 	]
 	,{i,Length[allTests]}
 ];
@@ -859,4 +859,4 @@ testData=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/apint_to_double_Ref.csv",testData];
+Export["csv/hpdyad_to_double_Ref.csv",testData];

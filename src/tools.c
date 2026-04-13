@@ -69,12 +69,12 @@ int msb32(unsigned int x) {
     return n;
 }
 
-/** @brief Initialize apint from unsigned long long with sign.
- * @param[out] a: destination apint
+/** @brief Initialize hpdyad from unsigned long long with sign.
+ * @param[out] a: destination hpdyad
  * @param[in] x: unsigned integer value
  * @param[in] sign: +1 or -1
  */
-void apint_set_ull(apint_t *a, unsigned long long x, signed char sign) {
+void hpdyad_set_ull(hpdyad_t *a, unsigned long long x, signed char sign) {
     if (x == 0) {
         a->n = 0;
         a->exp2 = 0;
@@ -98,12 +98,12 @@ void apint_set_ull(apint_t *a, unsigned long long x, signed char sign) {
     a->sign = sign;
 }
 
-/** @brief Normalize apint: trim leading zeros and left-shift mantissa so MSB of top
+/** @brief Normalize hpdyad: trim leading zeros and left-shift mantissa so MSB of top
  * limb is 1
- * @param[in,out] a: pointer to apint to normalize
+ * @param[in,out] a: pointer to hpdyad to normalize
  * @return void
  */
-void apint_normalize(apint_t *a) {
+void hpdyad_normalize(hpdyad_t *a) {
     int i;
     int s;
 
@@ -166,13 +166,13 @@ void apint_normalize(apint_t *a) {
     }
 }
 
-/** @brief Multiply two apints: out = a * b
+/** @brief Multiply two high precision dyadic numbers (hpdyad's): out = a * b
  * @param[out] out: result (may alias a or b)
  * @param[in] a: first operand
  * @param[in] b: second operand
  */
-void apint_mul(apint_t *out, const apint_t *a, const apint_t *b) {
-    apint_t result;
+void hpdyad_mul(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) {
+    hpdyad_t result;
     unsigned int i;
     unsigned int j;
     unsigned int k;
@@ -185,14 +185,14 @@ void apint_mul(apint_t *out, const apint_t *a, const apint_t *b) {
         out->n = 0;
         out->sign = 1;
         out->exp2 = 0;
-        for (k = 0; k < APINT_MAX_LIMBS; k++) {
+        for (k = 0; k < HPDYAD_MAX_LIMBS; k++) {
             out->limb[k] = 0;
         }
         return;
     }
 
     // Initialize result limbs to zero
-    for (k = 0; k < APINT_MAX_LIMBS; k++) {
+    for (k = 0; k < HPDYAD_MAX_LIMBS; k++) {
         result.limb[k] = 0;
     }
 
@@ -201,7 +201,7 @@ void apint_mul(apint_t *out, const apint_t *a, const apint_t *b) {
         carry = 0;
         for (j = 0; j < b->n; j++) {
             k = i + j;
-            if (k >= APINT_MAX_LIMBS) {
+            if (k >= HPDYAD_MAX_LIMBS) {
                 break; // Truncate high limbs
             }
 
@@ -212,7 +212,7 @@ void apint_mul(apint_t *out, const apint_t *a, const apint_t *b) {
         }
 
         // Propagate final carry
-        while (carry && k + 1 < APINT_MAX_LIMBS) {
+        while (carry && k + 1 < HPDYAD_MAX_LIMBS) {
             k++;
             acc = (unsigned long long)result.limb[k] + carry;
             result.limb[k] = (unsigned int)acc;
@@ -222,8 +222,8 @@ void apint_mul(apint_t *out, const apint_t *a, const apint_t *b) {
 
     // Set result size (min of natural size and max limbs)
     result.n = a->n + b->n;
-    if (result.n > APINT_MAX_LIMBS) {
-        result.n = APINT_MAX_LIMBS;
+    if (result.n > HPDYAD_MAX_LIMBS) {
+        result.n = HPDYAD_MAX_LIMBS;
     }
 
     // Set sign and exponent
@@ -231,7 +231,7 @@ void apint_mul(apint_t *out, const apint_t *a, const apint_t *b) {
     result.exp2 = a->exp2 + b->exp2;
 
     // Normalize
-    apint_normalize(&result);
+    hpdyad_normalize(&result);
 
     // Copy to output (handles aliasing)
     *out = result;
@@ -242,21 +242,21 @@ void apint_mul(apint_t *out, const apint_t *a, const apint_t *b) {
  * Shifts mantissa right by `bits`, increments exp2 by `bits` to preserve value.
  * Any 1-bit shifted out ORs into bit 0 (sticky). Does NOT normalize.
  *
- * @param[out] dst: destination apint
- * @param[in] src: source apint
+ * @param[out] dst: destination hpdyad
+ * @param[in] src: source hpdyad
  * @param[in] bits: number of bits to shift right
  */
-void apint_shr_bits_sticky(apint_t *dst, const apint_t *src, // NOLINT
-                           unsigned int bits) {
-    apint_t tmp;
-    apint_t *target = (dst == src) ? &tmp : dst;
+void hpdyad_shr_bits_sticky(hpdyad_t *dst, const hpdyad_t *src, // NOLINT
+                            unsigned int bits) {
+    hpdyad_t tmp;
+    hpdyad_t *target = (dst == src) ? &tmp : dst;
 
     // Handle zero source
     if (src->n == 0) {
         target->sign = 1;
         target->n = 0;
         target->exp2 = 0;
-        for (unsigned char i = 0; i < APINT_MAX_LIMBS; i++) {
+        for (unsigned char i = 0; i < HPDYAD_MAX_LIMBS; i++) {
             target->limb[i] = 0;
         }
         if (dst == src) {
@@ -271,7 +271,7 @@ void apint_shr_bits_sticky(apint_t *dst, const apint_t *src, // NOLINT
         target->exp2 = src->exp2 + (int)bits;
         target->n = 1;
         target->limb[0] = 1;
-        for (unsigned char i = 1; i < APINT_MAX_LIMBS; i++) {
+        for (unsigned char i = 1; i < HPDYAD_MAX_LIMBS; i++) {
             target->limb[i] = 0;
         }
         if (dst == src) {
@@ -293,7 +293,7 @@ void apint_shr_bits_sticky(apint_t *dst, const apint_t *src, // NOLINT
     }
 
     // Initialize target limbs to zero
-    for (unsigned char i = 0; i < APINT_MAX_LIMBS; i++) {
+    for (unsigned char i = 0; i < HPDYAD_MAX_LIMBS; i++) {
         target->limb[i] = 0;
     }
 
@@ -325,7 +325,7 @@ void apint_shr_bits_sticky(apint_t *dst, const apint_t *src, // NOLINT
     }
 
     // Zero upper limbs
-    for (unsigned char i = src->n - limb_shift; i < APINT_MAX_LIMBS; i++) {
+    for (unsigned char i = src->n - limb_shift; i < HPDYAD_MAX_LIMBS; i++) {
         target->limb[i] = 0;
     }
 
@@ -340,12 +340,13 @@ void apint_shr_bits_sticky(apint_t *dst, const apint_t *src, // NOLINT
     }
 }
 
-/** @brief Compare magnitudes of two apints (assumes same exp2 after alignment)
- * @param[in] a: first apint
- * @param[in] b: second apint
+/** @brief Compare magnitudes of two high precision dyadic numbers (hpdyad's)
+ * (assumes same exp2 after alignment)
+ * @param[in] a: first hpdyad
+ * @param[in] b: second hpdyad
  * @return 1 if |a| > |b|, -1 if |a| < |b|, 0 if equal
  */
-static int compare_magnitudes(const apint_t *a, const apint_t *b) {
+static int compare_magnitudes(const hpdyad_t *a, const hpdyad_t *b) {
     unsigned char max_n;
     int i;
 
@@ -368,12 +369,12 @@ static int compare_magnitudes(const apint_t *a, const apint_t *b) {
 }
 
 /** @brief Add two unsigned mantissas (assumes same exp2)
- * @param[out] result: output apint (only limb[] and n are set)
+ * @param[out] result: output hpdyad (only limb[] and n are set)
  * @param[in] a: first addend
  * @param[in] b: second addend
  */
-static void add_mantissas_unsigned(apint_t *result, const apint_t *a,
-                                   const apint_t *b) {
+static void add_mantissas_unsigned(hpdyad_t *result, const hpdyad_t *a,
+                                   const hpdyad_t *b) {
     unsigned char max_n;
     unsigned long long sum;
     unsigned int carry;
@@ -383,7 +384,7 @@ static void add_mantissas_unsigned(apint_t *result, const apint_t *a,
     carry = 0;
 
     // Add limbs with carry propagation
-    for (i = 0; i < APINT_MAX_LIMBS; i++) {
+    for (i = 0; i < HPDYAD_MAX_LIMBS; i++) {
         // Stop when no more non-zero limbs and no carry
         if (i >= max_n && carry == 0) {
             break;
@@ -400,18 +401,18 @@ static void add_mantissas_unsigned(apint_t *result, const apint_t *a,
     result->n = i;
 
     // Zero out unused limbs (for cleanliness)
-    for (; i < APINT_MAX_LIMBS; i++) {
+    for (; i < HPDYAD_MAX_LIMBS; i++) {
         result->limb[i] = 0;
     }
 }
 
 /** @brief Subtract smaller unsigned mantissa from larger (assumes same exp2)
- * @param[out] result: output apint (only limb[] and n are set)
+ * @param[out] result: output hpdyad (only limb[] and n are set)
  * @param[in] larger: larger magnitude operand
  * @param[in] smaller: smaller magnitude operand (assumed |larger| >= |smaller|)
  */
-static void subtract_mantissas_unsigned(apint_t *result, const apint_t *larger,
-                                        const apint_t *smaller) {
+static void subtract_mantissas_unsigned(hpdyad_t *result, const hpdyad_t *larger,
+                                        const hpdyad_t *smaller) {
     long long diff;
     unsigned int borrow;
     unsigned char i;
@@ -439,7 +440,7 @@ static void subtract_mantissas_unsigned(apint_t *result, const apint_t *larger,
     result->n = larger->n;
 
     // Zero out unused limbs
-    for (i = larger->n; i < APINT_MAX_LIMBS; i++) {
+    for (i = larger->n; i < HPDYAD_MAX_LIMBS; i++) {
         result->limb[i] = 0;
     }
 
@@ -447,12 +448,12 @@ static void subtract_mantissas_unsigned(apint_t *result, const apint_t *larger,
 }
 
 /** @brief Left-shift mantissa by specified number of bits (value-preserving)
- * @param[out] dst: destination apint
- * @param[in] src: source apint
+ * @param[out] dst: destination hpdyad
+ * @param[in] src: source hpdyad
  * @param[in] bits: number of bits to shift left
  * @return void
  */
-void apint_shl_bits(apint_t *dst, const apint_t *src, int bits) {
+void hpdyad_shl_bits(hpdyad_t *dst, const hpdyad_t *src, int bits) {
     unsigned int limb_shift;
     unsigned int bit_shift;
     unsigned char i;
@@ -462,7 +463,7 @@ void apint_shl_bits(apint_t *dst, const apint_t *src, int bits) {
         dst->sign = 1;
         dst->exp2 = 0;
         dst->n = 0;
-        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+        for (i = 0; i < HPDYAD_MAX_LIMBS; i++) {
             dst->limb[i] = 0;
         }
         return;
@@ -475,53 +476,53 @@ void apint_shl_bits(apint_t *dst, const apint_t *src, int bits) {
     bit_shift = bits % 32;
 
     // Check if shift exceeds available space
-    if (limb_shift >= APINT_MAX_LIMBS) {
+    if (limb_shift >= HPDYAD_MAX_LIMBS) {
         // Complete overflow - saturate to max
-        dst->n = APINT_MAX_LIMBS;
-        for (i = 0; i < APINT_MAX_LIMBS; i++) {
+        dst->n = HPDYAD_MAX_LIMBS;
+        for (i = 0; i < HPDYAD_MAX_LIMBS; i++) {
             dst->limb[i] = 0xFFFFFFFF;
         }
         return;
     }
     // Zero out destination
-    for (i = 0; i < APINT_MAX_LIMBS; i++) {
+    for (i = 0; i < HPDYAD_MAX_LIMBS; i++) {
         dst->limb[i] = 0;
     }
     // Shift by whole limbs first
     if (bit_shift == 0) {
         // Simple limb shift
-        for (i = 0; i < src->n && (i + limb_shift) < APINT_MAX_LIMBS; i++) {
+        for (i = 0; i < src->n && (i + limb_shift) < HPDYAD_MAX_LIMBS; i++) {
             dst->limb[i + limb_shift] = src->limb[i];
         }
-        dst->n = (src->n + limb_shift < APINT_MAX_LIMBS) ? src->n + limb_shift
-                                                         : APINT_MAX_LIMBS;
+        dst->n = (src->n + limb_shift < HPDYAD_MAX_LIMBS) ? src->n + limb_shift
+                                                          : HPDYAD_MAX_LIMBS;
     } else {
         // Shift with bit offset
-        for (i = 0; i < src->n && (i + limb_shift) < APINT_MAX_LIMBS; i++) {
+        for (i = 0; i < src->n && (i + limb_shift) < HPDYAD_MAX_LIMBS; i++) {
             unsigned long long temp = (unsigned long long)src->limb[i] << bit_shift;
             dst->limb[i + limb_shift] |= (unsigned int)temp;
-            if (i + limb_shift + 1 < APINT_MAX_LIMBS) {
+            if (i + limb_shift + 1 < HPDYAD_MAX_LIMBS) {
                 dst->limb[i + limb_shift + 1] = (unsigned int)(temp >> 32);
             }
         }
-        dst->n = (src->n + limb_shift + 1 < APINT_MAX_LIMBS)
+        dst->n = (src->n + limb_shift + 1 < HPDYAD_MAX_LIMBS)
                      ? src->n + limb_shift + 1
-                     : APINT_MAX_LIMBS;
+                     : HPDYAD_MAX_LIMBS;
     }
 }
 
-/** @brief Add two apints: out = a + b
+/** @brief Add two high precision dyadic numbers (hpdyad's): out = a + b
  * @param[out] out: result (supports aliasing)
  * @param[in] a: first operand
  * @param[in] b: second operand
  */
-void apint_add(apint_t *out, const apint_t *a, const apint_t *b) { // NOLINT
-    apint_t temp_result;
-    apint_t *result;
-    const apint_t *higher_exp;
-    const apint_t *lower_exp;
-    apint_t aligned_higher;
-    apint_t aligned_lower;
+void hpdyad_add(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) { // NOLINT
+    hpdyad_t temp_result;
+    hpdyad_t *result;
+    const hpdyad_t *higher_exp;
+    const hpdyad_t *lower_exp;
+    hpdyad_t aligned_higher;
+    hpdyad_t aligned_lower;
     int d;
     unsigned char i;
     int bits_higher;
@@ -560,18 +561,18 @@ void apint_add(apint_t *out, const apint_t *a, const apint_t *b) { // NOLINT
     // Smart alignment strategy
     bits_higher =
         32 * (higher_exp->n - 1) + msb32(higher_exp->limb[higher_exp->n - 1]) + 1;
-    bits_available = 32 * APINT_MAX_LIMBS;
+    bits_available = 32 * HPDYAD_MAX_LIMBS;
 
     if (d > 0 && d + bits_higher <= bits_available) {
         // Result of shift fits in available space - exact arithmetic
         aligned_lower = *lower_exp;
-        apint_shl_bits(&aligned_higher, higher_exp, d);
+        hpdyad_shl_bits(&aligned_higher, higher_exp, d);
         result->exp2 = lower_exp->exp2;
 
     } else {
         // Result wouldn't fit, use sticky bit approach
         aligned_higher = *higher_exp;
-        apint_shr_bits_sticky(&aligned_lower, lower_exp, d);
+        hpdyad_shr_bits_sticky(&aligned_lower, lower_exp, d);
         result->exp2 = higher_exp->exp2;
     }
 
@@ -589,13 +590,14 @@ void apint_add(apint_t *out, const apint_t *a, const apint_t *b) { // NOLINT
             result->sign = 1;
             result->n = 0;
             result->exp2 = 0;
-            for (i = 0; i < APINT_MAX_LIMBS; i++) {
+            for (i = 0; i < HPDYAD_MAX_LIMBS; i++) {
                 result->limb[i] = 0;
             }
         } else {
             // Determine which has larger magnitude
-            const apint_t *larger_mag = (cmp > 0) ? &aligned_higher : &aligned_lower;
-            const apint_t *smaller_mag =
+            const hpdyad_t *larger_mag =
+                (cmp > 0) ? &aligned_higher : &aligned_lower;
+            const hpdyad_t *smaller_mag =
                 (cmp > 0) ? &aligned_lower : &aligned_higher;
 
             subtract_mantissas_unsigned(result, larger_mag, smaller_mag);
@@ -604,7 +606,7 @@ void apint_add(apint_t *out, const apint_t *a, const apint_t *b) { // NOLINT
     }
 
     // Normalize result
-    apint_normalize(result);
+    hpdyad_normalize(result);
 
     // Copy back if aliasing
     if (result == &temp_result) {
@@ -612,11 +614,11 @@ void apint_add(apint_t *out, const apint_t *a, const apint_t *b) { // NOLINT
     }
 }
 
-/** @brief Convert apint to double with round-to-nearest-even.
- * @param[in] a: pointer to normalized apint
+/** @brief Convert hpdyad to double with round-to-nearest-even.
+ * @param[in] a: pointer to normalized hpdyad
  * @return closest double representation; ±DBL_MAX on overflow
  */
-double apint_to_double(const apint_t *a) {
+double hpdyad_to_double(const hpdyad_t *a) {
     int i;
     int top_bit;
     int adj_exp;

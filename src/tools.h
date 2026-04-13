@@ -18,15 +18,15 @@
 /** @brief Maximum number of 32-bit limbs in fixed-size representation (1024 bits
  * total).
  * */
-#define APINT_MAX_LIMBS 32
+#define HPDYAD_MAX_LIMBS 32
 
-/** @brief Fixed-size arbitrary-precision integer with separate sign and binary
- * exponent.
+/** @brief Fixed-size high-precision dyadic number (hpdyad) with separate sign and
+ * binary exponent.
  *
  * Representation: value = sign × (mantissa in base 2^32) × 2^exp2
  * Supports both integers (exp2 ≥ 0) and dyadic rationals (exp2 < 0).
  * Limbs are little-endian: limb[0] is least significant.
- * Maximum precision: APINT_MAX_LIMBS × 32 bits.
+ * Maximum precision: HPDYAD_MAX_LIMBS × 32 bits.
  * Invariant: if n > 0, then limb[n-1] != 0 (no leading zeros).
  * Invariant: if n > 0, then limb[0] != 0 (no trailing zeros after normalization).
  */
@@ -34,8 +34,8 @@ typedef struct {
     signed char sign; // +1 or -1
     unsigned char n;  // number of used limbs (0 => zero)
     int exp2;         // global power of two (negative for dyadic rationals)
-    unsigned int limb[APINT_MAX_LIMBS];
-} apint_t;
+    unsigned int limb[HPDYAD_MAX_LIMBS];
+} hpdyad_t;
 
 /**
  * @brief Compute the integer power of a double by squaring.
@@ -124,58 +124,58 @@ unsigned ctz64(unsigned long long x);
  */
 int msb32(unsigned int x);
 
-/** @brief Initialize apint from unsigned long long with sign.
- * @param[out] a: destination apint
+/** @brief Initialize hpdyad from unsigned long long with sign.
+ * @param[out] a: destination hpdyad
  * @param[in] x: unsigned integer value
  * @param[in] sign: +1 or -1
  */
-void apint_set_ull(apint_t *a, unsigned long long x, signed char sign);
+void hpdyad_set_ull(hpdyad_t *a, unsigned long long x, signed char sign);
 
-/** @brief Normalize apint: trim leading zeros and left-shift mantissa so MSB of top
+/** @brief Normalize hpdyad: trim leading zeros and left-shift mantissa so MSB of top
  * limb is 1
- * @param[in,out] a: pointer to apint to normalize
+ * @param[in,out] a: pointer to hpdyad to normalize
  * @return void
  */
-void apint_normalize(apint_t *a);
+void hpdyad_normalize(hpdyad_t *a);
 
-/** @brief Multiply two apints: out = a * b
+/** @brief Multiply two high precision dyadic numbers (hpdyad's): out = a * b
  * @param[out] out: result (may alias a or b)
  * @param[in] a: first operand
  * @param[in] b: second operand
  */
-void apint_mul(apint_t *out, const apint_t *a, const apint_t *b);
+void hpdyad_mul(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b);
 
 /** @brief Right-shift mantissa with sticky bit (value-preserving)
  *
  * Shifts mantissa right by `bits`, increments exp2 by `bits` to preserve value.
  * Any 1-bit shifted out ORs into bit 0 (sticky). Does NOT normalize.
  *
- * @param[out] dst: destination apint
- * @param[in] src: source apint
+ * @param[out] dst: destination hpdyad
+ * @param[in] src: source hpdyad
  * @param[in] bits: number of bits to shift right
  */
-void apint_shr_bits_sticky(apint_t *dst, const apint_t *src, unsigned int bits);
+void hpdyad_shr_bits_sticky(hpdyad_t *dst, const hpdyad_t *src, unsigned int bits);
 
 /** @brief Left-shift mantissa by specified number of bits (value-preserving)
- * @param[out] dst: destination apint
- * @param[in] src: source apint
+ * @param[out] dst: destination hpdyad
+ * @param[in] src: source hpdyad
  * @param[in] bits: number of bits to shift left
  * @return void
  */
-void apint_shl_bits(apint_t *dst, const apint_t *src, int bits);
+void hpdyad_shl_bits(hpdyad_t *dst, const hpdyad_t *src, int bits);
 
-/** @brief Add two apints: out = a + b
+/** @brief Add two high precision dyadic numbers (hpdyad's): out = a + b
  * @param[out] out: result (supports aliasing)
  * @param[in] a: first operand
  * @param[in] b: second operand
  */
-void apint_add(apint_t *out, const apint_t *a, const apint_t *b);
+void hpdyad_add(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b);
 
-/** @brief Convert apint to double with round-to-nearest-even.
- * @param[in] a: pointer to normalized apint
+/** @brief Convert hpdyad to double with round-to-nearest-even.
+ * @param[in] a: pointer to normalized hpdyad
  * @return closest double representation; ±DBL_MAX on overflow
  */
-double apint_to_double(const apint_t *a);
+double hpdyad_to_double(const hpdyad_t *a);
 
 double dot(unsigned int dim, const double *v1, const double *v2);
 void matrix_intVector(unsigned int dim, const double *m, const int *v, double *res);

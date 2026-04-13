@@ -251,51 +251,51 @@ double coeffs_c_outer(long long n, long long k, long long dim) {
     return ldexp(num_prod / (den_prod * inner), -(int)k);
 }
 
-/** @brief Computes cₙ,ᵢ,ₖ＝ ∏_{j=i+1}^{⌊n/2⌋-k} (2n＋d−2−4k−2j) as apint.
+/** @brief Computes cₙ,ᵢ,ₖ＝ ∏_{j=i+1}^{⌊n/2⌋-k} (2n＋d−2−4k−2j) as hpdyad.
  * @param[in] n: index (total of alpha).
  * @param[in] i: lower bound of product (exclusive).
  * @param[in] k: index (specifies degree |alpha| - 2k).
  * @param[in] dim: dimension.
- * @param[out] out: result apint.
+ * @param[out] out: result hpdyad.
  */
-void coeffs_c_inner_apint(unsigned int n, unsigned int i, unsigned int k,
-                          unsigned int dim, apint_t *out) {
+void coeffs_c_inner_hpdyad(unsigned int n, unsigned int i, unsigned int k,
+                           unsigned int dim, hpdyad_t *out) {
 
     long long end = (n / 2) - k;
 
-    apint_set_ull(out, 1, 1);
+    hpdyad_set_ull(out, 1, 1);
     if (i >= end) {
-        apint_normalize(out);
+        hpdyad_normalize(out);
         return;
     }
     int base = (2 * (int)n) + (int)dim - 2 - (4 * (int)k);
     for (unsigned int j = i + 1; j <= end; j++) {
         int factor = base - (2 * (int)j);
-        apint_t tmp;
-        apint_set_ull(&tmp, (unsigned long long)factor, 1);
-        apint_mul(out, out, &tmp);
+        hpdyad_t tmp;
+        hpdyad_set_ull(&tmp, (unsigned long long)factor, 1);
+        hpdyad_mul(out, out, &tmp);
     }
 }
 
-/** @brief Computes (-2)**(-i) · c_{n,i,k} · binom(i+k,k) as apint.
+/** @brief Computes (-2)**(-i) · c_{n,i,k} · binom(i+k,k) as hpdyad.
  * @param[in] n: index (total of alpha).
  * @param[in] i: index (total of beta).
  * @param[in] k: index (specifies degree |alpha| - 2k).
  * @param[in] dim: dimension.
- * @param[out] out: result apint.
+ * @param[out] out: result hpdyad.
  */
-void harmonic_h_inner_term_scalar_apint(unsigned int n, unsigned int i,
-                                        unsigned int k, unsigned int dim,
-                                        apint_t *out) {
+void harmonic_h_inner_term_scalar_hpdyad(unsigned int n, unsigned int i,
+                                         unsigned int k, unsigned int dim,
+                                         hpdyad_t *out) {
     unsigned long long b = binom((long long)(i + k), (long long)k);
-    apint_set_ull(out, b, 1);
+    hpdyad_set_ull(out, b, 1);
 
     // c_{n,i,k}
-    apint_t coeff;
-    coeffs_c_inner_apint(n, i, k, dim, &coeff);
-    apint_mul(out, out, &coeff);
+    hpdyad_t coeff;
+    coeffs_c_inner_hpdyad(n, i, k, dim, &coeff);
+    hpdyad_mul(out, out, &coeff);
 
-    apint_normalize(out);
+    hpdyad_normalize(out);
 
     // (-1/2)^i
     if (i & 1) {
@@ -304,51 +304,51 @@ void harmonic_h_inner_term_scalar_apint(unsigned int n, unsigned int i,
     out->exp2 -= (int)i;
 }
 
-/** @brief Computes binom(i,β) × binom(α,θ₁) × θ₂!/(θ₂−θ₁)! as apint.
+/** @brief Computes binom(i,β) × binom(α,θ₁) × θ₂!/(θ₂−θ₁)! as hpdyad.
  * @param[in] dim: dimension of the multi-indices.
  * @param[in] alpha: upper multi-index α.
  * @param[in] beta: lower multi-index β.
  * @param[in] theta1: multi-index α+β−γ.
  * @param[in] theta2: multi-index γ−β.
- * @param[out] out: result apint (always positive).
+ * @param[out] out: result hpdyad (always positive).
  */
-void harmonic_h_inner_term_multi_apint(unsigned int dim, const unsigned int *alpha,
-                                       const unsigned int *beta,
-                                       const unsigned int *theta1,
-                                       const unsigned int *theta2, apint_t *out) {
-    apint_set_ull(out, 1, 1);
+void harmonic_h_inner_term_multi_hpdyad(unsigned int dim, const unsigned int *alpha,
+                                        const unsigned int *beta,
+                                        const unsigned int *theta1,
+                                        const unsigned int *theta2, hpdyad_t *out) {
+    hpdyad_set_ull(out, 1, 1);
 
     // prod_j binom(betaAbsDim, beta[j])
     unsigned long long betaAbsDim = 0;
     for (unsigned int j = 0; j < dim; j++) {
         betaAbsDim += beta[j];
         unsigned long long b = binom((long long)betaAbsDim, (long long)beta[j]);
-        apint_t tmp;
-        apint_set_ull(&tmp, b, 1);
-        apint_mul(out, out, &tmp);
+        hpdyad_t tmp;
+        hpdyad_set_ull(&tmp, b, 1);
+        hpdyad_mul(out, out, &tmp);
     }
 
     // prod_j binom(alpha[j], theta1[j])
     for (unsigned int j = 0; j < dim; j++) {
         unsigned long long b = binom((long long)alpha[j], (long long)theta1[j]);
-        apint_t tmp;
-        apint_set_ull(&tmp, b, 1);
-        apint_mul(out, out, &tmp);
+        hpdyad_t tmp;
+        hpdyad_set_ull(&tmp, b, 1);
+        hpdyad_mul(out, out, &tmp);
     }
 
     // prod_j falling factorial: theta2[j]! / (theta2[j] - theta1[j])!
     for (unsigned int j = 0; j < dim; j++) {
         for (unsigned int l = theta2[j] - theta1[j] + 1; l <= theta2[j]; l++) {
-            apint_t tmp;
-            apint_set_ull(&tmp, (unsigned long long)l, 1);
-            apint_mul(out, out, &tmp);
+            hpdyad_t tmp;
+            hpdyad_set_ull(&tmp, (unsigned long long)l, 1);
+            hpdyad_mul(out, out, &tmp);
         }
     }
 
-    apint_normalize(out);
+    hpdyad_normalize(out);
 }
 
-/** @brief Computes the inner sum h_inner(α,γ,k) using exact apint arithmetic.
+/** @brief Computes the inner sum h_inner(α,γ,k) using exact hpdyad arithmetic.
  * @param[in] k: specifies degree |alpha| - 2k.
  * @param[in] dim: dimension of alpha, beta and gamma.
  * @param[in] alpha: upper multi-index.
@@ -377,16 +377,16 @@ double harmonic_h_inner_sum(unsigned int k, // NOLINT
 
     unsigned int lastScalarIndex = (alphaAbs / 2) - k;
 
-    // scalar coefficients as apint
-    apint_t scalar_coeffs[lastScalarIndex + 1];
+    // scalar coefficients as hpdyad
+    hpdyad_t scalar_coeffs[lastScalarIndex + 1];
     for (unsigned int i = 0; i <= lastScalarIndex; i++) {
-        harmonic_h_inner_term_scalar_apint(alphaAbs, i, k, dim, &scalar_coeffs[i]);
+        harmonic_h_inner_term_scalar_hpdyad(alphaAbs, i, k, dim, &scalar_coeffs[i]);
     }
 
-    // multi-index coefficients as apint (accumulated via apint_add)
-    apint_t multi_coeffs[lastScalarIndex + 1];
+    // multi-index coefficients as hpdyad (accumulated via hpdyad_add)
+    hpdyad_t multi_coeffs[lastScalarIndex + 1];
     for (unsigned int i = 0; i <= lastScalarIndex; i++) {
-        apint_set_ull(&multi_coeffs[i], 0, 1);
+        hpdyad_set_ull(&multi_coeffs[i], 0, 1);
     }
 
     // loop over beta multi-indices
@@ -415,10 +415,10 @@ double harmonic_h_inner_sum(unsigned int k, // NOLINT
             }
             redotheta2 = 0;
 
-            apint_t term;
-            harmonic_h_inner_term_multi_apint(dim, alpha, beta, theta1, theta2,
-                                              &term);
-            apint_add(&multi_coeffs[betaAbs], &multi_coeffs[betaAbs], &term);
+            hpdyad_t term;
+            harmonic_h_inner_term_multi_hpdyad(dim, alpha, beta, theta1, theta2,
+                                               &term);
+            hpdyad_add(&multi_coeffs[betaAbs], &multi_coeffs[betaAbs], &term);
         }
 
         done = 1;
@@ -442,17 +442,17 @@ double harmonic_h_inner_sum(unsigned int k, // NOLINT
     }
 
     // combine: sum_i scalar_coeffs[i] * multi_coeffs[i]
-    apint_t sumInner;
-    apint_set_ull(&sumInner, 0, 1);
+    hpdyad_t sumInner;
+    hpdyad_set_ull(&sumInner, 0, 1);
 
     for (unsigned int i = 0; i <= lastScalarIndex; i++) {
-        apint_t term;
-        apint_mul(&term, &scalar_coeffs[i], &multi_coeffs[i]);
-        apint_add(&sumInner, &sumInner, &term);
+        hpdyad_t term;
+        hpdyad_mul(&term, &scalar_coeffs[i], &multi_coeffs[i]);
+        hpdyad_add(&sumInner, &sumInner, &term);
     }
 
     // convert to double
-    double result = apint_to_double(&sumInner);
+    double result = hpdyad_to_double(&sumInner);
 
     return result;
 }
