@@ -36,7 +36,13 @@ static inline void kahan_add(double complex *restrict sum,
  * @param[in] v2: second vector.
  * @return dot product of v1 and v2.
  */
-double dot(unsigned int dim, const double *v1, const double *v2);
+static inline double dot(unsigned int dim, const double *v1, const double *v2) {
+    double r = 0;
+    for (int i = 0; i < dim; i++) {
+        r += v1[i] * v2[i];
+    }
+    return r;
+}
 
 /**
  * @brief matrix - (integer) vector multiplication.
