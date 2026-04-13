@@ -25,6 +25,13 @@ ConditionNumber[a_]:=Module[
 ]
 
 
+(* ::Text:: *)
+(*Lattice matrix along the Bain path, a physically relevant test matrix in 3D.*)
+
+
+BMat[a_]=1/Sqrt[a+1]*DiagonalMatrix[{Sqrt[a],1,1}] . {{1,1,0},{1,0,1},{0,1,1}};
+
+
 (* ::Subsection:: *)
 (*Test Singular Value Decomposition*)
 
@@ -56,7 +63,7 @@ matrixTestData2D={
 (*Generate random 2D matrix reference values.*)
 
 
-While[Length[matrixTestData2D]<800
+While[Length[matrixTestData2D]<500
 	,temp=RandomReal[{-10,10},{2,2}]
 	;If[ConditionNumber[temp]<10
 		,AppendTo[matrixTestData2D,matrixTestEntry[temp]]
@@ -69,17 +76,23 @@ While[Length[matrixTestData2D]<800
 (*Generate special 3D matrix reference values.*)
 
 
-matrixTestData3D={
-	matrixTestEntry[{{0,2,3},{1,1,1},{4,5,6}}]
-	,matrixTestEntry[{{0,0,1},{0,1,0},{1,0,0}}]
-};
+matrixTestData3D=Join[
+	{
+		matrixTestEntry[{{0,2,3},{1,1,1},{4,5,6}}]
+		,matrixTestEntry[{{0,0,1},{0,1,0},{1,0,0}}]
+	},
+	Table[
+		matrixTestEntry[BMat[a]]
+	,{a,1/10,1,1/10}
+	]
+];
 
 
 (* ::Text:: *)
 (*Generate random 3D matrix reference values.*)
 
 
-While[Length[matrixTestData3D]<100
+While[Length[matrixTestData3D]<400
 	,temp=RandomReal[{-10,10},{3,3}]
 	;If[ConditionNumber[temp]<10
 		,AppendTo[matrixTestData3D,matrixTestEntry[temp]]
