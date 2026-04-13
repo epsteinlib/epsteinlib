@@ -51,7 +51,15 @@ static inline double dot(unsigned int dim, const double *v1, const double *v2) {
  * @param[in] v: integer vector.
  * @param[in,out] res: solution vector of the vector matrix multiplication.
  */
-void matrix_intVector(unsigned int dim, const double *m, const int *v, double *res);
+static inline void matrix_intVector(unsigned int dim, const double *m, const int *v,
+                                    double *res) {
+    for (int i = 0; i < dim; i++) {
+        res[i] = 0;
+        for (int j = 0; j < dim; j++) {
+            res[i] += m[(i * dim) + j] * v[j];
+        }
+    }
+}
 
 /**
  * @brief square matrix transpose.
