@@ -45,10 +45,11 @@ static double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int
                                     const unsigned int *theta1,
                                     const unsigned int *theta2) {
     hpdyad_t numerator;
-    harmonic_h_inner_term_scalar_apint(n, i, k, dim, &numerator);
+    harmonic_h_inner_term_scalar_hpdyad(n, i, k, dim, &numerator);
 
     hpdyad_t multi_term;
-    harmonic_h_inner_term_multi_apint(dim, alpha, beta, theta1, theta2, &multi_term);
+    harmonic_h_inner_term_multi_hpdyad(dim, alpha, beta, theta1, theta2,
+                                       &multi_term);
 
     hpdyad_mul(&numerator, &multi_term, &numerator);
 

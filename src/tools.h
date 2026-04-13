@@ -124,16 +124,16 @@ unsigned ctz64(unsigned long long x);
  */
 int msb32(unsigned int x);
 
-/** @brief Initialize apint from unsigned long long with sign.
- * @param[out] a: destination apint
+/** @brief Initialize hpdyad from unsigned long long with sign.
+ * @param[out] a: destination hpdyad
  * @param[in] x: unsigned integer value
  * @param[in] sign: +1 or -1
  */
 void hpdyad_set_ull(hpdyad_t *a, unsigned long long x, signed char sign);
 
-/** @brief Normalize apint: trim leading zeros and left-shift mantissa so MSB of top
+/** @brief Normalize hpdyad: trim leading zeros and left-shift mantissa so MSB of top
  * limb is 1
- * @param[in,out] a: pointer to apint to normalize
+ * @param[in,out] a: pointer to hpdyad to normalize
  * @return void
  */
 void hpdyad_normalize(hpdyad_t *a);
@@ -150,15 +150,15 @@ void hpdyad_mul(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b);
  * Shifts mantissa right by `bits`, increments exp2 by `bits` to preserve value.
  * Any 1-bit shifted out ORs into bit 0 (sticky). Does NOT normalize.
  *
- * @param[out] dst: destination apint
- * @param[in] src: source apint
+ * @param[out] dst: destination hpdyad
+ * @param[in] src: source hpdyad
  * @param[in] bits: number of bits to shift right
  */
 void hpdyad_shr_bits_sticky(hpdyad_t *dst, const hpdyad_t *src, unsigned int bits);
 
 /** @brief Left-shift mantissa by specified number of bits (value-preserving)
- * @param[out] dst: destination apint
- * @param[in] src: source apint
+ * @param[out] dst: destination hpdyad
+ * @param[in] src: source hpdyad
  * @param[in] bits: number of bits to shift left
  * @return void
  */
@@ -171,8 +171,8 @@ void hpdyad_shl_bits(hpdyad_t *dst, const hpdyad_t *src, int bits);
  */
 void hpdyad_add(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b);
 
-/** @brief Convert apint to double with round-to-nearest-even.
- * @param[in] a: pointer to normalized apint
+/** @brief Convert hpdyad to double with round-to-nearest-even.
+ * @param[in] a: pointer to normalized hpdyad
  * @return closest double representation; ±DBL_MAX on overflow
  */
 double hpdyad_to_double(const hpdyad_t *a);

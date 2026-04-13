@@ -96,7 +96,7 @@ shiftLimbsLeft[limbs_, s_] := Module[{n, result}
 (* 	Returns {new_sign, new_exp2, new_limbs}.*)
 
 
-apintNormalize[{sign_,exp2_,limbs_}]:=Module[
+hpdyadNormalize[{sign_,exp2_,limbs_}]:=Module[
 	{n,s,newLimbs,newExp2}
 	,n=Length[limbs]
 	;While[n>0&&limbs[[n]]==0,n=n-1]
@@ -123,7 +123,7 @@ apintNormalize[{sign_,exp2_,limbs_}]:=Module[
 (*Define multiplication test function. Takes two unsigned long long values and their signs, returns product as double. Simulates: hpdyad_set_ull \[RightArrow] hpdyad_mul \[RightArrow] hpdyad_to_double_trunc.*)
 
 
-apintMulTest[valA_,signA_,valB_,signB_]:=Module[{prod}
+hpdyadMulTest[valA_,signA_,valB_,signB_]:=Module[{prod}
 	,prod=signA*valA*signB*valB
 	;If[prod==0
 	,0.0
@@ -133,7 +133,7 @@ apintMulTest[valA_,signA_,valB_,signB_]:=Module[{prod}
 
 
 (* ::Text:: *)
-(*Convert arbitrary integer to full APINTMAXLIMBS-limb apint representation. Returns {limb0, limb1, ..., limb7, exp2, sign}.*)
+(*Convert arbitrary integer to full APINTMAXLIMBS-limb hpdyad representation. Returns {limb0, limb1, ..., limb7, exp2, sign}.*)
 
 
 toApintFull[x_,s_]:=Module[
@@ -157,7 +157,7 @@ toApintFull[x_,s_]:=Module[
 (*	Output: {limb0-7, exp2, sign} after normalization.*)
 
 
-apintMulTest[valA_,signA_,valB_,signB_]:=Module[
+hpdyadMulTest[valA_,signA_,valB_,signB_]:=Module[
 	{prod,prodApint,normalized,limbList}
 	,If[valA==0||valB==0
 	    ,Return[Join[Table[0,{APINTMAXLIMBS}],{0,1}]]
@@ -165,7 +165,7 @@ apintMulTest[valA_,signA_,valB_,signB_]:=Module[
 	;prod=signA*valA*signB*valB
 	;prodApint=toApintFull[Abs[prod],Sign[prod]]
 	;limbList=Take[prodApint,APINTMAXLIMBS]
-	;normalized=apintNormalize[{prodApint[[APINTMAXLIMBS+2]],prodApint[[APINTMAXLIMBS+1]],limbList}]
+	;normalized=hpdyadNormalize[{prodApint[[APINTMAXLIMBS+2]],prodApint[[APINTMAXLIMBS+1]],limbList}]
 	;Flatten[{normalized[[3]],normalized[[2]],normalized[[1]]}]
 ]
 
@@ -174,7 +174,7 @@ apintMulTest[valA_,signA_,valB_,signB_]:=Module[
 (*Arbitrary precision integer right-shift with sticky bit.*)
 
 
-apintShrStickyRef[{sign_, exp2_, limbs_}, bits_] := Module[
+hpdyadShrStickyRef[{sign_, exp2_, limbs_}, bits_] := Module[
 	{M, Mshifted, sticky, newLimbs, newExp2}
 	,M = FromDigits[Reverse[limbs], 2^32]
 	;If[M == 0
@@ -189,7 +189,7 @@ apintShrStickyRef[{sign_, exp2_, limbs_}, bits_] := Module[
 
 
 (* ::Text:: *)
-(*Convert  integer  to  apint.*)
+(*Convert  integer  to  hpdyad.*)
 
 
 ratToApint[n_] := Module[
@@ -197,7 +197,7 @@ ratToApint[n_] := Module[
 	,absN = Abs[n]
 	;sign = If[n == 0, 1, Sign[n]]
 	;raw = toApintFull[absN, sign]
-	;apintNormalize[{raw[[APINTMAXLIMBS+2]], raw[[APINTMAXLIMBS+1]], raw[[1;;APINTMAXLIMBS]]}]
+	;hpdyadNormalize[{raw[[APINTMAXLIMBS+2]], raw[[APINTMAXLIMBS+1]], raw[[1;;APINTMAXLIMBS]]}]
 ]
 
 
@@ -340,7 +340,7 @@ Export["csv/ctzmsb_Ref.csv", ctzmsbTab];
 
 
 (* ::Subsection::Closed:: *)
-(*Test arbitrary precision integer apint*)
+(*Test arbitrary precision integer hpdyad*)
 
 
 (* ::Text:: *)
@@ -423,7 +423,7 @@ results = Table[
 	Module[
 		{input, output}
 		,input = testCases[[i]]
-		;output = apintNormalize[input]
+		;output = hpdyadNormalize[input]
 		;Join[
 			{input[[1]]}
 			,{input[[2]]}
@@ -509,10 +509,10 @@ allCases=Join[specialCases,randomCases];
 (*Generate reference outputs,*)
 
 
-apintMulTestTable=ParallelTable[
+hpdyadMulTestTable=ParallelTable[
 	Flatten[Join[
 		allCases[[i]]
-		,apintMulTest@@allCases[[i]]
+		,hpdyadMulTest@@allCases[[i]]
 	]]
 	,{i,1,Length[allCases]}
 ];
@@ -523,7 +523,7 @@ apintMulTestTable=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/hpdyad_mul_Ref.csv",apintMulTestTable];
+Export["csv/hpdyad_mul_Ref.csv",hpdyadMulTestTable];
 
 
 (* ::Subsection::Closed:: *)
@@ -594,20 +594,20 @@ Do[
 
 shrStickyTab=ParallelTable[
 	Module[
-		{apintIn,apintOut,sign,exp2,limbs,bits}
+		{hpdyadIn,hpdyadOut,sign,exp2,limbs,bits}
 		,{sign,exp2,limbs,bits}=If[i<=Length[edgeCases]
 			,edgeCases[[i]]
 			,{sign0[i-Length[edgeCases]],exp0[i-Length[edgeCases]]
 			,limbs0[i-Length[edgeCases]],bits0[i-Length[edgeCases]]}
 		]
-		;apintIn={sign,exp2,limbs}
-		;apintOut=apintShrStickyRef[apintIn,bits]
+		;hpdyadIn={sign,exp2,limbs}
+		;hpdyadOut=hpdyadShrStickyRef[hpdyadIn,bits]
 		;Flatten[Join[
 		{sign,exp2}
 		,limbs
 		,{bits}
-		,{apintOut[[1]],apintOut[[2]]}
-		,apintOut[[3]]
+		,{hpdyadOut[[1]],hpdyadOut[[2]]}
+		,hpdyadOut[[3]]
 		]]
 	]
 	,{i,Length[edgeCases]+nTests}
@@ -786,7 +786,7 @@ Export["csv/hpdyad_add_fractional_Ref.csv", fractionalTestData];
 
 
 (* ::Subsection::Closed:: *)
-(*Test apint to double conversion with round-to-nearest-even*)
+(*Test hpdyad to double conversion with round-to-nearest-even*)
 
 
 (* ::Text:: *)

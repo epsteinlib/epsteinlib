@@ -256,7 +256,7 @@ static int test_hpdyad_add_from_file(const char *filename) { // NOLINT
             continue;
         }
 
-        // Build apint a
+        // Build hpdyad a
         hpdyad_t a;
         a.sign = (signed char)sign_a;
         a.exp2 = exp2_a;
@@ -275,7 +275,7 @@ static int test_hpdyad_add_from_file(const char *filename) { // NOLINT
             a.exp2 = 0;
         }
 
-        // Build apint b
+        // Build hpdyad b
         hpdyad_t b;
         b.sign = (signed char)sign_b;
         b.exp2 = exp2_b;
@@ -294,7 +294,7 @@ static int test_hpdyad_add_from_file(const char *filename) { // NOLINT
             b.exp2 = 0;
         }
 
-        // Build apint expected
+        // Build hpdyad expected
         hpdyad_t expected;
         expected.sign = (signed char)sign_expected;
         expected.exp2 = exp2_expected;
@@ -314,16 +314,16 @@ static int test_hpdyad_add_from_file(const char *filename) { // NOLINT
         }
 
         // Perform addition
-        hpdyad_t result_apint;
-        hpdyad_add(&result_apint, &a, &b);
+        hpdyad_t result_hpdyad;
+        hpdyad_add(&result_hpdyad, &a, &b);
 
         // Compare
         int passed =
-            (result_apint.sign == expected.sign &&
-             result_apint.exp2 == expected.exp2 && result_apint.n == expected.n);
+            (result_hpdyad.sign == expected.sign &&
+             result_hpdyad.exp2 == expected.exp2 && result_hpdyad.n == expected.n);
         if (passed) {
             for (i = 0; i < APINT_MAX_LIMBS; i++) {
-                if (result_apint.limb[i] != expected.limb[i]) {
+                if (result_hpdyad.limb[i] != expected.limb[i]) {
                     passed = 0;
                     break;
                 }
@@ -336,8 +336,8 @@ static int test_hpdyad_add_from_file(const char *filename) { // NOLINT
             printf("\n\nWarning! Test %d failed:", totalTests + 1);
             printf("\n  a: sign=%d exp2=%d n=%d", a.sign, a.exp2, a.n);
             printf("\n  b: sign=%d exp2=%d n=%d", b.sign, b.exp2, b.n);
-            printf("\n  result:   sign=%d exp2=%d n=%d", result_apint.sign,
-                   result_apint.exp2, result_apint.n);
+            printf("\n  result:   sign=%d exp2=%d n=%d", result_hpdyad.sign,
+                   result_hpdyad.exp2, result_hpdyad.n);
             printf("\n  expected: sign=%d exp2=%d n=%d\n", expected.sign,
                    expected.exp2, expected.n);
         }
@@ -884,7 +884,7 @@ int test_hpdyad_to_double(void) { // NOLINT
         }
         // Parse reference double
         ref_double = strtod(ptr, &endptr);
-        // Build apint
+        // Build hpdyad
         hpdyad_t a;
         a.sign = (signed char)sign_input;
         a.exp2 = exp2_input;

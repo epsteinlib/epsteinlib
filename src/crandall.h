@@ -132,41 +132,41 @@ double coeffs_c_inner(long long n, long long i, long long k, long long dim);
  */
 double coeffs_c_outer(long long n, long long k, long long dim);
 
-/** @brief Computes cₙ,ᵢ,ₖ＝ ∏_{j=i+1}^{⌊n/2⌋-k} (2n＋d−2−4k−2j) as apint.
+/** @brief Computes cₙ,ᵢ,ₖ＝ ∏_{j=i+1}^{⌊n/2⌋-k} (2n＋d−2−4k−2j) as hpdyad.
  * @param[in] n: index (total of alpha).
  * @param[in] i: lower bound of product (exclusive).
  * @param[in] k: index (specifies degree |alpha| - 2k).
  * @param[in] dim: dimension.
- * @param[out] out: result apint.
+ * @param[out] out: result hpdyad.
  */
-void coeffs_c_inner_apint(unsigned int n, unsigned int i, unsigned int k,
-                          unsigned int dim, hpdyad_t *out);
+void coeffs_c_inner_hpdyad(unsigned int n, unsigned int i, unsigned int k,
+                           unsigned int dim, hpdyad_t *out);
 
-/** @brief Computes (-2)**(-i) · c_{n,i,k} · binom(i+k,k) as apint.
+/** @brief Computes (-2)**(-i) · c_{n,i,k} · binom(i+k,k) as hpdyad.
  * @param[in] n: index (total of alpha).
  * @param[in] i: index (total of beta).
  * @param[in] k: index (specifies degree |alpha| - 2k).
  * @param[in] dim: dimension.
- * @param[out] out: result apint.
+ * @param[out] out: result hpdyad.
  */
-void harmonic_h_inner_term_scalar_apint(unsigned int n, unsigned int i,
-                                        unsigned int k, unsigned int dim,
-                                        hpdyad_t *out);
+void harmonic_h_inner_term_scalar_hpdyad(unsigned int n, unsigned int i,
+                                         unsigned int k, unsigned int dim,
+                                         hpdyad_t *out);
 
-/** @brief Computes binom(i,β) × binom(α,θ₁) × θ₂!/(θ₂−θ₁)! as apint.
+/** @brief Computes binom(i,β) × binom(α,θ₁) × θ₂!/(θ₂−θ₁)! as hpdyad.
  * @param[in] dim: dimension of the multi-indices.
  * @param[in] alpha: upper multi-index α.
  * @param[in] beta: lower multi-index β.
  * @param[in] theta1: multi-index α+β−γ.
  * @param[in] theta2: multi-index γ−β.
- * @param[out] out: result apint (always positive).
+ * @param[out] out: result hpdyad (always positive).
  */
-void harmonic_h_inner_term_multi_apint(unsigned int dim, const unsigned int *alpha,
-                                       const unsigned int *beta,
-                                       const unsigned int *theta1,
-                                       const unsigned int *theta2, hpdyad_t *out);
+void harmonic_h_inner_term_multi_hpdyad(unsigned int dim, const unsigned int *alpha,
+                                        const unsigned int *beta,
+                                        const unsigned int *theta1,
+                                        const unsigned int *theta2, hpdyad_t *out);
 
-/** @brief Computes the inner sum h_inner(α,γ,k) using exact apint arithmetic.
+/** @brief Computes the inner sum h_inner(α,γ,k) using exact hpdyad arithmetic.
  * @param[in] k: specifies degree |alpha| - 2k.
  * @param[in] dim: dimension of alpha, beta and gamma.
  * @param[in] alpha: upper multi-index.
