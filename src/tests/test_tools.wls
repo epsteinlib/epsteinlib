@@ -52,7 +52,7 @@ msb32Ref[x_] := If[x == 0, 0, Floor[Log2[x]]]
 (*	Output: {x, s, limb[0], limb[1], n, exp2, sign}*)
 
 
-toApint[x_, s_] := Module[{tz, shifted, l0, l1, n, finalSign}
+toHpdyad[x_, s_] := Module[{tz, shifted, l0, l1, n, finalSign}
 	,If[x == 0
 		,Return[{x, s, 0, 0, 0, 0, 1}]
 	]
@@ -136,7 +136,7 @@ hpdyadMulTest[valA_,signA_,valB_,signB_]:=Module[{prod}
 (*Convert arbitrary integer to full APINTMAXLIMBS-limb hpdyad representation. Returns {limb0, limb1, ..., limb7, exp2, sign}.*)
 
 
-toApintFull[x_,s_]:=Module[
+toHpdyadFull[x_,s_]:=Module[
 	{num,den,denExp,tz,shifted,limbs}
 	,If[x==0
 		,Return[Join[Table[0,{APINTMAXLIMBS}],{0,1}]]
@@ -158,14 +158,14 @@ toApintFull[x_,s_]:=Module[
 
 
 hpdyadMulTest[valA_,signA_,valB_,signB_]:=Module[
-	{prod,prodApint,normalized,limbList}
+	{prod,prodHpdyad,normalized,limbList}
 	,If[valA==0||valB==0
 	    ,Return[Join[Table[0,{APINTMAXLIMBS}],{0,1}]]
 	]
 	;prod=signA*valA*signB*valB
-	;prodApint=toApintFull[Abs[prod],Sign[prod]]
-	;limbList=Take[prodApint,APINTMAXLIMBS]
-	;normalized=hpdyadNormalize[{prodApint[[APINTMAXLIMBS+2]],prodApint[[APINTMAXLIMBS+1]],limbList}]
+	;prodHpdyad=toHpdyadFull[Abs[prod],Sign[prod]]
+	;limbList=Take[prodHpdyad,APINTMAXLIMBS]
+	;normalized=hpdyadNormalize[{prodHpdyad[[APINTMAXLIMBS+2]],prodHpdyad[[APINTMAXLIMBS+1]],limbList}]
 	;Flatten[{normalized[[3]],normalized[[2]],normalized[[1]]}]
 ]
 
@@ -192,11 +192,11 @@ hpdyadShrStickyRef[{sign_, exp2_, limbs_}, bits_] := Module[
 (*Convert  integer  to  hpdyad.*)
 
 
-ratToApint[n_] := Module[
+ratToHpdyad[n_] := Module[
 	{raw, sign, absN}
 	,absN = Abs[n]
 	;sign = If[n == 0, 1, Sign[n]]
-	;raw = toApintFull[absN, sign]
+	;raw = toHpdyadFull[absN, sign]
 	;hpdyadNormalize[{raw[[APINTMAXLIMBS+2]], raw[[APINTMAXLIMBS+1]], raw[[1;;APINTMAXLIMBS]]}]
 ]
 
@@ -350,12 +350,12 @@ Export["csv/ctzmsb_Ref.csv", ctzmsbTab];
 SeedRandom[42];
 testCases = Join[
   (* Edge cases *)
-  {toApint[0, 1], toApint[0, -1], toApint[1, 1], toApint[1, -1],
-   toApint[2^32 - 1, 1], toApint[2^32, 1], toApint[2^64 - 1, 1]},
+  {toHpdyad[0, 1], toHpdyad[0, -1], toHpdyad[1, 1], toHpdyad[1, -1],
+   toHpdyad[2^32 - 1, 1], toHpdyad[2^32, 1], toHpdyad[2^64 - 1, 1]},
 
   (* Random cases *)
   ParallelTable[
-    toApint[RandomInteger[{0, 2^64 - 1}], RandomChoice[{-1, 1}]],
+    toHpdyad[RandomInteger[{0, 2^64 - 1}], RandomChoice[{-1, 1}]],
     {992}
   ]
 ];
@@ -679,13 +679,13 @@ allTests=Join[edgeCases,randomTests];
 
 
 testData=ParallelTable[
-	Module[{a,b,aApint,bApint,refApint,ref}
+	Module[{a,b,aHpdyad,bHpdyad,refHpdyad,ref}
 		,{a,b}={allTests[[i,1]],allTests[[i,2]]}
 		;ref=a+b
-		;aApint=ratToApint[a]
-		;bApint=ratToApint[b]
-		;refApint=ratToApint[ref]
-		;Flatten[{aApint[[1]],aApint[[2]],aApint[[3]],bApint[[1]],bApint[[2]],bApint[[3]],refApint[[1]],refApint[[2]],refApint[[3]]}]
+		;aHpdyad=ratToHpdyad[a]
+		;bHpdyad=ratToHpdyad[b]
+		;refHpdyad=ratToHpdyad[ref]
+		;Flatten[{aHpdyad[[1]],aHpdyad[[2]],aHpdyad[[3]],bHpdyad[[1]],bHpdyad[[2]],bHpdyad[[3]],refHpdyad[[1]],refHpdyad[[2]],refHpdyad[[3]]}]
 	]
 	,{i,Length[allTests]}
 ];
@@ -765,13 +765,13 @@ allFractionalTests=Join[fractionalEdgeCases,randomFractionalTests];
 
 
 fractionalTestData = ParallelTable[
-	Module[{a,b,aApint,bApint,refApint,ref}
+	Module[{a,b,aHpdyad,bHpdyad,refHpdyad,ref}
 		,{a,b} = allFractionalTests[[i]]
 		;ref = a + b
-		;aApint = ratToApint[a]
-		;bApint = ratToApint[b]
-		;refApint = ratToApint[ref]
-		;Flatten[{aApint[[1]],aApint[[2]],aApint[[3]],bApint[[1]],bApint[[2]],bApint[[3]],refApint[[1]],refApint[[2]],refApint[[3]]}]
+		;aHpdyad = ratToHpdyad[a]
+		;bHpdyad = ratToHpdyad[b]
+		;refHpdyad = ratToHpdyad[ref]
+		;Flatten[{aHpdyad[[1]],aHpdyad[[2]],aHpdyad[[3]],bHpdyad[[1]],bHpdyad[[2]],bHpdyad[[3]],refHpdyad[[1]],refHpdyad[[2]],refHpdyad[[3]]}]
 	]
 	,{i,Length[allFractionalTests]}
 ];
@@ -844,11 +844,11 @@ allTests=Join[edgeCases,randomTests];
 
 testData=ParallelTable[
 	Module[
-		{x,xApint,refDouble}
+		{x,xHpdyad,refDouble}
 		,x=allTests[[i]]
-		;xApint=ratToApint[x]
+		;xHpdyad=ratToHpdyad[x]
 		;refDouble=N[x]
-		;Flatten[{xApint[[1]],xApint[[2]],xApint[[3]],refDouble}]
+		;Flatten[{xHpdyad[[1]],xHpdyad[[2]],xHpdyad[[3]],refDouble}]
 	]
 	,{i,Length[allTests]}
 ];
