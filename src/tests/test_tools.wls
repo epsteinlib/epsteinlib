@@ -26,6 +26,13 @@ ConditionNumber[a_]:=Module[
 
 
 (* ::Text:: *)
+(*Lattice matrix along the Bain path, a physically relevant test matrix in 3D.*)
+
+
+BMat[a_]=1/Sqrt[a+1]*DiagonalMatrix[{Sqrt[a],1,1}] . {{1,1,0},{1,0,1},{0,1,1}};
+
+
+(* ::Text:: *)
 (*Maximum number of limbs, hard-coded here and in C as well.*)
 
 
@@ -201,7 +208,7 @@ ratToHpdyad[n_] := Module[
 ]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Test Singular Value Decomposition*)
 
 
@@ -217,14 +224,14 @@ matrixTestEntry[a_]:=Flatten[{Length[a],N@a,N@Inverse[Transpose[a]]}]
 
 
 matrixTestData2D={
-	matrixTestEntry[{{1,2},{0,1}}]
-	,matrixTestEntry[{{1,0},{2,1}}]
-	,matrixTestEntry[{{0,2},{1,0}}]
-	,matrixTestEntry[{{0,1},{1,1}}]
-	,matrixTestEntry[{{1,1},{1,0}}]
-	,matrixTestEntry[{{0,2},{1,1}}]
-	,matrixTestEntry[{{1,1},{2,0}}]
-	,matrixTestEntry[{{0,1},{1,1}}]
+        matrixTestEntry[{{1,2},{0,1}}]
+        ,matrixTestEntry[{{1,0},{2,1}}]
+        ,matrixTestEntry[{{0,2},{1,0}}]
+        ,matrixTestEntry[{{0,1},{1,1}}]
+        ,matrixTestEntry[{{1,1},{1,0}}]
+        ,matrixTestEntry[{{0,2},{1,1}}]
+        ,matrixTestEntry[{{1,1},{2,0}}]
+        ,matrixTestEntry[{{0,1},{1,1}}]
 };
 
 
@@ -232,12 +239,12 @@ matrixTestData2D={
 (*Generate random 2D matrix reference values.*)
 
 
-While[Length[matrixTestData2D]<800
-	,temp=RandomReal[{-10,10},{2,2}]
-	;If[ConditionNumber[temp]<10
-		,AppendTo[matrixTestData2D,matrixTestEntry[temp]]
-	]
-	;Clear[temp]
+While[Length[matrixTestData2D]<500
+        ,temp=RandomReal[{-10,10},{2,2}]
+        ;If[ConditionNumber[temp]<10
+                ,AppendTo[matrixTestData2D,matrixTestEntry[temp]]
+        ]
+        ;Clear[temp]
 ]
 
 
@@ -245,40 +252,55 @@ While[Length[matrixTestData2D]<800
 (*Generate special 3D matrix reference values.*)
 
 
-matrixTestData3D={
-	matrixTestEntry[{{0,2,3},{1,1,1},{4,5,6}}]
-};
+matrixTestData3D=Join[
+        {
+                matrixTestEntry[{{0,2,3},{1,1,1},{4,5,6}}]
+                ,matrixTestEntry[{{0,0,1},{0,1,0},{1,0,0}}]
+        },
+        Table[
+                matrixTestEntry[BMat[a]]
+        ,{a,1/10,1,1/10}
+        ]
+];
 
 
 (* ::Text:: *)
 (*Generate random 3D matrix reference values.*)
 
 
-While[Length[matrixTestData3D]<100
-	,temp=RandomReal[{-10,10},{3,3}]
-	;If[ConditionNumber[temp]<10
-		,AppendTo[matrixTestData3D,matrixTestEntry[temp]]
-	]
-	;Clear[temp]
+While[Length[matrixTestData3D]<400
+        ,temp=RandomReal[{-10,10},{3,3}]
+        ;If[ConditionNumber[temp]<10
+                ,AppendTo[matrixTestData3D,matrixTestEntry[temp]]
+        ]
+        ;Clear[temp]
 ]
+
+
+(* ::Text:: *)
+(*Generate special 4D matrix reference value.*)
+
+
+matrixTestData4D=Map[matrixTestEntry,Permutations[
+        {{1,0,0,0},{0,1,0,0},{5,-7,1,0},{0,0,0,1}}
+]];
 
 
 (* ::Text:: *)
 (*Generate 4D matrix reference values.*)
 
 
-matrixTestData4D={};
 While[Length[matrixTestData4D]<99
-	,temp=RandomReal[{-10,10},{4,4}]
-	;If[ConditionNumber[temp]<10
-		,AppendTo[matrixTestData4D,matrixTestEntry[temp]]
-	]
-	;Clear[temp]
+        ,temp=RandomReal[{-10,10},{4,4}]
+        ;If[ConditionNumber[temp]<10
+                ,AppendTo[matrixTestData4D,matrixTestEntry[temp]]
+        ]
+        ;Clear[temp]
 ]
 
 
 (* ::Text:: *)
-(*Combine reference data.*)
+(*Combine reference values.*)
 
 
 matrixTestData=Join[matrixTestData2D,matrixTestData3D,matrixTestData4D];
@@ -288,10 +310,7 @@ matrixTestData=Join[matrixTestData2D,matrixTestData3D,matrixTestData4D];
 (*Safe reference values.*)
 
 
-SetDirectory[NotebookDirectory[]];
-Export["csv/sdv_Ref.csv", matrixTestData];
-
-
+Export[NotebookDirectory[]<>"csv/svd_Ref.csv", matrixTestData];
 (* ::Subsection::Closed:: *)
 (*Test Count Trailing Zeros (64-bit) and Most Significant Bit (32-bit) functions*)
 
