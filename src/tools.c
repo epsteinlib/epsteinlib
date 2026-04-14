@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2024 Andreas Buchheit <buchheit@num.uni-sb.de>
-// SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
+// SPDX-FileCopyrightText: 2024-2026 Jonathan Busse <jonathan@jbusse.de>
 // SPDX-FileCopyrightText: 2024 Ruben Gutendorf
 // <ruben.gutendorf@uni-saarland.de>
 //
@@ -94,22 +94,22 @@ void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
     }
     for (int i = 0; i < dim; i++) {
         // column pivot search
-        int r = i;
+        int pivot = i;
         for (int j = i + 1; j < dim; j++) {
-            if (fabs(m[(i * dim) + j]) > fabs(m[(i * dim) + r])) {
-                r = j;
+            if (fabs(m[(j * dim) + i]) > fabs(m[(pivot * dim) + i])) {
+                pivot = j;
             }
         }
-        if (i != r) {
+        if (i != pivot) {
             int zw = p[i];
-            p[i] = p[r];
-            p[r] = zw;
+            p[i] = p[pivot];
+            p[pivot] = zw;
         }
         // permute accordingly
         for (int k = 0; k < dim; k++) {
             double zw = m[(i * dim) + k];
-            m[(i * dim) + k] = m[(r * dim) + k];
-            m[(r * dim) + k] = zw;
+            m[(i * dim) + k] = m[(pivot * dim) + k];
+            m[(pivot * dim) + k] = zw;
         }
         // standard LU-decomposition
         for (int k = i + 1; k < dim; k++) {
@@ -122,14 +122,10 @@ void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
     // Compute inverse
     double y[dim]; // NOLINT user has to provide dim > 0
     for (int i = 0; i < dim; i++) {
-        // Solve Ly=e_p[i]
-        for (int j = 0; j < p[i]; j++) {
-            y[j] = 0;
-        }
-        y[p[i]] = 1;
-        for (int k = p[i] + 1; k < dim; k++) {
-            y[k] = 0;
-            for (int j = p[i]; j < k; j++) {
+        // Solve Ly = P e_i
+        for (int k = 0; k < dim; k++) {
+            y[k] = (p[k] == i);
+            for (int j = 0; j < k; j++) {
                 y[k] -= m[(k * dim) + j] * y[j];
             }
         }
