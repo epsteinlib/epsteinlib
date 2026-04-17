@@ -32,7 +32,7 @@
  * @return FILE* Pointer to the opened file.
  * @note Exits the program if the file cannot be opened.
  */
-FILE *open(char *path, char *mode) {
+FILE *open_file(char *path, char *mode) {
     FILE *file = fopen(path, mode);
     if (file) {
         return file;
@@ -71,8 +71,8 @@ void sort(double *arr, int size) {
  */
 int benchmark(int dim, double a[], double x[], double y[], char zetaDataString[],
               char zetaRegDataString[]) {
-    FILE *zetaData = open(zetaDataString, "w");
-    FILE *zetaRegData = open(zetaRegDataString, "w");
+    FILE *zetaData = open_file(zetaDataString, "w");
+    FILE *zetaRegData = open_file(zetaRegDataString, "w");
     if (zetaData == NULL) {
         printf("%s\n", strerror(errno)); // NOLINT
         return 1;
