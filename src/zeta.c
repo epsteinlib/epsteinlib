@@ -106,25 +106,11 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
     double complex epsilon = 0.0;
 
     // Sum in real space
-    if (diag) {
-        for (long n = 0; n < totalSummands; n++) {
-            // Matrix vector product for diagonal matrices
-            for (int i = 0; i < dim; i++) {
-                lv[i] = m[(i * dim) + i] * zv[i];
-            }
-            double complex summand =
-                summand_real(nu, dim, lambda, lv, x, y, zArgBound);
-            kahan_add(&sum, &epsilon, summand);
-            lattice_vector_increment(dim, cutoffs, zv);
-        }
-    } else {
-        for (long n = 0; n < totalSummands; n++) {
-            matrix_intVector(dim, m, zv, lv);
-            double complex summand =
-                summand_real(nu, dim, lambda, lv, x, y, zArgBound);
-            kahan_add(&sum, &epsilon, summand);
-            lattice_vector_increment(dim, cutoffs, zv);
-        }
+    for (long n = 0; n < totalSummands; n++) {
+        matrix_intVector(dim, m, zv, lv, diag);
+        double complex summand = summand_real(nu, dim, lambda, lv, x, y, zArgBound);
+        kahan_add(&sum, &epsilon, summand);
+        lattice_vector_increment(dim, cutoffs, zv);
     }
 
     return sum;
@@ -185,43 +171,20 @@ double complex sum_fourier(double nu, unsigned int dim, double lambda,
     double complex sum = 0.0;
     double complex epsilon = 0.0;
     // second sum (in fourier space)
-    if (diag) {
-        for (long n = 0; n < zeroIndex; n++) {
-            // Matrix vector product for diagonal matrices
-            for (int i = 0; i < dim; i++) {
-                lv[i] = m_invt[(i * dim) + i] * zv[i];
-            }
-            double complex summand =
-                summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
-            kahan_add(&sum, &epsilon, summand);
-            lattice_vector_increment(dim, cutoffs, zv);
-        }
-        lattice_vector_increment(dim, cutoffs, zv); // skips zero
-        for (long n = zeroIndex + 1; n < totalSummands; n++) {
-            for (int i = 0; i < dim; i++) {
-                lv[i] = m_invt[(i * dim) + i] * zv[i];
-            }
-            double complex summand =
-                summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
-            kahan_add(&sum, &epsilon, summand);
-            lattice_vector_increment(dim, cutoffs, zv);
-        }
-    } else {
-        for (long n = 0; n < zeroIndex; n++) {
-            matrix_intVector(dim, m_invt, zv, lv);
-            double complex summand =
-                summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
-            kahan_add(&sum, &epsilon, summand);
-            lattice_vector_increment(dim, cutoffs, zv);
-        }
-        lattice_vector_increment(dim, cutoffs, zv); // skips zero
-        for (long n = zeroIndex + 1; n < totalSummands; n++) {
-            matrix_intVector(dim, m_invt, zv, lv);
-            double complex summand =
-                summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
-            kahan_add(&sum, &epsilon, summand);
-            lattice_vector_increment(dim, cutoffs, zv);
-        }
+    for (long n = 0; n < zeroIndex; n++) {
+        matrix_intVector(dim, m_invt, zv, lv, diag);
+        double complex summand =
+            summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
+        kahan_add(&sum, &epsilon, summand);
+        lattice_vector_increment(dim, cutoffs, zv);
+    }
+    lattice_vector_increment(dim, cutoffs, zv); // skips zero
+    for (long n = zeroIndex + 1; n < totalSummands; n++) {
+        matrix_intVector(dim, m_invt, zv, lv, diag);
+        double complex summand =
+            summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
+        kahan_add(&sum, &epsilon, summand);
+        lattice_vector_increment(dim, cutoffs, zv);
     }
     return sum;
 }

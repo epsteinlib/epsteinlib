@@ -48,15 +48,22 @@ static inline double dot(unsigned int dim, const double *v1, const double *v2) {
  * @brief matrix - (integer) vector multiplication.
  * @param[in] dim: dimension of the square matrix and the integer vector.
  * @param[in] m: square matrix.
- * @param[in] v: integer vector.
+ * @param[in, out] v: integer vector.
+ * @param[in] diag: true, if the matrix is diagonal.
  * @param[in,out] res: solution vector of the vector matrix multiplication.
  */
 static inline void matrix_intVector(unsigned int dim, const double *m, const int *v,
-                                    double *res) {
-    for (int i = 0; i < dim; i++) {
-        res[i] = 0;
-        for (int j = 0; j < dim; j++) {
-            res[i] += m[(i * dim) + j] * v[j];
+                                    double *res, bool diag) {
+    if (diag) {
+        for (int i = 0; i < dim; i++) {
+            res[i] = m[(i * dim) + i] * v[i];
+        }
+    } else {
+        for (int i = 0; i < dim; i++) {
+            res[i] = 0;
+            for (int j = 0; j < dim; j++) {
+                res[i] += m[(i * dim) + j] * v[j];
+            }
         }
     }
 }
