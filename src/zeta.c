@@ -62,6 +62,26 @@ static inline void lattice_vector_increment(unsigned int dim, const int cutoffs[
 }
 
 /**
+ * @brief Increments the integer lattice vector to the next lattice point and
+ * tracks the L1 norm.
+ * @param[in] dim: dimension of the lattice.
+ * @param[in] cutoffs: number of summands in each direction.
+ * @param[in,out] zv: integer lattice vector, incremented in-place.
+ * @param[in,out] zv_1_norm: L1 norm of zv, updated in-place.
+ */
+static inline void lattice_vector_increment_norm(unsigned int dim,
+                                                 const int cutoffs[], int zv[],
+                                                 unsigned int *restrict zv_1_norm) {
+    for (int k = 0; k < dim; k++) {
+        if (++zv[k] <= cutoffs[k]) {
+            *zv_1_norm += (zv[k] > 0) ? 1 : -1;
+            break;
+        }
+        zv[k] = -cutoffs[k];
+    }
+}
+
+/**
  * @brief Computes one summand of the first sum in Crandall's formula.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
@@ -314,7 +334,7 @@ static double complex sum_real_harmonic(
  * @param[in] valid_count: number of valid gamma entries for each k.
  * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
  * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
- * @param[in] zv_1_norm: norm |zv_1| + ... |zv_d| of zv.
+ * @param[in] zv_1_norm: L1 norm of zv.
  * @return I ** (|α| - 2k) h₍α,kIndex₎(y) * G_{nu}(z - x) * exp(-2 * PI * I * (z *
  * y).
  */
@@ -380,24 +400,20 @@ static double complex sum_real_harmonic_large_exp(
 
     double lambda = 1.; // parameter that decides the weight of each sum
 
-    int zv[dim]; // counting vector in Z^dim
-    unsigned int zv_1_norm = 0;
-    for (int i = 0; i < dim; i++) {
-        zv[i] = -cutoffs[i];
-        zv_1_norm += cutoffs[i];
-    }
-
+    int zv[dim];    // counting vector in Z^dim
     double lv[dim]; // lattice vector
-
+    // cuboid cutoffs
+    long totalSummands = 1;
+    unsigned int zv_1_norm = 0;
+    for (int k = 0; k < dim; k++) {
+        zv[k] = -cutoffs[k]; // lattice vector initialized
+        zv_1_norm += cutoffs[k];
+        totalSummands *= 2 * cutoffs[k] + 1;
+    }
     double complex sum = 0.0;
     double complex epsilon = 0.0;
 
-    int done = 0;
-
-    // Iterate over every over zv in the whole numbers, so that
-    // - cutoff[i] <= zv[i] <= cutoffs[i]
-    while (1) {
-
+    for (long n = 0; n < totalSummands; n++) {
         matrix_intVector(dim, m, zv, lv, diag);
 
         double complex summand = summand_real_harmonic_large_exp(
@@ -405,20 +421,7 @@ static double complex sum_real_harmonic_large_exp(
             valid_count, coeffs, exponents, zv_1_norm);
 
         kahan_add(&sum, &epsilon, summand);
-
-        done = 1;
-        for (unsigned int idx = 0; idx < dim; idx++) {
-            if (zv[idx] + 1 <= cutoffs[idx]) {
-                zv[idx]++;
-                zv_1_norm += (zv[idx] > 0) ? 1 : -1;
-                done = 0;
-                break;
-            }
-            zv[idx] = -cutoffs[idx];
-        }
-        if (done) {
-            break;
-        }
+        lattice_vector_increment_norm(dim, cutoffs, zv, &zv_1_norm);
     }
 
     return sum;
