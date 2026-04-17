@@ -206,6 +206,42 @@ static double complex sum_real_der(double nu, unsigned int dim, double lambda,
 }
 
 /**
+ * @brief Computes one summand of the derivative of the first sum in Crandall's
+ * formula.
+ * @param[in] nu: exponent for the Epstein zeta function.
+ * @param[in] kIndex: specifies degree |alpha| - 2k.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] lambda: parameter that decides the weight of each sum.
+ * @param[in,out] lv: lattice vector, shifted by x in-place.
+ * @param[in] x: projection of x vector to elementary lattice cell.
+ * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
+ * the incomplete gamma evaluation.
+ * @param[in] alphaAbs: total of alpha.
+ * @param[in] chunk_offset: starting offsets for each k.
+ * @param[in] valid_count: number of valid gamma entries for each k.
+ * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
+ * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
+ * @return h₍α,kIndex₎(y) * G_{nu}(z - x) * exp(-2 * PI * I * (z * y), the real space
+ * summand of the harmonic method.
+ */
+static inline double complex summand_real_harmonic(
+    double nu, unsigned int kIndex, unsigned int dim, double lambda, double lv[],
+    const double *x, const double *y, double zArgBound, unsigned int alphaAbs,
+    const unsigned long long *chunk_offset, const unsigned long long *valid_count,
+    const double *coeffs, const unsigned int *exponents) {
+
+    double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
+    for (int i = 0; i < dim; i++) {
+        lv[i] = lv[i] - x[i];
+    }
+    double h = harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
+                          coeffs, exponents);
+
+    return rot * h * crandall_g(dim, nu, lv, 1. / lambda, zArgBound);
+}
+
+/**
  * @brief calculates the an harmonic polynomial applied to the summands in real
  * space.
  * @param[in] nu: exponent for the Epstein zeta function.
@@ -241,40 +277,23 @@ static double complex sum_real_harmonic(
     double lv[dim]; // lattice vector
     // cuboid cutoffs
     long totalSummands = 1;
-    long totalCutoffs[dim + 1];
     for (int k = 0; k < dim; k++) {
-        totalCutoffs[k] = totalSummands;
+        zv[k] = -cutoffs[k]; // lattice vector initialized
         totalSummands *= 2 * cutoffs[k] + 1;
     }
     double complex sum = 0.0;
     double complex epsilon = 0.0;
-    double complex auxt;
-    double complex auxy;
-    double complex rot;
-
-    double h;
 
     // First Sum (in real space)
     for (long n = 0; n < totalSummands; n++) {
-        for (int k = 0; k < dim; k++) {
-            zv[k] =
-                (((int)(n / totalCutoffs[k])) % (2 * cutoffs[k] + 1)) - cutoffs[k];
-        }
         matrix_intVector(dim, m, zv, lv, diag);
-        rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
-        for (int i = 0; i < dim; i++) {
-            lv[i] = lv[i] - x[i];
-        }
-
-        h = harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count, coeffs,
-                       exponents);
-
-        // summing using Kahan's method
-        auxy = rot * h * crandall_g(dim, nu, lv, 1. / lambda, zArgBound) - epsilon;
-        auxt = sum + auxy;
-        epsilon = (auxt - sum) - auxy;
-        sum = auxt;
+        double complex summand = summand_real_harmonic(
+            nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
+            valid_count, coeffs, exponents);
+        kahan_add(&sum, &epsilon, summand);
+        lattice_vector_increment(dim, cutoffs, zv);
     }
+
     return sum;
 }
 
