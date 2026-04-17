@@ -298,6 +298,56 @@ static double complex sum_real_harmonic(
 }
 
 /**
+ * @brief Computes one summand of the derivative of the first sum in Crandall's
+ * formula.
+ * @param[in] nu: exponent for the Epstein zeta function.
+ * @param[in] kIndex: specifies degree |alpha| - 2k.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] lambda: parameter that decides the weight of each sum.
+ * @param[in,out] lv: lattice vector, shifted by x in-place.
+ * @param[in] x: projection of x vector to elementary lattice cell.
+ * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
+ * the incomplete gamma evaluation.
+ * @param[in] alphaAbs: total of alpha.
+ * @param[in] chunk_offset: starting offsets for each k.
+ * @param[in] valid_count: number of valid gamma entries for each k.
+ * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
+ * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
+ * @param[in] zv_1_norm: norm |zv_1| + ... |zv_d| of zv.
+ * @return I ** (|α| - 2k) h₍α,kIndex₎(y) * G_{nu}(z - x) * exp(-2 * PI * I * (z *
+ * y).
+ */
+static inline double complex summand_real_harmonic_large_exp(
+    double nu, unsigned int kIndex, unsigned int dim, double lambda, double lv[],
+    const double *x, const double *y, double zArgBound, unsigned int alphaAbs,
+    const unsigned long long *chunk_offset, const unsigned long long *valid_count,
+    const double *coeffs, const unsigned int *exponents, unsigned int zv_1_norm) {
+
+    double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
+    for (int i = 0; i < dim; i++) {
+        lv[i] = lv[i] - x[i];
+    }
+
+    double h = harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
+                          coeffs, exponents);
+
+    if (h) {
+        // use lower Crandall for the origin and its the nearest neighbors
+        double complex crandall;
+        unsigned int specialCase = (zv_1_norm <= 1);
+        if (specialCase) {
+            crandall = -crandall_g_lower(dim, nu, lv, 1. / lambda);
+        } else {
+            crandall = crandall_g(dim, nu, lv, 1. / lambda, zArgBound);
+        }
+        return rot * h * crandall;
+    }
+
+    return 0;
+}
+
+/**
  * @brief calculates the an harmonic polynomial applied to the summands in real
  * space. Computes (- lower Crandall) instead of upper Crandall for |z| = 0 and |z|
  * = 1.
@@ -339,17 +389,9 @@ static double complex sum_real_harmonic_large_exp(
 
     double lv[dim]; // lattice vector
 
-    double complex crandall;
-
     double complex sum = 0.0;
     double complex epsilon = 0.0;
-    double complex auxt;
-    double complex auxy;
-    double complex rot;
 
-    double h;
-
-    unsigned int specialCase;
     int done = 0;
 
     // Iterate over every over zv in the whole numbers, so that
@@ -357,29 +399,12 @@ static double complex sum_real_harmonic_large_exp(
     while (1) {
 
         matrix_intVector(dim, m, zv, lv, diag);
-        rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
-        for (int i = 0; i < dim; i++) {
-            lv[i] = lv[i] - x[i];
-        }
 
-        h = harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count, coeffs,
-                       exponents);
+        double complex summand = summand_real_harmonic_large_exp(
+            nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
+            valid_count, coeffs, exponents, zv_1_norm);
 
-        if (h) {
-
-            // use lower Crandall for origin and its the nearest neighbors
-            specialCase = (zv_1_norm <= 1);
-            if (specialCase) {
-                crandall = -crandall_g_lower(dim, nu, lv, 1. / lambda);
-            } else {
-                crandall = crandall_g(dim, nu, lv, 1. / lambda, zArgBound);
-            }
-            // summing using Kahan's method
-            auxy = rot * h * crandall - epsilon;
-            auxt = sum + auxy;
-            epsilon = (auxt - sum) - auxy;
-            sum = auxt;
-        }
+        kahan_add(&sum, &epsilon, summand);
 
         done = 1;
         for (unsigned int idx = 0; idx < dim; idx++) {
