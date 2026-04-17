@@ -876,6 +876,32 @@ static double complex sum_fourier_harmonic(
 }
 
 /**
+ * @brief Computes one summand of the harmonic method of the second sum in Crandall's
+ * formula in 1D.
+ * @param[in] nu: exponent for the Epstein zeta function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] lambda: parameter that decides the weight of each sum.
+ * @param[in,out] lv: lattice vector, shifted by x in-place.
+ * @param[in] x: projection of x vector to elementary lattice cell.
+ * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
+ * the incomplete gamma evaluation.
+ * @param[in] alphaAbs: total of alpha.
+ * @return h₍α,kIndex₎(y + k) G_{dim - nu + 2 * |α| - 4 * kIndex}(k + y) *
+ * exp(-2 * PI * I * x * (k + y)), the fourier space summand of the harmonic method.
+ */
+static inline double complex summand_fourier_harmonic_1D(
+    double nu, unsigned int dim, double lambda, double lv[], const double *x,
+    const double *y, double zArgBound, unsigned int alphaAbs) {
+    for (int i = 0; i < dim; i++) {
+        lv[i] = lv[i] + y[i];
+    }
+    double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
+    return rot * harmonic_h_1D_kMax(lv, alphaAbs) *
+           crandall_g(dim, dim - nu, lv, lambda, zArgBound);
+}
+
+/**
  * @brief calculates the harmonic polynomials applied to the sum in fourier space in
  * 1D.
  * @param[in] nu: exponent for the Epstein zeta function.
@@ -900,49 +926,33 @@ static double complex sum_fourier_harmonic_1D(double nu, unsigned int dim,
                                               unsigned int alphaAbs) {
     double lambda = 1.; // parameter that decides the weight of each sum
 
-    int zv[dim];    // counting vector in Z^dim
-    double lv[dim]; // lattice vector
+    int zv[dim];     // counting vector in Z^dim
+    int zv_sym[dim]; // -zv
+    double lv[dim];  // lattice vector
     // cuboid cutoffs
     long totalSummands = 1;
-    long totalCutoffs[dim + 1];
     for (int k = 0; k < dim; k++) {
-        totalCutoffs[k] = totalSummands;
+        zv[k] = -cutoffs[k]; // lattice vector initialized
         totalSummands *= 2 * cutoffs[k] + 1;
-    };
-    long zeroIndex = (totalSummands - 1) / 2;
-    double complex rot;
+    }
     double complex sum = 0.0;
     double complex epsilon = 0.0;
-    double complex auxt;
-    double complex auxy;
+
+    long zeroIndex = (totalSummands - 1) / 2;
     // second sum (in fourier space)
     for (long n = 0; n < zeroIndex; n++) {
-        for (int k = 0; k < dim; k++) {
-            zv[k] =
-                (((int)(n / totalCutoffs[k])) % (2 * cutoffs[k] + 1)) - cutoffs[k];
-        }
         matrix_intVector(dim, m_invt, zv, lv, diag);
-        for (int i = 0; i < dim; i++) {
-            lv[i] = lv[i] + y[i];
-        }
-        rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
-        auxy = rot * harmonic_h_1D_kMax(lv, alphaAbs) *
-               crandall_g(dim, dim - nu, lv, lambda, zArgBound);
-        // symmetric addition of terms to catch same - same cancellation errors
+        double complex summand = summand_fourier_harmonic_1D(nu, dim, lambda, lv, x,
+                                                             y, zArgBound, alphaAbs);
+        // symmerict addition to catch +- identical terms in y = 0
         for (int k = 0; k < dim; k++) {
-            zv[k] = -zv[k];
+            zv_sym[k] = -zv[k];
         }
-        matrix_intVector(dim, m_invt, zv, lv, diag);
-        for (int i = 0; i < dim; i++) {
-            lv[i] = lv[i] + y[i];
-        }
-        rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
-        auxy += rot * harmonic_h_1D_kMax(lv, alphaAbs) *
-                crandall_g(dim, dim - nu, lv, lambda, zArgBound);
-        auxy -= epsilon;
-        auxt = sum + auxy;
-        epsilon = (auxt - sum) - auxy;
-        sum = auxt;
+        matrix_intVector(dim, m_invt, zv_sym, lv, diag);
+        summand += summand_fourier_harmonic_1D(nu, dim, lambda, lv, x, y, zArgBound,
+                                               alphaAbs);
+        kahan_add(&sum, &epsilon, summand);
+        lattice_vector_increment(dim, cutoffs, zv);
     }
     return sum;
 }
