@@ -355,7 +355,7 @@ static inline double complex summand_real_harmonic_large_exp(
     if (h) {
         // use lower Crandall for the origin and its the nearest neighbors
         double complex crandall;
-        unsigned int specialCase = (zv_1_norm <= 1);
+        bool specialCase = (zv_1_norm <= 1);
         if (specialCase) {
             crandall = -crandall_g_lower(dim, nu, lv, 1. / lambda);
         } else {
@@ -415,16 +415,81 @@ static double complex sum_real_harmonic_large_exp(
 
     for (long n = 0; n < totalSummands; n++) {
         matrix_intVector(dim, m, zv, lv, diag);
-
         double complex summand = summand_real_harmonic_large_exp(
             nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
             valid_count, coeffs, exponents, zv_1_norm);
-
         kahan_add(&sum, &epsilon, summand);
         lattice_vector_increment_norm(dim, cutoffs, zv, &zv_1_norm);
     }
 
     return sum;
+}
+
+/**
+ * @brief Computes one summand of the derivative of the first sum in Crandall's
+ * formula.
+ * @param[in] nu: exponent for the Epstein zeta function.
+ * @param[in] kMax: k sum limit ⌊|α|/2⌋.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in,out] lv: lattice vector, shifted by x in-place.
+ * @param[in] x: projection of x vector to elementary lattice cell.
+ * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] alphaAbs: total of alpha.
+ * @param[in] chunk_offset: starting offsets for each k.
+ * @param[in] valid_count: number of valid gamma entries for each k.
+ * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
+ * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
+ * @return I ** (|α| - 2k) h₍α,kIndex₎(y) * G_{nu}(z - x) * exp(-2 * PI * I * (z *
+ * y).
+ */
+static inline double complex summand_real_harmonic_large_exp_singularity_sum(
+    double nu, unsigned int kMax, unsigned int dim, double lv[], const double *x,
+    const double *y, unsigned int alphaAbs, const unsigned long long *chunk_offset,
+    const unsigned long long *valid_count, const double *coeffs,
+    const unsigned int *exponents) {
+
+    double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
+    for (int i = 0; i < dim; i++) {
+        lv[i] = lv[i] - x[i];
+    }
+
+    double lvSquared = dot(dim, lv, lv);
+
+    double sumInner = 0.0;
+    double epsilonInner = 0.0;
+    double auxtInner;
+    double auxyInner;
+
+    for (unsigned int k = 0; k <= kMax; k++) {
+
+        double nuIt = nu - (2 * k);
+
+        // These special summands are already handled in the real sum
+        if (nuIt < -1 && fabs((nuIt / 2.) - nearbyint(nuIt / 2.)) < EPS) {
+            continue;
+        }
+
+        if (fabs(nuIt / 2) < EPS) {
+            continue;
+        }
+
+        double h = harmonic_h(k, dim, lv, alphaAbs, chunk_offset, valid_count,
+                              coeffs, exponents);
+
+        // summing using Kahan's method
+        if (h && lvSquared > EPS_ZERO_Y) {
+            auxyInner = h * real_int_pow(lvSquared, k) - epsilonInner;
+            auxtInner = sumInner + auxyInner;
+            epsilonInner = (auxtInner - sumInner) - auxyInner;
+            sumInner = auxtInner;
+        }
+    }
+
+    if (fabs(sumInner) > EPS_CANCELLATION) {
+
+        return rot * sumInner * pow(lvSquared, -nu / 2);
+    }
+    return 0;
 }
 
 /**
@@ -452,22 +517,17 @@ static double complex sum_real_harmonic_large_exp_singularity_sum( // NOLINT
     const double *coeffs, const unsigned int *exponents) {
 
     int zv[dim];
+    double lv[dim];
     for (int i = 0; i < dim; i++) {
         zv[i] = -1;
     }
-    double lv[dim];
+    unsigned int zv_1_norm;
     double complex sum = 0.0;
     double complex epsilon = 0.0;
-    double complex auxt;
-    double complex auxy;
-    double complex rot;
-    double h;
-    double nuIt;
     int done = 0;
-    unsigned int zv_1_norm;
-    unsigned int specialCase;
 
     while (1) {
+        // only iterate over origin and its the nearest neighbors
 
         // compute 1-norm
         zv_1_norm = 0;
@@ -475,55 +535,13 @@ static double complex sum_real_harmonic_large_exp_singularity_sum( // NOLINT
             zv_1_norm += abs(zv[i]);
         }
 
-        // only iterate over origin and its the nearest neighbors
-        specialCase = (zv_1_norm <= 1);
+        bool specialCase = (zv_1_norm <= 1);
         if (specialCase) {
-
             matrix_intVector(dim, m, zv, lv, diag);
-            rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
-            for (int i = 0; i < dim; i++) {
-                lv[i] = lv[i] - x[i];
-            }
-
-            double lvSquared = dot(dim, lv, lv);
-
-            double sumInner = 0.0;
-            double epsilonInner = 0.0;
-            double auxtInner;
-            double auxyInner;
-
-            for (unsigned int k = 0; k <= kMax; k++) {
-
-                nuIt = nu - (2 * k);
-
-                // These special summands are already handled in the real sum
-                if (nuIt < -1 && fabs((nuIt / 2.) - nearbyint(nuIt / 2.)) < EPS) {
-                    continue;
-                }
-
-                if (fabs(nuIt / 2) < EPS) {
-                    continue;
-                }
-
-                h = harmonic_h(k, dim, lv, alphaAbs, chunk_offset, valid_count,
-                               coeffs, exponents);
-
-                // summing using Kahan's method
-                if (h && lvSquared > EPS_ZERO_Y) {
-                    auxyInner = h * real_int_pow(lvSquared, k) - epsilonInner;
-                    auxtInner = sumInner + auxyInner;
-                    epsilonInner = (auxtInner - sumInner) - auxyInner;
-                    sumInner = auxtInner;
-                }
-            }
-
-            if (fabs(sumInner) > EPS_CANCELLATION) {
-
-                auxy = rot * sumInner * pow(lvSquared, -nu / 2) - epsilon;
-                auxt = sum + auxy;
-                epsilon = (auxt - sum) - auxy;
-                sum = auxt;
-            }
+            double complex summand = summand_real_harmonic_large_exp_singularity_sum(
+                nu, kMax, dim, lv, x, y, alphaAbs, chunk_offset, valid_count, coeffs,
+                exponents);
+            kahan_add(&sum, &epsilon, summand);
         }
 
         done = 1;
