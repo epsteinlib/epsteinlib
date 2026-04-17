@@ -518,22 +518,19 @@ static double complex sum_real_harmonic_large_exp_singularity_sum( // NOLINT
 
     int zv[dim];
     double lv[dim];
-    for (int i = 0; i < dim; i++) {
-        zv[i] = -1;
+    int cutoffs[dim];
+    long totalSummands = 1;
+    // only iterate over origin and its the nearest neighbors
+    for (int k = 0; k < dim; k++) {
+        cutoffs[k] = 1;
+        zv[k] = -cutoffs[k];
+        totalSummands *= 2 * cutoffs[k] + 1;
     }
-    unsigned int zv_1_norm;
+    unsigned int zv_1_norm = dim;
     double complex sum = 0.0;
     double complex epsilon = 0.0;
-    int done = 0;
 
-    while (1) {
-        // only iterate over origin and its the nearest neighbors
-
-        // compute 1-norm
-        zv_1_norm = 0;
-        for (unsigned int i = 0; i < dim; i++) {
-            zv_1_norm += abs(zv[i]);
-        }
+    for (long n = 0; n < totalSummands; n++) {
 
         bool specialCase = (zv_1_norm <= 1);
         if (specialCase) {
@@ -544,18 +541,7 @@ static double complex sum_real_harmonic_large_exp_singularity_sum( // NOLINT
             kahan_add(&sum, &epsilon, summand);
         }
 
-        done = 1;
-        for (unsigned int idx = 0; idx < dim; idx++) {
-            if (zv[idx] + 1 <= 1) {
-                zv[idx]++;
-                done = 0;
-                break;
-            }
-            zv[idx] = -1;
-        }
-        if (done) {
-            break;
-        }
+        lattice_vector_increment_norm(dim, cutoffs, zv, &zv_1_norm);
     }
 
     return sum;
