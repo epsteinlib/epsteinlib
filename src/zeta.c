@@ -128,7 +128,7 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
         }
     } else {
         for (long n = 0; n < totalSummands; n++) {
-            matrix_intVector(dim, m, zv, lv);
+            matrix_intVector(dim, m, zv, lv, diag);
             double complex summand =
                 summand_real(nu, dim, lambda, lv, x, y, zArgBound);
             kahan_add(&sum, &epsilon, summand);
@@ -208,25 +208,12 @@ static double complex sum_real_der(double nu, unsigned int dim, double lambda,
     double complex epsilon = 0.0;
 
     // First Sum (in real space)
-    if (diag) {
-        for (long n = 0; n < totalSummands; n++) {
-            // Matrix vector product for diagonal matrices
-            for (int i = 0; i < dim; i++) {
-                lv[i] = m[(i * dim) + i] * zv[i];
-            }
-            double complex summand =
-                summand_real_der(nu, dim, lambda, lv, x, y, zArgBound, alpha);
-            kahan_add(&sum, &epsilon, summand);
-            lattice_vector_increment(dim, cutoffs, zv);
-        }
-    } else {
-        for (long n = 0; n < totalSummands; n++) {
-            matrix_intVector(dim, m, zv, lv);
-            double complex summand =
-                summand_real_der(nu, dim, lambda, lv, x, y, zArgBound, alpha);
-            kahan_add(&sum, &epsilon, summand);
-            lattice_vector_increment(dim, cutoffs, zv);
-        }
+    for (long n = 0; n < totalSummands; n++) {
+        matrix_intVector(dim, m, zv, lv, diag);
+        double complex summand =
+            summand_real_der(nu, dim, lambda, lv, x, y, zArgBound, alpha);
+        kahan_add(&sum, &epsilon, summand);
+        lattice_vector_increment(dim, cutoffs, zv);
     }
 
     return sum;
@@ -245,6 +232,7 @@ static double complex sum_real_der(double nu, unsigned int dim, double lambda,
  * @param[in] cutoffs: how many summands in each direction are considered.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
+ * @param[in] diag: true, if the lattice matrix is diagonal.
  * @param[in] alphaAbs: total of alpha.
  * @param[in] chunk_offset: starting offsets for each k.
  * @param[in] valid_count: number of valid gamma entries for each k.
@@ -257,7 +245,7 @@ static double complex sum_real_der(double nu, unsigned int dim, double lambda,
 static double complex sum_real_harmonic(
     double nu, unsigned int kIndex, unsigned int dim, const double *m,
     const double *x, const double *y, const int cutoffs[], double zArgBound,
-    unsigned int alphaAbs, const unsigned long long *chunk_offset,
+    bool diag, unsigned int alphaAbs, const unsigned long long *chunk_offset,
     const unsigned long long *valid_count, const double *coeffs,
     const unsigned int *exponents) {
 
@@ -286,7 +274,7 @@ static double complex sum_real_harmonic(
             zv[k] =
                 (((int)(n / totalCutoffs[k])) % (2 * cutoffs[k] + 1)) - cutoffs[k];
         }
-        matrix_intVector(dim, m, zv, lv);
+        matrix_intVector(dim, m, zv, lv, diag);
         rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] - x[i];
@@ -318,6 +306,7 @@ static double complex sum_real_harmonic(
  * @param[in] cutoffs: how many summands in each direction are considered.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
+ * @param[in] diag: true, if the lattice matrix is diagonal.
  * @param[in] alphaAbs: total of alpha.
  * @param[in] chunk_offset: starting offsets for each k.
  * @param[in] valid_count: number of valid gamma entries for each k.
@@ -330,7 +319,7 @@ static double complex sum_real_harmonic(
 static double complex sum_real_harmonic_large_exp(
     double nu, unsigned int kIndex, unsigned int dim, const double *m,
     const double *x, const double *y, const int cutoffs[], double zArgBound,
-    unsigned int alphaAbs, const unsigned long long *chunk_offset,
+    bool diag, unsigned int alphaAbs, const unsigned long long *chunk_offset,
     const unsigned long long *valid_count, const double *coeffs,
     const unsigned int *exponents) {
 
@@ -362,7 +351,7 @@ static double complex sum_real_harmonic_large_exp(
     // - cutoff[i] <= zv[i] <= cutoffs[i]
     while (1) {
 
-        matrix_intVector(dim, m, zv, lv);
+        matrix_intVector(dim, m, zv, lv, diag);
         rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] - x[i];
@@ -414,6 +403,7 @@ static double complex sum_real_harmonic_large_exp(
  * @param[in] m: matrix that transforms the lattice.
  * @param[in] x: projection of x vector to elementary lattice cell.
  * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] diag: true, if the lattice matrix is diagonal.
  * @param[in] alphaAbs: total of alpha.
  * @param[in] chunk_offset: starting offsets for each k.
  * @param[in] valid_count: number of valid gamma entries for each k.
@@ -424,9 +414,9 @@ static double complex sum_real_harmonic_large_exp(
  */
 static double complex sum_real_harmonic_large_exp_singularity_sum( // NOLINT
     double nu, unsigned int kMax, unsigned int dim, const double *m, const double *x,
-    const double *y, unsigned int alphaAbs, const unsigned long long *chunk_offset,
-    const unsigned long long *valid_count, const double *coeffs,
-    const unsigned int *exponents) {
+    const double *y, bool diag, unsigned int alphaAbs,
+    const unsigned long long *chunk_offset, const unsigned long long *valid_count,
+    const double *coeffs, const unsigned int *exponents) {
 
     int zv[dim];
     for (int i = 0; i < dim; i++) {
@@ -456,7 +446,7 @@ static double complex sum_real_harmonic_large_exp_singularity_sum( // NOLINT
         specialCase = (zv_1_norm <= 1);
         if (specialCase) {
 
-            matrix_intVector(dim, m, zv, lv);
+            matrix_intVector(dim, m, zv, lv, diag);
             rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
             for (int i = 0; i < dim; i++) {
                 lv[i] = lv[i] - x[i];
@@ -532,6 +522,7 @@ static double complex sum_real_harmonic_large_exp_singularity_sum( // NOLINT
  * @param[in] cutoffs: how many summands in each direction are considered.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
+ * @param[in] diag: true, if the lattice matrix is diagonal.
  * @param[in] alphaAbs: total of alpha.
  * @return helper function for the first sum in crandalls formula. Calculates
  * sum_{z in m whole_numbers ** dim} I ** (|α| - 2k) h₍α,kIndex₎(y) * G_{nu}(z - x) *
@@ -540,7 +531,8 @@ static double complex sum_real_harmonic_large_exp_singularity_sum( // NOLINT
 static double complex sum_real_harmonic_1D(double nu, unsigned int dim,
                                            const double *m, const double *x,
                                            const double *y, const int cutoffs[],
-                                           double zArgBound, unsigned int alphaAbs) {
+                                           double zArgBound, bool diag,
+                                           unsigned int alphaAbs) {
 
     double lambda = 1.; // parameter that decides the weight of each sum
 
@@ -567,7 +559,7 @@ static double complex sum_real_harmonic_1D(double nu, unsigned int dim,
             zv[k] =
                 (((int)(n / totalCutoffs[k])) % (2 * cutoffs[k] + 1)) - cutoffs[k];
         }
-        matrix_intVector(dim, m, zv, lv);
+        matrix_intVector(dim, m, zv, lv, diag);
         rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] - x[i];
@@ -638,43 +630,20 @@ double complex sum_fourier(double nu, unsigned int dim, double lambda,
     double complex sum = 0.0;
     double complex epsilon = 0.0;
     // second sum (in fourier space)
-    if (diag) {
-        for (long n = 0; n < zeroIndex; n++) {
-            // Matrix vector product for diagonal matrices
-            for (int i = 0; i < dim; i++) {
-                lv[i] = m_invt[(i * dim) + i] * zv[i];
-            }
-            double complex summand =
-                summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
-            kahan_add(&sum, &epsilon, summand);
-            lattice_vector_increment(dim, cutoffs, zv);
-        }
-        lattice_vector_increment(dim, cutoffs, zv); // skips zero
-        for (long n = zeroIndex + 1; n < totalSummands; n++) {
-            for (int i = 0; i < dim; i++) {
-                lv[i] = m_invt[(i * dim) + i] * zv[i];
-            }
-            double complex summand =
-                summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
-            kahan_add(&sum, &epsilon, summand);
-            lattice_vector_increment(dim, cutoffs, zv);
-        }
-    } else {
-        for (long n = 0; n < zeroIndex; n++) {
-            matrix_intVector(dim, m_invt, zv, lv);
-            double complex summand =
-                summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
-            kahan_add(&sum, &epsilon, summand);
-            lattice_vector_increment(dim, cutoffs, zv);
-        }
-        lattice_vector_increment(dim, cutoffs, zv); // skips zero
-        for (long n = zeroIndex + 1; n < totalSummands; n++) {
-            matrix_intVector(dim, m_invt, zv, lv);
-            double complex summand =
-                summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
-            kahan_add(&sum, &epsilon, summand);
-            lattice_vector_increment(dim, cutoffs, zv);
-        }
+    for (long n = 0; n < zeroIndex; n++) {
+        matrix_intVector(dim, m_invt, zv, lv, diag);
+        double complex summand =
+            summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
+        kahan_add(&sum, &epsilon, summand);
+        lattice_vector_increment(dim, cutoffs, zv);
+    }
+    lattice_vector_increment(dim, cutoffs, zv); // skips zero
+    for (long n = zeroIndex + 1; n < totalSummands; n++) {
+        matrix_intVector(dim, m_invt, zv, lv, diag);
+        double complex summand =
+            summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
+        kahan_add(&sum, &epsilon, summand);
+        lattice_vector_increment(dim, cutoffs, zv);
     }
     return sum;
 }
@@ -741,43 +710,20 @@ static double complex sum_fourier_der(double nu, unsigned int dim, double lambda
     double complex sum = 0.0;
     double complex epsilon = 0.0;
     // second sum (in fourier space)
-    if (diag) {
-        for (long n = 0; n < zeroIndex; n++) {
-            // Matrix vector product for diagonal matrices
-            for (int i = 0; i < dim; i++) {
-                lv[i] = m_invt[(i * dim) + i] * zv[i];
-            }
-            double complex summand = summand_fourier_der(nu, dim, lambda, lv, x, y,
-                                                         zArgBound, alpha, alphaAbs);
-            kahan_add(&sum, &epsilon, summand);
-            lattice_vector_increment(dim, cutoffs, zv);
-        }
-        lattice_vector_increment(dim, cutoffs, zv); // skips zero
-        for (long n = zeroIndex + 1; n < totalSummands; n++) {
-            for (int i = 0; i < dim; i++) {
-                lv[i] = m_invt[(i * dim) + i] * zv[i];
-            }
-            double complex summand = summand_fourier_der(nu, dim, lambda, lv, x, y,
-                                                         zArgBound, alpha, alphaAbs);
-            kahan_add(&sum, &epsilon, summand);
-            lattice_vector_increment(dim, cutoffs, zv);
-        }
-    } else {
-        for (long n = 0; n < zeroIndex; n++) {
-            matrix_intVector(dim, m_invt, zv, lv);
-            double complex summand = summand_fourier_der(nu, dim, lambda, lv, x, y,
-                                                         zArgBound, alpha, alphaAbs);
-            kahan_add(&sum, &epsilon, summand);
-            lattice_vector_increment(dim, cutoffs, zv);
-        }
-        lattice_vector_increment(dim, cutoffs, zv); // skips zero
-        for (long n = zeroIndex + 1; n < totalSummands; n++) {
-            matrix_intVector(dim, m_invt, zv, lv);
-            double complex summand = summand_fourier_der(nu, dim, lambda, lv, x, y,
-                                                         zArgBound, alpha, alphaAbs);
-            kahan_add(&sum, &epsilon, summand);
-            lattice_vector_increment(dim, cutoffs, zv);
-        }
+    for (long n = 0; n < zeroIndex; n++) {
+        matrix_intVector(dim, m_invt, zv, lv, diag);
+        double complex summand = summand_fourier_der(nu, dim, lambda, lv, x, y,
+                                                     zArgBound, alpha, alphaAbs);
+        kahan_add(&sum, &epsilon, summand);
+        lattice_vector_increment(dim, cutoffs, zv);
+    }
+    lattice_vector_increment(dim, cutoffs, zv); // skips zero
+    for (long n = zeroIndex + 1; n < totalSummands; n++) {
+        matrix_intVector(dim, m_invt, zv, lv, diag);
+        double complex summand = summand_fourier_der(nu, dim, lambda, lv, x, y,
+                                                     zArgBound, alpha, alphaAbs);
+        kahan_add(&sum, &epsilon, summand);
+        lattice_vector_increment(dim, cutoffs, zv);
     }
     return sum;
 }
@@ -794,6 +740,7 @@ static double complex sum_fourier_der(double nu, unsigned int dim, double lambda
  * @param[in] cutoffs: how many summands in each direction are considered.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
+ * @param[in] diag: true, if the lattice matrix is diagonal.
  * @param[in] alphaAbs: total of alpha.
  * @return helper function for the second sum in crandalls formula. Calculates
  * sum_{k in m_invt whole_numbers ** dim without zero} h₍α,kIndex₎(y + k) G_{dim - nu
@@ -802,7 +749,7 @@ static double complex sum_fourier_der(double nu, unsigned int dim, double lambda
 static double complex sum_fourier_harmonic_1D(double nu, unsigned int dim,
                                               const double *m_invt, const double *x,
                                               const double *y, const int cutoffs[],
-                                              double zArgBound,
+                                              double zArgBound, bool diag,
                                               unsigned int alphaAbs) {
     double lambda = 1.; // parameter that decides the weight of each sum
 
@@ -827,7 +774,7 @@ static double complex sum_fourier_harmonic_1D(double nu, unsigned int dim,
             zv[k] =
                 (((int)(n / totalCutoffs[k])) % (2 * cutoffs[k] + 1)) - cutoffs[k];
         }
-        matrix_intVector(dim, m_invt, zv, lv);
+        matrix_intVector(dim, m_invt, zv, lv, diag);
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] + y[i];
         }
@@ -840,7 +787,7 @@ static double complex sum_fourier_harmonic_1D(double nu, unsigned int dim,
                      (2 * cutoffs[k] + 1)) -
                     cutoffs[k];
         }
-        matrix_intVector(dim, m_invt, zv, lv);
+        matrix_intVector(dim, m_invt, zv, lv, diag);
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] + y[i];
         }
@@ -867,6 +814,7 @@ static double complex sum_fourier_harmonic_1D(double nu, unsigned int dim,
  * @param[in] cutoffs: how many summands in each direction are considered.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
+ * @param[in] diag: true, if the lattice matrix is diagonal.
  * @param[in] alphaAbs: total of alpha.
  * @param[in] chunk_offset: starting offsets for each k.
  * @param[in] valid_count: number of valid gamma entries for each k.
@@ -879,7 +827,7 @@ static double complex sum_fourier_harmonic_1D(double nu, unsigned int dim,
 static double complex sum_fourier_harmonic(
     double nu, unsigned int kIndex, unsigned int dim, const double *m_invt,
     const double *x, const double *y, const int cutoffs[], double zArgBound,
-    unsigned int alphaAbs, const unsigned long long *chunk_offset,
+    bool diag, unsigned int alphaAbs, const unsigned long long *chunk_offset,
     const unsigned long long *valid_count, const double *coeffs,
     const unsigned int *exponents) {
     double lambda = 1.; // parameter that decides the weight of each sum
@@ -905,7 +853,7 @@ static double complex sum_fourier_harmonic(
             zv[k] =
                 (((int)(n / totalCutoffs[k])) % (2 * cutoffs[k] + 1)) - cutoffs[k];
         }
-        matrix_intVector(dim, m_invt, zv, lv);
+        matrix_intVector(dim, m_invt, zv, lv, diag);
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] + y[i];
         }
@@ -924,7 +872,7 @@ static double complex sum_fourier_harmonic(
                      (2 * cutoffs[k] + 1)) -
                     cutoffs[k];
         }
-        matrix_intVector(dim, m_invt, zv, lv);
+        matrix_intVector(dim, m_invt, zv, lv, diag);
         for (int i = 0; i < dim; i++) {
             lv[i] = lv[i] + y[i];
         }
@@ -1003,6 +951,7 @@ static double *vectorProj(unsigned int dim, const double *m, const double *m_inv
  * @param[in] cutoffsFourier: how many summands in each direction (Fourier sum).
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
+ * @param[in] diag: true, if the lattice matrix is diagonal.
  * @param[in] xfactor: precomputed prefactor for the real sum.
  * @return updated res after adding the 1-D harmonic contribution.
  */
@@ -1011,7 +960,7 @@ static double complex summation_harmonic_1D(
     double lambda, double ms, const double *m_real, const double *m_fourier,
     const double *x_t1, const double *x_t2, const double *y_t1, const double *y_t2,
     double x_t2_squared, const int cutoffsReal[], const int cutoffsFourier[],
-    double zArgBound, double complex xfactor) {
+    double zArgBound, bool diag, double complex xfactor) {
 
     double complex s1;
     double complex s2;
@@ -1054,12 +1003,12 @@ static double complex summation_harmonic_1D(
         }
 
         s2 = sum_fourier_harmonic_1D(nuReci, dim, m_fourier, x_t1, y_t2,
-                                     cutoffsFourier, zArgBoundReci, alphaAbs);
+                                     cutoffsFourier, zArgBoundReci, diag, alphaAbs);
 
         s2 = negative_one_pow(k) * (s2 * rot + nc);
 
         s1 = sum_real_harmonic_1D(nuIt, dim, m_real, x_t2, y_t2, cutoffsReal,
-                                  zArgBound, alphaAbs) *
+                                  zArgBound, diag, alphaAbs) *
              imaginary_int_pow(alphaAbs) * rot * xfactor;
         resIt = (s1 + pow(lambda, dim) * s2) / tgamma(nuIt / 2.);
     }
@@ -1091,6 +1040,7 @@ static double complex summation_harmonic_1D(
  * @param[in] cutoffsReal: how many summands in each direction (real sum).
  * @param[in] cutoffsFourier: how many summands in each direction (Fourier sum).
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
+ * @param[in] diag: true, if the lattice matrix is diagonal.
  * the incomplete gamma evaluation.
  * @param[in] xfactor: precomputed prefactor for the real sum.
  * @return updated res after adding the high-exponent harmonic contribution.
@@ -1100,7 +1050,7 @@ static double complex summation_harmonic_high_exp(
     const unsigned int *alpha, double lambda, double ms, const double *m_real,
     const double *m_fourier, const double *x_t1, const double *x_t2,
     const double *y_t1, const double *y_t2, double x_t2_squared,
-    const int cutoffsReal[], const int cutoffsFourier[], double zArgBound,
+    const int cutoffsReal[], const int cutoffsFourier[], double zArgBound, bool diag,
     double complex xfactor) {
     // Compute set zeta derivatives by harmonic method for large nu,
     // Isolate singularities in fourier sum
@@ -1172,13 +1122,13 @@ static double complex summation_harmonic_high_exp(
             }
 
             s2 = sum_fourier_harmonic(nuReci, k, dim, m_fourier, x_t1, y_t2,
-                                      cutoffsFourier, zArgBoundReci, alphaAbs,
+                                      cutoffsFourier, zArgBoundReci, diag, alphaAbs,
                                       chunk_offset, valid_count, coeffs, exponents);
 
             s2 = negative_one_pow(k) * (s2 * rot + nc);
 
             s1 = sum_real_harmonic_large_exp(
-                     nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal, zArgBound,
+                     nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal, zArgBound, diag,
                      alphaAbs, chunk_offset, valid_count, coeffs, exponents) *
                  imaginary_int_pow(alphaAbs) * rot * xfactor;
 
@@ -1190,9 +1140,9 @@ static double complex summation_harmonic_high_exp(
 
     double complex s1_singularity =
         xfactor * rot * imaginary_int_pow(alphaAbs) *
-        sum_real_harmonic_large_exp_singularity_sum(nu, kMax, dim, m_real, x_t2,
-                                                    y_t2, alphaAbs, chunk_offset,
-                                                    valid_count, coeffs, exponents);
+        sum_real_harmonic_large_exp_singularity_sum(
+            nu, kMax, dim, m_real, x_t2, y_t2, diag, alphaAbs, chunk_offset,
+            valid_count, coeffs, exponents);
 
     res += s1_singularity;
 
@@ -1224,6 +1174,7 @@ static double complex summation_harmonic_high_exp(
  * @param[in] cutoffsReal: how many summands in each direction (real sum).
  * @param[in] cutoffsFourier: how many summands in each direction (Fourier sum).
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
+ * @param[in] diag: true, if the lattice matrix is diagonal.
  * the incomplete gamma evaluation.
  * @param[in] xfactor: precomputed prefactor for the real sum.
  * @return updated res after adding the general harmonic contribution.
@@ -1233,7 +1184,8 @@ static double complex summation_harmonic(
     const unsigned int *alpha, double lambda, double ms, const double *m_real,
     const double *m_fourier, const double *x_t1, const double *x_t2,
     const double *y_t1, const double *y_t2, const int cutoffsReal[],
-    const int cutoffsFourier[], double zArgBound, double complex xfactor) {
+    const int cutoffsFourier[], double zArgBound, bool diag,
+    double complex xfactor) {
 
     // Compute set zeta derivatives by harmonic method
 
@@ -1302,14 +1254,14 @@ static double complex summation_harmonic(
             }
 
             s2 = sum_fourier_harmonic(nuReci, k, dim, m_fourier, x_t1, y_t2,
-                                      cutoffsFourier, zArgBoundReci, alphaAbs,
+                                      cutoffsFourier, zArgBoundReci, diag, alphaAbs,
                                       chunk_offset, valid_count, coeffs, exponents);
 
             s2 = negative_one_pow(k) * (s2 * rot + nc);
 
             s1 = sum_real_harmonic(nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal,
-                                   zArgBound, alphaAbs, chunk_offset, valid_count,
-                                   coeffs, exponents) *
+                                   zArgBound, diag, alphaAbs, chunk_offset,
+                                   valid_count, coeffs, exponents) *
                  imaginary_int_pow(alphaAbs) * rot * xfactor;
 
             resIt = (s1 + pow(lambda, dim) * s2) / tgamma(nuIt / 2.);
@@ -1484,20 +1436,20 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             xfactor = 1;
         } else if (variant == 2) {
             if (harmonicMethod1D) {
-                res = summation_harmonic_1D(res, nu, dim, alphaAbs, lambda, ms,
-                                            m_real, m_fourier, x_t1, x_t2, y_t1,
-                                            y_t2, x_t2_squared, cutoffsReal,
-                                            cutoffsFourier, zArgBound, xfactor);
+                res = summation_harmonic_1D(
+                    res, nu, dim, alphaAbs, lambda, ms, m_real, m_fourier, x_t1,
+                    x_t2, y_t1, y_t2, x_t2_squared, cutoffsReal, cutoffsFourier,
+                    zArgBound, diag, xfactor);
             } else if (harmonicMethodHighExp) {
                 res = summation_harmonic_high_exp(
                     res, nu, dim, alphaAbs, alpha, lambda, ms, m_real, m_fourier,
                     x_t1, x_t2, y_t1, y_t2, x_t2_squared, cutoffsReal,
-                    cutoffsFourier, zArgBound, xfactor);
+                    cutoffsFourier, zArgBound, diag, xfactor);
             } else if (harmonicMethod) {
                 res = summation_harmonic(res, nu, dim, alphaAbs, alpha, lambda, ms,
                                          m_real, m_fourier, x_t1, x_t2, y_t1, y_t2,
                                          cutoffsReal, cutoffsFourier, zArgBound,
-                                         xfactor);
+                                         diag, xfactor);
             } else {
                 // Compute set zeta derivatives by polynomial p method
                 rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
