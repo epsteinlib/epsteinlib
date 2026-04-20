@@ -109,7 +109,7 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
     for (long n = 0; n < totalSummands; n++) {
         matrix_intVector(dim, m, zv, lv, diag);
         double complex summand = summand_real(nu, dim, lambda, lv, x, y, zArgBound);
-        kahan_add(&sum, &epsilon, summand);
+        kahan_add_c(&sum, &epsilon, summand);
         lattice_vector_increment(dim, cutoffs, zv);
     }
 
@@ -175,7 +175,7 @@ double complex sum_fourier(double nu, unsigned int dim, double lambda,
         matrix_intVector(dim, m_invt, zv, lv, diag);
         double complex summand =
             summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
-        kahan_add(&sum, &epsilon, summand);
+        kahan_add_c(&sum, &epsilon, summand);
         lattice_vector_increment(dim, cutoffs, zv);
     }
     lattice_vector_increment(dim, cutoffs, zv); // skips zero
@@ -183,7 +183,7 @@ double complex sum_fourier(double nu, unsigned int dim, double lambda,
         matrix_intVector(dim, m_invt, zv, lv, diag);
         double complex summand =
             summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
-        kahan_add(&sum, &epsilon, summand);
+        kahan_add_c(&sum, &epsilon, summand);
         lattice_vector_increment(dim, cutoffs, zv);
     }
     return sum;

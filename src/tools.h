@@ -16,13 +16,13 @@
 #include <stdbool.h>
 
 /**
- * @brief Kahan compensated summation step.
+ * @brief Kahan compensated summation step for complex sums.
  * @param[in,out] sum: running compensated sum.
  * @param[in,out] epsilon: running compensation term.
  * @param[in] x: summand to add.
  */
-static inline void kahan_add(double complex *restrict sum,
-                             double complex *restrict epsilon, double complex x) {
+static inline void kahan_add_c(double complex *restrict sum,
+                               double complex *restrict epsilon, double complex x) {
     double complex y = x - *epsilon;
     double complex t = *sum + y;
     *epsilon = (t - *sum) - y;
