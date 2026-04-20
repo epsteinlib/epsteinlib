@@ -610,8 +610,6 @@ double harmonic_h(unsigned int k, unsigned int dim, const double *z,
     double zPow;
     double sumOuter = 0.0;
     double epsilonOuter = 0.0;
-    double auxtOuter;
-    double auxyOuter;
     unsigned long long n;
     unsigned long long count = valid_count[k];
     unsigned long long baseIdx = chunk_offset[k];
@@ -625,10 +623,8 @@ double harmonic_h(unsigned int k, unsigned int dim, const double *z,
         for (i = 0; i < dim; i++) {
             zPow *= real_int_pow(z[i], exponents[expIdx + i]);
         }
-        auxyOuter = zPow * sumInner - epsilonOuter;
-        auxtOuter = sumOuter + auxyOuter;
-        epsilonOuter = (auxtOuter - sumOuter) - auxyOuter;
-        sumOuter = auxtOuter;
+        double summand = zPow * sumInner;
+        kahan_add_r(&sumOuter, &epsilonOuter, summand);
     }
     sumOuter *= coeffs_c_outer(alphaAbs, k, dim);
     return sumOuter;
@@ -682,8 +678,6 @@ double complex crandall_g_der(unsigned int dim, double nu, const double *z,
 
     double complex sum = 0.0;
     double complex epsilon = 0.0;
-    double complex auxt;
-    double complex auxy;
 
     // zArgBounds[i] is the zArgBound for nu = nu + 2 * alphaAbs - 2 * i;
     double zArgBounds[(alphaAbs / 2) + 1];
@@ -698,14 +692,12 @@ double complex crandall_g_der(unsigned int dim, double nu, const double *z,
         nuIt = nu + 2 * alphaAbs - 2 * betaAbs;
         zArgBoundIt = zArgBounds[betaAbs]; // NOLINT
 
-        // summing using Kahan's method
         // catch vanishing polynomials
         double p = polynomial_p(dim, z, alpha, beta);
         if (p) {
-            auxy = p * crandall_g(dim, nuIt, z, prefactor, zArgBoundIt) - epsilon;
-            auxt = sum + auxy;
-            epsilon = (auxt - sum) - auxy;
-            sum = auxt;
+            double complex summand =
+                p * crandall_g(dim, nuIt, z, prefactor, zArgBoundIt);
+            kahan_add_c(&sum, &epsilon, summand);
         }
 
         done = 1;
@@ -797,20 +789,15 @@ double complex log_l_der(unsigned int dim, const double *z,
 
     double complex sum = 0.0;
     double complex epsilon = 0.0;
-    double complex auxt;
-    double complex auxy;
 
     int done = 0;
 
     // Iterate over every multi-index beta so that 2 beta <= alpha
     while (1) {
 
-        // summing using Kahan's method
-        auxy = polynomial_l(dim, z, alpha, beta) / real_int_pow(zArg, aMinusb) -
-               epsilon;
-        auxt = sum + auxy;
-        epsilon = (auxt - sum) - auxy;
-        sum = auxt;
+        double complex summand =
+            polynomial_l(dim, z, alpha, beta) / real_int_pow(zArg, aMinusb);
+        kahan_add_c(&sum, &epsilon, summand);
 
         done = 1;
         for (unsigned int idx = 0; idx < dim; idx++) {
@@ -881,8 +868,6 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
 
     double sum = 0.;
     double epsilon = 0.;
-    double auxt;
-    double auxy;
 
     double summand;
     double res;
@@ -912,12 +897,7 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
             }
 
             summand = summand / (double)betaFact;
-
-            // summing using Kahan's method
-            auxy = summand - epsilon;
-            auxt = sum + auxy;
-            epsilon = (auxt - sum) - auxy;
-            sum = auxt;
+            kahan_add_r(&sum, &epsilon, summand);
         }
 
         done = 1;
@@ -967,8 +947,8 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
  * @parma[in] alphaAbs: absolute value of the multi-index alpha.
  * @return partial derivative of s_{d+2k}(z).
  */
-double complex singularity_s_der(unsigned int k, unsigned int dim, const double *z,
-                                 const unsigned int *alpha, unsigned int alphaAbs) {
+double singularity_s_der(unsigned int k, unsigned int dim, const double *z,
+                         const unsigned int *alpha, unsigned int alphaAbs) {
 
     double res;
 
@@ -998,10 +978,8 @@ double complex singularity_s_der(unsigned int k, unsigned int dim, const double 
     unsigned int betaAbs = 0;
     unsigned int gammaAbs = alphaAbs;
 
-    double complex sum = 0.0;
-    double complex epsilon = 0.0;
-    double complex auxt;
-    double complex auxy;
+    double sum = 0.0;
+    double epsilon = 0.0;
 
     unsigned int multBinom;
 
@@ -1014,15 +992,10 @@ double complex singularity_s_der(unsigned int k, unsigned int dim, const double 
             for (int i = 0; i < dim; i++) {
                 multBinom *= binom((long long)alpha[i], (long long)beta[i]);
             }
-
-            // summing using Kahan's method
-            auxy = (double)multBinom *
-                       polynomial_y_der(k, dim, z, beta, betaAbs, 1) *
-                       log_l_der(dim, z, gamma, gammaAbs) -
-                   epsilon;
-            auxt = sum + auxy;
-            epsilon = (auxt - sum) - auxy;
-            sum = auxt;
+            double summand = (double)multBinom *
+                             polynomial_y_der(k, dim, z, beta, betaAbs, 1) *
+                             log_l_der(dim, z, gamma, gammaAbs);
+            kahan_add_r(&sum, &epsilon, summand);
         }
 
         done = 1;
@@ -1063,9 +1036,10 @@ double complex singularity_s_der(unsigned int k, unsigned int dim, const double 
  * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
  * @return partial derivative of the regularized Crandall function.
  */
-double complex crandall_gReg_nuequalsdimplus2k_der(
-    double s, unsigned int k, unsigned int dim, const double *z, double lambda,
-    const unsigned int *alpha, unsigned int alphaAbs, double zArgBound) {
+double crandall_gReg_nuequalsdimplus2k_der(double s, unsigned int k,
+                                           unsigned int dim, const double *z,
+                                           double lambda, const unsigned int *alpha,
+                                           unsigned int alphaAbs, double zArgBound) {
     double res;
     double zArg = M_PI * dot(dim, z, z);
     double taylorBranchBound = M_PI * 0.65 * 0.65;
@@ -1076,10 +1050,8 @@ double complex crandall_gReg_nuequalsdimplus2k_der(
     } else if (zArg < taylorBranchBound) {
         // Taylor expansion if arg close to zero.
 
-        double complex sum = 0.0;
-        double complex epsilon = 0.0;
-        double complex auxt;
-        double complex auxy;
+        double sum = 0.0;
+        double epsilon = 0.0;
 
         double eulerGamma = 0.57721566490153286555;
 
@@ -1102,13 +1074,10 @@ double complex crandall_gReg_nuequalsdimplus2k_der(
         for (int n = 1; n < taylorSeriesLimit + 1; n++) {
             if (n - k) {
                 // Summing using Kahan's method
-                auxy = ((n % 2) ? -1. : 1.) *
-                           polynomial_y_der(n, dim, z, alpha, alphaAbs, n) /
-                           (double)(n - (int)k) -
-                       epsilon;
-                auxt = sum + auxy;
-                epsilon = (auxt - sum) - auxy;
-                sum = auxt;
+                double summand = ((n % 2) ? -1. : 1.) *
+                                 polynomial_y_der(n, dim, z, alpha, alphaAbs, n) /
+                                 (double)(n - (int)k);
+                kahan_add_r(&sum, &epsilon, summand);
             }
         }
 
@@ -1164,8 +1133,6 @@ double complex crandall_gReg_der(unsigned int dim, double s, const double *z,
 
     double complex sum = 0.0;
     double complex epsilon = 0.0;
-    double complex auxt;
-    double complex auxy;
 
     // Iterate over every multi-index beta so that 2 beta <= alpha
     while (1) {
@@ -1173,12 +1140,11 @@ double complex crandall_gReg_der(unsigned int dim, double s, const double *z,
         sIt = s + 2 * alphaAbs - 2 * betaAbs;
 
         // Summing using Kahan's method
-        auxy = -polynomial_p(dim, z, alpha, beta) * tgamma(sIt / 2) *
-                   egf_gammaStar(sIt / 2, zArgument) -
-               epsilon;
-        auxt = sum + auxy;
-        epsilon = (auxt - sum) - auxy;
-        sum = auxt;
+        double complex summand =
+            (-polynomial_p(dim, z, alpha, beta) * tgamma(sIt / 2) *
+             egf_gammaStar(sIt / 2, zArgument)) -
+            epsilon;
+        kahan_add_c(&sum, &epsilon, summand);
 
         done = 1;
         for (unsigned int idx = 0; idx < dim; idx++) {

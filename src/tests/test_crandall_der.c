@@ -1295,7 +1295,7 @@ int test_singularity_s_der(void) {
 
         k = kRef[0];
 
-        num = singularity_s_der(k, dim, z, alpha, alphaAbs);
+        num = (double complex)singularity_s_der(k, dim, z, alpha, alphaAbs);
         ref = refRead[0] + 0 * I;
 
         errorAbs = errAbs(ref, num);

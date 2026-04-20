@@ -138,7 +138,7 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
     for (long n = 0; n < totalSummands; n++) {
         matrix_intVector(dim, m, zv, lv, diag);
         double complex summand = summand_real(nu, dim, lambda, lv, x, y, zArgBound);
-        kahan_add(&sum, &epsilon, summand);
+        kahan_add_c(&sum, &epsilon, summand);
         lattice_vector_increment(dim, cutoffs, zv);
     }
 
@@ -218,7 +218,7 @@ static double complex sum_real_der(double nu, unsigned int dim, double lambda,
         matrix_intVector(dim, m, zv, lv, diag);
         double complex summand =
             summand_real_der(nu, dim, lambda, lv, x, y, zArgBound, alpha);
-        kahan_add(&sum, &epsilon, summand);
+        kahan_add_c(&sum, &epsilon, summand);
         lattice_vector_increment(dim, cutoffs, zv);
     }
 
@@ -310,7 +310,7 @@ static double complex sum_real_harmonic(
         double complex summand = summand_real_harmonic(
             nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
             valid_count, coeffs, exponents);
-        kahan_add(&sum, &epsilon, summand);
+        kahan_add_c(&sum, &epsilon, summand);
         lattice_vector_increment(dim, cutoffs, zv);
     }
 
@@ -418,7 +418,7 @@ static double complex sum_real_harmonic_large_exp(
         double complex summand = summand_real_harmonic_large_exp(
             nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
             valid_count, coeffs, exponents, zv_1_norm);
-        kahan_add(&sum, &epsilon, summand);
+        kahan_add_c(&sum, &epsilon, summand);
         lattice_vector_increment_norm(dim, cutoffs, zv, &zv_1_norm);
     }
 
@@ -457,8 +457,6 @@ static inline double complex summand_real_harmonic_large_exp_singularity_sum(
 
     double sumInner = 0.0;
     double epsilonInner = 0.0;
-    double auxtInner;
-    double auxyInner;
 
     for (unsigned int k = 0; k <= kMax; k++) {
 
@@ -478,10 +476,8 @@ static inline double complex summand_real_harmonic_large_exp_singularity_sum(
 
         // summing using Kahan's method
         if (h && lvSquared > EPS_ZERO_Y) {
-            auxyInner = h * real_int_pow(lvSquared, k) - epsilonInner;
-            auxtInner = sumInner + auxyInner;
-            epsilonInner = (auxtInner - sumInner) - auxyInner;
-            sumInner = auxtInner;
+            double summand = h * real_int_pow(lvSquared, k);
+            kahan_add_r(&sumInner, &epsilonInner, summand);
         }
     }
 
@@ -538,7 +534,7 @@ static double complex sum_real_harmonic_large_exp_singularity_sum( // NOLINT
             double complex summand = summand_real_harmonic_large_exp_singularity_sum(
                 nu, kMax, dim, lv, x, y, alphaAbs, chunk_offset, valid_count, coeffs,
                 exponents);
-            kahan_add(&sum, &epsilon, summand);
+            kahan_add_c(&sum, &epsilon, summand);
         }
 
         lattice_vector_increment_norm(dim, cutoffs, zv, &zv_1_norm);
@@ -616,7 +612,7 @@ static double complex sum_real_harmonic_1D(double nu, unsigned int dim,
         matrix_intVector(dim, m, zv, lv, diag);
         double complex summand =
             summand_real_harmonic_1D(nu, dim, lambda, lv, x, y, zArgBound, alphaAbs);
-        kahan_add(&sum, &epsilon, summand);
+        kahan_add_c(&sum, &epsilon, summand);
         lattice_vector_increment(dim, cutoffs, zv);
     }
 
@@ -682,7 +678,7 @@ double complex sum_fourier(double nu, unsigned int dim, double lambda,
         matrix_intVector(dim, m_invt, zv, lv, diag);
         double complex summand =
             summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
-        kahan_add(&sum, &epsilon, summand);
+        kahan_add_c(&sum, &epsilon, summand);
         lattice_vector_increment(dim, cutoffs, zv);
     }
     lattice_vector_increment(dim, cutoffs, zv); // skips zero
@@ -690,7 +686,7 @@ double complex sum_fourier(double nu, unsigned int dim, double lambda,
         matrix_intVector(dim, m_invt, zv, lv, diag);
         double complex summand =
             summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
-        kahan_add(&sum, &epsilon, summand);
+        kahan_add_c(&sum, &epsilon, summand);
         lattice_vector_increment(dim, cutoffs, zv);
     }
     return sum;
@@ -762,7 +758,7 @@ static double complex sum_fourier_der(double nu, unsigned int dim, double lambda
         matrix_intVector(dim, m_invt, zv, lv, diag);
         double complex summand = summand_fourier_der(nu, dim, lambda, lv, x, y,
                                                      zArgBound, alpha, alphaAbs);
-        kahan_add(&sum, &epsilon, summand);
+        kahan_add_c(&sum, &epsilon, summand);
         lattice_vector_increment(dim, cutoffs, zv);
     }
     lattice_vector_increment(dim, cutoffs, zv); // skips zero
@@ -770,7 +766,7 @@ static double complex sum_fourier_der(double nu, unsigned int dim, double lambda
         matrix_intVector(dim, m_invt, zv, lv, diag);
         double complex summand = summand_fourier_der(nu, dim, lambda, lv, x, y,
                                                      zArgBound, alpha, alphaAbs);
-        kahan_add(&sum, &epsilon, summand);
+        kahan_add_c(&sum, &epsilon, summand);
         lattice_vector_increment(dim, cutoffs, zv);
     }
     return sum;
@@ -869,7 +865,7 @@ static double complex sum_fourier_harmonic(
         summand += summand_fourier_harmonic(nu, kIndex, dim, lambda, lv, x, y,
                                             zArgBound, alphaAbs, chunk_offset,
                                             valid_count, coeffs, exponents);
-        kahan_add(&sum, &epsilon, summand);
+        kahan_add_c(&sum, &epsilon, summand);
         lattice_vector_increment(dim, cutoffs, zv);
     }
     return sum;
@@ -951,7 +947,7 @@ static double complex sum_fourier_harmonic_1D(double nu, unsigned int dim,
         matrix_intVector(dim, m_invt, zv_sym, lv, diag);
         summand += summand_fourier_harmonic_1D(nu, dim, lambda, lv, x, y, zArgBound,
                                                alphaAbs);
-        kahan_add(&sum, &epsilon, summand);
+        kahan_add_c(&sum, &epsilon, summand);
         lattice_vector_increment(dim, cutoffs, zv);
     }
     return sum;
