@@ -678,37 +678,6 @@ double hpdyad_to_double(const hpdyad_t *a) {
 }
 
 /**
- * @brief euclidean dot product.
- * @param[in] dim: dimension of the input vectors
- * @param[in] v1: first vector.
- * @param[in] v2: second vector.
- * @return dot product of v1 and v2.
- */
-double dot(unsigned int dim, const double *v1, const double *v2) {
-    double r = 0;
-    for (int i = 0; i < dim; i++) {
-        r += v1[i] * v2[i];
-    }
-    return r;
-}
-
-/**
- * @brief matrix - (integer) vector multiplication.
- * @param[in] dim: dimension of the square matrix and the integer vector.
- * @param[in] m: square matrix.
- * @param[in] v: integer vector.
- * @param[in,out] res: solution vector of the vector matrix multiplication.
- */
-void matrix_intVector(unsigned int dim, const double *m, const int *v, double *res) {
-    for (int i = 0; i < dim; i++) {
-        res[i] = 0;
-        for (int j = 0; j < dim; j++) {
-            res[i] += m[(i * dim) + j] * v[j];
-        }
-    }
-}
-
-/**
  * @brief square matrix transpose.
  * @param[in] dim: dimension of the square matrix.
  * @param[in,out] m: square matrix.

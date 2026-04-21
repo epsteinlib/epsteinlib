@@ -291,8 +291,8 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
  * @parma[in] alphaAbs: absolute value of the multi-index alpha.
  * @return partial derivative of s_{d+2k}(z).
  */
-double complex singularity_s_der(unsigned int k, unsigned int dim, const double *z,
-                                 const unsigned int *alpha, unsigned int alphaAbs);
+double singularity_s_der(unsigned int k, unsigned int dim, const double *z,
+                         const unsigned int *alpha, unsigned int alphaAbs);
 /**
  * @brief Calculates the derivatives of regularization of the zero summand in the
  * second sum in Crandall's formula in the special case of nu = dim + 2k for some
