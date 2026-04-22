@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan.busse@dlr.de>
+// SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
@@ -19,7 +19,7 @@
 
 #include "../src/gamma.h"
 
-#define BASE_PATH "src/tests/csv"
+#define BASE_PATH "tests/csv"
 
 #ifndef MAX_PATH_LENGTH
 #define MAX_PATH_LENGTH 1024

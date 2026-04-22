@@ -224,14 +224,14 @@ matrixTestEntry[a_]:=Flatten[{Length[a],N@a,N@Inverse[Transpose[a]]}]
 
 
 matrixTestData2D={
-        matrixTestEntry[{{1,2},{0,1}}]
-        ,matrixTestEntry[{{1,0},{2,1}}]
-        ,matrixTestEntry[{{0,2},{1,0}}]
-        ,matrixTestEntry[{{0,1},{1,1}}]
-        ,matrixTestEntry[{{1,1},{1,0}}]
-        ,matrixTestEntry[{{0,2},{1,1}}]
-        ,matrixTestEntry[{{1,1},{2,0}}]
-        ,matrixTestEntry[{{0,1},{1,1}}]
+	matrixTestEntry[{{1,2},{0,1}}]
+	,matrixTestEntry[{{1,0},{2,1}}]
+	,matrixTestEntry[{{0,2},{1,0}}]
+	,matrixTestEntry[{{0,1},{1,1}}]
+	,matrixTestEntry[{{1,1},{1,0}}]
+	,matrixTestEntry[{{0,2},{1,1}}]
+	,matrixTestEntry[{{1,1},{2,0}}]
+	,matrixTestEntry[{{0,1},{1,1}}]
 };
 
 
@@ -240,11 +240,11 @@ matrixTestData2D={
 
 
 While[Length[matrixTestData2D]<500
-        ,temp=RandomReal[{-10,10},{2,2}]
-        ;If[ConditionNumber[temp]<10
-                ,AppendTo[matrixTestData2D,matrixTestEntry[temp]]
-        ]
-        ;Clear[temp]
+	,temp=RandomReal[{-10,10},{2,2}]
+	;If[ConditionNumber[temp]<10
+		,AppendTo[matrixTestData2D,matrixTestEntry[temp]]
+	]
+	;Clear[temp]
 ]
 
 
@@ -253,14 +253,14 @@ While[Length[matrixTestData2D]<500
 
 
 matrixTestData3D=Join[
-        {
-                matrixTestEntry[{{0,2,3},{1,1,1},{4,5,6}}]
-                ,matrixTestEntry[{{0,0,1},{0,1,0},{1,0,0}}]
-        },
-        Table[
-                matrixTestEntry[BMat[a]]
-        ,{a,1/10,1,1/10}
-        ]
+	{
+		matrixTestEntry[{{0,2,3},{1,1,1},{4,5,6}}]
+		,matrixTestEntry[{{0,0,1},{0,1,0},{1,0,0}}]
+	},
+	Table[
+		matrixTestEntry[BMat[a]]
+	,{a,1/10,1,1/10}
+	]
 ];
 
 
@@ -269,11 +269,11 @@ matrixTestData3D=Join[
 
 
 While[Length[matrixTestData3D]<400
-        ,temp=RandomReal[{-10,10},{3,3}]
-        ;If[ConditionNumber[temp]<10
-                ,AppendTo[matrixTestData3D,matrixTestEntry[temp]]
-        ]
-        ;Clear[temp]
+	,temp=RandomReal[{-10,10},{3,3}]
+	;If[ConditionNumber[temp]<10
+		,AppendTo[matrixTestData3D,matrixTestEntry[temp]]
+	]
+	;Clear[temp]
 ]
 
 
@@ -282,7 +282,7 @@ While[Length[matrixTestData3D]<400
 
 
 matrixTestData4D=Map[matrixTestEntry,Permutations[
-        {{1,0,0,0},{0,1,0,0},{5,-7,1,0},{0,0,0,1}}
+	{{1,0,0,0},{0,1,0,0},{5,-7,1,0},{0,0,0,1}}
 ]];
 
 
@@ -291,11 +291,11 @@ matrixTestData4D=Map[matrixTestEntry,Permutations[
 
 
 While[Length[matrixTestData4D]<99
-        ,temp=RandomReal[{-10,10},{4,4}]
-        ;If[ConditionNumber[temp]<10
-                ,AppendTo[matrixTestData4D,matrixTestEntry[temp]]
-        ]
-        ;Clear[temp]
+	,temp=RandomReal[{-10,10},{4,4}]
+	;If[ConditionNumber[temp]<10
+		,AppendTo[matrixTestData4D,matrixTestEntry[temp]]
+	]
+	;Clear[temp]
 ]
 
 
