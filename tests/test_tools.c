@@ -30,7 +30,7 @@
 int test_matrix_transpose_inverse(void) { // NOLINT
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/svd_Ref.csv", BASE_PATH);
+    int result = snprintf(path, sizeof(path), "%s/svd_ref.csv", BASE_PATH);
     if (result < 0 || result >= (int)sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }

@@ -31,7 +31,7 @@
 int test_crandall_g(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/crandall_g_Ref.csv", // NOLINT
+    int result = snprintf(path, sizeof(path), "%s/crandall_g_ref.csv", // NOLINT
                           BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
