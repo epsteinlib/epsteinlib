@@ -10,7 +10,7 @@
 
 
 (* ::Text:: *)
-(*This notebook generates the results for all figures presented in "Computation and Properties of the Epstein Zeta Function with Applications to Quantum Systems", published in the IMA Journal of Numerical Analysis. Evaluation of this script takes less than 3 minutes on a standard laptop equipped with 12 cores.*)
+(*This notebook generates the results for all figures presented in "Computation and Properties of the Epstein Zeta Function with Applications to Quantum Systems", published in the IMA Journal of Numerical Analysis. Evaluation of this script takes less than a minute on a standard laptop equipped with 12 cores.*)
 
 
 (* ::Subsection::Closed:: *)
