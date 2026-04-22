@@ -58,6 +58,7 @@ subdir('include')
 subdir('mathematica')
 subdir('src')
 subdir('examples/c')
+subdir('tests')
 if build_python
     subdir('python')
 endif
