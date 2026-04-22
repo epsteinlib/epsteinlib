@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2025 Jan Schmitz <schmitz@num.uni-sb.de>
+# SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
 # SPDX-FileCopyrightText: 2025-2026 Jonathan Busse <jonathan@jbusse.de>
 #
+# SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-License-Identifier: CC0-1.0
 
 test_epsteinZeta = executable('epsteinlib_test_epsteinZeta',
@@ -41,6 +43,15 @@ test_epsteinZetaRegDer = executable('epsteinlib_test_epsteinZetaRegDer',
 
 test_tools= executable('epsteinlib_test_tools',
     ['../src/tools.c','utils.c','test_tools.c'],
+    include_directories : incdir,
+    dependencies: deps,
+    install: false,
+    override_options: override_options,
+    link_with : epsteinlib
+)
+
+test_hpdyad= executable('epsteinlib_test_hpdyad',
+    ['../src/hpdyad.c','utils.c','test_hpdyad.c'],
     include_directories : incdir,
     dependencies: deps,
     install: false,
@@ -112,5 +123,10 @@ test('test_crandall_derivatives',
 
 test('test_tools',
     test_tools,
+    workdir: meson.current_source_dir()
+)
+
+test('test_hpdyad',
+    test_hpdyad,
     workdir: meson.current_source_dir()
 )

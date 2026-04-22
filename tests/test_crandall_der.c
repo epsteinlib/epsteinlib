@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only
+ */
+
 // SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
 //
 // SPDX-License-Identifier: AGPL-3.0-only
@@ -10,6 +16,7 @@
 
 #include "../src/crandall.h"
 #include "../src/tools.h"
+#include "/home/buss_jn/learning/coding/c/epsteinlib/src/hpdyad.h"
 #include "utils.h"
 #include <complex.h>
 #include <errno.h>

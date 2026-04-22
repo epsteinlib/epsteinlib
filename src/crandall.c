@@ -12,6 +12,7 @@
  */
 
 #include "gamma.h"
+#include "hpdyad.h"
 #include "tools.h"
 #include <complex.h>
 #include <float.h>
