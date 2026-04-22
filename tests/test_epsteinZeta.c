@@ -7,7 +7,7 @@
  * @brief Benchmarking of the Epstein zeta function.
  */
 
-#include "../tools.h"
+#include "../src/tools.h"
 #include "epsteinZeta.h"
 #include "utils.h"
 #include <complex.h>
