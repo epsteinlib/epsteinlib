@@ -233,7 +233,7 @@ static int test_hpdyad_add_from_file(const char *filename) { // NOLINT
 int test_ctzmsb(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/ctzmsb_Ref.csv", BASE_PATH);
+    int result = snprintf(path, sizeof(path), "%s/ctzmsb_ref.csv", BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
@@ -309,7 +309,7 @@ int test_hpdyad_set_ull(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result =
-        snprintf(path, sizeof(path), "%s/hpdyad_set_ull_Ref.csv", BASE_PATH);
+        snprintf(path, sizeof(path), "%s/hpdyad_set_ull_ref.csv", BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
@@ -386,7 +386,7 @@ int test_hpdyad_normalize(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result =
-        snprintf(path, sizeof(path), "%s/hpdyad_normalize_Ref.csv", BASE_PATH);
+        snprintf(path, sizeof(path), "%s/hpdyad_normalize_ref.csv", BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
@@ -493,7 +493,7 @@ int test_hpdyad_normalize(void) {
 int test_hpdyad_mul(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/hpdyad_mul_Ref.csv", BASE_PATH);
+    int result = snprintf(path, sizeof(path), "%s/hpdyad_mul_ref.csv", BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
@@ -584,7 +584,7 @@ int test_hpdyad_shr_bits_sticky(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result =
-        snprintf(path, sizeof(path), "%s/hpdyad_shr_sticky_Ref.csv", BASE_PATH);
+        snprintf(path, sizeof(path), "%s/hpdyad_shr_sticky_ref.csv", BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
@@ -688,7 +688,7 @@ int test_hpdyad_shr_bits_sticky(void) {
  */
 int test_hpdyad_add(void) {
     printf("%s\n", __func__);
-    return test_hpdyad_add_from_file("hpdyad_add_Ref.csv");
+    return test_hpdyad_add_from_file("hpdyad_add_ref.csv");
 }
 
 /*!
@@ -698,7 +698,7 @@ int test_hpdyad_add(void) {
  */
 int test_hpdyad_add_fractional(void) {
     printf("%s\n", __func__);
-    return test_hpdyad_add_from_file("hpdyad_add_fractional_Ref.csv");
+    return test_hpdyad_add_from_file("hpdyad_add_fractional_ref.csv");
 }
 
 /*!
@@ -710,7 +710,7 @@ int test_hpdyad_to_double(void) { // NOLINT
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result =
-        snprintf(path, sizeof(path), "%s/hpdyad_to_double_Ref.csv", BASE_PATH);
+        snprintf(path, sizeof(path), "%s/hpdyad_to_double_ref.csv", BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }

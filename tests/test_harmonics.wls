@@ -94,8 +94,8 @@ cOuterTab=ParallelTable[{n0[j],k0[j],d0[j],N@cOuter[n0[j],k0[j],d0[j]]},{j,range
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/coeffs_c_inner_Ref.csv",cInnerTab];
-Export["csv/coeffs_c_outer_Ref.csv",cOuterTab];
+Export["csv/coeffs_c_inner_ref.csv",cInnerTab];
+Export["csv/coeffs_c_outer_ref.csv",cOuterTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -137,7 +137,7 @@ hInnerTab=ParallelTable[Flatten@{\[Alpha]0[j],\[Beta]0[j],\[Gamma]0[j],k0[j],N@h
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/harmonic_h_inner_Ref.csv",hInnerTab];
+Export["csv/harmonic_h_inner_ref.csv",hInnerTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -165,7 +165,7 @@ h1DTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@h[k0[j]][z0[j],\[Alph
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/harmonic_h_1D_Ref.csv",h1DTab];
+Export["csv/harmonic_h_1D_ref.csv",h1DTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -207,4 +207,4 @@ h3DTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@h[k0[j]][z0[j],\[Alph
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/harmonic_h_3D_Ref.csv",h3DTab];
+Export["csv/harmonic_h_3D_ref.csv",h3DTab];

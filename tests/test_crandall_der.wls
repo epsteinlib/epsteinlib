@@ -162,7 +162,7 @@ pTab=ParallelTable[Flatten[Join[N[z0[i],30],\[Alpha]0[i],\[Beta]0[i],{N[SetPreci
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/polynomial_p_Ref.csv",pTab];
+Export["csv/polynomial_p_ref.csv",pTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -196,8 +196,8 @@ cOuterTab=ParallelTable[{n0[j],k0[j],d0[j],N@cOuter[n0[j],k0[j],d0[j]]},{j,range
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/coeffs_c_inner_Ref.csv",cInnerTab];
-Export["csv/coeffs_c_outer_Ref.csv",cOuterTab];
+Export["csv/coeffs_c_inner_ref.csv",cInnerTab];
+Export["csv/coeffs_c_outer_ref.csv",cOuterTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -239,7 +239,7 @@ hInnerTab=ParallelTable[Flatten@{\[Alpha]0[j],\[Beta]0[j],\[Gamma]0[j],k0[j],N@h
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/harmonic_h_inner_Ref.csv",hInnerTab];
+Export["csv/harmonic_h_inner_ref.csv",hInnerTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -267,7 +267,7 @@ h1DTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@h[k0[j]][z0[j],\[Alph
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/harmonic_h_1D_Ref.csv",h1DTab];
+Export["csv/harmonic_h_1D_ref.csv",h1DTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -309,7 +309,7 @@ h3DTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@h[k0[j]][z0[j],\[Alph
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/harmonic_h_3D_Ref.csv",h3DTab];
+Export["csv/harmonic_h_3D_ref.csv",h3DTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -345,7 +345,7 @@ crandallDerTab=ParallelTable[With[{g=GDerAnalytic[\[Nu]0[i],z0[i],\[Alpha]0[i]]}
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/crandall_g_der_Ref.csv",crandallDerTab];
+Export["csv/crandall_g_der_ref.csv",crandallDerTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -377,7 +377,7 @@ lTab=ParallelTable[Flatten[Join[N[z0[i],30],\[Alpha]0[i],\[Beta]0[i],{N[SetPreci
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/polynomial_l_Ref.csv",lTab];
+Export["csv/polynomial_l_ref.csv",lTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -409,7 +409,7 @@ YDerTab=ParallelTable[Flatten[{k0[i],N[z0[i],30],\[Alpha]0[i],N[SetPrecision[Der
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/polynomial_y_der_Ref.csv",YDerTab];
+Export["csv/polynomial_y_der_ref.csv",YDerTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -440,7 +440,7 @@ LDerTab=ParallelTable[Flatten[{N[z0[i],30],\[Alpha]0[i],N[SetPrecision[Derivativ
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/log_l_der_Ref.csv",LDerTab];
+Export["csv/log_l_der_ref.csv",LDerTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -472,7 +472,7 @@ sDerTab=ParallelTable[Flatten[{k0[i],N[z0[i],30],\[Alpha]0[i],N[SetPrecision[Der
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/singularity_s_der_Ref.csv",sDerTab];
+Export["csv/singularity_s_der_ref.csv",sDerTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -504,7 +504,7 @@ crandallgRegDerTab=ParallelTable[With[{g=GRegDer[\[Nu]0[i],z0[i],\[Alpha]0[i]]},
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/crandall_gReg_der_Ref.csv",crandallgRegDerTab];
+Export["csv/crandall_gReg_der_ref.csv",crandallgRegDerTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -532,4 +532,4 @@ GRegKDerTab=ParallelTable[Flatten[Join[{\[Nu]0[i]},N[z0[i],16],\[Alpha]0[i],{N[S
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/crandall_gReg_der_d2k_prototype_Ref.csv",GRegKDerTab];
+Export["csv/crandall_gReg_der_d2k_prototype_ref.csv",GRegKDerTab];

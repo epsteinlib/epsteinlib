@@ -42,7 +42,7 @@ int test_polynomial_p(void) {
     printf("%s ", __func__);
 
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/polynomial_p_Ref.csv", // NOLINT
+    int result = snprintf(path, sizeof(path), "%s/polynomial_p_ref.csv", // NOLINT
                           BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
@@ -150,7 +150,7 @@ int test_polynomial_l(void) {
     printf("%s ", __func__);
 
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/polynomial_l_Ref.csv", // NOLINT
+    int result = snprintf(path, sizeof(path), "%s/polynomial_l_ref.csv", // NOLINT
                           BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
@@ -505,7 +505,7 @@ int test_polynomial_y_der(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result =
-        snprintf(path, sizeof(path), "%s/polynomial_y_der_Ref.csv", // NOLINT
+        snprintf(path, sizeof(path), "%s/polynomial_y_der_ref.csv", // NOLINT
                  BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
@@ -620,7 +620,7 @@ int test_log_l_der(void) {
     printf("%s ", __func__);
 
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/log_l_der_Ref.csv", // NOLINT
+    int result = snprintf(path, sizeof(path), "%s/log_l_der_ref.csv", // NOLINT
                           BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
@@ -732,7 +732,7 @@ int test_singularity_s_der(void) {
 
     char path[MAX_PATH_LENGTH];
     int result =
-        snprintf(path, sizeof(path), "%s/singularity_s_der_Ref.csv", // NOLINT
+        snprintf(path, sizeof(path), "%s/singularity_s_der_ref.csv", // NOLINT
                  BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
@@ -848,7 +848,7 @@ int test_singularity_s_der(void) {
 int test_crandall_g_der(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/crandall_g_der_Ref.csv", // NOLINT
+    int result = snprintf(path, sizeof(path), "%s/crandall_g_der_ref.csv", // NOLINT
                           BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
@@ -965,7 +965,7 @@ int test_crandall_gReg_der(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result =
-        snprintf(path, sizeof(path), "%s/crandall_gReg_der_Ref.csv", // NOLINT
+        snprintf(path, sizeof(path), "%s/crandall_gReg_der_ref.csv", // NOLINT
                  BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
@@ -1079,7 +1079,7 @@ int test_crandall_gReg_der_d2k_prototype(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path),
-                          "%s/crandall_gReg_der_d2k_prototype_Ref.csv", // NOLINT
+                          "%s/crandall_gReg_der_d2k_prototype_ref.csv", // NOLINT
                           BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");

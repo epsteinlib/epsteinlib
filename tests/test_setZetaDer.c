@@ -34,7 +34,7 @@
 int test_setZetaDer_1D(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/setZetaDer_1D_Ref.csv", // NOLINT
+    int result = snprintf(path, sizeof(path), "%s/setZetaDer_1D_ref.csv", // NOLINT
                           BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
@@ -153,7 +153,7 @@ int test_setZetaDer_1D(void) {
 int test_setZetaDer_2D(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/setZetaDer_2D_Ref.csv", // NOLINT
+    int result = snprintf(path, sizeof(path), "%s/setZetaDer_2D_ref.csv", // NOLINT
                           BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
@@ -402,7 +402,7 @@ int test_setZetaDer_taylor(void) { // NOLINT
 int test_setZetaDer_odd(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/setZetaDer_odd_Ref.csv", // NOLINT
+    int result = snprintf(path, sizeof(path), "%s/setZetaDer_odd_ref.csv", // NOLINT
                           BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
@@ -527,7 +527,7 @@ int test_setZetaDer_special_exponents(void) { // NOLINT
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path),
-                          "%s/setZetaDer_special_exponents_Ref.csv", BASE_PATH);
+                          "%s/setZetaDer_special_exponents_ref.csv", BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }

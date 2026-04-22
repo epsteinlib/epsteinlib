@@ -233,7 +233,7 @@ ctzmsbTab = Join[specialCases, ctzmsbTab];
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/ctzmsb_Ref.csv", ctzmsbTab];
+Export["csv/ctzmsb_ref.csv", ctzmsbTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -263,7 +263,7 @@ testCases = Join[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/hpdyad_set_ull_Ref.csv", testCases];
+Export["csv/hpdyad_set_ull_ref.csv", testCases];
 
 
 (* ::Subsection::Closed:: *)
@@ -339,7 +339,7 @@ results = Table[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/hpdyad_normalize_Ref.csv", results];
+Export["csv/hpdyad_normalize_ref.csv", results];
 
 
 (* ::Subsection::Closed:: *)
@@ -420,7 +420,7 @@ hpdyadMulTestTable=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/hpdyad_mul_Ref.csv",hpdyadMulTestTable];
+Export["csv/hpdyad_mul_ref.csv",hpdyadMulTestTable];
 
 
 (* ::Subsection::Closed:: *)
@@ -516,7 +516,7 @@ shrStickyTab=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/hpdyad_shr_sticky_Ref.csv", shrStickyTab];
+Export["csv/hpdyad_shr_sticky_ref.csv", shrStickyTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -593,7 +593,7 @@ testData=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/hpdyad_add_Ref.csv", testData];
+Export["csv/hpdyad_add_ref.csv", testData];
 
 
 (* ::Subsection::Closed:: *)
@@ -679,7 +679,7 @@ fractionalTestData = ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/hpdyad_add_fractional_Ref.csv", fractionalTestData];
+Export["csv/hpdyad_add_fractional_ref.csv", fractionalTestData];
 
 
 (* ::Subsection::Closed:: *)
@@ -756,4 +756,4 @@ testData=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/hpdyad_to_double_Ref.csv",testData];
+Export["csv/hpdyad_to_double_ref.csv",testData];

@@ -88,7 +88,7 @@ int test_coeffs_c_inner(void) {
     printf("%s ", __func__);
 
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/coeffs_c_inner_Ref.csv", // NOLINT
+    int result = snprintf(path, sizeof(path), "%s/coeffs_c_inner_ref.csv", // NOLINT
                           BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
@@ -194,7 +194,7 @@ int test_harmonic_h_inner(void) {
 
     char path[MAX_PATH_LENGTH];
     int result =
-        snprintf(path, sizeof(path), "%s/harmonic_h_inner_Ref.csv", // NOLINT
+        snprintf(path, sizeof(path), "%s/harmonic_h_inner_ref.csv", // NOLINT
                  BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
@@ -320,7 +320,7 @@ int test_harmonic_h_1D(void) {
     printf("%s ", __func__);
 
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/harmonic_h_1D_Ref.csv", // NOLINT
+    int result = snprintf(path, sizeof(path), "%s/harmonic_h_1D_ref.csv", // NOLINT
                           BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
@@ -430,7 +430,7 @@ int test_harmonic_h_3D(void) {
     printf("%s ", __func__);
 
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/harmonic_h_3D_Ref.csv", // NOLINT
+    int result = snprintf(path, sizeof(path), "%s/harmonic_h_3D_ref.csv", // NOLINT
                           BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");

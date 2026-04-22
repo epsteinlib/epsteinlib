@@ -166,8 +166,8 @@ epsteinZetaRegRef=N[ParallelTable[With[{zeta=N[epsteinZetaReg[\[Nu]0[i],a0[i],x0
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/epsteinZeta_Ref.csv",epsteinZetaRef];
-Export["csv/epsteinZetaReg_Ref.csv",epsteinZetaRegRef];
+Export["csv/epsteinZeta_ref.csv",epsteinZetaRef];
+Export["csv/epsteinZetaReg_ref.csv",epsteinZetaRegRef];
 
 
 (* ::Subsection::Closed:: *)
@@ -246,7 +246,7 @@ epsteinZetaRandomMatricesRef=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/epsteinZeta_random_matrices_Ref.csv",epsteinZetaRandomMatricesRef];
+Export["csv/epsteinZeta_random_matrices_ref.csv",epsteinZetaRandomMatricesRef];
 
 
 epsteinZetaRegRandomMatricesRef=Table[
@@ -267,4 +267,4 @@ epsteinZetaRegRandomMatricesRef=Table[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/epsteinZetaReg_random_matrices_Ref.csv",epsteinZetaRegRandomMatricesRef];
+Export["csv/epsteinZetaReg_random_matrices_ref.csv",epsteinZetaRegRandomMatricesRef];

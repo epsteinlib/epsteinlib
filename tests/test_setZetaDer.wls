@@ -377,7 +377,7 @@ zDerTab1D=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/setZetaDer_1D_Ref.csv",zDerTab1D];
+Export["csv/setZetaDer_1D_ref.csv",zDerTab1D];
 
 
 (* ::Subsection::Closed:: *)
@@ -477,7 +477,7 @@ zDerTab=Join[zDerRandomTab,zDerSpecialTab,zDerLargeNu];
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/setZetaDer_2D_Ref.csv",zDerTab];
+Export["csv/setZetaDer_2D_ref.csv",zDerTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -512,7 +512,7 @@ zOddTab=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/setZetaDer_odd_Ref.csv",zOddTab];
+Export["csv/setZetaDer_odd_ref.csv",zOddTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -559,7 +559,7 @@ zLaplaceTab=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/setZetaDer_laplace_Ref.csv",zLaplaceTab];
+Export["csv/setZetaDer_laplace_ref.csv",zLaplaceTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -646,4 +646,4 @@ zetaSpecialTab = Join[zetaSpecialNuBiggerDim,zetaSpecialNuEqualsDimMinus2k];
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/setZetaDer_special_exponents_Ref.csv", zetaSpecialTab];
+Export["csv/setZetaDer_special_exponents_ref.csv", zetaSpecialTab];
