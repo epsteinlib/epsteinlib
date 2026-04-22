@@ -58,28 +58,75 @@ SetOptions[MaTeX,FontSize->18];
 
 
 (* ::Text:: *)
+(*Set reference and plotting functions.*)
+
+
+ArgColor[arg_]=Hue[(arg+Pi)/(2 Pi)];
+zfunc[x_,y_]:=EpsteinZeta[0.5,{{1}},{y},{x}]
+zregfunc[x_,y_]:=EpsteinZetaReg[0.5,{{1}},{y},{x}]
+
+
+(* ::Text:: *)
 (*Generate Epstein zeta and regularized Epstein zeta values for a 2D grid in the range [-0.7, 0.7] x [-0.7, 0.7], avoiding the origin.*)
 
 
 offset=0.01; xmin=-0.7-offset; xmax=0.7+offset; ymin =-0.7-offset; ymax=0.7+offset; stepsize=0.01;
-ztab3D[1]=Flatten[ParallelTable[{x,y,Abs[EpsteinZeta[1/2,{{1}},{y},{x}]]},{x,xmin,0-offset,stepsize},{y,ymin,0-offset,stepsize}],1];
-ztab3D[2]=Flatten[ParallelTable[{x,y,Abs[EpsteinZeta[1/2,{{1}},{y},{x}]]},{x,xmin,0-offset,stepsize},{y,0+offset,ymax,stepsize}],1];
-ztab3D[3]=Flatten[ParallelTable[{x,y,Abs[EpsteinZeta[1/2,{{1}},{y},{x}]]},{x,0+offset,xmax,stepsize},{y,ymin,0-offset,stepsize}],1];
-ztab3D[4]=Flatten[ParallelTable[{x,y,Abs[EpsteinZeta[1/2,{{1}},{y},{x}]]},{x,0+offset,xmax,stepsize},{y,0+offset,ymax,stepsize}],1];
-ztab3D[5]=Join[Flatten[ParallelTable[{x,y,Abs[EpsteinZeta[1/2,{{1}},{y},{x}]]},{x,xmin,0-offset, stepsize},{y,{0}}],1],Flatten[ParallelTable[{x,y,Abs[EpsteinZeta[1/2,{{1}},{y},{x}]]},{x,0+offset,xmax, stepsize},{y,{0}}],1]];
-ztab3D[6]=Join[Flatten[ParallelTable[{x,y,Abs[EpsteinZeta[1/2,{{1}},{y},{x}]]},{x,{0}},{y,ymin,0-offset,stepsize}],1],Flatten[ParallelTable[{x,y,Abs[EpsteinZeta[1/2,{{1}},{y},{x}]]},{x,{0}},{y,0+offset,ymax,stepsize}],1]];
-zregtab3D[1]=Flatten[ParallelTable[{x,y,Abs[EpsteinZetaReg[1/2,{{1}},{y},{x}]]},{y,xmin,0-offset,stepsize},{x,ymin,ymax,stepsize}],1];
-zregtab3D[2]=Flatten[ParallelTable[{x,y,Abs[EpsteinZetaReg[1/2,{{1}},{y},{x}]]},{y,0+offset,xmax,stepsize},{x,ymin,ymax,stepsize}],1];
+ztab3D[1]=Flatten[ParallelTable[{x,y,Abs[zfunc[x,y]]},{x,xmin,0-offset, stepsize},{y,ymin,0-offset,stepsize}],1];
+ztab3D[2]=Flatten[ParallelTable[{x,y,Abs[zfunc[x,y]]},{x,xmin,0-offset, stepsize},{y,0+offset,ymax,stepsize}],1];
+ztab3D[3]=Flatten[ParallelTable[{x,y,Abs[zfunc[x,y]]},{x,0+offset,xmax, stepsize},{y,ymin,0-offset,stepsize}],1];
+ztab3D[4]=Flatten[ParallelTable[{x,y,Abs[zfunc[x,y]]},{x,0+offset,xmax, stepsize},{y,0+offset,ymax,stepsize}],1];
+ztab3D[5]=Join[Flatten[ParallelTable[{x,y,Abs[zfunc[x,y]]},{x,xmin,0-offset, stepsize},{y,{0}}],1],Flatten[ParallelTable[{x,y,Abs[zfunc[x,y]]},{x,0+offset,xmax, 0.1stepsize},{y,{0}}],1]];
+ztab3D[6]=Join[Flatten[ParallelTable[{x,y,Abs[zfunc[x,y]]},{x,{0}},{y,ymin,0-offset,0.1stepsize}],1],Flatten[ParallelTable[{x,y,Abs[zfunc[x,y]]},{x,{0}},{y,0+offset,ymax,0.05stepsize}],1]];
+zregtab3D[1]=Flatten[ParallelTable[{x,y,Abs[zregfunc[x,y]]},{y,xmin,0-offset,stepsize},{x,ymin,ymax,stepsize}],1];
+zregtab3D[2]=Flatten[ParallelTable[{x,y,Abs[zregfunc[x,y]]},{y,0+offset,xmax,stepsize},{x,ymin,ymax,stepsize}],1];
+zregtab3D[3]=Flatten[ParallelTable[{x,y,Abs[zregfunc[x,y]]},{x,xmin,xmax, 0.1stepsize},{y,{0}}],1];
 
 
 (* ::Text:: *)
 (*Create a side-by-side 3D plot of the absolute values of the Epstein zeta function and its regularized version.*)
 
 
-GraphicsRow[{Show[ListPlot3D[ztab3D[#],AxesLabel->{MaTeX@"y",MaTeX@"x"},ColorFunction->"Rainbow",PlotLabel->MaTeX@"|Z_{\\mathbb{Z},\\:\\! 1/2}\\begin{vmatrix}x\\\\ y\\end{vmatrix}|",PlotRange->{-0.5,8},Mesh->None]&/@Range[6],
-Show[ListLinePlot3D[ztab3D[#],PlotStyle->Thickness[0.01],PlotRange->{-0.5,8}]&/@{5,6}]],
-Show[ListPlot3D[zregtab3D[#],AxesLabel->{MaTeX@"y",MaTeX@"x"},ColorFunction->"Rainbow",PlotLabel->MaTeX@"|Z_{\\mathbb{Z},\\:\\! 1/2}^{\\mathrm{reg}}\\begin{vmatrix}x\\\\ y\\end{vmatrix}|",PlotRange->{-0.5,8},Mesh->None]&/@Range[2],
-Show[ListLinePlot3D[ztab3D[#],PlotStyle->Thickness[0.01],ColorFunction->"Rainbow"]&/@{5,6}]]}]
+GraphicsRow[{
+	Show[
+		ListPlot3D[
+			ztab3D[#]
+			,AxesLabel->{MaTeX@"y",MaTeX@"x"}
+			,ColorFunction->Function[{x,y,z},ArgColor[Arg[zfunc[x,y]]]]
+			,ColorFunctionScaling->False
+			,PlotLabel->MaTeX["|Z_{\\mathbb{Z},\\:\\! 1/2}(x,y)|"]
+			,PlotRange->{-0.5,8}
+			,Mesh->None
+		]&/@Range[6]
+		,ListLinePlot3D[
+			ztab3D[#]
+			,PlotStyle->Thickness[0.01]
+			,ColorFunction->Function[{x,y,z},ArgColor[Arg[zfunc[y,x]]]]
+			,ColorFunctionScaling->False
+			,PlotRange->{-0.5,8}
+		]&/@{5,6}
+	],Show[
+		ListPlot3D[
+			zregtab3D[#]
+			,AxesLabel->{MaTeX@"y",MaTeX@"x"}
+			,ColorFunction->Function[{x,y,z},ArgColor[Arg[zregfunc[x,y]]]]
+			,ColorFunctionScaling->False
+			,PlotLabel->MaTeX["|Z_{\\mathbb{Z},\\:\\! 1/2}^{\\mathrm{reg}}(x,y)|"]
+			,PlotRange->{-0.5,8}
+			,Mesh->None
+		]&/@Range[2]
+		,ListLinePlot3D[
+			zregtab3D[3]
+			,PlotStyle->Thickness[0.01]
+			,ColorFunction->Function[{x,y,z},ArgColor[Arg[zfunc[y,x]]]]
+			,ColorFunctionScaling->False
+			,PlotRange->{-0.5,8}
+		]
+	]
+	,BarLegend[
+		{ArgColor[#]&,{-Pi-1/100,Pi+1/100}}
+		,Ticks->{{-Pi,"-\[Pi]"},{-Pi/2,"-\[Pi]/2"},{0,"0"},{Pi/2,"\[Pi]/2"},{Pi,"\[Pi]"}}
+	]
+}]
 
 
 (* ::Section:: *)
