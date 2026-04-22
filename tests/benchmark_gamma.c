@@ -17,7 +17,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "../gamma.h"
+#include "../src/gamma.h"
 
 #define BASE_PATH "src/tests/csv"
 

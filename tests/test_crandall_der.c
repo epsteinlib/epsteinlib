@@ -8,8 +8,8 @@
  * benchmark values.
  */
 
-#include "../crandall.h"
-#include "../tools.h"
+#include "../src/crandall.h"
+#include "../src/tools.h"
 #include "utils.h"
 #include <complex.h>
 #include <errno.h>

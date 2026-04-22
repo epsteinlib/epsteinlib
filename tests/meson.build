@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: CC0-1.0
 
 test_epsteinZeta = executable('epsteinlib_test_epsteinZeta',
-    ['../tools.c','utils.c','test_epsteinZeta.c'],
+    ['../src/tools.c','utils.c','test_epsteinZeta.c'],
     include_directories : incdir,
     dependencies: deps,
     install: false,
@@ -22,7 +22,7 @@ test_crandall = executable('epsteinlib_test_crandall',
 )
 
 test_setZetaDer = executable('epsteinlib_test_setZetaDer',
-    ['../tools.c','utils.c','test_setZetaDer.c'],
+    ['../src/tools.c','utils.c','test_setZetaDer.c'],
     include_directories : incdir,
     dependencies: deps,
     install: false,
@@ -31,7 +31,7 @@ test_setZetaDer = executable('epsteinlib_test_setZetaDer',
 )
 
 test_epsteinZetaRegDer = executable('epsteinlib_test_epsteinZetaRegDer',
-    ['../tools.c','utils.c','test_epsteinZetaRegDer.c'],
+    ['../src/tools.c','utils.c','test_epsteinZetaRegDer.c'],
     include_directories : incdir,
     dependencies: deps,
     install: false,
@@ -40,7 +40,7 @@ test_epsteinZetaRegDer = executable('epsteinlib_test_epsteinZetaRegDer',
 )
 
 test_tools= executable('epsteinlib_test_tools',
-    ['../tools.c','utils.c','test_tools.c'],
+    ['../src/tools.c','utils.c','test_tools.c'],
     include_directories : incdir,
     dependencies: deps,
     install: false,
@@ -67,7 +67,7 @@ benchmark_epstein = executable('epsteinlib_benchmark_epstein',
 )
 
 benchmark_gamma = executable('epsteinlib_benchmark_gamma',
-    ['../gamma.c','benchmark_gamma.c'],
+    ['../src/gamma.c','benchmark_gamma.c'],
     include_directories : incdir,
     dependencies: deps,
     install: false,

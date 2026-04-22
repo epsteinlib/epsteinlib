@@ -7,7 +7,7 @@
  * @brief Benchmarking of the upper Crandall function.
  */
 
-#include "../crandall.h"
+#include "../src/crandall.h"
 #include "utils.h"
 #include <complex.h>
 #include <errno.h>
