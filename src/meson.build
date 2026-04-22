@@ -5,7 +5,7 @@
 
 python_only = not build_C and build_python
 
-zeta_src += files('zeta.c', 'gamma.c', 'tools.c', 'hpdyad.c', 'crandall.c', 'epsteinZeta.c')
+zeta_src += files('zeta.c', 'gamma.c', 'tools.c', 'hpdyad.c', 'harmonics.c', 'crandall.c', 'epsteinZeta.c')
 epsteinlib = both_libraries('epstein', zeta_src, include_directories : incdir, dependencies: deps, install: not python_only, override_options: override_options)
 
 epsteinlib_dep = declare_dependency(include_directories : incdir, link_with : epsteinlib)

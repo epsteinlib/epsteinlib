@@ -59,6 +59,15 @@ test_hpdyad= executable('epsteinlib_test_hpdyad',
     link_with : epsteinlib
 )
 
+test_harmonics= executable('epsteinlib_test_harmonics',
+    ['utils.c','test_harmonics.c'],
+    include_directories : incdir,
+    dependencies: deps,
+    install: false,
+    override_options: override_options,
+    link_with : epsteinlib
+)
+
 test_crandall_der = executable('epsteinlib_test_crandall_derivatives',
     ['utils.c','test_crandall_der.c'],
     include_directories : incdir,
@@ -113,6 +122,11 @@ test('test_setZetaDer',
 
 test('test_epsteinZetaRegDer',
     test_epsteinZetaRegDer,
+    workdir: meson.current_source_dir()
+)
+
+test('test_harmonics',
+    test_harmonics,
     workdir: meson.current_source_dir()
 )
 
