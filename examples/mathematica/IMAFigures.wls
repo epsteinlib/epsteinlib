@@ -6,7 +6,7 @@
 
 
 (* ::Section:: *)
-(*EpsteinLib Figures*)
+(*IMA Journal of Numerical Analysis Figures*)
 
 
 (* ::Text:: *)
