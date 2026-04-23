@@ -17,6 +17,7 @@
 #include <stdlib.h>
 
 #include "crandall.h"
+#include "harmonics.h"
 #include "tools.h"
 
 #include "zeta.h"
