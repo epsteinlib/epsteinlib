@@ -1431,7 +1431,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     // faster than harmonic Methods in d > 1
 
     // handle special case of non-positive integer values nu.
-    double complex res = 0.;
+    double complex res = NAN;
     double x_t2_squared = dot(dim, x_t2, x_t2);
     double y_t2_squared = dot(dim, y_t2, y_t2);
     if (variant < 3 && nu < 1 && fabs((nu / 2.) - nearbyint(nu / 2.)) < EPS) {
@@ -1446,9 +1446,9 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     } else {
         double zArgBound = assignzArgBound(nu);
         double zArgBoundReci = assignzArgBound(dim - nu);
-        double complex s1 = 0;
-        double complex s2 = 0;
-        double complex nc = 0;
+        double complex s1;
+        double complex s2;
+        double complex nc;
         double complex rot = 1;
         double complex xfactor = 1;
         double vx[dim];
@@ -1544,7 +1544,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         }
         // In the harmonic method, the res is already set as there is no global
         // nu-dependent coefficient there
-        if (!(harmonicMethod)) {
+        if (!(harmonicMethod) && variant <= 3) {
             res = xfactor * pow(lambda * lambda / M_PI, -nu / 2.) / tgamma(nu / 2.) *
                   (s1 + pow(lambda, dim) * s2);
         }
