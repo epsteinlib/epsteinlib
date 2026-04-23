@@ -18,45 +18,13 @@
 #include <time.h>
 
 #include "epsteinZeta.h"
+#include "utils.h"
 
 #define BASE_PATH "tests/csv"
 
 #ifndef MAX_PATH_LENGTH
 #define MAX_PATH_LENGTH 1024
 #endif
-
-/**
- * @brief Opens a file.
- * @param path Path to the file.
- * @param mode 'r' to read or 'w' to write.
- * @return FILE* Pointer to the opened file.
- * @note Exits the program if the file cannot be opened.
- */
-FILE *open_file(char *path, char *mode) {
-    FILE *file = fopen(path, mode);
-    if (file) {
-        return file;
-    }
-    printf("File '%s' does not exist.\n", path);
-    exit(1); // NOLINT
-}
-
-/**
- * @brief Sorts an array of doubles in ascending order using bubble sort.
- * @param arr: The array to be sorted.
- * @param size: The size of the array.
- */
-void sort(double *arr, int size) {
-    for (int i = 0; i < size - 1; i++) {
-        for (int j = 0; j < size - i - 1; j++) {
-            if (*(arr + j) > *(arr + j + 1)) {
-                double temp = *(arr + j);
-                *(arr + j) = *(arr + j + 1);
-                *(arr + j + 1) = temp;
-            }
-        }
-    }
-}
 
 /**
  * @brief Benchmarks the Epstein Zeta and regularized Epstein Zeta functions.
@@ -73,7 +41,7 @@ int benchmark(unsigned int dim, double a[], double x[], double y[],
               char zetaDataString[], char zetaRegDataString[]) {
     FILE *zetaData = open_file(zetaDataString, "w");
     FILE *zetaRegData = open_file(zetaRegDataString, "w");
-    if (zetaData == NULL) {
+    if (zetaData == NULL || zetaRegData == NULL) {
         printf("%s\n", strerror(errno)); // NOLINT
         return 1;
     }

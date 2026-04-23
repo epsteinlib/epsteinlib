@@ -133,3 +133,18 @@ void sort(double *arr, int size) {
         }
     }
 }
+
+/**
+ * @brief Opens a file.
+ * @param path Path to the file.
+ * @param mode 'r' to read or 'w' to write.
+ * @return FILE* Pointer to the opened file.
+ * @note Exits the program if the file cannot be opened.
+ */
+FILE *open_file(char *path, char *mode) {
+    FILE *file = fopen(path, mode);
+    if (!file) {
+        perror(path);
+    }
+    return file;
+}
