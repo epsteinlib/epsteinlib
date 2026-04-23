@@ -1447,8 +1447,8 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     } else {
         double zArgBound = assignzArgBound(nu);
         double zArgBoundReci = assignzArgBound(dim - nu);
-        double complex s1;
-        double complex s2;
+        double complex s1 = NAN;
+        double complex s2 = NAN;
         double complex nc;
         double complex rot = 1;
         double complex xfactor = 1;
