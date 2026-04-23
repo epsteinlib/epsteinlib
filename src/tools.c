@@ -25,8 +25,8 @@
  */
 void transpose(unsigned int dim, double *m) {
     double swap;
-    for (int i = 0; i < dim; i++) {
-        for (int j = 0; j < i; j++) {
+    for (unsigned int i = 0; i < dim; i++) {
+        for (unsigned int j = 0; j < i; j++) {
             swap = m[(dim * i) + j];
             m[(dim * i) + j] = m[(dim * j) + i];
             m[(dim * j) + i] = swap;
@@ -43,7 +43,7 @@ void transpose(unsigned int dim, double *m) {
  */
 bool equals(unsigned int dim, const double *v1, const double *v2) {
     bool eq = true;
-    for (int i = 0; i < dim && eq; i++) {
+    for (unsigned int i = 0; i < dim && eq; i++) {
         eq = eq && fabs(v1[i] - v2[i]) < EPS;
     }
     return eq;
@@ -56,45 +56,45 @@ bool equals(unsigned int dim, const double *v1, const double *v2) {
  * @param[out] p: permutation vector.
  * @param[out] r: where inverse matrix is stored.
  */
-void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
+void invert(unsigned int dim, double *m, unsigned int *p, double *r) { // NOLINT
     // initialize p
-    for (int i = 0; i < dim; i++) {
+    for (unsigned int i = 0; i < dim; i++) {
         p[i] = i;
     }
-    for (int i = 0; i < dim; i++) {
+    for (unsigned int i = 0; i < dim; i++) {
         // column pivot search
-        int pivot = i;
-        for (int j = i + 1; j < dim; j++) {
+        unsigned int pivot = i;
+        for (unsigned int j = i + 1; j < dim; j++) {
             if (fabs(m[(j * dim) + i]) > fabs(m[(pivot * dim) + i])) {
                 pivot = j;
             }
         }
         if (i != pivot) {
-            int zw = p[i];
+            unsigned int zw = p[i];
             p[i] = p[pivot];
             p[pivot] = zw;
         }
         // permute accordingly
-        for (int k = 0; k < dim; k++) {
+        for (unsigned int k = 0; k < dim; k++) {
             double zw = m[(i * dim) + k];
             m[(i * dim) + k] = m[(pivot * dim) + k];
             m[(pivot * dim) + k] = zw;
         }
         // standard LU-decomposition
-        for (int k = i + 1; k < dim; k++) {
+        for (unsigned int k = i + 1; k < dim; k++) {
             m[(k * dim) + i] /= m[(i * dim) + i]; // l-value
-            for (int j = i + 1; j < dim; j++) {
+            for (unsigned int j = i + 1; j < dim; j++) {
                 m[(k * dim) + j] -= m[(k * dim) + i] * m[(i * dim) + j];
             }
         }
     }
     // Compute inverse
     double y[dim]; // NOLINT user has to provide dim > 0
-    for (int i = 0; i < dim; i++) {
+    for (unsigned int i = 0; i < dim; i++) {
         // Solve Ly = P e_i
-        for (int k = 0; k < dim; k++) {
+        for (unsigned int k = 0; k < dim; k++) {
             y[k] = (p[k] == i);
-            for (int j = 0; j < k; j++) {
+            for (unsigned int j = 0; j < k; j++) {
                 y[k] -= m[(k * dim) + j] * y[j];
             }
         }
@@ -116,12 +116,12 @@ void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
  */
 double inf_norm(unsigned int dim, const double *m) { // NOLINT
     double r = 0;
-    for (int j = 0; j < dim; j++) {
+    for (unsigned int j = 0; j < dim; j++) {
         r += fabs(m[j]);
     }
-    for (int i = 1; i < dim; i++) {
+    for (unsigned int i = 1; i < dim; i++) {
         double w = 0;
-        for (int j = 0; j < dim; j++) {
+        for (unsigned int j = 0; j < dim; j++) {
             w += fabs(m[(i * dim) + j]);
         }
         if (w > r) {

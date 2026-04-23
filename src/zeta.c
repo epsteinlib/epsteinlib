@@ -44,7 +44,7 @@
  */
 static inline void lattice_vector_increment(unsigned int dim, const int cutoffs[],
                                             int zv[]) {
-    for (int k = 0; k < dim; k++) {
+    for (unsigned int k = 0; k < dim; k++) {
         if (++zv[k] <= cutoffs[k]) {
             break;
         }
@@ -68,7 +68,7 @@ static inline double complex summand_real(double nu, unsigned int dim, double la
                                           double lv[], const double *x,
                                           const double *y, double zArgBound) {
     double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
-    for (int i = 0; i < dim; i++) {
+    for (unsigned int i = 0; i < dim; i++) {
         lv[i] -= x[i];
     }
     return rot * crandall_g(dim, nu, lv, 1. / lambda, zArgBound);
@@ -98,7 +98,7 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
     double lv[dim]; // lattice vector
     // cuboid cutoffs
     long totalSummands = 1;
-    for (int k = 0; k < dim; k++) {
+    for (unsigned int k = 0; k < dim; k++) {
         zv[k] = -cutoffs[k]; // lattice vector initialized
         totalSummands *= 2 * cutoffs[k] + 1;
     }
@@ -132,7 +132,7 @@ static inline double complex summand_fourier(double nu, unsigned int dim,
                                              double lambda, double lv[],
                                              const double *x, const double *y,
                                              double zArgBound) {
-    for (int i = 0; i < dim; i++) {
+    for (unsigned int i = 0; i < dim; i++) {
         lv[i] += y[i];
     }
     double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
@@ -163,7 +163,7 @@ double complex sum_fourier(double nu, unsigned int dim, double lambda,
     double lv[dim]; // lattice vector
     // cuboid cutoffs
     long totalSummands = 1;
-    for (int k = 0; k < dim; k++) {
+    for (unsigned int k = 0; k < dim; k++) {
         zv[k] = -cutoffs[k]; // lattice vector initialized
         totalSummands *= 2 * cutoffs[k] + 1;
     };
@@ -202,31 +202,31 @@ double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
                    const double *v) {
     bool todo = false;
     double *vt = malloc(dim * sizeof(double));
-    for (int i = 0; i < dim; i++) {
+    for (unsigned int i = 0; i < dim; i++) {
         vt[i] = 0;
-        for (int j = 0; j < dim; j++) {
+        for (unsigned int j = 0; j < dim; j++) {
             vt[i] += m_invt[(dim * j) + i] * v[j];
         }
     }
     // check if projection is needed, else copy
-    for (int i = 0; i < dim && !todo; i++) {
+    for (unsigned int i = 0; i < dim && !todo; i++) {
         todo = todo || (vt[i] <= -0.5 || vt[i] >= 0.5);
     }
     if (todo) {
-        for (int i = 0; i < dim; i++) {
+        for (unsigned int i = 0; i < dim; i++) {
             vt[i] = remainder(vt[i], 1);
         }
         double *vres = malloc(dim * sizeof(double));
-        for (int i = 0; i < dim; i++) {
+        for (unsigned int i = 0; i < dim; i++) {
             vres[i] = 0;
-            for (int j = 0; j < dim; j++) {
+            for (unsigned int j = 0; j < dim; j++) {
                 vres[i] += m[(dim * i) + j] * vt[j];
             }
         }
         free(vt);
         return vres;
     }
-    for (int i = 0; i < dim; i++) {
+    for (unsigned int i = 0; i < dim; i++) {
         vt[i] = v[i];
     }
     return vt;
@@ -254,10 +254,10 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     double m_real[dim * dim];
     double x_t1[dim];
     double y_t1[dim];
-    int p[dim];
+    unsigned int p[dim];
     bool diag = 1;
-    for (int i = 0; i < dim; i++) {
-        for (int j = 0; j < dim; j++) {
+    for (unsigned int i = 0; i < dim; i++) {
+        for (unsigned int j = 0; j < dim; j++) {
             m_copy[(dim * i) + j] = m[(dim * i) + j];
             m_real[(dim * i) + j] = m[(dim * i) + j];
             diag = diag && ((i == j) || (m[(dim * i) + j] == 0));
@@ -265,17 +265,17 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     }
     invert(dim, m_copy, p, m_fourier);
     double vol = 1;
-    for (int k = 0; k < dim; k++) {
+    for (unsigned int k = 0; k < dim; k++) {
         vol *= m_copy[(dim * k) + k];
     }
     transpose(dim, m_fourier);
     vol = fabs(vol);
     double ms = pow(vol, -1. / dim);
-    for (int i = 0; i < dim * dim; i++) {
+    for (unsigned int i = 0; i < dim * dim; i++) {
         m_real[i] *= ms;
         m_fourier[i] /= ms;
     }
-    for (int i = 0; i < dim; i++) {
+    for (unsigned int i = 0; i < dim; i++) {
         x_t1[i] = x[i] * ms;
         y_t1[i] = y[i] / ms;
     }
@@ -288,7 +288,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     double cutoff_id = G_BOUND + 0.5;
     if (diag) {
         // Chose absolute diag. entries for cutoff
-        for (int k = 0; k < dim; k++) {
+        for (unsigned int k = 0; k < dim; k++) {
             cutoffsReal[k] = floor(cutoff_id / fabs(m_real[(dim * k) + k]));
             cutoffsFourier[k] = floor(cutoff_id * fabs(m_real[(dim * k) + k]));
         }
@@ -296,7 +296,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         // choose cutoff depending on smallest and biggest abs eigenvalue
         double ev_abs_max = inf_norm(dim, m_real);
         double ev_abs_min_r = inf_norm(dim, m_fourier);
-        for (int k = 0; k < dim; k++) {
+        for (unsigned int k = 0; k < dim; k++) {
             cutoffsReal[k] = floor(cutoff_id * ev_abs_min_r);
             cutoffsFourier[k] = floor(cutoff_id * ev_abs_max);
         }
@@ -321,7 +321,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         double complex rot = 1;
         double complex xfactor = 1;
         double vx[dim];
-        for (int i = 0; i < dim; i++) {
+        for (unsigned int i = 0; i < dim; i++) {
             vx[i] = x_t1[i] - x_t2[i];
         }
         xfactor = cexp(-2 * M_PI * I * dot(dim, vx, y_t1));
@@ -367,7 +367,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                    log(ms * ms) / vol;
         } else {
             double ySquared = 0;
-            for (int i = 0; i < dim; i++) {
+            for (unsigned int i = 0; i < dim; i++) {
                 ySquared += y[i] * y[i];
             }
             res -= pow(M_PI, (2 * k) + ((double)dim / 2)) /

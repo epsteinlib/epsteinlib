@@ -107,7 +107,7 @@ int test_matrix_transpose_inverse(void) { // NOLINT
         // compute transpose(inverse(m)) via invert()
         double m_copy[dim * dim];
         double m_fourier[dim * dim];
-        int p[dim];
+        unsigned int p[dim];
         for (unsigned int i = 0; i < n; i++) {
             m_copy[i] = m[i];
         }

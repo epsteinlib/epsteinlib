@@ -69,8 +69,8 @@ void sort(double *arr, int size) {
  * data.
  * @return  0 on successful execution.
  */
-int benchmark(int dim, double a[], double x[], double y[], char zetaDataString[],
-              char zetaRegDataString[]) {
+int benchmark(unsigned int dim, double a[], double x[], double y[],
+              char zetaDataString[], char zetaRegDataString[]) {
     FILE *zetaData = open_file(zetaDataString, "w");
     FILE *zetaRegData = open_file(zetaRegDataString, "w");
     if (zetaData == NULL) {
@@ -141,7 +141,7 @@ int benchmark(int dim, double a[], double x[], double y[], char zetaDataString[]
  * @return  0 on successful execution.
  */
 int s1() {
-    int dim = 1;
+    unsigned int dim = 1;
     double a[] = {1};
     double x[] = {-0.5};
     double y[] = {0};
@@ -167,7 +167,7 @@ int s1() {
  * @return  0 on successful execution.
  */
 int s21() {
-    int dim = 2;
+    unsigned int dim = 2;
     double a[] = {1, 0, 0, 2};
     double x[] = {-1, -2};
     double y[] = {0, 0};
@@ -193,7 +193,7 @@ int s21() {
  * @return  0 on successful execution.
  */
 int s22() {
-    int dim = 2;
+    unsigned int dim = 2;
     double a[] = {1, 1. / 2, 0, sqrt(3.) / 2};
     double x[] = {0.0, 0.0};
     double y[] = {-0, 0};
@@ -219,7 +219,7 @@ int s22() {
  * @return  0 on successful execution.
  */
 int s31() {
-    int dim = 3;
+    unsigned int dim = 3;
     double a[] = {1, 0, 0, 0, 1, 0, 0, 0, 2};
     double x[] = {0, 0, -0.5};
     double y[] = {0.5, 0, 0};
@@ -244,7 +244,7 @@ int s31() {
  * @return  0 on successful execution.
  */
 int s32() {
-    int dim = 3;
+    unsigned int dim = 3;
     double a[] = {6, 0, 0, 0, 6, 0, 0, 0, 6};
     double x[] = {-1, -1, -1};
     double y[] = {1. / 12, 1. / 12, 1. / 12};
@@ -270,7 +270,7 @@ int s32() {
  * @return  0 on successful execution.
  */
 int s33() {
-    int dim = 3;
+    unsigned int dim = 3;
     double a[] = {2 * sqrt(2.), 0, 0, 0, 4, 0, 0, 0, 2};
     double x[] = {0, -1, -1};
     double y[] = {1. / (4 * sqrt(2.)), 0, 0};
@@ -296,7 +296,7 @@ int s33() {
  * @return  0 on successful execution.
  */
 int s4() {
-    int dim = 4;
+    unsigned int dim = 4;
     double a[] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
     double x[] = {0.5, 0.0, 0.0, 0.0};
     double y[] = {0.0, 0.0, 0.0, 0.0};
@@ -322,10 +322,10 @@ int s4() {
  * @return  0 on successful execution.
  */
 int s6() {
-    int dim = 6;
+    unsigned int dim = 6;
     double a[dim * dim];
-    for (int i = 0; i < dim; i++) {
-        for (int j = 0; j < dim; j++) {
+    for (unsigned int i = 0; i < dim; i++) {
+        for (unsigned int j = 0; j < dim; j++) {
             a[(dim * i) + j] = (i == j) ? 1 : 0;
         }
     }
@@ -353,10 +353,10 @@ int s6() {
  * @return  0 on successful execution.
  */
 int s8() {
-    int dim = 8;
+    unsigned int dim = 8;
     double a[dim * dim];
-    for (int i = 0; i < dim; i++) {
-        for (int j = 0; j < dim; j++) {
+    for (unsigned int i = 0; i < dim; i++) {
+        for (unsigned int j = 0; j < dim; j++) {
             a[(dim * i) + j] = (i == j) ? 1 : 0;
         }
     }

@@ -38,7 +38,7 @@ static inline void kahan_add_c(double complex *restrict sum,
  */
 static inline double dot(unsigned int dim, const double *v1, const double *v2) {
     double r = 0;
-    for (int i = 0; i < dim; i++) {
+    for (unsigned int i = 0; i < dim; i++) {
         r += v1[i] * v2[i];
     }
     return r;
@@ -55,13 +55,13 @@ static inline double dot(unsigned int dim, const double *v1, const double *v2) {
 static inline void matrix_intVector(unsigned int dim, const double *m, const int *v,
                                     double *res, bool diag) {
     if (diag) {
-        for (int i = 0; i < dim; i++) {
+        for (unsigned int i = 0; i < dim; i++) {
             res[i] = m[(i * dim) + i] * v[i];
         }
     } else {
-        for (int i = 0; i < dim; i++) {
+        for (unsigned int i = 0; i < dim; i++) {
             res[i] = 0;
-            for (int j = 0; j < dim; j++) {
+            for (unsigned int j = 0; j < dim; j++) {
                 res[i] += m[(i * dim) + j] * v[j];
             }
         }
@@ -91,7 +91,7 @@ bool equals(unsigned int dim, const double *v1, const double *v2);
  * @param[out] p: permutation vector.
  * @param[out] r: where inverse matrix is stored.
  */
-void invert(unsigned int dim, double *m, int *p, double *r);
+void invert(unsigned int dim, double *m, unsigned int *p, double *r);
 
 /**
  * @brief Compute infinity norm (maximum sum row norm).

@@ -146,7 +146,7 @@ static int test_epsteinZeta() { // NOLINT
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/epsteinZeta_ref.csv", // NOLINT
                           BASE_PATH);
-    if (result < 0 || result >= sizeof(path)) {
+    if (result < 0 || (long unsigned int)result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
     FILE *zetaRefData = fopen(path, "r");
@@ -256,7 +256,7 @@ static int test_epsteinZetaReg() { // NOLINT
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/epsteinZetaReg_ref.csv", // NOLINT
                           BASE_PATH);
-    if (result < 0 || result >= sizeof(path)) {
+    if (result < 0 || (long unsigned int)result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
     FILE *zetaRegRefData = fopen(path, "r");
@@ -363,7 +363,7 @@ int test_epsteinZeta_random_matrices(void) { // NOLINT
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path),
                           "%s/epsteinZeta_random_matrices_ref.csv", BASE_PATH);
-    if (result < 0 || result >= sizeof(path)) {
+    if (result < 0 || (long unsigned int)result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
     FILE *data = fopen(path, "r");
@@ -518,7 +518,7 @@ int test_epsteinZetaReg_random_matrices(void) { // NOLINT
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path),
                           "%s/epsteinZetaReg_random_matrices_ref.csv", BASE_PATH);
-    if (result < 0 || result >= sizeof(path)) {
+    if (result < 0 || (long unsigned int)result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
     FILE *data = fopen(path, "r");

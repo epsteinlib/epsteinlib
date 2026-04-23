@@ -51,7 +51,7 @@ double errRel(double complex ref, double complex comp) {
  */
 void printVectorUnitTest(const char *name, double *vec, unsigned int dim) {
     printf("%s[", name);
-    for (int i = 0; i < dim; ++i) {
+    for (unsigned int i = 0; i < dim; ++i) {
         printf("%.16lf", vec[i]);
         if (i != dim - 1) {
             printf(", ");
@@ -68,7 +68,7 @@ void printVectorUnitTest(const char *name, double *vec, unsigned int dim) {
  */
 void printMultiindexUnitTest(const char *name, unsigned int *vec, unsigned int dim) {
     printf("%s[", name);
-    for (int i = 0; i < dim; ++i) {
+    for (unsigned int i = 0; i < dim; ++i) {
         printf("%u", vec[i]);
         if (i != dim - 1) {
             printf(", ");
@@ -86,9 +86,9 @@ void printMultiindexUnitTest(const char *name, unsigned int *vec, unsigned int d
 void printMatrixUnitTest(const char *name, const double *mat, unsigned int dim) {
     printf("%s", name);
     double matrixEntry;
-    for (int i = 0; i < dim; ++i) {
+    for (unsigned int i = 0; i < dim; ++i) {
         printf("\t\t [");
-        for (int j = 0; j < dim; ++j) {
+        for (unsigned int j = 0; j < dim; ++j) {
             matrixEntry = mat[(i * dim) + j];
             if (pow(matrixEntry, 2) < 100) {
                 printf("%.16f", matrixEntry);

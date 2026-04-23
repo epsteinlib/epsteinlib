@@ -3,7 +3,18 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-project('epsteinlib', 'c', 'cython', version: files('VERSION'), default_options: ['werror=true', 'c_std=gnu11', 'buildtype=release', 'default_library=shared'])
+
+project('epsteinlib', 'c', 'cython',
+  version: files('VERSION'),
+  meson_version: '>=1.1',
+  default_options: [
+    'werror=true',
+    'warning_level=2',
+    'c_std=gnu11',
+    'buildtype=release',
+    'default_library=shared'
+  ]
+)
 
 add_project_arguments('-Wno-error=cpp', language: 'c')
 if meson.get_compiler('c').get_id() == 'gcc'
@@ -57,8 +68,8 @@ endif
 subdir('include')
 subdir('mathematica')
 subdir('src')
-subdir('tests')
 subdir('examples/c')
+subdir('tests')
 if build_python
     subdir('python')
 endif

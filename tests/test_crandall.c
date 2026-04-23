@@ -33,7 +33,7 @@ int test_crandall_g(void) {
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/crandall_g_ref.csv", // NOLINT
                           BASE_PATH);
-    if (result < 0 || result >= sizeof(path)) {
+    if (result < 0 || (long unsigned int)result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
     FILE *data = fopen(path, "r");

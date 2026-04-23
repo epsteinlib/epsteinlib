@@ -233,7 +233,7 @@ double egf_ua_r(double a, double eta) {
     }
     double s = 0;
     double f = 1.;
-    for (int i = 0; i <= 25; i++) {
+    for (unsigned int i = 0; i <= 25; i++) {
         s += beta[i] * f;
         f *= eta;
     }

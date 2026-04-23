@@ -69,8 +69,8 @@ int benchmark_gamma(double xinc, double nuinc, double xbound, const char *filena
     double x = 0;
     double xmin = ldexp(1, -12);
     double complex upper_gamma_val;
-    for (int i = 0; i < 400 + 1; i++) {
-        for (int j = 0; j < 400 + 1; j++) {
+    for (unsigned int i = 0; i < 400 + 1; i++) {
+        for (unsigned int j = 0; j < 400 + 1; j++) {
             nu = numin + i * nuinc;
             x = xmin + j * xinc;
             if (x > xbound) {

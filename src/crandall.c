@@ -56,7 +56,7 @@ double complex crandall_gReg_nuequalsdimplus2k(double s, double arg, double k,
                                    0.00002834467120181406,
                                    -3.1001984126984127e-6,
                                    3.0619243582206544e-7};
-        for (int i = 0; i < 10; i++) {
+        for (unsigned int i = 0; i < 10; i++) {
             gReg += taylorCoeffs[i] * pow(arg, i);
         }
     } else if (arg == 0) {
