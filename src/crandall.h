@@ -11,7 +11,7 @@
  * in Crandall's formula.
  */
 
-#include "tools.h"
+#include "hpdyad.h"
 #include <complex.h>
 
 #ifndef EPSTEIN_CRANDALL

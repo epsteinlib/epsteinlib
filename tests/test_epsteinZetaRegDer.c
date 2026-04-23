@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only
+ */
+
 // SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
 //
 // SPDX-License-Identifier: AGPL-3.0-only
@@ -29,7 +35,7 @@ int test_epsteinZetaRegDer_prototype(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path),
-                          "%s/epsteinZetaRegDer_prototype_Ref.csv", // NOLINT
+                          "%s/epsteinZetaRegDer_prototype_ref.csv", // NOLINT
                           BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
@@ -152,7 +158,7 @@ int test_epsteinZetaRegDer_d2k_prototype(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path),
-                          "%s/epsteinZetaRegDer_d2k_prototype_Ref.csv", // NOLINT
+                          "%s/epsteinZetaRegDer_d2k_prototype_ref.csv", // NOLINT
                           BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
@@ -275,7 +281,7 @@ int test_epsteinZetaRegDer_bain_prototype(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path),
-                          "%s/epsteinZetaRegDer_bain_prototype_Ref.csv", // NOLINT
+                          "%s/epsteinZetaRegDer_bain_prototype_ref.csv", // NOLINT
                           BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");

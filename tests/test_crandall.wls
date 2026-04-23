@@ -45,4 +45,4 @@ crandallTab=N[ParallelTable[With[{g=g[\[Nu]0[i],z0[i]]},{\[Nu]0[i], z0[i][[1]],z
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/crandall_g_Ref.csv",crandallTab];
+Export["csv/crandall_g_ref.csv",crandallTab];

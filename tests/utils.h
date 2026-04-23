@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only
+ */
+
 // SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
 // SPDX-FileCopyrightText: 2024 Ruben Gutendorf
 // <ruben.gutendorf@uni-saarland.de>

@@ -227,7 +227,7 @@ zDerTab=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/epsteinZetaRegDer_prototype_Ref.csv",zDerTab];
+Export["csv/epsteinZetaRegDer_prototype_ref.csv",zDerTab];
 
 
 (* ::Subsection:: *)
@@ -265,7 +265,7 @@ zDerd2kTab=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/epsteinZetaRegDer_d2k_prototype_Ref.csv",zDerd2kTab];
+Export["csv/epsteinZetaRegDer_d2k_prototype_ref.csv",zDerd2kTab];
 
 
 (* ::Subsection:: *)
@@ -310,4 +310,4 @@ zDerBainTab=ParallelTable[
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/epsteinZetaRegDer_bain_prototype_Ref.csv",zDerBainTab];
+Export["csv/epsteinZetaRegDer_bain_prototype_ref.csv",zDerBainTab];
