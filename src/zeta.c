@@ -1006,10 +1006,10 @@ static double *vectorProj(unsigned int dim, const double *m, const double *m_inv
  * @param[in] ms: lattice scaling factor, pow(vol, -1./dim).
  * @param[in] m_real: matrix that transforms the lattice (real sum).
  * @param[in] m_fourier: matrix that transforms the lattice (Fourier sum).
- * @param[in] x_t1: first projection of x vector to elementary lattice cell.
- * @param[in] x_t2: second projection of x vector to elementary lattice cell.
- * @param[in] y_t1: first projection of y vector to elementary lattice cell.
- * @param[in] y_t2: second projection of y vector to elementary lattice cell.
+ * @param[in] x_t1: rescaled shift vector.
+ * @param[in] x_t2: projection of shift vector to the elementary lattice cell.
+ * @param[in] y_t1: rescaled wave vector.
+ * @param[in] y_t2: projection of wave vector to reciprocal elementary lattice cell.
  * @param[in] x_t2_squared: precomputed dot(dim, x_t2, x_t2).
  * @param[in] cutoffsReal: how many summands in each direction (real sum).
  * @param[in] cutoffsFourier: how many summands in each direction (Fourier sum).
@@ -1040,9 +1040,9 @@ static double complex summation_harmonic_1D(
     // 1/gamma(nIt) = 0
     if (nuIt < -1 && fabs((nuIt / 2.) - nearbyint(nuIt / 2.)) < EPS) {
         res = 0;
-        // if nu = 0, everything except the zero summand in the real sum
-        // vanishes
     } else if (fabs(nuIt / 2) < EPS) {
+        // if nuIt = 0, everything except the zero summand in the real sum
+        // vanishes
         if (x_t2_squared > EPS_ZERO_Y) {
             res = 0.;
         } else {
@@ -1093,10 +1093,10 @@ static double complex summation_harmonic_1D(
  * @param[in] ms: lattice scaling factor, pow(vol, -1./dim).
  * @param[in] m_real: matrix that transforms the lattice (real sum).
  * @param[in] m_fourier: matrix that transforms the lattice (Fourier sum).
- * @param[in] x_t1: first projection of x vector to elementary lattice cell.
- * @param[in] x_t2: second projection of x vector to elementary lattice cell.
- * @param[in] y_t1: first projection of y vector to elementary lattice cell.
- * @param[in] y_t2: second projection of y vector to elementary lattice cell.
+ * @param[in] x_t1: rescaled shift vector.
+ * @param[in] x_t2: projection of shift vector to the elementary lattice cell.
+ * @param[in] y_t1: rescaled wave vector.
+ * @param[in] y_t2: projection of wave vector to reciprocal elementary lattice cell.
  * @param[in] x_t2_squared: precomputed dot(dim, x_t2, x_t2).
  * @param[in] cutoffsReal: how many summands in each direction (real sum).
  * @param[in] cutoffsFourier: how many summands in each direction (Fourier sum).
@@ -1221,10 +1221,10 @@ static double complex summation_harmonic_high_exp(
  * @param[in] ms: lattice scaling factor, pow(vol, -1./dim).
  * @param[in] m_real: matrix that transforms the lattice (real sum).
  * @param[in] m_fourier: matrix that transforms the lattice (Fourier sum).
- * @param[in] x_t1: first projection of x vector to elementary lattice cell.
- * @param[in] x_t2: second projection of x vector to elementary lattice cell.
- * @param[in] y_t1: first projection of y vector to elementary lattice cell.
- * @param[in] y_t2: second projection of y vector to elementary lattice cell.
+ * @param[in] x_t1: rescaled shift vector.
+ * @param[in] x_t2: projection of shift vector to the elementary lattice cell.
+ * @param[in] y_t1: rescaled wave vector.
+ * @param[in] y_t2: projection of wave vector to reciprocal elementary lattice cell.
  * @param[in] cutoffsReal: how many summands in each direction (real sum).
  * @param[in] cutoffsFourier: how many summands in each direction (Fourier sum).
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
