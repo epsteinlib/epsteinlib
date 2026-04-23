@@ -17,6 +17,7 @@
 #include <stdlib.h>
 
 #include "crandall.h"
+#include "harmonics.h"
 #include "tools.h"
 
 #include "zeta.h"
@@ -87,8 +88,8 @@ static inline void lattice_vector_increment_norm(unsigned int dim,
  * @param[in] dim: dimension of the input vectors.
  * @param[in] lambda: parameter that decides the weight of each sum.
  * @param[in,out] lv: lattice vector, shifted by x in-place.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
  * @return rot * G_{nu}(lv - x), the real space summand.
@@ -110,8 +111,8 @@ static inline double complex summand_real(double nu, unsigned int dim, double la
  * @param[in] lambda: parameters that decides the weight of each sum.
  * @param[in] m: matrix that transforms the lattice in the Epstein zeta
  * function.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] cutoffs: how many summands in each direction are considered.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * @param[in] diag: 1 iff the lattice matrix is diagonal.
@@ -152,8 +153,8 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
  * @param[in] dim: dimension of the input vectors.
  * @param[in] lambda: parameter that decides the weight of each sum.
  * @param[in,out] lv: lattice vector, shifted by x in-place.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
  * @return (-2 * PI * I * (z-x) ) ** alpha * G_{nu}^{(alpha)}((z - x) / lambda)) X
@@ -166,7 +167,7 @@ static inline double complex summand_real_der(double nu, unsigned int dim,
                                               const unsigned int *alpha) {
     double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
     for (int i = 0; i < dim; i++) {
-        lv[i] = lv[i] - x[i];
+        lv[i] -= x[i];
     }
     // Calculate (- 2 PI I (z - x)) ** alpha
     double complex mon = 1.;
@@ -188,8 +189,8 @@ static inline double complex summand_real_der(double nu, unsigned int dim,
  * @param[in] lambda: parameters that decides the weight of each sum.
  * @param[in] m: matrix that transforms the lattice in the Epstein zeta
  * function.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] cutoffs: how many summands in each direction are considered.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
@@ -233,8 +234,8 @@ static double complex sum_real_der(double nu, unsigned int dim, double lambda,
  * @param[in] dim: dimension of the input vectors.
  * @param[in] lambda: parameter that decides the weight of each sum.
  * @param[in,out] lv: lattice vector, shifted by x in-place.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
  * @param[in] alphaAbs: total of alpha.
@@ -253,7 +254,7 @@ static inline double complex summand_real_harmonic(
 
     double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
     for (int i = 0; i < dim; i++) {
-        lv[i] = lv[i] - x[i];
+        lv[i] -= x[i];
     }
     double h = harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
                           coeffs, exponents);
@@ -269,8 +270,8 @@ static inline double complex summand_real_harmonic(
  * @param[in] dim: dimension of the input vectors.
  * @param[in] m: matrix that transforms the lattice in the Epstein zeta
  * function.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] cutoffs: how many summands in each direction are considered.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
@@ -325,8 +326,8 @@ static double complex sum_real_harmonic(
  * @param[in] dim: dimension of the input vectors.
  * @param[in] lambda: parameter that decides the weight of each sum.
  * @param[in,out] lv: lattice vector, shifted by x in-place.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
  * @param[in] alphaAbs: total of alpha.
@@ -346,7 +347,7 @@ static inline double complex summand_real_harmonic_large_exp(
 
     double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
     for (int i = 0; i < dim; i++) {
-        lv[i] = lv[i] - x[i];
+        lv[i] -= x[i];
     }
 
     double h = harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
@@ -376,8 +377,8 @@ static inline double complex summand_real_harmonic_large_exp(
  * @param[in] dim: dimension of the input vectors.
  * @param[in] m: matrix that transforms the lattice in the Epstein zeta
  * function.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] cutoffs: how many summands in each direction are considered.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
@@ -432,8 +433,8 @@ static double complex sum_real_harmonic_large_exp(
  * @param[in] kMax: k sum limit ⌊|α|/2⌋.
  * @param[in] dim: dimension of the input vectors.
  * @param[in,out] lv: lattice vector, shifted by x in-place.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] alphaAbs: total of alpha.
  * @param[in] chunk_offset: starting offsets for each k.
  * @param[in] valid_count: number of valid gamma entries for each k.
@@ -450,7 +451,7 @@ static inline double complex summand_real_harmonic_large_exp_singularity_sum(
 
     double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
     for (int i = 0; i < dim; i++) {
-        lv[i] = lv[i] - x[i];
+        lv[i] -= x[i];
     }
 
     double lvSquared = dot(dim, lv, lv);
@@ -495,8 +496,8 @@ static inline double complex summand_real_harmonic_large_exp_singularity_sum(
  * @param[in] kMax: k sum limit ⌊|α|/2⌋.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] m: matrix that transforms the lattice.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] diag: true, if the lattice matrix is diagonal.
  * @param[in] alphaAbs: total of alpha.
  * @param[in] chunk_offset: starting offsets for each k.
@@ -550,8 +551,8 @@ static double complex sum_real_harmonic_large_exp_singularity_sum( // NOLINT
  * @param[in] dim: dimension of the input vectors.
  * @param[in] lambda: parameter that decides the weight of each sum.
  * @param[in,out] lv: lattice vector, shifted by x in-place.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
  * @param[in] alphaAbs: total of alpha.
@@ -564,7 +565,7 @@ static inline double complex summand_real_harmonic_1D(
 
     double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
     for (int i = 0; i < dim; i++) {
-        lv[i] = lv[i] - x[i];
+        lv[i] -= x[i];
     }
     double h = harmonic_h_1D_kMax(lv, alphaAbs);
 
@@ -578,8 +579,8 @@ static inline double complex summand_real_harmonic_1D(
  * @param[in] dim: dimension of the input vectors.
  * @param[in] m: matrix that transforms the lattice in the Epstein zeta
  * function.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] cutoffs: how many summands in each direction are considered.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
@@ -625,8 +626,8 @@ static double complex sum_real_harmonic_1D(double nu, unsigned int dim,
  * @param[in] dim: dimension of the input vectors.
  * @param[in] lambda: parameter that decides the weight of each sum.
  * @param[in,out] lv: lattice vector, shifted by y in-place.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
  * @return rot * G_{dim - nu}(lv + y), the Fourier space summand.
@@ -649,8 +650,8 @@ static inline double complex summand_fourier(double nu, unsigned int dim,
  * @param[in] lambda: parameters that decides the weight of each sum.
  * @param[in] m: matrix that transforms the lattice in the Epstein zeta
  * function.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] cutoffs: how many summands in each direction are considered.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * @param[in] diag: 1 iff the lattice matrix is diagonal.
@@ -699,8 +700,8 @@ double complex sum_fourier(double nu, unsigned int dim, double lambda,
  * @param[in] dim: dimension of the input vectors.
  * @param[in] lambda: parameter that decides the weight of each sum.
  * @param[in,out] lv: lattice vector, shifted by y in-place.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
  * @return G_{dim - nu}^{(alpha)}(lambda * (k + y)) * exp(-2 * PI * I * x * (k + y)),
@@ -727,8 +728,8 @@ static inline double complex summand_fourier_der(double nu, unsigned int dim,
  * @param[in] lambda: parameters that decides the weight of each sum.
  * @param[in] m: matrix that transforms the lattice in the Epstein zeta
  * function.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] cutoffs: how many summands in each direction are considered.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
@@ -779,9 +780,9 @@ static double complex sum_fourier_der(double nu, unsigned int dim, double lambda
  * @param[in] kIndex: specifies degree |alpha| - 2k.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] lambda: parameter that decides the weight of each sum.
- * @param[in,out] lv: lattice vector, shifted by x in-place.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in,out] lv: lattice vector, shifted by y in-place.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
  * @param[in] alphaAbs: total of alpha.
@@ -798,7 +799,7 @@ static inline double complex summand_fourier_harmonic(
     const unsigned long long *chunk_offset, const unsigned long long *valid_count,
     const double *coeffs, const unsigned int *exponents) {
     for (int i = 0; i < dim; i++) {
-        lv[i] = lv[i] + y[i];
+        lv[i] += y[i];
     }
     double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
     return rot *
@@ -814,8 +815,8 @@ static inline double complex summand_fourier_harmonic(
  * @param[in] dim: dimension of the input vectors.
  * @param[in] m: matrix that transforms the lattice in the Epstein zeta
  * function.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] cutoffs: how many summands in each direction are considered.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
@@ -878,8 +879,8 @@ static double complex sum_fourier_harmonic(
  * @param[in] dim: dimension of the input vectors.
  * @param[in] lambda: parameter that decides the weight of each sum.
  * @param[in,out] lv: lattice vector, shifted by x in-place.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
  * @param[in] alphaAbs: total of alpha.
@@ -904,8 +905,8 @@ static inline double complex summand_fourier_harmonic_1D(
  * @param[in] dim: dimension of the input vectors.
  * @param[in] m: matrix that transforms the lattice in the Epstein zeta
  * function.
- * @param[in] x: projection of x vector to elementary lattice cell.
- * @param[in] y: projection of y vector to elementary lattice cell.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] cutoffs: how many summands in each direction are considered.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
@@ -1005,10 +1006,10 @@ static double *vectorProj(unsigned int dim, const double *m, const double *m_inv
  * @param[in] ms: lattice scaling factor, pow(vol, -1./dim).
  * @param[in] m_real: matrix that transforms the lattice (real sum).
  * @param[in] m_fourier: matrix that transforms the lattice (Fourier sum).
- * @param[in] x_t1: first projection of x vector to elementary lattice cell.
- * @param[in] x_t2: second projection of x vector to elementary lattice cell.
- * @param[in] y_t1: first projection of y vector to elementary lattice cell.
- * @param[in] y_t2: second projection of y vector to elementary lattice cell.
+ * @param[in] x_t1: rescaled shift vector.
+ * @param[in] x_t2: projection of shift vector to the elementary lattice cell.
+ * @param[in] y_t1: rescaled wave vector.
+ * @param[in] y_t2: projection of wave vector to reciprocal elementary lattice cell.
  * @param[in] x_t2_squared: precomputed dot(dim, x_t2, x_t2).
  * @param[in] cutoffsReal: how many summands in each direction (real sum).
  * @param[in] cutoffsFourier: how many summands in each direction (Fourier sum).
@@ -1039,9 +1040,9 @@ static double complex summation_harmonic_1D(
     // 1/gamma(nIt) = 0
     if (nuIt < -1 && fabs((nuIt / 2.) - nearbyint(nuIt / 2.)) < EPS) {
         res = 0;
-        // if nu = 0, everything except the zero summand in the real sum
-        // vanishes
     } else if (fabs(nuIt / 2) < EPS) {
+        // if nuIt = 0, everything except the zero summand in the real sum
+        // vanishes
         if (x_t2_squared > EPS_ZERO_Y) {
             res = 0.;
         } else {
@@ -1092,10 +1093,10 @@ static double complex summation_harmonic_1D(
  * @param[in] ms: lattice scaling factor, pow(vol, -1./dim).
  * @param[in] m_real: matrix that transforms the lattice (real sum).
  * @param[in] m_fourier: matrix that transforms the lattice (Fourier sum).
- * @param[in] x_t1: first projection of x vector to elementary lattice cell.
- * @param[in] x_t2: second projection of x vector to elementary lattice cell.
- * @param[in] y_t1: first projection of y vector to elementary lattice cell.
- * @param[in] y_t2: second projection of y vector to elementary lattice cell.
+ * @param[in] x_t1: rescaled shift vector.
+ * @param[in] x_t2: projection of shift vector to the elementary lattice cell.
+ * @param[in] y_t1: rescaled wave vector.
+ * @param[in] y_t2: projection of wave vector to reciprocal elementary lattice cell.
  * @param[in] x_t2_squared: precomputed dot(dim, x_t2, x_t2).
  * @param[in] cutoffsReal: how many summands in each direction (real sum).
  * @param[in] cutoffsFourier: how many summands in each direction (Fourier sum).
@@ -1220,10 +1221,10 @@ static double complex summation_harmonic_high_exp(
  * @param[in] ms: lattice scaling factor, pow(vol, -1./dim).
  * @param[in] m_real: matrix that transforms the lattice (real sum).
  * @param[in] m_fourier: matrix that transforms the lattice (Fourier sum).
- * @param[in] x_t1: first projection of x vector to elementary lattice cell.
- * @param[in] x_t2: second projection of x vector to elementary lattice cell.
- * @param[in] y_t1: first projection of y vector to elementary lattice cell.
- * @param[in] y_t2: second projection of y vector to elementary lattice cell.
+ * @param[in] x_t1: rescaled shift vector.
+ * @param[in] x_t2: projection of shift vector to the elementary lattice cell.
+ * @param[in] y_t1: rescaled wave vector.
+ * @param[in] y_t2: projection of wave vector to reciprocal elementary lattice cell.
  * @param[in] cutoffsReal: how many summands in each direction (real sum).
  * @param[in] cutoffsFourier: how many summands in each direction (Fourier sum).
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
