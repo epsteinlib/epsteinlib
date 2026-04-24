@@ -380,7 +380,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_1D_ref.csv",zDerTab1D];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Create set zeta 2D reference values*)
 
 
@@ -444,12 +444,16 @@ zDerSpecialTab={
 (*Add reference values for large nu.*)
 
 
-zDerLargeNu =Flatten[
+zDerLargeNu=Flatten[
 	ParallelTable[{
 			Flatten@{N@{\[Nu],{{1,0},{0,1}},{0,0},{0,0}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,0},{0,0},\[Alpha]]}}
 			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.},{0,.4}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,0},{0,4/10},\[Alpha]]}}
 			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.4},{0,.0}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,4/10},{0,0},\[Alpha]]}}
 			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0.,0.2},{0,.4}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],{{1,0},{0,1}},{0,2/10},{0,4/10},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],AHex,{0,0},{0,0}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],AHex,{0,0},{0,0},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],AHex,{0.,0.},{0,.4}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],AHex,{0,0},{0,4/10},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],AHex,{0.,0.4},{0,.0}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],AHex,{0,4/10},{0,0},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],AHex,{0.,0.2},{0,.4}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],AHex,{0,2/10},{0,4/10},\[Alpha]]}}
 		}
 		,{\[Nu],{1/2,30,83/3,11}}
 		,{\[Alpha],{{2,0},{6,8},{6,9}}}
@@ -476,8 +480,7 @@ zDerTab=Join[zDerRandomTab,zDerSpecialTab,zDerLargeNu];
 (*Save reference values to file.*)
 
 
-SetDirectory[NotebookDirectory[]];
-Export["csv/setZetaDer_2D_ref.csv",zDerTab];
+Export[NotebookDirectory[]<>"csv/setZetaDer_2D_ref.csv",zDerTab];
 
 
 (* ::Subsection::Closed:: *)
