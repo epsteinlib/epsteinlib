@@ -335,15 +335,15 @@ static double complex sum_real_harmonic(
  * @param[in] valid_count: number of valid gamma entries for each k.
  * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
  * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
- * @param[in] zv_1_norm: L1 norm of zv.
+ * @param[in] nearOrigin: true if zv is zero or a nearest neighbor.
  * @return I ** (|α| - 2k) h₍α,kIndex₎(y) * G_{nu}(z - x) * exp(-2 * PI * I * (z *
  * y).
  */
-static inline double complex summand_real_harmonic_largeExp(
+static inline double complex summand_real_harmonic_large_exp(
     double nu, unsigned int kIndex, unsigned int dim, double lambda, double lv[],
     const double *x, const double *y, double zArgBound, unsigned int alphaAbs,
     const unsigned long long *chunk_offset, const unsigned long long *valid_count,
-    const double *coeffs, const unsigned int *exponents, unsigned int zv_1_norm) {
+    const double *coeffs, const unsigned int *exponents, bool nearOrigin) {
 
     double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
     for (int i = 0; i < dim; i++) {
@@ -356,7 +356,6 @@ static inline double complex summand_real_harmonic_largeExp(
     if (h) {
         // use lower Crandall for the origin and its the nearest neighbors
         double complex crandall;
-        bool nearOrigin = (zv_1_norm <= 1);
         if (nearOrigin) {
             crandall = -crandall_g_lower(dim, nu, lv, 1. / lambda);
         } else {
@@ -392,7 +391,7 @@ static inline double complex summand_real_harmonic_largeExp(
  * sum_{z in m whole_numbers ** dim} I ** (|α| - 2k) h₍α,kIndex₎(y) * G_{nu}(z - x) *
  * exp(-2 * PI * I * (z * y)
  */
-static double complex sum_real_harmonic_largeExp(
+static double complex sum_real_harmonic_large_exp(
     double nu, unsigned int kIndex, unsigned int dim, const double *m,
     const double *x, const double *y, const int cutoffs[], double zArgBound,
     bool diag, unsigned int alphaAbs, const unsigned long long *chunk_offset,
@@ -415,10 +414,11 @@ static double complex sum_real_harmonic_largeExp(
     double complex epsilon = 0.0;
 
     for (long n = 0; n < totalSummands; n++) {
+        bool nearOrigin = (zv_1_norm <= 1);
         matrix_intVector(dim, m, zv, lv, diag);
-        double complex summand = summand_real_harmonic_largeExp(
+        double complex summand = summand_real_harmonic_large_exp(
             nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
-            valid_count, coeffs, exponents, zv_1_norm);
+            valid_count, coeffs, exponents, nearOrigin);
         kahan_add_c(&sum, &epsilon, summand);
         lattice_vector_increment_norm(dim, cutoffs, zv, &zv_1_norm);
     }
@@ -443,7 +443,7 @@ static double complex sum_real_harmonic_largeExp(
  * @return I ** (|α| - 2k) h₍α,kIndex₎(y) * G_{nu}(z - x) * exp(-2 * PI * I * (z *
  * y).
  */
-static inline double complex summand_real_harmonic_largeExp_singularity_sum(
+static inline double complex summand_real_harmonic_large_exp_singularity_sum(
     double nu, unsigned int kMax, unsigned int dim, double lv[], const double *x,
     const double *y, unsigned int alphaAbs, const unsigned long long *chunk_offset,
     const unsigned long long *valid_count, const double *coeffs,
@@ -501,7 +501,7 @@ static inline double complex summand_real_harmonic_largeExp_singularity_sum(
  * @return (-2πi)^{|α|} ∑_{z ∈ Aℤᵈ − x, |z| = 0 or |z| = 1} e^(−2πi y·z)
  * ∑_{k=0}^{⌊|α|/2⌋} h_{α,k}(−2πi z) (z·z)^{−(ν−2k)/2}
  */
-static double complex sum_real_harmonic_largeExp_singularity_sum( // NOLINT
+static double complex sum_real_harmonic_large_exp_singularity_sum( // NOLINT
     double nu, unsigned int kMax, unsigned int dim, const double *m, const double *x,
     const double *y, bool diag, unsigned int alphaAbs,
     const unsigned long long *chunk_offset, const unsigned long long *valid_count,
@@ -525,7 +525,7 @@ static double complex sum_real_harmonic_largeExp_singularity_sum( // NOLINT
         bool nearOrigin = (zv_1_norm <= 1);
         if (nearOrigin) {
             matrix_intVector(dim, m, zv, lv, diag);
-            double complex summand = summand_real_harmonic_largeExp_singularity_sum(
+            double complex summand = summand_real_harmonic_large_exp_singularity_sum(
                 nu, kMax, dim, lv, x, y, alphaAbs, chunk_offset, valid_count, coeffs,
                 exponents);
             kahan_add_c(&sum, &epsilon, summand);
@@ -1176,10 +1176,10 @@ static double complex summation_harmonic(
             s2 = negative_one_pow(k) * (s2 * rot + nc);
 
             if (largeExp) {
-                s1 = sum_real_harmonic_largeExp(nuIt, k, dim, m_real, x_t2, y_t2,
-                                                cutoffsReal, zArgBound, diag,
-                                                alphaAbs, chunk_offset, valid_count,
-                                                coeffs, exponents) *
+                s1 = sum_real_harmonic_large_exp(nuIt, k, dim, m_real, x_t2, y_t2,
+                                                 cutoffsReal, zArgBound, diag,
+                                                 alphaAbs, chunk_offset, valid_count,
+                                                 coeffs, exponents) *
                      imaginary_int_pow(alphaAbs) * rot * xfactor;
             } else {
                 s1 = sum_real_harmonic(nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal,
@@ -1197,7 +1197,7 @@ static double complex summation_harmonic(
     if (largeExp) {
         double complex s1_singularity =
             xfactor * rot * imaginary_int_pow(alphaAbs) *
-            sum_real_harmonic_largeExp_singularity_sum(
+            sum_real_harmonic_large_exp_singularity_sum(
                 nu, kMax, dim, m_real, x_t2, y_t2, diag, alphaAbs, chunk_offset,
                 valid_count, coeffs, exponents);
         res += s1_singularity;
