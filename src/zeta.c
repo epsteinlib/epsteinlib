@@ -855,18 +855,18 @@ static double complex sum_fourier_harmonic(
     // second sum (in fourier space)
     for (long n = 0; n < zeroIndex; n++) {
         matrix_intVector(dim, m_invt, zv, lv, diag);
-        double complex summand = summand_fourier_harmonic(
+        double complex left = summand_fourier_harmonic(
             nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
             valid_count, coeffs, exponents);
-        // symmerict addition to catch +- identical terms in y = 0
+        // symmetric addition to catch +- identical terms in y = 0
         for (int k = 0; k < dim; k++) {
             zv_sym[k] = -zv[k];
         }
         matrix_intVector(dim, m_invt, zv_sym, lv, diag);
-        summand += summand_fourier_harmonic(nu, kIndex, dim, lambda, lv, x, y,
-                                            zArgBound, alphaAbs, chunk_offset,
-                                            valid_count, coeffs, exponents);
-        kahan_add_c(&sum, &epsilon, summand);
+        double complex right = summand_fourier_harmonic(
+            nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
+            valid_count, coeffs, exponents);
+        kahan_add_c(&sum, &epsilon, left + right);
         lattice_vector_increment(dim, cutoffs, zv);
     }
     return sum;
@@ -939,16 +939,16 @@ static double complex sum_fourier_harmonic_1D(double nu, unsigned int dim,
     // second sum (in fourier space)
     for (long n = 0; n < zeroIndex; n++) {
         matrix_intVector(dim, m_invt, zv, lv, diag);
-        double complex summand = summand_fourier_harmonic_1D(nu, dim, lambda, lv, x,
-                                                             y, zArgBound, alphaAbs);
-        // symmerict addition to catch +- identical terms in y = 0
+        double complex left = summand_fourier_harmonic_1D(nu, dim, lambda, lv, x, y,
+                                                          zArgBound, alphaAbs);
+        // symmetric addition to catch +- identical terms in y = 0
         for (int k = 0; k < dim; k++) {
             zv_sym[k] = -zv[k];
         }
         matrix_intVector(dim, m_invt, zv_sym, lv, diag);
-        summand += summand_fourier_harmonic_1D(nu, dim, lambda, lv, x, y, zArgBound,
-                                               alphaAbs);
-        kahan_add_c(&sum, &epsilon, summand);
+        double complex right = summand_fourier_harmonic_1D(nu, dim, lambda, lv, x, y,
+                                                           zArgBound, alphaAbs);
+        kahan_add_c(&sum, &epsilon, left + right);
         lattice_vector_increment(dim, cutoffs, zv);
     }
     return sum;
@@ -1156,10 +1156,10 @@ static double complex summation_harmonic_high_exp(
                                    coeffs, exponents);
             }
         } else {
+            // calculate set zeta derivative function values.
+
             double nuReci = nuIt - (2 * alphaAbs) + (4 * k);
             double zArgBoundReci = assignzArgBound(dim - nuReci);
-
-            // calculate set zeta derivative function values.
 
             // skip zero summand if harmonic polynomial vanishes
             double h = harmonic_h(k, dim, y_t2, alphaAbs, chunk_offset, valid_count,
@@ -1282,10 +1282,11 @@ static double complex summation_harmonic(
                                    coeffs, exponents);
             }
         } else {
+            // calculate set zeta derivative function values.
+
             double nuReci = nuIt - (2 * alphaAbs) + (4 * k);
             double zArgBoundReci = assignzArgBound(dim - nuReci);
 
-            // calculate set zeta derivative function values.
             double complex rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
 
             // skip zero summand if harmonic polynomial vanishes

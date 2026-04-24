@@ -17,12 +17,12 @@
 #include <stdbool.h>
 
 /*!
- * @brief minimal distance of two vector elements considered unequal.
+ * @brief Minimal distance of two vector elements considered unequal.
  */
 #define EPS ldexp(1, -32)
 
 /**
- * @brief square matrix transpose.
+ * @brief Square matrix transpose.
  * @param[in] dim: dimension of the square matrix.
  * @param[in,out] m: square matrix.
  */
@@ -38,7 +38,7 @@ void transpose(unsigned int dim, double *m) {
 }
 
 /**
- * @brief check if two vectors are equal.
+ * @brief Check if two vectors are equal.
  * @param[in] dim: dimension of the vectors.
  * @param[in] v1: first vector.
  * @param[in] v2: second vector.
@@ -155,13 +155,11 @@ unsigned int mult_abs(unsigned int dim, const unsigned int *alpha) {
  * @return binom(n)(k).
  */
 unsigned long long binom(unsigned long long n, unsigned long long k) {
-    unsigned long long res = 1;
-
-    // Calculate binom(n)(n-k) if n - k is closer to smaller than k
+    // Calculate binom(n)(n-k) if n - k is smaller than k
     if (k > n - k) {
         k = n - k;
     }
-
+    unsigned long long res = 1;
     for (unsigned int i = 1; i <= k; i++) {
         res = res * (n - k + i) / i;
     }
