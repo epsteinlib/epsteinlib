@@ -24,28 +24,13 @@
 #include <time.h>
 
 #include "../src/gamma.h"
+#include "utils.h"
 
 #define BASE_PATH "tests/csv"
 
 #ifndef MAX_PATH_LENGTH
 #define MAX_PATH_LENGTH 1024
 #endif
-
-/**
- * @brief Opens a file.
- * @param path Path to the file.
- * @param mode 'r' to read or 'w' to write.
- * @return FILE* Pointer to the opened file.
- * @note Exits the program if the file cannot be opened.
- */
-FILE *open(char *path, char *mode) {
-    FILE *file = fopen(path, mode);
-    if (file) {
-        return file;
-    }
-    printf("File '%s' does not exist.\n", path);
-    exit(1); // NOLINT
-}
 
 /**
  * @brief Computes and prints reference values of the upper gamma function to a CSV
@@ -64,7 +49,7 @@ int benchmark_gamma(double xinc, double nuinc, double xbound, const char *filena
         return fprintf(stderr, "Error: filename too long\n");
     }
 
-    FILE *gammaData = open(gammaString, "w");
+    FILE *gammaData = open_file(gammaString, "w");
     if (gammaData == NULL) {
         printf("%s\n", strerror(errno)); // NOLINT
         return 1;

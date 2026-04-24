@@ -686,6 +686,7 @@ double complex sum_fourier(double nu, unsigned int dim, double lambda,
 }
 
 /**
+<<<<<<< HEAD
  * @brief Computes one summand of the derivative of the second sum in Crandall's
  * formula.
  * @param[in] nu: exponent for the Epstein zeta function.
@@ -947,49 +948,6 @@ static double complex sum_fourier_harmonic_1D(double nu, unsigned int dim,
 }
 
 /**
- * @brief calculate projection of vector to elementary lattice cell.
- * @param[in] dim: dimension of the input vectors
- * @param[in] m: matrix that transforms the lattice in the function.
- * @param[in] m_invt: inverse of m.
- * @param[in] v: vector for which the projection to the elementary lattice cell
- * is needet.
- * @return projection of v to the elementary lattice cell.
- */
-static double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
-                          const double *v) {
-    bool todo = false;
-    double *vt = malloc(dim * sizeof(double));
-    for (int i = 0; i < dim; i++) {
-        vt[i] = 0;
-        for (int j = 0; j < dim; j++) {
-            vt[i] += m_invt[(dim * j) + i] * v[j];
-        }
-    }
-    // check if projection is needed, else copy
-    for (int i = 0; i < dim && !todo; i++) {
-        todo = todo || (vt[i] <= -0.5 || vt[i] >= 0.5);
-    }
-    if (todo) {
-        for (int i = 0; i < dim; i++) {
-            vt[i] = remainder(vt[i], 1);
-        }
-        double *vres = malloc(dim * sizeof(double));
-        for (int i = 0; i < dim; i++) {
-            vres[i] = 0;
-            for (int j = 0; j < dim; j++) {
-                vres[i] += m[(dim * i) + j] * vt[j];
-            }
-        }
-        free(vt);
-        return vres;
-    }
-    for (int i = 0; i < dim; i++) {
-        vt[i] = v[i];
-    }
-    return vt;
-}
-
-/**
  * @brief calculates set zeta derivatives by the 1-D harmonic method.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
@@ -1216,6 +1174,9 @@ static double complex summation_harmonic(
 /**
  * @brief calculates the (regularized) Epstein zeta function as well es the
  * derivatives of the set zeta function.
+=======
+ * @brief calculates the (regularized) Epstein zeta function.
+>>>>>>> rework-benchmarks
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] m: matrix that transforms the lattice in the Epstein zeta
