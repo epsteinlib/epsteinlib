@@ -74,7 +74,7 @@ AHex={{1,1/2},{0,Sqrt@3/2}};
 BMat[a_] = 1/Sqrt[a + 1]*DiagonalMatrix[{Sqrt[a], 1, 1}] . {{1, 1, 0}, {1, 0, 1}, {0, 1, 1}};
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Reference functions*)
 
 
@@ -125,7 +125,7 @@ SumFourierDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[gDer[Length[\[Alph
 (*Prototype for epsteinZetaDer without special cases such non-positive even integers nu.*)
 
 
-Options[setZetaDer]={InputPrecision->100,SumLim->10};
+Options[setZetaDer]={InputPrecision->100,SumLim->6};
 setZetaDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Module[
 	{EPS,prec,sumLim,\[Nu]N,AN,xN,yN,\[Mu],sumReal,sumReci,res}
 	,EPS=10^-50
@@ -455,7 +455,7 @@ zDerLargeNu=Flatten[
 			,Flatten@{N@{\[Nu],AHex,{0.,0.4},{0,.0}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],AHex,{0,4/10},{0,0},\[Alpha]]}}
 			,Flatten@{N@{\[Nu],AHex,{0.,0.2},{0,.4}},\[Alpha],{N@Re@#,N@Im@#}&/@{setZetaDer[\[Nu],AHex,{0,2/10},{0,4/10},\[Alpha]]}}
 		}
-		,{\[Nu],{1/2,30,83/3,11}}
+		,{\[Nu],{1/2,30,83/3,11,12}}
 		,{\[Alpha],{{2,0},{6,8},{6,9}}}
 	]
 ,2];
