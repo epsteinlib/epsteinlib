@@ -99,4 +99,16 @@ void invert(unsigned int dim, double *m, int *p, double *r);
  * @param[in] m: matrix to compute infinity norm of.
  */
 double inf_norm(unsigned int dim, const double *m);
+
+/**
+ * @brief calculate projection of vector to elementary lattice cell.
+ * @param[in] dim: dimension of the input vectors
+ * @param[in] m: matrix that transforms the lattice in the function.
+ * @param[in] m_invt: inverse of m.
+ * @param[in] v: vector for which the projection to the elementary lattice cell
+ * is needet.
+ * @return projection of v to the elementary lattice cell.
+ */
+double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
+                   const double *v);
 #endif

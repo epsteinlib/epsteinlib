@@ -190,49 +190,6 @@ double complex sum_fourier(double nu, unsigned int dim, double lambda,
 }
 
 /**
- * @brief calculate projection of vector to elementary lattice cell.
- * @param[in] dim: dimension of the input vectors
- * @param[in] m: matrix that transforms the lattice in the function.
- * @param[in] m_invt: inverse of m.
- * @param[in] v: vector for which the projection to the elementary lattice cell
- * is needet.
- * @return projection of v to the elementary lattice cell.
- */
-double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
-                   const double *v) {
-    bool todo = false;
-    double *vt = malloc(dim * sizeof(double));
-    for (int i = 0; i < dim; i++) {
-        vt[i] = 0;
-        for (int j = 0; j < dim; j++) {
-            vt[i] += m_invt[(dim * j) + i] * v[j];
-        }
-    }
-    // check if projection is needed, else copy
-    for (int i = 0; i < dim && !todo; i++) {
-        todo = todo || (vt[i] <= -0.5 || vt[i] >= 0.5);
-    }
-    if (todo) {
-        for (int i = 0; i < dim; i++) {
-            vt[i] = remainder(vt[i], 1);
-        }
-        double *vres = malloc(dim * sizeof(double));
-        for (int i = 0; i < dim; i++) {
-            vres[i] = 0;
-            for (int j = 0; j < dim; j++) {
-                vres[i] += m[(dim * i) + j] * vt[j];
-            }
-        }
-        free(vt);
-        return vres;
-    }
-    for (int i = 0; i < dim; i++) {
-        vt[i] = v[i];
-    }
-    return vt;
-}
-
-/**
  * @brief calculates the (regularized) Epstein zeta function.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
