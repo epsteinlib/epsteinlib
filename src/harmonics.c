@@ -305,6 +305,7 @@ precompute_harmonic_h_inner_chunk_size(unsigned int alphaAbs, unsigned int kMax,
         }
         totalSize += valid_count[k];
     }
+
     return totalSize;
 }
 
@@ -330,6 +331,7 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, // NOLINT
     unsigned int kMax = alphaAbs / 2;
 
     for (unsigned int k = 0; k <= kMax; k++) {
+
         unsigned int gamma[dim];
         for (unsigned int j = 0; j < dim; j++) {
             gamma[j] = 0;
@@ -397,6 +399,7 @@ double harmonic_h(unsigned int k, unsigned int dim, const double *z,
                   unsigned int alphaAbs, const unsigned long long *chunk_offset,
                   const unsigned long long *valid_count, const double *coeffs,
                   const unsigned int *exponents) {
+
     double zPow;
     double sumOuter = 0.0;
     double epsilonOuter = 0.0;
@@ -416,7 +419,9 @@ double harmonic_h(unsigned int k, unsigned int dim, const double *z,
         double summand = zPow * sumInner;
         kahan_add_r(&sumOuter, &epsilonOuter, summand);
     }
+
     sumOuter *= coeffs_c_outer(alphaAbs, k, dim);
+
     return sumOuter;
 }
 

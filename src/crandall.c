@@ -181,11 +181,13 @@ double complex crandall_g_lower(unsigned int dim, double nu, const double *z,
  */
 double polynomial_p(unsigned int dim, const double *z, const unsigned int *alpha,
                     const unsigned int *beta) {
+
     double res = 1;
     unsigned int ai = 0;
     unsigned int bi = 0;
     unsigned long long factFrac;
     unsigned int aMinusb = 0;
+
     for (int i = 0; i < dim; i++) {
         ai = alpha[i];
         bi = beta[i];
@@ -550,6 +552,7 @@ double singularity_s_der(unsigned int k, unsigned int dim, const double *z,
             beta[idx] = 0;
             done = true;
         }
+
         if (done) {
             break;
         }
@@ -658,43 +661,37 @@ double complex crandall_gReg_der(unsigned int dim, double s, const double *z,
     }
 
     unsigned int beta[dim];
-    for (int i = 0; i < dim; i++) {
-        beta[i] = 0;
+    for (unsigned int j = 0; j < dim; j++) {
+        beta[j] = 0;
     }
-
-    double sIt;
-
-    int done = 0;
     unsigned int betaAbs = 0;
+
+    unsigned long long totalCount = 1;
+    for (unsigned int j = 0; j < dim; j++) {
+        totalCount *= alpha[j] / 2 + 1;
+    }
 
     double complex sum = 0.0;
     double complex epsilon = 0.0;
 
-    // Iterate over every multi-index beta so that 2 beta <= alpha
-    while (1) {
+    // Iterate over every multi-index beta so that 2 * beta <= alpha
+    for (unsigned long long i = 0; i < totalCount; i++) {
 
-        sIt = s + 2 * alphaAbs - 2 * betaAbs;
+        double sIt = s + (2 * alphaAbs) - (2 * betaAbs);
 
-        // Summing using Kahan's method
-        double complex summand =
-            (-polynomial_p(dim, z, alpha, beta) * tgamma(sIt / 2) *
-             egf_gammaStar(sIt / 2, zArgument)) -
-            epsilon;
+        double complex summand = -polynomial_p(dim, z, alpha, beta) *
+                                 tgamma(sIt / 2) * egf_gammaStar(sIt / 2, zArgument);
+
         kahan_add_c(&sum, &epsilon, summand);
 
-        done = 1;
         for (unsigned int idx = 0; idx < dim; idx++) {
             if (beta[idx] + 1 <= alpha[idx] / 2) {
                 beta[idx]++;
                 betaAbs++;
-                done = 0;
                 break;
             }
             betaAbs -= beta[idx];
             beta[idx] = 0;
-        }
-        if (done) {
-            break;
         }
     }
 
