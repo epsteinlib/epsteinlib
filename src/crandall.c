@@ -12,6 +12,7 @@
  */
 
 #include "gamma.h"
+#include "stdbool.h"
 #include "tools.h"
 #include <complex.h>
 #include <float.h>
@@ -343,6 +344,7 @@ double complex log_l_der(unsigned int dim, const double *z,
 
     // Iterate over every multi-index beta so that 2 * beta <= alpha
     for (unsigned long long i = 0; i < totalCount; i++) {
+
         double complex summand =
             polynomial_l(dim, z, alpha, beta) / real_int_pow(zArg, aMinusb);
         kahan_add_c(&sum, &epsilon, summand);
@@ -373,19 +375,18 @@ double complex log_l_der(unsigned int dim, const double *z,
 double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NOLINT
                         const unsigned int *alpha, unsigned int alphaAbs,
                         unsigned int n) {
-
     // Return function if there is no derivative
     if (!alphaAbs) {
         return real_int_pow(M_PI * dot(dim, z, z), k);
     }
 
     unsigned int betaMin[dim];
-    for (int i = 0; i < dim; i++) {
+    for (unsigned int i = 0; i < dim; i++) {
         betaMin[i] = (alpha[i] + 1) / 2;
     }
 
     unsigned int absMin = 0;
-    for (int i = 0; i < dim; i++) {
+    for (unsigned int i = 0; i < dim; i++) {
         absMin += betaMin[i];
     }
 
@@ -395,90 +396,82 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
     }
 
     unsigned long long factMin = 1;
-    for (int i = 0; i < dim; i++) {
-        for (int j = 1; j < betaMin[i] + 1; j++) {
+    for (unsigned int i = 0; i < dim; i++) {
+        for (unsigned int j = 1; j <= betaMin[i]; j++) {
             factMin *= j;
         }
     }
 
     unsigned int beta[dim];
-    for (int i = 0; i < dim; i++) {
+    for (unsigned int i = 0; i < dim; i++) {
         beta[i] = betaMin[i];
     }
-
     unsigned int betaAbs = absMin;
     unsigned long long betaFact = factMin;
 
+    // cutoff is k - absMin per dimension, totalCount = (k - absMin + 1)^dim
+    unsigned int range = k - absMin;
+    unsigned long long totalCount = 1;
+    for (unsigned int j = 0; j < dim; j++) {
+        totalCount *= range + 1;
+    }
+
     double sum = 0.;
     double epsilon = 0.;
+    bool redoFact = false;
 
-    double summand;
-    double res;
+    // Iterate over multi-indices beta so that 2 * beta >= alpha and |beta| <= k
+    for (unsigned long long i = 0; i < totalCount; i++) {
 
-    unsigned int redoFact = 0;
-    unsigned int done = 0;
-    while (1) {
-
-        if (!(betaAbs - k)) {
-
+        if (betaAbs == k) {
             // Recalculate factorial (expensive but stable)
             if (redoFact) {
                 betaFact = factMin;
-                for (unsigned int i = 0; i < dim; i++) {
-                    for (unsigned int j = betaMin[i] + 1; j < beta[i] + 1; j++) {
-                        betaFact *= j;
+                for (unsigned int j = 0; j < dim; j++) {
+                    for (unsigned int l = betaMin[j] + 1; l <= beta[j]; l++) {
+                        betaFact *= l;
                     }
                 }
-                redoFact = 0;
+                redoFact = false;
             }
 
-            summand = 1.;
-            for (int i = 0; i < dim; i++) {
+            double summand = 1.;
+            for (unsigned int j = 0; j < dim; j++) {
                 summand *=
-                    (double)binom((long long)(2 * beta[i]), (long long)alpha[i]) *
-                    real_int_pow(z[i], (2 * beta[i]) - alpha[i]);
+                    (double)binom((long long)(2 * beta[j]), (long long)alpha[j]) *
+                    real_int_pow(z[j], (2 * beta[j]) - alpha[j]);
             }
-
-            summand = summand / (double)betaFact;
+            summand /= (double)betaFact;
             kahan_add_r(&sum, &epsilon, summand);
         }
 
-        done = 1;
-        // Loop over multi-indexes beta so that 2 beta >= alpha and |beta| <= k
         for (unsigned int idx = 0; idx < dim; idx++) {
-            if (beta[idx] < k - absMin + betaMin[idx]) {
+            if (beta[idx] < betaMin[idx] + range) {
                 // Fast path: increment current dimension
                 beta[idx]++;
                 betaAbs++;
                 betaFact *= beta[idx];
-                done = 0;
                 break;
             }
-
-            // Slow path: reset this dimension and continue
+            // Slow path: reset this dimension and carry
             betaAbs -= beta[idx] - betaMin[idx];
             beta[idx] = betaMin[idx];
-            redoFact = 1;
-        }
-        if (done) {
-            break;
+            redoFact = true;
         }
     }
 
-    // factorial = alpha! k! / n!
+    // factorial = alpha! * k! / n!
     unsigned long long factorial = 1;
     for (unsigned int i = 0; i < dim; i++) {
-        for (int j = 1; j < alpha[i] + 1; j++) {
+        for (unsigned int j = 1; j <= alpha[i]; j++) {
             factorial *= j;
         }
     }
-    for (unsigned int j = n + 1; j < k + 1; j++) {
+    for (unsigned int j = n + 1; j <= k; j++) {
         factorial *= j;
     }
 
-    res = (double)factorial * real_int_pow(M_PI, k) * sum;
-
-    return res;
+    return (double)factorial * real_int_pow(M_PI, k) * sum;
 }
 
 /** @brief Calculates the singularity s_{d+2k}(z) = pi**(k + d / 2) / gamma(k + d /
@@ -526,7 +519,7 @@ double singularity_s_der(unsigned int k, unsigned int dim, const double *z,
 
     unsigned int multBinom;
 
-    int done = 0;
+    bool done = false;
     // Iterate over every multi-index beta so that beta + gamma = alpha
     while (1) {
 
@@ -541,21 +534,21 @@ double singularity_s_der(unsigned int k, unsigned int dim, const double *z,
             kahan_add_r(&sum, &epsilon, summand);
         }
 
-        done = 1;
+        done = true;
         for (unsigned int idx = 0; idx < dim; idx++) {
             if (beta[idx] < alpha[idx]) {
                 betaAbs++;
                 gammaAbs--;
                 beta[idx]++;
                 gamma[idx]--;
-                done = 0;
+                done = false;
                 break;
             }
             betaAbs -= beta[idx];
             gammaAbs += beta[idx];
             gamma[idx] += beta[idx];
             beta[idx] = 0;
-            done = 1;
+            done = true;
         }
         if (done) {
             break;
