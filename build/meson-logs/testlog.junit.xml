@@ -6,15 +6,15 @@ SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
 SPDX-License-Identifier: AGPL-3.0-only
 -->
 
-<testsuites tests="10" errors="0" failures="0"><testsuite name="epsteinlib" tests="10" errors="0" failures="0" skipped="0" time="0.022905588150024414"><testcase name="test_crandall" classname="epsteinlib" time="0.022905588150024414"><system-out>test_crandall_g 
+<testsuites tests="10" errors="0" failures="0"><testsuite name="epsteinlib" tests="10" errors="0" failures="0" skipped="0" time="0.03245854377746582"><testcase name="test_crandall" classname="epsteinlib" time="0.03245854377746582"><system-out>test_crandall_g 
 	 ... processing csv/crandall_g_ref.csv 
 	 ... 200 out of 200 tests passed with tolerance 1.000000E-13.	    [ Error →  min: 0.000000E+00 | max: 1.128955E-14 | avg: 1.307951E-16 ]
-									    [ Time  →  sec: 0.000341     ]</system-out></testcase><testcase name="test_tools" classname="epsteinlib" time="0.012059926986694336"><system-out>test_matrix_transpose_inverse 
+									    [ Time  →  sec: 0.000387     ]</system-out></testcase><testcase name="test_tools" classname="epsteinlib" time="0.01770186424255371"><system-out>test_matrix_transpose_inverse 
 	 ... processing csv/svd_ref.csv 
 	 ... 999 out of 999 tests passed with tolerance 5.000000E-14.	    [ Error →  min: 0.000000E+00 | max: 5.551115E-16 | avg: 6.209775E-17 ]
-									    [ Time  →  sec: 0.001756     ]</system-out></testcase><testcase name="Minimal working example" classname="epsteinlib" time="0.007964372634887695"><system-out>Madelung sum in 3 dimensions:	 -1.7475645946331821
+									    [ Time  →  sec: 0.002934     ]</system-out></testcase><testcase name="Minimal working example" classname="epsteinlib" time="0.01193547248840332"><system-out>Madelung sum in 3 dimensions:	 -1.7475645946331821
 Reference value:		 -1.7475645946331821
-Relative error:			 +0.00e+00</system-out></testcase><testcase name="test_hpdyad" classname="epsteinlib" time="0.01504373550415039"><system-out>test_ctzmsb 
+Relative error:			 +0.00e+00</system-out></testcase><testcase name="test_hpdyad" classname="epsteinlib" time="0.025593280792236328"><system-out>test_ctzmsb 
 	 ... processing csv/ctzmsb_ref.csv 
 	 ... 999 out of 999 tests passed.
 test_hpdyad_set_ull 
@@ -37,121 +37,121 @@ test_hpdyad_add_fractional
 	 ... 999 out of 999 tests passed.
 test_hpdyad_to_double 
 	 ... processing csv/hpdyad_to_double_ref.csv 
-	 ... 999 out of 999 tests passed.</system-out></testcase><testcase name="test_epsteinZeta" classname="epsteinlib" time="0.21815109252929688"><system-out>test_epsteinZeta 
+	 ... 999 out of 999 tests passed.</system-out></testcase><testcase name="test_epsteinZeta" classname="epsteinlib" time="0.09987974166870117"><system-out>test_epsteinZeta 
 	 ... processing csv/epsteinZeta_ref.csv 
 	 ... 300 out of 300 tests passed with tolerance 6.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.822089E-15 | avg: 2.766178E-16 ]
-									    [ Time  →  sec: 0.005562     ]
+									    [ Time  →  sec: 0.003965     ]
 test_epsteinZetaReg 
 	 ... processing file: csv/epsteinZetaReg_ref.csv 
 	 ... 200 out of 200 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.133043E-15 | avg: 1.747445E-16 ]
-									    [ Time  →  sec: 0.004104     ]
+									    [ Time  →  sec: 0.002984     ]
 test_epsteinZeta_random_matrices 
 	 ... processing csv/epsteinZeta_random_matrices_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 2.168404E-18 | max: 1.613647E-15 | avg: 2.249099E-16 ]
-									    [ Time  →  sec: 0.092851     ]
+									    [ Time  →  sec: 0.029857     ]
 test_epsteinZetaReg_random_matrices 
 	 ... processing csv/epsteinZetaReg_random_matrices_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 9.697399E-19 | max: 1.180183E-15 | avg: 1.530408E-16 ]
-									    [ Time  →  sec: 0.081867     ]
+									    [ Time  →  sec: 0.030594     ]
 test_epsteinZeta_epsteinZetaReg_represent_as_each_other 
 	 ... 200 out of 200 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 9.424515E-16 | avg: 1.707986E-16 ]
-									    [ Time  →  sec: 0.007677     ]
+									    [ Time  →  sec: 0.006952     ]
 test_epsteinZeta_cutoff 
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-15.
-									    [ Time  →  sec: 0.021418     ]</system-out></testcase><testcase name="test_crandall_derivatives" classname="epsteinlib" time="0.25491929054260254"><system-out>test_polynomial_p 
+									    [ Time  →  sec: 0.020961     ]</system-out></testcase><testcase name="test_crandall_derivatives" classname="epsteinlib" time="0.12620878219604492"><system-out>test_polynomial_p 
 	 ... processing csv/polynomial_p_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 7.486101E-16 | avg: 2.143548E-16 ]
-									    [ Time  →  sec: 0.000210     ]
+									    [ Time  →  sec: 0.000174     ]
 test_polynomial_l 
 	 ... processing csv/polynomial_l_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 8.548077E-16 | avg: 1.494514E-16 ]
-									    [ Time  →  sec: 0.000166     ]
+									    [ Time  →  sec: 0.000132     ]
 test_polynomial_y_der 
 	 ... processing csv/polynomial_y_der_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.081439E-15 | avg: 1.747025E-16 ]
-									    [ Time  →  sec: 0.000215     ]
+									    [ Time  →  sec: 0.000183     ]
 test_log_l_der 
 	 ... processing csv/log_l_der_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-12.	    [ Error →  min: 0.000000E+00 | max: 1.531882E-12 | avg: 3.771422E-14 ]
-									    [ Time  →  sec: 0.000262     ]
+									    [ Time  →  sec: 0.000208     ]
 test_singularity_s_der 
 	 ... processing csv/singularity_s_der_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-11.	    [ Error →  min: 0.000000E+00 | max: 1.632727E-11 | avg: 4.399605E-13 ]
-									    [ Time  →  sec: 0.004419     ]
+									    [ Time  →  sec: 0.003303     ]
 test_crandall_g_der 
 	 ... processing csv/crandall_g_der_ref.csv 
 	 ... 10 out of 10 tests passed with tolerance 5.000000E-14.	    [ Error →  min: 3.913984E-16 | max: 2.431066E-14 | avg: 7.936357E-15 ]
-									    [ Time  →  sec: 0.000094     ]
+									    [ Time  →  sec: 0.000067     ]
 test_crandall_gReg_der 
 	 ... processing csv/crandall_gReg_der_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-11.	    [ Error →  min: 0.000000E+00 | max: 8.235915E-12 | avg: 1.276608E-13 ]
-									    [ Time  →  sec: 0.000804     ]
+									    [ Time  →  sec: 0.000475     ]
 test_crandall_gReg_der_d2k_prototype 
 	 ... processing csv/crandall_gReg_der_d2k_prototype_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-10.	    [ Error →  min: 0.000000E+00 | max: 7.883412E-11 | avg: 8.475243E-13 ]
-									    [ Time  →  sec: 0.002184     ]
+									    [ Time  →  sec: 0.001531     ]
 test_crandall_g_der_taylor 
 	 ... generating test values
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-14.	    [ Error →  min: 0.000000E+00 | max: 7.490270E-15 | avg: 3.891047E-16 ]
-									    [ Time  →  sec: 0.128262     ]
+									    [ Time  →  sec: 0.061234     ]
 test_crandall_gReg_der_taylor 
 	 ... generating test values
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 7.880421E-16 | avg: 1.069885E-16 ]
-									    [ Time  →  sec: 0.114682     ]</system-out></testcase><testcase name="test_harmonics" classname="epsteinlib" time="0.5482175350189209"><system-out>test_coeffs_c_inner 
+									    [ Time  →  sec: 0.054601     ]</system-out></testcase><testcase name="test_harmonics" classname="epsteinlib" time="0.5204493999481201"><system-out>test_coeffs_c_inner 
 	 ... processing csv/coeffs_c_inner_ref.csv 
 	 ... 999 out of 999 tests passed with tolerance 1.000000E-16.	    [ Error →  min: 0.000000E+00 | max: 0.000000E+00 | avg: 0.000000E+00 ]
-									    [ Time  →  sec: 0.000388     ]
+									    [ Time  →  sec: 0.000457     ]
 test_harmonic_h_inner 
 	 ... processing csv/harmonic_h_inner_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-16.	    [ Error →  min: 0.000000E+00 | max: 0.000000E+00 | avg: 0.000000E+00 ]
-									    [ Time  →  sec: 0.000354     ]
+									    [ Time  →  sec: 0.000458     ]
 test_harmonic_h_1D 
 	 ... processing csv/harmonic_h_1D_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-16.	    [ Error →  min: 0.000000E+00 | max: 0.000000E+00 | avg: 0.000000E+00 ]
-									    [ Time  →  sec: 0.000062     ]
+									    [ Time  →  sec: 0.000082     ]
 test_harmonic_h_3D 
 	 ... processing csv/harmonic_h_3D_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-14.	    [ Error →  min: 0.000000E+00 | max: 1.123220E-14 | avg: 2.469984E-16 ]
-									    [ Time  →  sec: 0.543936     ]</system-out></testcase><testcase name="test_setZetaDer" classname="epsteinlib" time="2.5013298988342285"><system-out>test_setZetaDer_1D 
+									    [ Time  →  sec: 0.514615     ]</system-out></testcase><testcase name="test_epsteinlib" classname="epsteinlib" time="2.464035749435425"><system-err>.................
+----------------------------------------------------------------------
+Ran 17 tests in 2.295s
+
+OK</system-err></testcase><testcase name="test_setZetaDer" classname="epsteinlib" time="2.491672992706299"><system-out>test_setZetaDer_1D 
 	 ... processing csv/setZetaDer_1D_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-13.	    [ Error →  min: 0.000000E+00 | max: 3.119553E-13 | avg: 7.174415E-15 ]
-									    [ Time  →  sec: 0.000457     ]
+									    [ Time  →  sec: 0.000739     ]
 test_setZetaDer_2D 
 	 ... processing csv/setZetaDer_2D_ref.csv 
 	 ... 320 out of 320 tests passed with tolerance 5.000000E-12.	    [ Error →  min: 0.000000E+00 | max: 4.247984E-12 | avg: 8.375179E-14 ]
-									    [ Time  →  sec: 0.149928     ]
+									    [ Time  →  sec: 0.178630     ]
 test_setZetaDer_taylor 
 	 ... generating test values
 	 ... 10  out of 10  tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.008703E-15 | avg: 2.689972E-16 ]
-									    [ Time  →  sec: 0.671095     ]
+									    [ Time  →  sec: 0.631698     ]
 test_setZetaDer_odd 
 	 ... processing csv/setZetaDer_odd_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-16.	    [ Error →  min: 0.000000E+00 | max: 0.000000E+00 | avg: 0.000000E+00 ]
-									    [ Time  →  sec: 0.000233     ]
+									    [ Time  →  sec: 0.000212     ]
 test_setZetaDer_special_exponents 
 	 ... processing csv/setZetaDer_special_exponents_ref.csv 
 	 ... 872 out of 872 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.546177E-15 | avg: 1.323022E-16 ]
-									    [ Time  →  sec: 0.018095     ]
+									    [ Time  →  sec: 0.017705     ]
 test_setZetaDer_poly_laplace 
 	 ... building the 4D PolyLaplace operator Δⁿ, n = 1,2,...,6
 	 ... 6 out of 6 tests passed with tolerance 1.000000E-13.	    [ Error →  min: 4.486139E-17 | max: 6.958231E-14 | avg: 1.750464E-14 ]
-									    [ Time  →  sec: 1.658169     ]</system-out></testcase><testcase name="test_epsteinlib" classname="epsteinlib" time="2.4888968467712402"><system-err>.................
-----------------------------------------------------------------------
-Ran 17 tests in 2.322s
-
-OK</system-err></testcase><testcase name="test_epsteinZetaRegDer" classname="epsteinlib" time="2.802611827850342"><system-out>test_epsteinZetaRegDer_prototype 
+									    [ Time  →  sec: 1.658378     ]</system-out></testcase><testcase name="test_epsteinZetaRegDer" classname="epsteinlib" time="3.175307512283325"><system-out>test_epsteinZetaRegDer_prototype 
 	 ... processing csv/epsteinZetaRegDer_prototype_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 4.000000E-12.	    [ Error →  min: 6.795859E-18 | max: 2.446785E-13 | avg: 7.394964E-15 ]
-									    [ Time  →  sec: 0.010516     ]
+									    [ Time  →  sec: 0.011902     ]
 test_epsteinZetaRegDer_d2k_prototype 
 	 ... processing csv/epsteinZetaRegDer_d2k_prototype_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-11.	    [ Error →  min: 6.370986E-19 | max: 3.539860E-13 | avg: 9.150650E-15 ]
-									    [ Time  →  sec: 0.010511     ]
+									    [ Time  →  sec: 0.011123     ]
 test_epsteinZetaRegDer_bain_prototype 
 	 ... processing csv/epsteinZetaRegDer_bain_prototype_ref.csv 
 	 ... 12 out of 12 tests passed with tolerance 5.000000E-08.	    [ Error →  min: 6.149770E-16 | max: 4.638871E-09 | avg: 5.821574E-10 ]
-									    [ Time  →  sec: 0.025371     ]
+									    [ Time  →  sec: 0.038857     ]
 test_epsteinZetaRegDer_taylor 
 	 ... generating test values
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 2.074108E-15 | avg: 1.713415E-16 ]
-									    [ Time  →  sec: 2.752129     ]</system-out></testcase></testsuite></testsuites>
+									    [ Time  →  sec: 3.108942     ]</system-out></testcase></testsuite></testsuites>
