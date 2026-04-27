@@ -8,6 +8,7 @@
  */
 
 #include "hpdyad.h"
+#include "stdbool.h"
 #include "tools.h"
 #include <math.h>
 
@@ -178,11 +179,14 @@ double harmonic_h_inner_sum(unsigned int k, // NOLINT
         theta2[j] = gamma[j] - beta[j];
     }
 
-    unsigned int redotheta1 = 0;
-    unsigned int redotheta2 = 0;
+    bool redotheta1 = false;
+    bool redotheta2 = false;
     unsigned int betaAbs = 0;
-    int done;
-    int skip;
+
+    unsigned long long totalCount = 1;
+    for (unsigned int j = 0; j < dim; j++) {
+        totalCount *= gamma[j] - (alpha[j] + 1) / 2 + 1;
+    }
 
     unsigned int lastScalarIndex = (alphaAbs / 2) - k;
 
@@ -199,12 +203,12 @@ double harmonic_h_inner_sum(unsigned int k, // NOLINT
     }
 
     // loop over beta multi-indices
-    while (1) {
+    for (unsigned long long i = 0; i < totalCount; i++) {
 
-        skip = 0;
+        bool skip = false;
         for (unsigned int j = 0; j < dim; j++) {
             if (gamma[j] > alpha[j] && gamma[j] - alpha[j] > beta[j]) {
-                skip = 1;
+                skip = true;
             }
         }
 
@@ -215,14 +219,14 @@ double harmonic_h_inner_sum(unsigned int k, // NOLINT
                     theta1[j] = alpha[j] + beta[j] - gamma[j];
                 }
             }
-            redotheta1 = 0;
+            redotheta1 = false;
 
             if (redotheta2) {
                 for (unsigned int j = 0; j < dim; j++) {
                     theta2[j] = gamma[j] - beta[j];
                 }
             }
-            redotheta2 = 0;
+            redotheta2 = false;
 
             hpdyad_t term;
             harmonic_h_inner_term_multi_hpdyad(dim, alpha, beta, theta1, theta2,
@@ -230,23 +234,18 @@ double harmonic_h_inner_sum(unsigned int k, // NOLINT
             hpdyad_add(&multi_coeffs[betaAbs], &multi_coeffs[betaAbs], &term);
         }
 
-        done = 1;
         for (unsigned int idx = 0; idx < dim; idx++) {
             if (2 * beta[idx] + 2 <= 2 * gamma[idx] - alpha[idx]) {
                 beta[idx]++;
                 theta1[idx]++;
                 betaAbs++;
-                redotheta2 = 1;
-                done = 0;
+                redotheta2 = true;
                 break;
             }
             betaAbs -= beta[idx];
             theta2[idx] = beta[idx];
             beta[idx] = 0;
-            redotheta1 = 1;
-        }
-        if (done) {
-            break;
+            redotheta1 = true;
         }
     }
 
