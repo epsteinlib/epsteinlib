@@ -321,46 +321,40 @@ double polynomial_l(unsigned int dim, const double *z, const unsigned int *alpha
  */
 double complex log_l_der(unsigned int dim, const double *z,
                          const unsigned int *alpha, unsigned int alphaAbs) {
-
     double zArg = dot(dim, z, z);
-
     // Return function if there is no derivative
     if (!alphaAbs) {
         return log(M_PI * zArg);
     }
 
     unsigned int beta[dim];
-    for (int i = 0; i < dim; i++) {
-        beta[i] = 0;
+    for (unsigned int j = 0; j < dim; j++) {
+        beta[j] = 0;
     }
-
     unsigned int aMinusb = alphaAbs;
+
+    unsigned long long totalCount = 1;
+    for (unsigned int j = 0; j < dim; j++) {
+        totalCount *= alpha[j] / 2 + 1;
+    }
 
     double complex sum = 0.0;
     double complex epsilon = 0.0;
 
-    int done = 0;
-
-    // Iterate over every multi-index beta so that 2 beta <= alpha
-    while (1) {
-
+    // Iterate over every multi-index beta so that 2 * beta <= alpha
+    for (unsigned long long i = 0; i < totalCount; i++) {
         double complex summand =
             polynomial_l(dim, z, alpha, beta) / real_int_pow(zArg, aMinusb);
         kahan_add_c(&sum, &epsilon, summand);
 
-        done = 1;
         for (unsigned int idx = 0; idx < dim; idx++) {
             if (beta[idx] + 1 <= alpha[idx] / 2) {
                 beta[idx]++;
                 aMinusb--;
-                done = 0;
                 break;
             }
             aMinusb += beta[idx];
             beta[idx] = 0;
-        }
-        if (done) {
-            break;
         }
     }
 
