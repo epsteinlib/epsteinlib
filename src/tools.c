@@ -15,14 +15,15 @@
 #include <complex.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 /*!
- * @brief minimal distance of two vector elements considered unequal.
+ * @brief Minimal distance of two vector elements considered unequal.
  */
 #define EPS ldexp(1, -32)
 
 /**
- * @brief square matrix transpose.
+ * @brief Square matrix transpose.
  * @param[in] dim: dimension of the square matrix.
  * @param[in,out] m: square matrix.
  */
@@ -38,7 +39,7 @@ void transpose(unsigned int dim, double *m) {
 }
 
 /**
- * @brief check if two vectors are equal.
+ * @brief Check if two vectors are equal.
  * @param[in] dim: dimension of the vectors.
  * @param[in] v1: first vector.
  * @param[in] v2: second vector.
@@ -155,13 +156,11 @@ unsigned int mult_abs(unsigned int dim, const unsigned int *alpha) {
  * @return binom(n)(k).
  */
 unsigned long long binom(unsigned long long n, unsigned long long k) {
-    unsigned long long res = 1;
-
-    // Calculate binom(n)(n-k) if n - k is closer to smaller than k
+    // Calculate binom(n)(n-k) if n - k is smaller than k
     if (k > n - k) {
         k = n - k;
     }
-
+    unsigned long long res = 1;
     for (unsigned int i = 1; i <= k; i++) {
         res = res * (n - k + i) / i;
     }
@@ -190,4 +189,46 @@ double complex int_pow(double complex base, unsigned int exp) {
     return res;
 }
 
+/**
+ * @brief calculate projection of vector to elementary lattice cell.
+ * @param[in] dim: dimension of the input vectors
+ * @param[in] m: matrix that transforms the lattice in the function.
+ * @param[in] m_invt: inverse of m.
+ * @param[in] v: vector for which the projection to the elementary lattice cell
+ * is needet.
+ * @return projection of v to the elementary lattice cell.
+ */
+double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
+                   const double *v) {
+    bool todo = false;
+    double *vt = malloc(dim * sizeof(double));
+    for (int i = 0; i < dim; i++) {
+        vt[i] = 0;
+        for (int j = 0; j < dim; j++) {
+            vt[i] += m_invt[(dim * j) + i] * v[j];
+        }
+    }
+    // check if projection is needed, else copy
+    for (int i = 0; i < dim && !todo; i++) {
+        todo = todo || (vt[i] <= -0.5 || vt[i] >= 0.5);
+    }
+    if (todo) {
+        for (int i = 0; i < dim; i++) {
+            vt[i] = remainder(vt[i], 1);
+        }
+        double *vres = malloc(dim * sizeof(double));
+        for (int i = 0; i < dim; i++) {
+            vres[i] = 0;
+            for (int j = 0; j < dim; j++) {
+                vres[i] += m[(dim * i) + j] * vt[j];
+            }
+        }
+        free(vt);
+        return vres;
+    }
+    for (int i = 0; i < dim; i++) {
+        vt[i] = v[i];
+    }
+    return vt;
+}
 #undef EPS

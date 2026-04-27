@@ -8,6 +8,7 @@
  */
 
 #include "hpdyad.h"
+#include "stdbool.h"
 #include "tools.h"
 #include <math.h>
 
@@ -178,11 +179,14 @@ double harmonic_h_inner_sum(unsigned int k, // NOLINT
         theta2[j] = gamma[j] - beta[j];
     }
 
-    unsigned int redotheta1 = 0;
-    unsigned int redotheta2 = 0;
+    bool redotheta1 = false;
+    bool redotheta2 = false;
     unsigned int betaAbs = 0;
-    int done;
-    int skip;
+
+    unsigned long long totalCount = 1;
+    for (unsigned int j = 0; j < dim; j++) {
+        totalCount *= gamma[j] - (alpha[j] + 1) / 2 + 1;
+    }
 
     unsigned int lastScalarIndex = (alphaAbs / 2) - k;
 
@@ -199,12 +203,13 @@ double harmonic_h_inner_sum(unsigned int k, // NOLINT
     }
 
     // loop over beta multi-indices
-    while (1) {
+    for (unsigned long long i = 0; i < totalCount; i++) {
 
-        skip = 0;
+        bool skip = false;
         for (unsigned int j = 0; j < dim; j++) {
             if (gamma[j] > alpha[j] && gamma[j] - alpha[j] > beta[j]) {
-                skip = 1;
+                skip = true;
+                break;
             }
         }
 
@@ -215,14 +220,14 @@ double harmonic_h_inner_sum(unsigned int k, // NOLINT
                     theta1[j] = alpha[j] + beta[j] - gamma[j];
                 }
             }
-            redotheta1 = 0;
+            redotheta1 = false;
 
             if (redotheta2) {
                 for (unsigned int j = 0; j < dim; j++) {
                     theta2[j] = gamma[j] - beta[j];
                 }
             }
-            redotheta2 = 0;
+            redotheta2 = false;
 
             hpdyad_t term;
             harmonic_h_inner_term_multi_hpdyad(dim, alpha, beta, theta1, theta2,
@@ -230,23 +235,18 @@ double harmonic_h_inner_sum(unsigned int k, // NOLINT
             hpdyad_add(&multi_coeffs[betaAbs], &multi_coeffs[betaAbs], &term);
         }
 
-        done = 1;
         for (unsigned int idx = 0; idx < dim; idx++) {
             if (2 * beta[idx] + 2 <= 2 * gamma[idx] - alpha[idx]) {
                 beta[idx]++;
                 theta1[idx]++;
                 betaAbs++;
-                redotheta2 = 1;
-                done = 0;
+                redotheta2 = true;
                 break;
             }
             betaAbs -= beta[idx];
             theta2[idx] = beta[idx];
             beta[idx] = 0;
-            redotheta1 = 1;
-        }
-        if (done) {
-            break;
+            redotheta1 = true;
         }
     }
 
@@ -264,29 +264,6 @@ double harmonic_h_inner_sum(unsigned int k, // NOLINT
     double result = hpdyad_to_double(&sumInner);
 
     return result;
-}
-
-/** @brief Updates the multi-index gamma in graded lexicographic order
- * while maintaining its total degree.
- * @param[in] maxAbs: maximum allowed total degree.
- * @param[in] dim: dimension of gamma.
- * @param[in,out] gamma: current multi-index to be updated.
- * @param[in,out] gammaAbs: total of gamma.
- * @return 1 if iteration is finished, 0 otherwise.
- */
-static int harmonic_h_update_outer_index(unsigned int maxAbs, unsigned int dim,
-                                         unsigned int *gamma,
-                                         unsigned int *gammaAbs) {
-    for (unsigned int idx = 0; idx < dim; idx++) {
-        if (gamma[idx] + 1 <= maxAbs) {
-            gamma[idx]++;
-            (*gammaAbs)++;
-            return 0;
-        }
-        (*gammaAbs) -= gamma[idx];
-        gamma[idx] = 0;
-    }
-    return 1;
 }
 
 /** @brief Computes chunk offsets and valid entry counts for precomputed
@@ -328,6 +305,7 @@ precompute_harmonic_h_inner_chunk_size(unsigned int alphaAbs, unsigned int kMax,
         }
         totalSize += valid_count[k];
     }
+
     return totalSize;
 }
 
@@ -337,7 +315,7 @@ precompute_harmonic_h_inner_chunk_size(unsigned int alphaAbs, unsigned int kMax,
  * Coefficients are stored in coeffs starting at offsets given by chunk_offset[k].
  * Exponents are stored in exponents with stride dim, i.e., exponent i for
  * entry n of chunk k is at exponents[(chunk_offset[k] + n) * dim + i].
- * Gamma is ordered identically to harmonic_h_update_outer_index.
+ * Gamma is iterated in graded lexicographic order with total degree |alpha| - k.
  * @param[in] alphaAbs: total of alpha.
  * @param[in] dim: dimension of alpha and gamma.
  * @param[in] alpha: upper multi-index.
@@ -350,49 +328,54 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, // NOLINT
                                      unsigned int dim, const unsigned int *alpha,
                                      const unsigned long long *chunk_offset,
                                      double *coeffs, unsigned int *exponents) {
-    unsigned int gamma[dim];
-    unsigned int gammaAbs;
-    int skip;
-    int done;
-    unsigned int k;
     unsigned int kMax = alphaAbs / 2;
-    long long n;
-    unsigned long long expIdx;
-    unsigned int i;
 
-    for (k = 0; k <= kMax; k++) {
-        /* Initialize gamma and count n */
-        for (i = 0; i < dim; i++) {
-            gamma[i] = 0;
+    for (unsigned int k = 0; k <= kMax; k++) {
+
+        unsigned int gamma[dim];
+        for (unsigned int j = 0; j < dim; j++) {
+            gamma[j] = 0;
         }
-        gammaAbs = 0;
-        n = 0;
-        while (1) {
-            skip = 0;
-            if (gammaAbs != alphaAbs - k) {
-                skip = 1;
-            }
+        unsigned int gammaAbs = 0;
+        unsigned int maxAbs = alphaAbs - k;
+
+        // totalCount = (maxAbs + 1)^dim
+        unsigned long long totalCount = 1;
+        for (unsigned int j = 0; j < dim; j++) {
+            totalCount *= maxAbs + 1;
+        }
+
+        unsigned long long n = 0;
+        for (unsigned long long i = 0; i < totalCount; i++) {
+
+            bool skip = (gammaAbs != maxAbs);
             if (!skip) {
-                for (i = 0; i < dim; i++) {
-                    if (2 * gamma[i] < alpha[i]) {
-                        skip = 1;
+                for (unsigned int j = 0; j < dim; j++) {
+                    if (2 * gamma[j] < alpha[j]) {
+                        skip = true;
                         break;
                     }
                 }
             }
+
             if (!skip) {
                 coeffs[chunk_offset[k] + n] =
                     harmonic_h_inner_sum(k, dim, alpha, gamma, alphaAbs);
-                expIdx = (chunk_offset[k] + n) * dim;
-                for (i = 0; i < dim; i++) {
-                    exponents[expIdx + i] = (2 * gamma[i]) - alpha[i];
+                unsigned long long expIdx = (chunk_offset[k] + n) * dim;
+                for (unsigned int j = 0; j < dim; j++) {
+                    exponents[expIdx + j] = (2 * gamma[j]) - alpha[j];
                 }
                 n++;
             }
-            done =
-                harmonic_h_update_outer_index(alphaAbs - k, dim, gamma, &gammaAbs);
-            if (done) {
-                break;
+
+            for (unsigned int idx = 0; idx < dim; idx++) {
+                if (gamma[idx] + 1 <= maxAbs) {
+                    gamma[idx]++;
+                    gammaAbs++;
+                    break;
+                }
+                gammaAbs -= gamma[idx];
+                gamma[idx] = 0;
             }
         }
     }
@@ -416,6 +399,7 @@ double harmonic_h(unsigned int k, unsigned int dim, const double *z,
                   unsigned int alphaAbs, const unsigned long long *chunk_offset,
                   const unsigned long long *valid_count, const double *coeffs,
                   const unsigned int *exponents) {
+
     double zPow;
     double sumOuter = 0.0;
     double epsilonOuter = 0.0;
@@ -435,7 +419,9 @@ double harmonic_h(unsigned int k, unsigned int dim, const double *z,
         double summand = zPow * sumInner;
         kahan_add_r(&sumOuter, &epsilonOuter, summand);
     }
+
     sumOuter *= coeffs_c_outer(alphaAbs, k, dim);
+
     return sumOuter;
 }
 

@@ -12,6 +12,7 @@
  */
 
 #include "gamma.h"
+#include "stdbool.h"
 #include "tools.h"
 #include <complex.h>
 #include <float.h>
@@ -180,11 +181,13 @@ double complex crandall_g_lower(unsigned int dim, double nu, const double *z,
  */
 double polynomial_p(unsigned int dim, const double *z, const unsigned int *alpha,
                     const unsigned int *beta) {
+
     double res = 1;
     unsigned int ai = 0;
     unsigned int bi = 0;
     unsigned long long factFrac;
     unsigned int aMinusb = 0;
+
     for (int i = 0; i < dim; i++) {
         ai = alpha[i];
         bi = beta[i];
@@ -223,59 +226,51 @@ double complex crandall_g_der(unsigned int dim, double nu, const double *z,
     }
 
     unsigned int beta[dim];
-    for (int i = 0; i < dim; i++) {
-        beta[i] = 0;
+    for (unsigned int j = 0; j < dim; j++) {
+        beta[j] = 0;
+    }
+    unsigned int betaAbs = 0;
+
+    // zArgBounds[i] is the zArgBound for nu = nu + 2 * alphaAbs - 2 * i
+    double zArgBounds[(alphaAbs / 2) + 1];
+    for (unsigned int i = 0; i <= alphaAbs / 2; i++) {
+        zArgBounds[i] =
+            assignzArgBound(nu + (2 * (double)alphaAbs) - (2 * (double)i));
     }
 
-    double nuIt;
-    double zArgBoundIt;
-
-    int done = 0;
-    unsigned int betaAbs = 0;
+    unsigned long long totalCount = 1;
+    for (unsigned int j = 0; j < dim; j++) {
+        totalCount *= alpha[j] / 2 + 1;
+    }
 
     double complex sum = 0.0;
     double complex epsilon = 0.0;
 
-    // zArgBounds[i] is the zArgBound for nu = nu + 2 * alphaAbs - 2 * i;
-    double zArgBounds[(alphaAbs / 2) + 1];
-    for (int i = 0; i < (alphaAbs / 2) + 1; i++) {
-        nuIt = nu + 2 * (double)alphaAbs - 2 * (double)i;
-        zArgBounds[i] = assignzArgBound(nuIt);
-    }
+    // Iterate over every multi-index beta so that 2 * beta <= alpha
+    for (unsigned long long i = 0; i < totalCount; i++) {
 
-    // Iterate over every multi-index beta so that 2 beta <= alpha
-    while (1) {
-
-        nuIt = nu + 2 * alphaAbs - 2 * betaAbs;
-        zArgBoundIt = zArgBounds[betaAbs]; // NOLINT
-
-        // catch vanishing polynomials
         double p = polynomial_p(dim, z, alpha, beta);
         if (p) {
+            double nuIt = nu + (2 * alphaAbs) - (2 * betaAbs);
+            double zArgBoundIt = zArgBounds[betaAbs]; // NOLINT
             double complex summand =
                 p * crandall_g(dim, nuIt, z, prefactor, zArgBoundIt);
             kahan_add_c(&sum, &epsilon, summand);
         }
 
-        done = 1;
         for (unsigned int idx = 0; idx < dim; idx++) {
             if (beta[idx] + 1 <= alpha[idx] / 2) {
                 beta[idx]++;
                 betaAbs++;
-                done = 0;
                 break;
             }
             betaAbs -= beta[idx];
             beta[idx] = 0;
         }
-        if (done) {
-            break;
-        }
     }
 
     return sum;
 }
-
 /** @brief Calculates the polynomial l_(alpha,beta)(y) = - (-1)**|alpha - beta| *
  * binom(alpha,beta) * (alpha-beta)! / (alpha - 2 beta)! |alpha - beta|! / |alpha -
  * beta| * (2 * y)**(alpha - 2 beta) where 2 beta =< alpha
@@ -329,46 +324,41 @@ double polynomial_l(unsigned int dim, const double *z, const unsigned int *alpha
  */
 double complex log_l_der(unsigned int dim, const double *z,
                          const unsigned int *alpha, unsigned int alphaAbs) {
-
     double zArg = dot(dim, z, z);
-
     // Return function if there is no derivative
     if (!alphaAbs) {
         return log(M_PI * zArg);
     }
 
     unsigned int beta[dim];
-    for (int i = 0; i < dim; i++) {
-        beta[i] = 0;
+    for (unsigned int j = 0; j < dim; j++) {
+        beta[j] = 0;
     }
-
     unsigned int aMinusb = alphaAbs;
+
+    unsigned long long totalCount = 1;
+    for (unsigned int j = 0; j < dim; j++) {
+        totalCount *= alpha[j] / 2 + 1;
+    }
 
     double complex sum = 0.0;
     double complex epsilon = 0.0;
 
-    int done = 0;
-
-    // Iterate over every multi-index beta so that 2 beta <= alpha
-    while (1) {
+    // Iterate over every multi-index beta so that 2 * beta <= alpha
+    for (unsigned long long i = 0; i < totalCount; i++) {
 
         double complex summand =
             polynomial_l(dim, z, alpha, beta) / real_int_pow(zArg, aMinusb);
         kahan_add_c(&sum, &epsilon, summand);
 
-        done = 1;
         for (unsigned int idx = 0; idx < dim; idx++) {
             if (beta[idx] + 1 <= alpha[idx] / 2) {
                 beta[idx]++;
                 aMinusb--;
-                done = 0;
                 break;
             }
             aMinusb += beta[idx];
             beta[idx] = 0;
-        }
-        if (done) {
-            break;
         }
     }
 
@@ -387,19 +377,18 @@ double complex log_l_der(unsigned int dim, const double *z,
 double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NOLINT
                         const unsigned int *alpha, unsigned int alphaAbs,
                         unsigned int n) {
-
     // Return function if there is no derivative
     if (!alphaAbs) {
         return real_int_pow(M_PI * dot(dim, z, z), k);
     }
 
     unsigned int betaMin[dim];
-    for (int i = 0; i < dim; i++) {
+    for (unsigned int i = 0; i < dim; i++) {
         betaMin[i] = (alpha[i] + 1) / 2;
     }
 
     unsigned int absMin = 0;
-    for (int i = 0; i < dim; i++) {
+    for (unsigned int i = 0; i < dim; i++) {
         absMin += betaMin[i];
     }
 
@@ -409,90 +398,82 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NO
     }
 
     unsigned long long factMin = 1;
-    for (int i = 0; i < dim; i++) {
-        for (int j = 1; j < betaMin[i] + 1; j++) {
+    for (unsigned int i = 0; i < dim; i++) {
+        for (unsigned int j = 1; j <= betaMin[i]; j++) {
             factMin *= j;
         }
     }
 
     unsigned int beta[dim];
-    for (int i = 0; i < dim; i++) {
+    for (unsigned int i = 0; i < dim; i++) {
         beta[i] = betaMin[i];
     }
-
     unsigned int betaAbs = absMin;
     unsigned long long betaFact = factMin;
 
+    // cutoff is k - absMin per dimension, totalCount = (k - absMin + 1)^dim
+    unsigned int range = k - absMin;
+    unsigned long long totalCount = 1;
+    for (unsigned int j = 0; j < dim; j++) {
+        totalCount *= range + 1;
+    }
+
     double sum = 0.;
     double epsilon = 0.;
+    bool redoFact = false;
 
-    double summand;
-    double res;
+    // Iterate over multi-indices beta so that 2 * beta >= alpha and |beta| <= k
+    for (unsigned long long i = 0; i < totalCount; i++) {
 
-    unsigned int redoFact = 0;
-    unsigned int done = 0;
-    while (1) {
-
-        if (!(betaAbs - k)) {
-
+        if (betaAbs == k) {
             // Recalculate factorial (expensive but stable)
             if (redoFact) {
                 betaFact = factMin;
-                for (unsigned int i = 0; i < dim; i++) {
-                    for (unsigned int j = betaMin[i] + 1; j < beta[i] + 1; j++) {
-                        betaFact *= j;
+                for (unsigned int j = 0; j < dim; j++) {
+                    for (unsigned int l = betaMin[j] + 1; l <= beta[j]; l++) {
+                        betaFact *= l;
                     }
                 }
-                redoFact = 0;
+                redoFact = false;
             }
 
-            summand = 1.;
-            for (int i = 0; i < dim; i++) {
+            double summand = 1.;
+            for (unsigned int j = 0; j < dim; j++) {
                 summand *=
-                    (double)binom((long long)(2 * beta[i]), (long long)alpha[i]) *
-                    real_int_pow(z[i], (2 * beta[i]) - alpha[i]);
+                    (double)binom((long long)(2 * beta[j]), (long long)alpha[j]) *
+                    real_int_pow(z[j], (2 * beta[j]) - alpha[j]);
             }
-
-            summand = summand / (double)betaFact;
+            summand /= (double)betaFact;
             kahan_add_r(&sum, &epsilon, summand);
         }
 
-        done = 1;
-        // Loop over multi-indexes beta so that 2 beta >= alpha and |beta| <= k
         for (unsigned int idx = 0; idx < dim; idx++) {
-            if (beta[idx] < k - absMin + betaMin[idx]) {
+            if (beta[idx] < betaMin[idx] + range) {
                 // Fast path: increment current dimension
                 beta[idx]++;
                 betaAbs++;
                 betaFact *= beta[idx];
-                done = 0;
                 break;
             }
-
-            // Slow path: reset this dimension and continue
+            // Slow path: reset this dimension and carry
             betaAbs -= beta[idx] - betaMin[idx];
             beta[idx] = betaMin[idx];
-            redoFact = 1;
-        }
-        if (done) {
-            break;
+            redoFact = true;
         }
     }
 
-    // factorial = alpha! k! / n!
+    // factorial = alpha! * k! / n!
     unsigned long long factorial = 1;
     for (unsigned int i = 0; i < dim; i++) {
-        for (int j = 1; j < alpha[i] + 1; j++) {
+        for (unsigned int j = 1; j <= alpha[i]; j++) {
             factorial *= j;
         }
     }
-    for (unsigned int j = n + 1; j < k + 1; j++) {
+    for (unsigned int j = n + 1; j <= k; j++) {
         factorial *= j;
     }
 
-    res = (double)factorial * real_int_pow(M_PI, k) * sum;
-
-    return res;
+    return (double)factorial * real_int_pow(M_PI, k) * sum;
 }
 
 /** @brief Calculates the singularity s_{d+2k}(z) = pi**(k + d / 2) / gamma(k + d /
@@ -540,7 +521,7 @@ double singularity_s_der(unsigned int k, unsigned int dim, const double *z,
 
     unsigned int multBinom;
 
-    int done = 0;
+    bool done = false;
     // Iterate over every multi-index beta so that beta + gamma = alpha
     while (1) {
 
@@ -555,22 +536,23 @@ double singularity_s_der(unsigned int k, unsigned int dim, const double *z,
             kahan_add_r(&sum, &epsilon, summand);
         }
 
-        done = 1;
+        done = true;
         for (unsigned int idx = 0; idx < dim; idx++) {
             if (beta[idx] < alpha[idx]) {
                 betaAbs++;
                 gammaAbs--;
                 beta[idx]++;
                 gamma[idx]--;
-                done = 0;
+                done = false;
                 break;
             }
             betaAbs -= beta[idx];
             gammaAbs += beta[idx];
             gamma[idx] += beta[idx];
             beta[idx] = 0;
-            done = 1;
+            done = true;
         }
+
         if (done) {
             break;
         }
@@ -679,43 +661,37 @@ double complex crandall_gReg_der(unsigned int dim, double s, const double *z,
     }
 
     unsigned int beta[dim];
-    for (int i = 0; i < dim; i++) {
-        beta[i] = 0;
+    for (unsigned int j = 0; j < dim; j++) {
+        beta[j] = 0;
     }
-
-    double sIt;
-
-    int done = 0;
     unsigned int betaAbs = 0;
+
+    unsigned long long totalCount = 1;
+    for (unsigned int j = 0; j < dim; j++) {
+        totalCount *= alpha[j] / 2 + 1;
+    }
 
     double complex sum = 0.0;
     double complex epsilon = 0.0;
 
-    // Iterate over every multi-index beta so that 2 beta <= alpha
-    while (1) {
+    // Iterate over every multi-index beta so that 2 * beta <= alpha
+    for (unsigned long long i = 0; i < totalCount; i++) {
 
-        sIt = s + 2 * alphaAbs - 2 * betaAbs;
+        double sIt = s + (2 * alphaAbs) - (2 * betaAbs);
 
-        // Summing using Kahan's method
-        double complex summand =
-            (-polynomial_p(dim, z, alpha, beta) * tgamma(sIt / 2) *
-             egf_gammaStar(sIt / 2, zArgument)) -
-            epsilon;
+        double complex summand = -polynomial_p(dim, z, alpha, beta) *
+                                 tgamma(sIt / 2) * egf_gammaStar(sIt / 2, zArgument);
+
         kahan_add_c(&sum, &epsilon, summand);
 
-        done = 1;
         for (unsigned int idx = 0; idx < dim; idx++) {
             if (beta[idx] + 1 <= alpha[idx] / 2) {
                 beta[idx]++;
                 betaAbs++;
-                done = 0;
                 break;
             }
             betaAbs -= beta[idx];
             beta[idx] = 0;
-        }
-        if (done) {
-            break;
         }
     }
 

@@ -78,7 +78,7 @@ test_crandall_der = executable('epsteinlib_test_crandall_derivatives',
 )
 
 benchmark_epstein = executable('epsteinlib_benchmark_epstein',
-    ['benchmark_epstein.c'],
+    ['utils.c', 'benchmark_epstein.c'],
     include_directories : incdir,
     dependencies: deps,
     install: false,
@@ -87,7 +87,7 @@ benchmark_epstein = executable('epsteinlib_benchmark_epstein',
 )
 
 benchmark_gamma = executable('epsteinlib_benchmark_gamma',
-    ['../src/gamma.c','benchmark_gamma.c'],
+    ['utils.c','../src/gamma.c','benchmark_gamma.c'],
     include_directories : incdir,
     dependencies: deps,
     install: false,
