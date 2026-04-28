@@ -1077,11 +1077,6 @@ static double complex summation_harmonic(
     // Decide when to isolate singularies in the real sum for large exponents
     bool largeExp = nu > 10;
 
-    double complex s1;
-    double complex s2;
-    double complex nc;
-    double complex resIt;
-
     double complex res = 0.;
     double complex rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
 
@@ -1096,6 +1091,8 @@ static double complex summation_harmonic(
             continue;
         }
 
+        double complex resIt;
+
         // if nu = 0, everything except the zero summand in the real sum
         // vanishes
         if (fabs(nuIt / 2) < EPS) {
@@ -1107,7 +1104,10 @@ static double complex summation_harmonic(
                                    coeffs, exponents);
             }
         } else {
-            // calculate set zeta derivative function values.
+
+            double complex s1;
+            double complex s2;
+            double complex nc = 0.;
 
             double nuReci = nuIt - (2 * alphaAbs) + (4 * k);
             double zArgBoundReci = assignzArgBound(dim - nuReci);
@@ -1116,22 +1116,15 @@ static double complex summation_harmonic(
             double h = harmonic_h(k, dim, y_t2, alphaAbs, chunk_offset, valid_count,
                                   coeffs, exponents);
             if (h) {
-                if (equals(dim, y_t1, y_t2)) {
-                    nc = h *
-                         crandall_g(dim, dim - nuReci, y_t1, lambda, zArgBoundReci);
-                } else {
-                    nc = h *
-                         crandall_g(dim, dim - nuReci, y_t2, lambda, zArgBoundReci) *
-                         cexp(-2 * M_PI * I * dot(dim, y_t2, x_t1)) * rot;
-                }
-            } else {
-                nc = 0;
+                nc += h *
+                      crandall_g(dim, dim - nuReci, y_t2, lambda, zArgBoundReci) *
+                      cexp(-2 * M_PI * I * dot(dim, y_t2, x_t1));
             }
 
             s2 = sum_fourier_harmonic(nuReci, k, dim, m_fourier, x_t1, y_t2,
                                       cutoffsFourier, zArgBoundReci, diag, alphaAbs,
                                       chunk_offset, valid_count, coeffs, exponents);
-            s2 = negative_one_pow(k) * (s2 * rot + nc);
+            s2 = negative_one_pow(k) * rot * (s2 + nc);
 
             if (largeExp) {
                 s1 = sum_real_harmonic_large_exp(nuIt, k, dim, m_real, x_t2, y_t2,
@@ -1174,9 +1167,6 @@ static double complex summation_harmonic(
 /**
  * @brief calculates the (regularized) Epstein zeta function as well es the
  * derivatives of the set zeta function.
-=======
- * @brief calculates the (regularized) Epstein zeta function.
->>>>>>> rework-benchmarks
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] m: matrix that transforms the lattice in the Epstein zeta
