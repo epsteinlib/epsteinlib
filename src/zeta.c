@@ -963,8 +963,6 @@ static double complex sum_fourier_harmonic_1D(double nu, unsigned int dim,
  * @param[in] x_t2_squared: precomputed dot(dim, x_t2, x_t2).
  * @param[in] cutoffsReal: how many summands in each direction (real sum).
  * @param[in] cutoffsFourier: how many summands in each direction (Fourier sum).
- * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
- * the incomplete gamma evaluation.
  * @param[in] diag: true, if the lattice matrix is diagonal.
  * @param[in] xfactor: precomputed prefactor for the real sum.
  * @return updated res after adding the 1-D harmonic contribution.
@@ -973,18 +971,18 @@ static double complex summation_harmonic_1D(
     double nu, unsigned int dim, unsigned int alphaAbs, double lambda, double ms,
     const double *m_real, const double *m_fourier, const double *x_t1,
     const double *x_t2, const double *y_t1, const double *y_t2, double x_t2_squared,
-    const int cutoffsReal[], const int cutoffsFourier[], double zArgBound, bool diag,
+    const int cutoffsReal[], const int cutoffsFourier[], bool diag,
     double complex xfactor) {
 
     double complex s1;
     double complex s2;
     double complex nc;
-
-    // Compute set zeta derivatives by harmonic method
+    double complex res;
 
     unsigned int k = alphaAbs / 2;
-    double complex res;
+
     double nuIt = nu - (2 * k);
+    double zArgBoundIt = assignzArgBound(nuIt);
 
     // skip iterartions where nuIt is a negative even integer, as
     // 1/gamma(nIt) = 0
@@ -1021,7 +1019,7 @@ static double complex summation_harmonic_1D(
         s2 = negative_one_pow(k) * (s2 * rot + nc);
 
         s1 = sum_real_harmonic_1D(nuIt, dim, m_real, x_t2, y_t2, cutoffsReal,
-                                  zArgBound, diag, alphaAbs) *
+                                  zArgBoundIt, diag, alphaAbs) *
              imaginary_int_pow(alphaAbs) * rot * xfactor;
         res = (s1 + pow(lambda, dim) * s2) / tgamma(nuIt / 2.);
     }
@@ -1048,7 +1046,6 @@ static double complex summation_harmonic_1D(
  * @param[in] y_t2: projection of wave vector to reciprocal elementary lattice cell.
  * @param[in] cutoffsReal: how many summands in each direction (real sum).
  * @param[in] cutoffsFourier: how many summands in each direction (Fourier sum).
- * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * @param[in] diag: true, if the lattice matrix is diagonal.
  * the incomplete gamma evaluation.
  * @param[in] xfactor: precomputed prefactor for the real sum.
@@ -1058,7 +1055,7 @@ static double complex summation_harmonic(
     double nu, unsigned int dim, unsigned int alphaAbs, const unsigned int *alpha,
     double lambda, double ms, const double *m_real, const double *m_fourier,
     const double *x_t1, const double *x_t2, const double *y_t1, const double *y_t2,
-    const int cutoffsReal[], const int cutoffsFourier[], double zArgBound, bool diag,
+    const int cutoffsReal[], const int cutoffsFourier[], bool diag,
     double complex xfactor) {
 
     // Precompute coefficients for harmonic polynomials once
@@ -1084,6 +1081,7 @@ static double complex summation_harmonic(
     for (unsigned int k = 0; k <= kMax; k++) {
 
         double nuIt = nu - (2 * k);
+        double zArgBoundIt = assignzArgBound(nuIt);
 
         // skip iterartions where nuIt is a negative even integer, as
         // 1/gamma(nIt) = 0
@@ -1128,13 +1126,13 @@ static double complex summation_harmonic(
 
             if (largeExp) {
                 s1 = sum_real_harmonic_large_exp(nuIt, k, dim, m_real, x_t2, y_t2,
-                                                 cutoffsReal, zArgBound, diag,
+                                                 cutoffsReal, zArgBoundIt, diag,
                                                  alphaAbs, chunk_offset, valid_count,
                                                  coeffs, exponents) *
                      imaginary_int_pow(alphaAbs) * rot * xfactor;
             } else {
                 s1 = sum_real_harmonic(nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal,
-                                       zArgBound, diag, alphaAbs, chunk_offset,
+                                       zArgBoundIt, diag, alphaAbs, chunk_offset,
                                        valid_count, coeffs, exponents) *
                      imaginary_int_pow(alphaAbs) * rot * xfactor;
             }
@@ -1284,12 +1282,11 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         double complex s2 = NAN;
         double complex nc;
         double complex rot = 1;
-        double complex xfactor = 1;
         double vx[dim];
         for (int i = 0; i < dim; i++) {
             vx[i] = x_t1[i] - x_t2[i];
         }
-        xfactor = cexp(-2 * M_PI * I * dot(dim, vx, y_t1));
+        double complex xfactor = cexp(-2 * M_PI * I * dot(dim, vx, y_t1));
         if (variant == 0) {
             // calculate non regularized Epstein zeta function values.
             nc = crandall_g(dim, dim - nu, y_t2, lambda, zArgBoundReci) *
@@ -1319,15 +1316,14 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             xfactor = 1;
         } else if (variant == 2) {
             if (harmonicMethod1D) {
-                res = summation_harmonic_1D(
-                    nu, dim, alphaAbs, lambda, ms, m_real, m_fourier, x_t1, x_t2,
-                    y_t1, y_t2, x_t2_squared, cutoffsReal, cutoffsFourier, zArgBound,
-                    diag, xfactor);
+                res = summation_harmonic_1D(nu, dim, alphaAbs, lambda, ms, m_real,
+                                            m_fourier, x_t1, x_t2, y_t1, y_t2,
+                                            x_t2_squared, cutoffsReal,
+                                            cutoffsFourier, diag, xfactor);
             } else if (harmonicMethod) {
                 res = summation_harmonic(nu, dim, alphaAbs, alpha, lambda, ms,
                                          m_real, m_fourier, x_t1, x_t2, y_t1, y_t2,
-                                         cutoffsReal, cutoffsFourier, zArgBound,
-                                         diag, xfactor);
+                                         cutoffsReal, cutoffsFourier, diag, xfactor);
             } else {
                 // Compute set zeta derivatives by polynomial p method
                 rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
