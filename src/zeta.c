@@ -1111,7 +1111,7 @@ static double complex summation_harmonic_reg(
             double zArgBoundReci = assignzArgBound(dim - nuReci);
 
             // skip zero summand if harmonic polynomial vanishes
-            double h = harmonic_h(k, dim, y_t2, alphaAbs, chunk_offset, valid_count,
+            double h = harmonic_h(k, dim, y_t1, alphaAbs, chunk_offset, valid_count,
                                   coeffs, exponents);
             if (h) {
                 nc += h * crandall_gReg(dim, dim - nuReci, y_t1, lambda);
@@ -1120,6 +1120,19 @@ static double complex summation_harmonic_reg(
             s2 = sum_fourier_harmonic(nuReci, k, dim, m_fourier, x_t1, y_t2,
                                       cutoffsFourier, zArgBoundReci, diag, alphaAbs,
                                       chunk_offset, valid_count, coeffs, exponents);
+
+            // correct wrong zero summand in regularized fourier sum.
+            if (!equals(dim, y_t1, y_t2)) {
+                s2 += harmonic_h(k, dim, y_t2, alphaAbs, chunk_offset, valid_count,
+                                 coeffs, exponents) *
+                      crandall_g(dim, dim - nuReci, y_t2, lambda, zArgBoundReci) *
+                      cexp(-2 * M_PI * I * dot(dim, x_t1, y_t2));
+                s2 -= harmonic_h(k, dim, y_t1, alphaAbs, chunk_offset, valid_count,
+                                 coeffs, exponents) *
+                      crandall_g(dim, dim - nuReci, y_t1, lambda, zArgBoundReci) *
+                      cexp(-2 * M_PI * I * dot(dim, x_t1, y_t1));
+            }
+
             s2 = negative_one_pow(k) * (rot * s2 + nc);
 
             if (largeExp) {
