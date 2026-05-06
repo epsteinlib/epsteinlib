@@ -1,0 +1,366 @@
+// SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+/**
+ * @file benchmark.c
+ * @author Jonathan Busse
+ * @date 06/06/2024
+ * @section Description: Generate epsteinZeta(Reg) reference values
+ */
+
+#include <complex.h>
+#include <errno.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#include "epsteinZeta.h"
+#include "utils.h"
+
+#define BASE_PATH "tests/csv"
+
+#ifndef MAX_PATH_LENGTH
+#define MAX_PATH_LENGTH 1024
+#endif
+
+/**
+ * @brief Benchmarks the Epstein Zeta and regularized Epstein Zeta functions.
+ * @param dim Dimension of the lattice.
+ * @param a Array representing the lattice matrix.
+ * @param x Array of x coordinates.
+ * @param y Array of y coordinates.
+ * @param zetaDataString Filename for storing Epstein Zeta function data.
+ * @param zetaRegDataString Filename for storing regularized Epstein Zeta function
+ * data.
+ * @return  0 on successful execution.
+ */
+int benchmark(int dim, double a[], double x[], double y[], char zetaDataString[],
+              char zetaRegDataString[]) {
+    FILE *zetaData = open_file(zetaDataString, "w");
+    FILE *zetaRegData = open_file(zetaRegDataString, "w");
+    if (zetaData == NULL || zetaRegData == NULL) {
+        printf("%s\n", strerror(errno)); // NOLINT
+        return 1;
+    }
+    double nu;
+    double complex zetaReg = NAN;
+    double varBenchmark;
+    double offset = ldexp(1, -15);
+    double elapsedTime;
+    int its[9] = {10000, 1000, 100, 10, 0, 10, 0, 10};
+    int iterations = dim < 9 ? its[dim - 1] : 0;
+    int iterationsReg = dim < 9 ? its[dim - 1] : 0;
+    double *elapsedTimes = malloc(iterations * sizeof(double));
+    clock_t timeStart;
+    clock_t timeEnd;
+    for (int i = -250; i < 250 + 1; i++) { // print values to file
+        varBenchmark = i * 0.05 + offset;
+        nu = varBenchmark;
+        // warmup
+        (void)epsteinZeta(nu, dim, a, x, y);
+        // zeta
+        for (int n = 0; n < iterations; n++) {
+            timeStart = clock();
+            zetaReg = epsteinZeta(nu, dim, a, x, y);
+            timeEnd = clock();
+            elapsedTimes[n] = ((double)(timeEnd - timeStart)) / CLOCKS_PER_SEC;
+        }
+        sort(elapsedTimes, iterations);
+        elapsedTime = elapsedTimes[iterations / 2];
+        fprintf(zetaData, "%.16lf,%.16lf,%.16lf,%.16lf\n", varBenchmark, // NOLINT
+                creal(zetaReg), cimag(zetaReg), elapsedTime);
+        printf("nu:\t %.16lf\t", varBenchmark);
+        printf("zeta:\t\t%.16lf %+.16lf I, \t execution time: %.8f seconds\n",
+               creal(zetaReg), cimag(zetaReg), elapsedTime);
+        // warump
+        (void)epsteinZetaReg(nu, dim, a, x, y);
+        // zeta Reg
+        for (int n = 0; n < iterationsReg; n++) {
+            timeStart = clock();
+            zetaReg = epsteinZetaReg(nu, dim, a, x, y);
+            timeEnd = clock();
+            elapsedTimes[n] = ((double)(timeEnd - timeStart)) / CLOCKS_PER_SEC;
+        }
+        sort(elapsedTimes, iterations);
+        elapsedTime = elapsedTimes[(iterations / 2)];
+        fprintf(zetaRegData, "%.16lf,%.16lf,%.16lf,%.16lf\n", varBenchmark, // NOLINT
+                creal(zetaReg), cimag(zetaReg), elapsedTime);
+        printf("nu:\t %.16lf\t", varBenchmark);
+        printf("zetaReg:\t%.16lf %+.16lf I, \t execution time: %.8f "
+               "seconds\n",
+               creal(zetaReg), cimag(zetaReg), elapsedTime);
+    }
+    free(elapsedTimes);
+    if (fclose(zetaData) != 0) {
+        return fprintf(stderr, "Error closing file: %d\n", errno);
+    }
+    if (fclose(zetaRegData) != 0) {
+        return fprintf(stderr, "Error closing file: %d\n", errno);
+    }
+    return 0;
+}
+
+/*!
+ * @brief Example of evaluating the Epstein Zeta function for values where
+ * analytic representations exist for benchmarking.
+ * @return  0 on successful execution.
+ */
+int s1() {
+    int dim = 1;
+    double a[] = {1};
+    double x[] = {-0.5};
+    double y[] = {0};
+    char zetaDataString[MAX_PATH_LENGTH];
+    char zetaRegDataString[MAX_PATH_LENGTH];
+
+    if (snprintf(zetaDataString, MAX_PATH_LENGTH, "%s/epsteinZeta_%s.csv", BASE_PATH,
+                 __func__) >= MAX_PATH_LENGTH) {
+        return fprintf(stderr, "Error: filename too long\n");
+    }
+    if (snprintf(zetaRegDataString, MAX_PATH_LENGTH, "%s/epsteinZetaReg_%s.csv",
+                 BASE_PATH, __func__) >= MAX_PATH_LENGTH) {
+        return fprintf(stderr, "Error: filename too long\n");
+    }
+
+    printf("\n========== Benchmarking %s() ==========\n", __func__);
+    return benchmark(dim, a, x, y, zetaDataString, zetaRegDataString);
+}
+
+/*!
+ * @brief Example of evaluating the Epstein Zeta function for values where
+ * analytic representations exist for benchmarking.
+ * @return  0 on successful execution.
+ */
+int s21() {
+    int dim = 2;
+    double a[] = {1, 0, 0, 2};
+    double x[] = {-1, -2};
+    double y[] = {0, 0};
+    char zetaDataString[MAX_PATH_LENGTH];
+    char zetaRegDataString[MAX_PATH_LENGTH];
+
+    if (snprintf(zetaDataString, MAX_PATH_LENGTH, "%s/epsteinZeta_%s.csv", BASE_PATH,
+                 __func__) >= MAX_PATH_LENGTH) {
+        return fprintf(stderr, "Error: filename too long\n");
+    }
+    if (snprintf(zetaRegDataString, MAX_PATH_LENGTH, "%s/epsteinZetaReg_%s.csv",
+                 BASE_PATH, __func__) >= MAX_PATH_LENGTH) {
+        return fprintf(stderr, "Error: filename too long\n");
+    }
+
+    printf("\n========== Benchmarking diag12_m1m2_00() ==========\n");
+    return benchmark(dim, a, x, y, zetaDataString, zetaRegDataString);
+}
+
+/**
+ * @brief Benchmarks the Epstein Zeta function for a 2D lattice with specific
+ * parameters.
+ * @return  0 on successful execution.
+ */
+int s22() {
+    int dim = 2;
+    double a[] = {1, 1. / 2, 0, sqrt(3.) / 2};
+    double x[] = {0.0, 0.0};
+    double y[] = {-0, 0};
+    char zetaDataString[MAX_PATH_LENGTH];
+    char zetaRegDataString[MAX_PATH_LENGTH];
+
+    if (snprintf(zetaDataString, MAX_PATH_LENGTH, "%s/epsteinZeta_%s.csv", BASE_PATH,
+                 __func__) >= MAX_PATH_LENGTH) {
+        return fprintf(stderr, "Error: filename too long\n");
+    }
+    if (snprintf(zetaRegDataString, MAX_PATH_LENGTH, "%s/epsteinZetaReg_%s.csv",
+                 BASE_PATH, __func__) >= MAX_PATH_LENGTH) {
+        return fprintf(stderr, "Error: filename too long\n");
+    }
+
+    printf("\n========== Benchmarking onehalf0sqrt3haf_00_00() ==========\n");
+    return benchmark(dim, a, x, y, zetaDataString, zetaRegDataString);
+}
+
+/**
+ * @brief Benchmarks the Epstein Zeta function for a 3D lattice with specific
+ * parameters.
+ * @return  0 on successful execution.
+ */
+int s31() {
+    int dim = 3;
+    double a[] = {1, 0, 0, 0, 1, 0, 0, 0, 2};
+    double x[] = {0, 0, -0.5};
+    double y[] = {0.5, 0, 0};
+    char zetaDataString[MAX_PATH_LENGTH];
+    char zetaRegDataString[MAX_PATH_LENGTH];
+
+    if (snprintf(zetaDataString, MAX_PATH_LENGTH, "%s/epsteinZeta_%s.csv", BASE_PATH,
+                 __func__) >= MAX_PATH_LENGTH) {
+        return fprintf(stderr, "Error: filename too long\n");
+    }
+    if (snprintf(zetaRegDataString, MAX_PATH_LENGTH, "%s/epsteinZetaReg_%s.csv",
+                 BASE_PATH, __func__) >= MAX_PATH_LENGTH) {
+        return fprintf(stderr, "Error: filename too long\n");
+    }
+
+    printf("\n========== Benchmarking diag112_00mhalf_half00() ==========\n");
+    return benchmark(dim, a, x, y, zetaDataString, zetaRegDataString);
+}
+
+/**
+ * @brief Benchmarks the Epstein Zeta function for another 3D lattice configuration.
+ * @return  0 on successful execution.
+ */
+int s32() {
+    int dim = 3;
+    double a[] = {6, 0, 0, 0, 6, 0, 0, 0, 6};
+    double x[] = {-1, -1, -1};
+    double y[] = {1. / 12, 1. / 12, 1. / 12};
+    char zetaDataString[MAX_PATH_LENGTH];
+    char zetaRegDataString[MAX_PATH_LENGTH];
+
+    if (snprintf(zetaDataString, MAX_PATH_LENGTH, "%s/epsteinZeta_%s.csv", BASE_PATH,
+                 __func__) >= MAX_PATH_LENGTH) {
+        return fprintf(stderr, "Error: filename too long\n");
+    }
+    if (snprintf(zetaRegDataString, MAX_PATH_LENGTH, "%s/epsteinZetaReg_%s.csv",
+                 BASE_PATH, __func__) >= MAX_PATH_LENGTH) {
+        return fprintf(stderr, "Error: filename too long\n");
+    }
+
+    printf("\n========== Benchmarking diag666_m1m1m1_twelthtwelthtwelth() "
+           "==========\n");
+    return benchmark(dim, a, x, y, zetaDataString, zetaRegDataString);
+}
+
+/**
+ * @brief Benchmarks the Epstein Zeta function for a third 3D lattice configuration.
+ * @return  0 on successful execution.
+ */
+int s33() {
+    int dim = 3;
+    double a[] = {2 * sqrt(2.), 0, 0, 0, 4, 0, 0, 0, 2};
+    double x[] = {0, -1, -1};
+    double y[] = {1. / (4 * sqrt(2.)), 0, 0};
+    char zetaDataString[MAX_PATH_LENGTH];
+    char zetaRegDataString[MAX_PATH_LENGTH];
+
+    if (snprintf(zetaDataString, MAX_PATH_LENGTH, "%s/epsteinZeta_%s.csv", BASE_PATH,
+                 __func__) >= MAX_PATH_LENGTH) {
+        return fprintf(stderr, "Error: filename too long\n");
+    }
+    if (snprintf(zetaRegDataString, MAX_PATH_LENGTH, "%s/epsteinZetaReg_%s.csv",
+                 BASE_PATH, __func__) >= MAX_PATH_LENGTH) {
+        return fprintf(stderr, "Error: filename too long\n");
+    }
+
+    printf("\n========== Benchmarking diag2sqrt242_0m1m1_4sqrt2th00() ==========\n");
+    return benchmark(dim, a, x, y, zetaDataString, zetaRegDataString);
+}
+
+/**
+ * @brief Benchmarks the Epstein Zeta function for a 4D lattice with specific
+ * parameters.
+ * @return  0 on successful execution.
+ */
+int s4() {
+    int dim = 4;
+    double a[] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+    double x[] = {0.5, 0.0, 0.0, 0.0};
+    double y[] = {0.0, 0.0, 0.0, 0.0};
+    char zetaDataString[MAX_PATH_LENGTH];
+    char zetaRegDataString[MAX_PATH_LENGTH];
+
+    if (snprintf(zetaDataString, MAX_PATH_LENGTH, "%s/epsteinZeta_%s.csv", BASE_PATH,
+                 __func__) >= MAX_PATH_LENGTH) {
+        return fprintf(stderr, "Error: filename too long\n");
+    }
+    if (snprintf(zetaRegDataString, MAX_PATH_LENGTH, "%s/epsteinZetaReg_%s.csv",
+                 BASE_PATH, __func__) >= MAX_PATH_LENGTH) {
+        return fprintf(stderr, "Error: filename too long\n");
+    }
+
+    printf("\n========== Benchmarking Id_half000_0000() ==========\n");
+    return benchmark(dim, a, x, y, zetaDataString, zetaRegDataString);
+}
+
+/**
+ * @brief Benchmarks the Epstein Zeta function for a 6D lattice with specific
+ * parameters.
+ * @return  0 on successful execution.
+ */
+int s6() {
+    int dim = 6;
+    double a[dim * dim];
+    for (int i = 0; i < dim; i++) {
+        for (int j = 0; j < dim; j++) {
+            a[(dim * i) + j] = (i == j) ? 1 : 0;
+        }
+    }
+    double x[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    double y[] = {0.5, 0.5, 0.0, 0.0, 0.0, 0.0};
+    char zetaDataString[MAX_PATH_LENGTH];
+    char zetaRegDataString[MAX_PATH_LENGTH];
+
+    if (snprintf(zetaDataString, MAX_PATH_LENGTH, "%s/epsteinZeta_%s.csv", BASE_PATH,
+                 __func__) >= MAX_PATH_LENGTH) {
+        return fprintf(stderr, "Error: filename too long\n");
+    }
+    if (snprintf(zetaRegDataString, MAX_PATH_LENGTH, "%s/epsteinZetaReg_%s.csv",
+                 BASE_PATH, __func__) >= MAX_PATH_LENGTH) {
+        return fprintf(stderr, "Error: filename too long\n");
+    }
+
+    printf("\n========== Benchmarking Id_000000_halfhalf0000() ==========\n");
+    return benchmark(dim, a, x, y, zetaDataString, zetaRegDataString);
+}
+
+/**
+ * @brief Benchmarks the Epstein Zeta function for an 8D lattice with specific
+ * parameters.
+ * @return  0 on successful execution.
+ */
+int s8() {
+    int dim = 8;
+    double a[dim * dim];
+    for (int i = 0; i < dim; i++) {
+        for (int j = 0; j < dim; j++) {
+            a[(dim * i) + j] = (i == j) ? 1 : 0;
+        }
+    }
+    double x[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    double y[] = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5};
+    char zetaDataString[MAX_PATH_LENGTH];
+    char zetaRegDataString[MAX_PATH_LENGTH];
+
+    if (snprintf(zetaDataString, MAX_PATH_LENGTH, "%s/epsteinZeta_%s.csv", BASE_PATH,
+                 __func__) >= MAX_PATH_LENGTH) {
+        return fprintf(stderr, "Error: filename too long\n");
+    }
+    if (snprintf(zetaRegDataString, MAX_PATH_LENGTH, "%s/epsteinZetaReg_%s.csv",
+                 BASE_PATH, __func__) >= MAX_PATH_LENGTH) {
+        return fprintf(stderr, "Error: filename too long\n");
+    }
+
+    printf("\n========== Benchmarking "
+           "Id_00000000_halfhalfhalfhalfhalfhalfhalfhalf() ==========\n");
+    return benchmark(dim, a, x, y, zetaDataString, zetaRegDataString);
+}
+
+/**
+ * @brief Main function to run all benchmark tests.
+ * @return number of failed executions.
+ */
+int main() {
+    int failed = 0;
+    failed += s1();
+    failed += s21();
+    failed += s22();
+    failed += s31();
+    failed += s32();
+    failed += s33();
+    failed += s4();
+    failed += s6();
+    failed += s8();
+    return failed;
+}

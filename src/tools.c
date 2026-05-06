@@ -12,42 +12,12 @@
 
 #include <math.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 /*!
  * @brief minimal distance of two vector elements considered unequal.
  */
 #define EPS ldexp(1, -32)
-
-/**
- * @brief euclidean dot product.
- * @param[in] dim: dimension of the input vectors
- * @param[in] v1: first vector.
- * @param[in] v2: second vector.
- * @return dot product of v1 and v2.
- */
-double dot(unsigned int dim, const double *v1, const double *v2) {
-    double r = 0;
-    for (int i = 0; i < dim; i++) {
-        r += v1[i] * v2[i];
-    }
-    return r;
-}
-
-/**
- * @brief matrix - (integer) vector multiplication.
- * @param[in] dim: dimension of the square matrix and the integer vector.
- * @param[in] m: square matrix.
- * @param[in] v: integer vector.
- * @param[in,out] res: solution vector of the vector matrix multiplication.
- */
-void matrix_intVector(unsigned int dim, const double *m, const int *v, double *res) {
-    for (int i = 0; i < dim; i++) {
-        res[i] = 0;
-        for (int j = 0; j < dim; j++) {
-            res[i] += m[(i * dim) + j] * v[j];
-        }
-    }
-}
 
 /**
  * @brief square matrix transpose.
@@ -161,4 +131,48 @@ double inf_norm(unsigned int dim, const double *m) { // NOLINT
     }
     return r;
 }
+
+/**
+ * @brief calculate projection of vector to elementary lattice cell.
+ * @param[in] dim: dimension of the input vectors
+ * @param[in] m: matrix that transforms the lattice in the function.
+ * @param[in] m_invt: inverse of m.
+ * @param[in] v: vector for which the projection to the elementary lattice cell
+ * is needet.
+ * @return projection of v to the elementary lattice cell.
+ */
+double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
+                   const double *v) {
+    bool todo = false;
+    double *vt = malloc(dim * sizeof(double));
+    for (int i = 0; i < dim; i++) {
+        vt[i] = 0;
+        for (int j = 0; j < dim; j++) {
+            vt[i] += m_invt[(dim * j) + i] * v[j];
+        }
+    }
+    // check if projection is needed, else copy
+    for (int i = 0; i < dim && !todo; i++) {
+        todo = todo || (vt[i] <= -0.5 || vt[i] >= 0.5);
+    }
+    if (todo) {
+        for (int i = 0; i < dim; i++) {
+            vt[i] = remainder(vt[i], 1);
+        }
+        double *vres = malloc(dim * sizeof(double));
+        for (int i = 0; i < dim; i++) {
+            vres[i] = 0;
+            for (int j = 0; j < dim; j++) {
+                vres[i] += m[(dim * i) + j] * vt[j];
+            }
+        }
+        free(vt);
+        return vres;
+    }
+    for (int i = 0; i < dim; i++) {
+        vt[i] = v[i];
+    }
+    return vt;
+}
+
 #undef EPS

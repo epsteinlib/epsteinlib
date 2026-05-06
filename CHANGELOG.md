@@ -11,6 +11,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 ## [0.5.1] - 2026-04-27
 
+### Changed
+- Improved performance of linear algebra for diagonal matrices
+- Reduced computation time in index calculation for main summation loops
+
 ### Added
 - Standalone minimal Julia example `examples/julia/lattice_sum.jl`, independent of our build system
 

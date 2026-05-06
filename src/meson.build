@@ -15,6 +15,3 @@ if not python_only
   pkgconf = import('pkgconfig')
   pkgconf.generate(epsteinlib)
 endif
-
-# include unittests
-subdir('tests')
