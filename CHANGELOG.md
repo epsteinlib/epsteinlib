@@ -1,15 +1,15 @@
 <!--
-SPDX-FileCopyrightText: 2025 Andreas Buchheit <buchheit@num.uni-sb.de>
-SPDX-FileCopyrightText: 2025 Jan Schmitz <schmitz@num.uni-sb.de>
-SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
-SPDX-FileCopyrightText: 2025 Ruben Gutendorf <ruben.gutendorf@uni-saarland.de>
+SPDX-FileCopyrightText: 2026 Andreas Buchheit <buchheit@num.uni-sb.de>
+SPDX-FileCopyrightText: 2026 Jan Schmitz <schmitz@num.uni-sb.de>
+SPDX-FileCopyrightText: 2026 Jonathan Busse <jonathan@jbusse.de>
+SPDX-FileCopyrightText: 2026 Ruben Gutendorf <ruben.gutendorf@uni-saarland.de>
 
 SPDX-License-Identifier: AGPL-3.0-only
 -->
 
 # Changelog
 
-## [0.5.1] - unreleased
+## [0.5.1] - 2026-04-27
 
 ### Changed
 - Improved performance of linear algebra for diagonal matrices
@@ -19,7 +19,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 - Standalone minimal Julia example `examples/julia/lattice_sum.jl`, independent of our build system
 
 ### Fixed
-- Switched pivot search direction and corrected forward-substitution in `invert` eliminating errors in matrix inversion
+- Switched pivot search direction and corrected forward-substitution in `invert`, eliminating errors in matrix inversion
 - Introduced variable `zArgBoundReci` analogous to `zArgBound` for arguments `dim - NU` instead of `NU` in reciprocal sums in `zeta.c`
 - Bounds for asymptotic expansion changed to guarantee precision of $10^{-18}$ instead of $10^{-16}$
 
