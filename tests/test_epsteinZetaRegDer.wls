@@ -9,7 +9,7 @@
 (*Unit tests for epsteinZetaReGDer in epsteinZeta.c*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Setup*)
 
 
@@ -40,7 +40,7 @@ Protect[Power];
 ];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Auxiliary functions*)
 
 
@@ -120,12 +120,19 @@ sDer[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=(
 (*Crandall functions.*)
 
 
-G[\[Nu]_,z_]:=Piecewise[{{0,Norm[z]>=4},{ -2/\[Nu],Norm[z]<10^(-64)},{ExpIntegralE[1-\[Nu]/2,Pi z . z],Norm[z]>=10^(-64)&&Norm[z]<4}}];
-GReg[\[Nu]_,z_]:=Piecewise[{
-	{G[\[Nu],z]-\[Pi]^(-(Length[z]-\[Nu])/2)Gamma[(Length[z]-\[Nu])/2]sDer[Round[-\[Nu]/2],z,ConstantArray[0,Length[z]]],(Norm[z]>10^(-64))&&Element[-\[Nu]/2,NonNegativeIntegers]}
-	,{-2/\[Nu],Norm[z]<10^(-64)&&Not[Element[-\[Nu]/2,NonNegativeIntegers]]}
-	,{-Gamma[\[Nu]/2,0,Pi z . z]/(Pi z . z)^(\[Nu]/2),Norm[z]>=10^(-64)&&Not[Element[-\[Nu]/2,NonNegativeIntegers]]}}
-];
+GLower[\[Nu]_,z_]:=Piecewise[{
+	{2/\[Nu],Norm[z]<10^(-64)}
+	,{Gamma[\[Nu]/2,0,Pi z . z]/(Pi z . z)^(\[Nu]/2),Norm[z]<4}
+}]
+GUpper[\[Nu]_,z_]:=Piecewise[ {
+	{-2/\[Nu],Norm[z]<10^(-64)}
+	,{ExpIntegralE[1-\[Nu]/2,Pi z . z],Norm[z]<4}
+}]
+GReg[\[Nu]_,z_]:=With[{\[Nu]Z=Round[\[Nu]]}
+	,Piecewise[{
+		{GUpper[\[Nu],z]-\[Pi]^(-(Length[z]-\[Nu])/2)Gamma[(Length[z]-\[Nu])/2]sDer[Round[-\[Nu]/2],z,ConstantArray[0,Length[z]]],(Norm[z]>10^(-64))&&PossibleZeroQ[\[Nu]-\[Nu]Z]&&Element[-\[Nu]Z/2,NonNegativeIntegers]}
+	},-GLower[\[Nu],z]]
+]
 
 
 (* ::Text:: *)
@@ -133,8 +140,8 @@ GReg[\[Nu]_,z_]:=Piecewise[{
 
 
 GDer[\[Nu]_,y_,\[Alpha]_]:=Piecewise[{
-	{G[\[Nu],y],Total[\[Alpha]]==0}
-	,{Total[Flatten[Table[p[y,\[Alpha],\[Beta]]G[\[Nu]+2Total[\[Alpha]-\[Beta]],y],{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}]]],Total[\[Alpha]]>0}
+	{GUpper[\[Nu],y],Total[\[Alpha]]==0}
+	,{Total[Flatten[Table[p[y,\[Alpha],\[Beta]]GUpper[\[Nu]+2Total[\[Alpha]-\[Beta]],y],{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}]]],Total[\[Alpha]]>0}
 }]
 GRegDer[\[Nu]_,z_,\[Alpha]_]:=Piecewise[{
 	{
@@ -159,7 +166,7 @@ GRegDer[\[Nu]_,z_,\[Alpha]_]:=Piecewise[{
 (*Derivatives of sums in real and reciprocal space.*)
 
 
-sumRealDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[Apply[Times,(-2Pi I z)^\[Alpha]]G[\[Nu],z]Exp[-2Pi I y . z],{z,(A . #-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}]
+sumRealDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[Apply[Times,(-2Pi I z)^\[Alpha]]GUpper[\[Nu],z]Exp[-2Pi I y . z],{z,(A . #-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}]
 sumFourierNonZeroDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[GDer[Length[\[Alpha]]-\[Nu],k+y,\[Alpha]]Exp[-2Pi I x . k],{k,(Inverse[Transpose[A]] . #)&/@Select[Tuples[Range[-sumLim,sumLim],Length[A]],Not[PossibleZeroQ[Norm[#]]]&]}]
 
 
@@ -167,9 +174,11 @@ sumFourierNonZeroDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[GDer[Length
 (*Prototype for epsteinZetaDer without special cases such non-positive even integers nu.*)
 
 
-epsteinZetaRegDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:8]:=Module[
-	{dim,prec,\[Nu]N,AN,xN,yN,\[Mu],sumReal,sumReci,res,k,cor,vol}
-	,prec=120
+Options[epsteinZetaRegDer]={InputPrecision->120,SumLim->10};
+epsteinZetaRegDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Module[
+	{dim,prec,\[Nu]N,AN,xN,yN,\[Mu],sumReal,sumReci,res,k,cor,vol,sumLim}
+	,prec=OptionValue[InputPrecision]
+	;sumLim=OptionValue[SumLim]
 	;dim = Length[AExt]
 	;If[\[Nu]Ext>=dim&&PossibleZeroQ[(\[Nu]Ext-dim)/2-Round[(\[Nu]Ext-dim)/2]]
 		,\[Nu]N=Round[\[Nu]Ext];If[PossibleZeroQ[Total[\[Alpha]]],Return[" bug for no derivatives in nu equals dim plus 2k"]]
@@ -186,9 +195,135 @@ epsteinZetaRegDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,sumLim_:8]:=Module[
 	;res=SetPrecision[\[Mu]^(Total[\[Alpha]]-\[Nu]N)\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci),prec]
 	;k=Max[0,Round[(\[Nu]N-dim)/2]]
 	;If[PossibleZeroQ[k-(\[Nu]N-dim)/2]
-		,res+=Pi^(k+dim/2)/Gamma[k+dim/2](-1)^(k+1)/k!YDer[k,N[yExt],\[Alpha]]Log[\[Mu] \[Mu]]/Abs[Det[N[AExt]]]
+		,res+=Pi^(k+dim/2)/Gamma[k+dim/2](-1)^(k+1)/k!YDer[k,N[yExt],\[Alpha]]Log[\[Mu] \[Mu]]/Abs[Det[AExt]]
 	]
 	;Return[res]
+]
+
+
+(* ::Text:: *)
+(*Harmonic polynomials*)
+
+
+cInner[n_,i_,k_,d_]=2^i Product[2n+d-2-4k-2j,{j,1,i}];
+cOuter[n_,k_,d_]=2^-k Product[(2n+d-2ell)/((2n+d+2-4ell)(2n+d-4ell)),{ell,k}];
+hHarmonic[k_/;Element[k,NonNegativeIntegers]][x_List,\[Alpha]_List]:=Module[
+	{res,d,n}
+	,d=Length[\[Alpha]]
+	;n=Total[\[Alpha]]
+	;res=cOuter[n,k,d]Total@Table[
+		Apply[Times,Power[x,2\[Gamma]-\[Alpha]]]
+		Total[Table[
+			(-1)^Total[\[Beta]]/cInner[n,Total[\[Beta]],k,d]
+			 Binomial[Total[\[Beta]]+k,k]Total[\[Beta]]!/Apply[Times,Factorial[\[Beta]]]
+			Apply[Times,Binomial[\[Alpha],\[Alpha]+\[Beta]-\[Gamma]](\[Gamma]-\[Beta])!/(2\[Gamma]-\[Alpha]-2\[Beta])!]
+			,{\[Beta],Tuples[Range[MapThread[Max,{0\[Alpha],\[Gamma]-\[Alpha]}],\[Gamma]-\[Alpha]/2]]}
+			]]
+		,{\[Gamma],Select[Tuples[Range[Ceiling[\[Alpha]/2],0\[Alpha]+Total[\[Alpha]]-k]],Total[#]==Total[\[Alpha]]-k&]}
+		]
+	;res
+]
+
+
+(* ::Text:: *)
+(*Regularized Crandall function.*)
+
+
+GRegHarmonic[\[Nu]_,z_,k_,\[Alpha]_]:=Module[
+	{ell,d,n}
+	,d=Length[z]
+	;ell=Max[k,Round[-\[Nu]/2]]
+	;n=Total[\[Alpha]]
+	;Which[
+		PossibleZeroQ[\[Nu]+2ell]
+			,Which [
+				z . z<1/100
+					,(-\[Pi] z . z)^(ell+k-n)/(ell+k-n)!(HarmonicNumber[ell]+PolyGamma[ell+d/2]-PolyGamma[ell+d/2-k]-EulerGamma)
+						-Total[Table[If[j==ell+k-n,0,(-\[Pi] z . z)^j/(j-(ell+k-n))/j!],{j,0,100}]]
+				,True
+					,GUpper[-2(k+ell-n),z]
+						+(-\[Pi] z . z)^(ell+k-n)/(ell+k-n)!(Log[\[Pi] z . z]+HarmonicNumber[ell]-HarmonicNumber[ell+k-n]+PolyGamma[ell+Length[z]/2]-PolyGamma[ell+Length[z]/2-k])
+			]
+		,True
+			,-GLower[\[Nu]+2(n-k),z]
+	]
+]
+
+
+(* ::Text:: *)
+(*Sums for harmonic method in real and reciprocal space.*)
+
+
+SumRealHarmonic[\[Nu]_,A_,x_,y_,\[Alpha]_,kIndex_,sumLim_]:=Total[Table[
+	Module[{h}
+		,h=hHarmonic[kIndex][z,\[Alpha]]
+		;If[PossibleZeroQ[h],0,h GUpper[\[Nu],z]Exp[-2\[Pi] I y . z]]
+	]
+	,{z,(A . #-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}
+]]
+SumFourierRegHarmonic[\[Nu]_,A_,x_,y_,\[Alpha]_,kIndex_,sumLim_]:=Total[Table[
+	hHarmonic[kIndex][y+k,\[Alpha]]GUpper[Length[x]-\[Nu]+2Total[\[Alpha]]-4kIndex,k+y]Exp[-2\[Pi] I x . k]
+	,{k,(Inverse[Transpose[A]] . #)&/@Select[Tuples[Range[-sumLim,sumLim],Length[A]],Not[PossibleZeroQ[Norm[#]]]&]}
+]]
+
+
+(* ::Text:: *)
+(*Harmonic method for the regularized epstein Zeta derivatives.*)
+
+
+Options[epsteinZetaRegDerHarmonic]={InputPrecision->100,SumLim->8};
+epsteinZetaRegDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Module[
+	{EPS,prec,sumLim,\[Nu]True,AN,xN,yN,\[Mu],res,n,nc,m,l,d}
+	,EPS=10^-50
+	;prec=OptionValue[InputPrecision]
+	;sumLim=OptionValue[SumLim]
+	;d=Length[\[Alpha]]
+	;n = Total[\[Alpha]]
+	;\[Nu]True=N[\[Nu]Ext,prec]
+	;AN=N[AExt,prec]
+	;\[Mu]=Abs[Det[AN]]^(1/Length[AN])
+	;AN=1/\[Mu] N[AExt,prec]
+	;xN=1/\[Mu] N[xExt,prec]
+	;yN=\[Mu] N[yExt,prec]
+	;If[Abs[\[Nu]Ext]<EPS&&n>0
+		,res = 0
+		,res=(-2Pi)^n Total@Table[
+			Module[
+				{\[Nu]N,sumReal,sumReci,resk}
+				,\[Nu]N=\[Nu]True-2k
+				;m=Total[\[Alpha]]-2k
+				;If[\[Nu]N<-1&&Abs[\[Nu]N/2-Round[\[Nu]N/2]]<EPS
+					,0
+					,If[Abs[\[Nu]N]<EPS
+						,If[Norm[xN]>EPS
+							,0
+							,sumReal=-I^n hHarmonic[k][xN,\[Alpha]]
+							;resk=\[Pi]^(\[Nu]N/2)sumReal
+							;resk
+						]
+						,sumReal=I^n SumRealHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+						;nc=Module[{h}
+							,h=hHarmonic[k][yN,\[Alpha]]
+							;If[PossibleZeroQ@h
+								,0
+								,h GRegHarmonic[d-\[Nu]True,yN,k,\[Alpha]]
+							]
+						]
+						;sumReci=(-1)^k (SumFourierRegHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]+nc)
+						;resk=\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci)
+						;resk
+					]
+				]
+			]
+		,{k,0,Floor[n/2]}
+		]
+	]
+	;res*=\[Mu]^(Total[\[Alpha]]-\[Nu]True)
+	;l=Max[0,Round[(\[Nu]True-d)/2]]
+	;If[PossibleZeroQ[l-(\[Nu]True-d)/2]
+		,res+=Pi^(l+d/2)/Gamma[l+d/2](-1)^(l+1)/l!YDer[l,N[yExt,prec],\[Alpha]]Log[\[Mu] \[Mu]]/Abs[Det[AExt]]
+	]
+	;res
 ]
 
 
@@ -212,10 +347,66 @@ Do[
 
 
 (* ::Text:: *)
-(*Generate reference values.*)
+(*Set special reference values.*)
 
 
-zDerTab=ParallelTable[
+zDerTabSpecial={
+	With[{\[Nu]=1/2,a=IdentityMatrix@2,x={0,0},y={0,0},\[Alpha]={2,0}}
+		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+	]
+	,With[{\[Nu]=1/2,a=IdentityMatrix@2,x={1/10,0},y={0,0},\[Alpha]={2,0}}
+		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+	]
+	,With[{\[Nu]=1/2,a=IdentityMatrix@2,x={1/10,0},y={1/20,0},\[Alpha]={2,0}}
+		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+	]
+	,With[{\[Nu]=1/2,a=AHex,x={1/10,0},y={1/20,0},\[Alpha]={2,0}}
+		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+	]
+	,With[{\[Nu]=1/2,a=AHex,x={1+1/10,0},y={1/20,0},\[Alpha]={2,0}}
+		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+	]
+	,With[{\[Nu]=1/2,a=AHex,x={1+1/10,0},y={1/20,2},\[Alpha]={2,0}}
+		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+	]
+	,With[{\[Nu]=10+1/2,a=IdentityMatrix@2,x={0,0},y={1+1/10,0},\[Alpha]={2,0}}
+			,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
+			;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+	]
+	,With[{\[Nu]=10+1/2,a=AHex,x={1+1/10,0},y={1/20,2},\[Alpha]={2,0}}
+		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+	]
+		,With[{\[Nu]=1/2,a=AHex,x={1+1/10,0},y={1/20,2},\[Alpha]={2,0}}
+		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+	]
+	,With[{\[Nu]=4,a=IdentityMatrix@2,x={0,0},y={0,0},\[Alpha]={2,0}}
+		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+	]
+	,With[{\[Nu]=6,a=IdentityMatrix@2,x={0,0},y={0,0},\[Alpha]={2,0}}
+		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+	]
+	,With[{\[Nu]=6,a=AHex,x={0,0},y={0,0},\[Alpha]={2,0}}
+		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+	]
+}
+
+
+(* ::Text:: *)
+(*Generate random reference values.*)
+
+
+zDerTabRandom=ParallelTable[
 	With[{result=N[epsteinZetaRegDer[\[Nu]0[i],a0[i],x0[i],y0[i],\[Alpha]0[i]],30]}
 	,Flatten[Join[N[{\[Nu]0[i],a0[i],x0[i],y0[i]},30],\[Alpha]0[i],{Re[result],Im[result]}]]
 	],{i,range}
@@ -223,11 +414,17 @@ zDerTab=ParallelTable[
 
 
 (* ::Text:: *)
+(*Join reference values.*)
+
+
+zDerTab=Join[zDerTabSpecial,zDerTabRandom];
+
+
+(* ::Text:: *)
 (*Save reference values to file.*)
 
 
-SetDirectory[NotebookDirectory[]];
-Export["csv/epsteinZetaRegDer_prototype_ref.csv",zDerTab];
+Export[NotebookDirectory[]<>"csv/epsteinZetaRegDer_prototype_ref.csv",zDerTab];
 
 
 (* ::Subsection:: *)
