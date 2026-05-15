@@ -1202,7 +1202,7 @@ int test_crandall_gReg_harmonic(void) { // NOLINT
     char line[4096];
     int testsPassed = 0;
     int totalTests = 0;
-    double tol = 5 * pow(10, -14);
+    double tol = pow(10, -14);
     double errMin = NAN;
     double errMax = NAN;
     double errSum = 0.;

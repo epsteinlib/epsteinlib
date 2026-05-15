@@ -200,6 +200,8 @@ double complex crandall_gReg_nuequalsdimplus2l_harmonic(int l, int k, int n,
         for (int i = 1; i < 10; i++) {
             res += taylorCoeffs[i - 1] * pow(arg, i);
         }
+
+        return res;
     }
 
     double exp = l + k - n;

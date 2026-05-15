@@ -596,18 +596,20 @@ Export["csv/crandall_gReg_der_d2k_prototype_ref.csv",GRegKDerTab];
 
 randomGeneralData=Table[
 	Module[
-		{d,\[Nu],z,k,\[Alpha]}
+		{d,\[Nu],z,k,\[Alpha],res}
 		,d=RandomChoice[Range[4]]
 		;\[Nu]=RandomInteger[{-10^(16), 10^(16)}]/10^15
 		;z=RandomChoice[
-			{0.1,0.9}->{
+			{0.05,0.05,0.9}->{
 				ConstantArray[0,d]
+				,PadRight[{10^-14},d]
 				,RandomInteger[{-10^(16), 10^(16)},{d}]/10^15
 			}
 		]
 		;\[Alpha]=RandomInteger[{0,Floor[80/d]},{d}]
 		;k=RandomInteger[{0,Floor[Total[\[Alpha]]/2]}]
-		;Flatten[{d,N@\[Nu],N@z,k,\[Alpha],N@GRegHarmonic[\[Nu],z,k,\[Alpha]]}]
+		;res=SetPrecision[GRegHarmonic[\[Nu],z,k,\[Alpha]],200]
+		;Flatten[{d,N@\[Nu],N@z,k,\[Alpha],N@res}]
 	]
 	,{500}
 ];
@@ -619,18 +621,20 @@ randomGeneralData=Table[
 
 randomIntegerData=Table[
 	Module[
-		{d,\[Nu],z,k,\[Alpha]}
+		{d,\[Nu],z,k,\[Alpha],res}
 		,d=RandomChoice[Range[4]]
 		;\[Nu]=2 RandomInteger[{-6,0}]
 		;z=RandomChoice[
-			{0.1,0.9}->{
+			{0.05,0.05,0.9}->{
 				ConstantArray[0,d]
+				,PadRight[{10^-14},d]
 				,RandomInteger[{-10^(16), 10^(16)},{d}]/10^15
 			}
 		]
 		;\[Alpha]=RandomInteger[{0,Floor[80/d]},{d}]
 		;k=RandomInteger[{0,Floor[Total[\[Alpha]]/2]}]
-		;Flatten[{d,N@\[Nu],N@z,k,\[Alpha],N@GRegHarmonic[\[Nu],z,k,\[Alpha]]}]
+		;res=SetPrecision[GRegHarmonic[\[Nu],z,k,\[Alpha]],200]
+		;Flatten[{d,N@\[Nu],N@z,k,\[Alpha],N@res}]
 	]
 	,{i,499}
 ];
