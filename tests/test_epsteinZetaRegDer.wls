@@ -6,10 +6,10 @@
 
 
 (* ::Section:: *)
-(*Unit tests for epsteinZetaReGDer in epsteinZeta.c*)
+(*Unit tests for epsteinZetaRegDer in epsteinZeta.c*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Setup*)
 
 
@@ -40,7 +40,7 @@ Protect[Power];
 ];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Auxiliary functions*)
 
 
@@ -75,7 +75,7 @@ DirectionalDerivative[v_,n_,size_:15,h_:1/1000][f_][x_]:=If[PossibleZeroQ[n]
 ]
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Reference functions*)
 
 
@@ -334,7 +334,7 @@ epsteinZetaRegDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]
 ]
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create Epstein zeta regularized prototype reference values*)
 
 
@@ -434,7 +434,7 @@ zDerTab=Join[zDerTabSpecial,zDerTabRandom];
 Export[NotebookDirectory[]<>"csv/epsteinZetaRegDer_prototype_ref.csv",zDerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create Epstein zeta regularized prototype reference values for nu = dim + 2k.*)
 
 
@@ -472,7 +472,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/epsteinZetaRegDer_d2k_prototype_ref.csv",zDerd2kTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create Epstein zeta regularized derivative reference values for Bain type lattice matrix*)
 
 
@@ -515,3 +515,47 @@ zDerBainTab=ParallelTable[
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/epsteinZetaRegDer_bain_prototype_ref.csv",zDerBainTab];
+
+
+(* ::Subsection:: *)
+(*Create Epstein zeta regularized 1D reference values*)
+
+
+(* ::Text:: *)
+(*Setup test parameters.*)
+
+
+range = Range[999];
+SeedRandom[2]; (* TODO: cancellation error, seed 2 and up to 40 ders *)
+Do[
+	\[Nu]1D[i]=10 randRational
+	;a1D[i]=1+{{RandomInteger[{-2^10,2^8}]/2^10/2}}
+	;x1D[i]=If[i<5,{0},{1+randRational}]
+	;y1D[i]=If[i<10,{0},{randRational}]
+	;n1D[i]={RandomInteger[{0,20}]}
+	,{i,range}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+zDerTab1D=ParallelTable[
+	With[{result=N[epsteinZetaRegDer[\[Nu]1D[i],a1D[i],x1D[i],y1D[i],n1D[i],InputPrecision->100,SumLim->8]]}
+	,Flatten[{N[\[Nu]1D[i]]
+	,N[a1D[i]]
+	,N[x1D[i]]
+	,N[y1D[i]]
+	,n1D[i]
+	,Re[result]
+	,Im[result]
+	}]],{i,range}
+];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+Export[NotebookDirectory[]<>"csv/epsteinZetaRegDer_1D_ref.csv",zDerTab1D];

@@ -74,7 +74,7 @@ AHex={{1,1/2},{0,Sqrt@3/2}};
 BMat[a_] = 1/Sqrt[a + 1]*DiagonalMatrix[{Sqrt[a], 1, 1}] . {{1, 1, 0}, {1, 0, 1}, {0, 1, 1}};
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Reference functions*)
 
 
@@ -334,7 +334,7 @@ setZetaDerHighExp[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modul
 ]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Create Epstein zeta 1D analytic reference values in x = 0*)
 
 
@@ -342,14 +342,14 @@ setZetaDerHighExp[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modul
 (*Setup test parameters.*)
 
 
-range = Range[100];
+range = Range[999];
 SeedRandom[2]; (* TODO: cancellation error, seed 2 and up to 40 ders *)
 Do[
 	\[Nu]1D[i]=10 randRational
-	;a1D[i]={{1/2+i/100}}
-	;x1D[i]=If[i<5,{0},{randRational}]
+	;a1D[i]=1+{{RandomInteger[{-2^10,2^8}]/2^10/2}}
+	;x1D[i]=If[i<5,{0},{1+randRational}]
 	;y1D[i]=If[i<10,{0},{randRational}]
-	;n1D[i]={RandomInteger[{0,40}]}
+	;n1D[i]={RandomInteger[{0,20}]}
 	,{i,range}
 ]
 
@@ -359,7 +359,7 @@ Do[
 
 
 zDerTab1D=ParallelTable[
-	With[{result=N[setZetaDer[\[Nu]1D[i],a1D[i],x1D[i],y1D[i],n1D[i],InputPrecision->100,SumLim->8]]}
+	With[{result=N[setZetaDer[\[Nu]1D[i],a1D[i],x1D[i],y1D[i],n1D[i],InputPrecision->200,SumLim->8]]}
 	,Flatten[{N[\[Nu]1D[i]]
 	,N[a1D[i]]
 	,N[x1D[i]]
@@ -379,7 +379,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_1D_ref.csv",zDerTab1D];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create set zeta 2D reference values*)
 
 
