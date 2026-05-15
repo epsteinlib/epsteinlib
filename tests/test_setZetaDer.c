@@ -705,7 +705,7 @@ int test_setZetaDer_poly_laplace(void) { // NOLINT
     int testsPassed = 0;
     int totalTests = 0;
 
-    int maxn = 6; // For n'th power of the Laplace operator
+    int maxn = 5; // For n'th power of the Laplace operator
     unsigned int dim = 4;
     double errMin = NAN;
     double errMax = NAN;

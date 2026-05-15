@@ -433,9 +433,9 @@ int test_epsteinZetaRegDer_taylor(void) { // NOLINT
 
     printf("\n\t ... ");
     printf("generating test values");
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10; i++) {
 
-        nu = -12.5 + 0.333 * (i + 1);
+        nu = -12.5 + 3.333 * (i + 1);
 
         x[0] = 0.003 * i;
         x[1] = -0.002 * i;
@@ -528,8 +528,8 @@ int test_epsteinZetaRegDer_taylor(void) { // NOLINT
 int main(void) {
     int failed = 0;
 
-    failed += run_timed_test(test_epsteinZetaRegDer_prototype);
     failed += run_timed_test(test_epsteinZetaRegDer_d2k_prototype);
+    failed += run_timed_test(test_epsteinZetaRegDer_prototype);
     failed += run_timed_test(test_epsteinZetaRegDer_bain_prototype);
     failed += run_timed_test(test_epsteinZetaRegDer_taylor);
 

@@ -1114,7 +1114,8 @@ static double complex summation_harmonic_reg(
             double h = harmonic_h(k, dim, y_t1, alphaAbs, chunk_offset, valid_count,
                                   coeffs, exponents);
             if (h) {
-                nc += h * crandall_gReg(dim, dim - nuReci, y_t1, lambda);
+                nc += h * crandall_gReg_harmonic((int)k, (int)alphaAbs, dim,
+                                                 dim - nu, y_t1, lambda);
             }
 
             s2 = sum_fourier_harmonic(nuReci, k, dim, m_fourier, x_t1, y_t2,
@@ -1399,7 +1400,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         }
     }
     // choose harmonic method for setZetaDer in most cases
-    bool harmonicMethod = (variant == 2);
+    bool harmonicMethod = true;
     bool harmonicMethod1D = harmonicMethod && (dim == 1);
     // if variant == 2 and all of the above false, polynomial p method is used
     // works for low derivatives and arbitrary nu, slightly
@@ -1488,7 +1489,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                 xfactor = 1. / real_int_pow(ms, alphaAbs);
             }
         } else if (variant == 3) {
-            if (nu < 100) {
+            if (harmonicMethod) {
                 res = summation_harmonic_reg(
                     nu, dim, alphaAbs, alpha, lambda, ms, m_real, m_fourier, x_t1,
                     x_t2, y_t1, y_t2, cutoffsReal, cutoffsFourier, diag, xfactor);
@@ -1516,9 +1517,10 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                 xfactor = 1. / real_int_pow(ms, alphaAbs);
             }
         }
+
         // In the harmonic method, the res is already set as there is no global
         // nu-dependent coefficient there
-        if (!(harmonicMethod) && variant <= 3 && 0) {
+        if (variant <= 1 || !(harmonicMethod)) {
             res = xfactor * pow(lambda * lambda / M_PI, -nu / 2.) / tgamma(nu / 2.) *
                   (s1 + pow(lambda, dim) * s2);
         }

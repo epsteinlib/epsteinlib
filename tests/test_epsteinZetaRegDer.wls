@@ -9,7 +9,7 @@
 (*Unit tests for epsteinZetaReGDer in epsteinZeta.c*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Setup*)
 
 
@@ -40,15 +40,16 @@ Protect[Power];
 ];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Auxiliary functions*)
 
 
 (* ::Text:: *)
-(*Bain path lattice matrix.*)
+(*Bain path lattice matrix and hexagonal lattice matrix.*)
 
 
-BMat[a_]=1/Sqrt[a+1]DiagonalMatrix[{Sqrt[a],1,1}] . {{1,1,0},{1,0,1},{0,1,1}}
+BMat[a_]=1/Sqrt[a+1]DiagonalMatrix[{Sqrt[a],1,1}] . {{1,1,0},{1,0,1},{0,1,1}};
+AHex={{1,1/2},{0,Sqrt@3/2}};
 
 
 (* ::Text:: *)
@@ -120,18 +121,21 @@ sDer[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=(
 (*Crandall functions.*)
 
 
-GLower[\[Nu]_,z_]:=Piecewise[{
-	{2/\[Nu],Norm[z]<10^(-64)}
-	,{Gamma[\[Nu]/2,0,Pi z . z]/(Pi z . z)^(\[Nu]/2),Norm[z]<4}
-}]
-GUpper[\[Nu]_,z_]:=Piecewise[ {
+GLower[\[Nu]_,z_]:=Piecewise[
+	{{2/\[Nu],Norm[z]<10^(-64)}}
+	,Gamma[\[Nu]/2,0,Pi z . z]/(Pi z . z)^(\[Nu]/2)
+]
+GUpper[\[Nu]_,z_]:=Piecewise[{
 	{-2/\[Nu],Norm[z]<10^(-64)}
 	,{ExpIntegralE[1-\[Nu]/2,Pi z . z],Norm[z]<4}
 }]
 GReg[\[Nu]_,z_]:=With[{\[Nu]Z=Round[\[Nu]]}
-	,Piecewise[{
-		{GUpper[\[Nu],z]-\[Pi]^(-(Length[z]-\[Nu])/2)Gamma[(Length[z]-\[Nu])/2]sDer[Round[-\[Nu]/2],z,ConstantArray[0,Length[z]]],(Norm[z]>10^(-64))&&PossibleZeroQ[\[Nu]-\[Nu]Z]&&Element[-\[Nu]Z/2,NonNegativeIntegers]}
-	},-GLower[\[Nu],z]]
+	,Piecewise[{{
+			GUpper[\[Nu],z]-\[Pi]^(-(Length[z]-\[Nu])/2)Gamma[(Length[z]-\[Nu])/2]sDer[Round[-\[Nu]/2]
+			,z,ConstantArray[0,Length[z]]],(Norm[z]>10^(-64))&&PossibleZeroQ[\[Nu]-\[Nu]Z]&&Element[-\[Nu]Z/2,NonNegativeIntegers]
+		}}
+		,-GLower[\[Nu],z]
+	]
 ]
 
 
@@ -230,23 +234,26 @@ hHarmonic[k_/;Element[k,NonNegativeIntegers]][x_List,\[Alpha]_List]:=Module[
 
 
 GRegHarmonic[\[Nu]_,z_,k_,\[Alpha]_]:=Module[
-	{ell,d,n}
+	{ell,d,n,res}
 	,d=Length[z]
-	;ell=Max[k,Round[-\[Nu]/2]]
+	;ell=Max[0,Round[-\[Nu]/2]]
 	;n=Total[\[Alpha]]
-	;Which[
-		PossibleZeroQ[\[Nu]+2ell]
+	;res=Which[
+		ell>=Max[k,n-k]&&PossibleZeroQ[\[Nu]+2ell]
 			,Which [
 				z . z<1/100
-					,(-\[Pi] z . z)^(ell+k-n)/(ell+k-n)!(HarmonicNumber[ell]+PolyGamma[ell+d/2]-PolyGamma[ell+d/2-k]-EulerGamma)
-						-Total[Table[If[j==ell+k-n,0,(-\[Pi] z . z)^j/(j-(ell+k-n))/j!],{j,0,100}]]
+					,(-\[Pi] z . z)^(ell+k-n)/(ell+k-n)!
+					(HarmonicNumber[ell]+PolyGamma[ell+d/2]-PolyGamma[ell+d/2-k]-EulerGamma)
+					-Total[Table[If[j==ell+k-n,0,(-\[Pi] z . z)^j/(j-(ell+k-n))/j!],{j,0,100}]]
 				,True
 					,GUpper[-2(k+ell-n),z]
-						+(-\[Pi] z . z)^(ell+k-n)/(ell+k-n)!(Log[\[Pi] z . z]+HarmonicNumber[ell]-HarmonicNumber[ell+k-n]+PolyGamma[ell+Length[z]/2]-PolyGamma[ell+Length[z]/2-k])
+					+(-\[Pi] z . z)^(ell+k-n)/(ell+k-n)!
+					(Log[\[Pi] z . z]+HarmonicNumber[ell]-HarmonicNumber[ell+k-n]+PolyGamma[ell+Length[z]/2]-PolyGamma[ell+Length[z]/2-k])
 			]
 		,True
 			,-GLower[\[Nu]+2(n-k),z]
 	]
+	;res
 ]
 
 
@@ -335,10 +342,10 @@ epsteinZetaRegDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]
 (*Setup test parameters.*)
 
 
-range = Range[100];
+range = Range[987];
 Do[
 	\[Nu]0[i]=10 randRational
-	;a0[i]={{1,1/2},{0,Sqrt@3/2}}
+	;a0[i]=AHex
 	;x0[i]=If[i<10,{0,0},{randRational,randRational}]
 	;y0[i]={randRational,randRational}
 	;\[Alpha]0[i]={randDerivative,randDerivative}
@@ -353,53 +360,53 @@ Do[
 zDerTabSpecial={
 	With[{\[Nu]=1/2,a=IdentityMatrix@2,x={0,0},y={0,0},\[Alpha]={2,0}}
 		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
-		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N[Re[res]],N[Im[res]]}]
 	]
 	,With[{\[Nu]=1/2,a=IdentityMatrix@2,x={1/10,0},y={0,0},\[Alpha]={2,0}}
 		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
-		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N[Re[res]],N[Im[res]]}]
 	]
 	,With[{\[Nu]=1/2,a=IdentityMatrix@2,x={1/10,0},y={1/20,0},\[Alpha]={2,0}}
 		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
-		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N[Re[res]],N[Im[res]]}]
 	]
 	,With[{\[Nu]=1/2,a=AHex,x={1/10,0},y={1/20,0},\[Alpha]={2,0}}
 		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
-		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N[Re[res]],N[Im[res]]}]
 	]
 	,With[{\[Nu]=1/2,a=AHex,x={1+1/10,0},y={1/20,0},\[Alpha]={2,0}}
 		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
-		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N[Re[res]],N[Im[res]]}]
 	]
 	,With[{\[Nu]=1/2,a=AHex,x={1+1/10,0},y={1/20,2},\[Alpha]={2,0}}
 		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
-		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N[Re[res]],N[Im[res]]}]
 	]
 	,With[{\[Nu]=10+1/2,a=IdentityMatrix@2,x={0,0},y={1+1/10,0},\[Alpha]={2,0}}
 			,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
-			;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+			;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N[Re[res]],N[Im[res]]}]
 	]
 	,With[{\[Nu]=10+1/2,a=AHex,x={1+1/10,0},y={1/20,2},\[Alpha]={2,0}}
 		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
-		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N[Re[res]],N[Im[res]]}]
 	]
 		,With[{\[Nu]=1/2,a=AHex,x={1+1/10,0},y={1/20,2},\[Alpha]={2,0}}
 		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
-		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N[Re[res]],N[Im[res]]}]
 	]
 	,With[{\[Nu]=4,a=IdentityMatrix@2,x={0,0},y={0,0},\[Alpha]={2,0}}
 		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
-		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N[Re[res]],N[Im[res]]}]
 	]
 	,With[{\[Nu]=6,a=IdentityMatrix@2,x={0,0},y={0,0},\[Alpha]={2,0}}
 		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
-		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N[Re[res]],N[Im[res]]}]
 	]
 	,With[{\[Nu]=6,a=AHex,x={0,0},y={0,0},\[Alpha]={2,0}}
 		,res=epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]
-		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N@Re[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]],N@Im[epsteinZetaRegDer[\[Nu],a,x,y,\[Alpha]]]}]
+		;Flatten@Join[N[{\[Nu],a,x,y}],{\[Alpha],N[Re[res]],N[Im[res]]}]
 	]
-}
+};
 
 
 (* ::Text:: *)
