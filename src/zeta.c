@@ -147,41 +147,6 @@ double complex sum_real(double nu, unsigned int dim, double lambda, const double
 }
 
 /**
- * @brief Computes one summand of the derivative of the first sum in Crandall's
- * formula.
- * @param[in] nu: exponent for the Epstein zeta function.
- * @param[in] dim: dimension of the input vectors.
- * @param[in] lambda: parameter that decides the weight of each sum.
- * @param[in,out] lv: lattice vector, shifted by x in-place.
- * @param[in] x: shift vector.
- * @param[in] y: wave vector.
- * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
- * the incomplete gamma evaluation.
- * @return (-2 * PI * I * (z-x) ) ** alpha * G_{nu}^{(alpha)}((z - x) / lambda)) X
- * exp(-2 * PI * I * (z * y), the real space summand derivative.
- */
-static inline double complex summand_real_der(double nu, unsigned int dim,
-                                              double lambda, double lv[],
-                                              const double *x, const double *y,
-                                              double zArgBound,
-                                              const unsigned int *alpha) {
-    double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
-    for (int i = 0; i < dim; i++) {
-        lv[i] -= x[i];
-    }
-    // Calculate (- 2 PI I (z - x)) ** alpha
-    double complex mon = 1.;
-    for (int i = 0; i < dim; i++) {
-        unsigned int alphai = alpha[i];
-        if (alphai) {
-            mon *=
-                imaginary_int_pow(alphai) * real_int_pow(-2 * M_PI * lv[i], alphai);
-        }
-    }
-    return rot * mon * crandall_g(dim, nu, lv, 1. / lambda, zArgBound);
-}
-
-/**
  * @brief Computes one summand of the harmonic method of the first sum in Crandall's
  * formula.
  * @param[in] nu: exponent for the Epstein zeta function.
@@ -562,35 +527,6 @@ double complex sum_fourier(double nu, unsigned int dim, double lambda,
         lattice_vector_increment(dim, cutoffs, zv);
     }
     return sum;
-}
-
-/**
-<<<<<<< HEAD
- * @brief Computes one summand of the derivative of the second sum in Crandall's
- * formula.
- * @param[in] nu: exponent for the Epstein zeta function.
- * @param[in] dim: dimension of the input vectors.
- * @param[in] lambda: parameter that decides the weight of each sum.
- * @param[in,out] lv: lattice vector, shifted by y in-place.
- * @param[in] x: shift vector.
- * @param[in] y: wave vector.
- * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
- * the incomplete gamma evaluation.
- * @return G_{dim - nu}^{(alpha)}(lambda * (k + y)) * exp(-2 * PI * I * x * (k + y)),
- * the Fourier space summand derivative.
- */
-static inline double complex summand_fourier_der(double nu, unsigned int dim,
-                                                 double lambda, double lv[],
-                                                 const double *x, const double *y,
-                                                 double zArgBound,
-                                                 const unsigned int *alpha,
-                                                 unsigned int alphaAbs) {
-    for (int i = 0; i < dim; i++) {
-        lv[i] = lv[i] + y[i];
-    }
-    double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
-    return rot *
-           crandall_g_der(dim, dim - nu, lv, lambda, zArgBound, alpha, alphaAbs);
 }
 
 /**

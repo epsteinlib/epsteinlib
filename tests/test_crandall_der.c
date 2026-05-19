@@ -11,6 +11,7 @@
 #include "../src/crandall.h"
 #include "../src/tools.h"
 #include "utils.h"
+#include "wrappers.h"
 #include <complex.h>
 #include <errno.h>
 #include <math.h>
