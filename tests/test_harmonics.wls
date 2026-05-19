@@ -8,6 +8,7 @@
 (* ::Section:: *)
 (*Unit tests for harmonics . c*)
 
+
 (* ::Subsection::Closed:: *)
 (*Setup*)
 
@@ -30,7 +31,7 @@ Protect[Power];
 ];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Reference functions*)
 
 
@@ -98,7 +99,7 @@ Export["csv/coeffs_c_inner_ref.csv",cInnerTab];
 Export["csv/coeffs_c_outer_ref.csv",cOuterTab];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Create references values for inner sum of harmonic polynomials*)
 
 
@@ -106,7 +107,7 @@ Export["csv/coeffs_c_outer_ref.csv",cOuterTab];
 (*Generate reference arguments.*)
 
 
-range = Range[100];
+range = Range[999];
 j=1;
 maxn=60;
 While[j<=Last[range]
@@ -140,11 +141,11 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/harmonic_h_inner_ref.csv",hInnerTab];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Create 1D harmonic h reference values*)
 
 
-range=Range[100];
+range=Range[999];
 Do[
 	\[Alpha]0[j]={RandomInteger[{0,50}]}
 	;k0[j]=RandomInteger[{0,Floor[First@\[Alpha]0[j]/2]}]
@@ -168,7 +169,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/harmonic_h_1D_ref.csv",h1DTab];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Create harmonic h reference values*)
 
 
@@ -176,7 +177,7 @@ Export["csv/harmonic_h_1D_ref.csv",h1DTab];
 (*Generate reference arguments.*)
 
 
-range = Range[100];
+range = Range[200];
 j=1;
 While[j<=Last[range]
 	,
@@ -196,15 +197,40 @@ Clear[j,tups]
 
 
 (* ::Text:: *)
-(*Generate reference values.*)
+(*Generate reference values for z = (1,1,1), which focuses on the precision of harmonics.*)
 
 
-h3DTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@h[k0[j]][z0[j],\[Alpha]0[j]]},{j,range}];
+h3DTabUnity=ParallelTable[
+		With[
+			{res=SetPrecision[h[k0[j]][{1,1,1},\[Alpha]0[j]],200]}
+			,Flatten@{k0[j],N@{1,1,1},\[Alpha]0[j],N@res}
+		]
+	,{j,range}
+];
 
 
 (* ::Text:: *)
 (*Save reference values to file.*)
 
 
-SetDirectory[NotebookDirectory[]];
-Export["csv/harmonic_h_3D_ref.csv",h3DTab];
+Export[NotebookDirectory[]<>"csv/harmonic_h_3D_unity_ref.csv",h3DTabUnity];
+
+
+(* ::Text:: *)
+(*Generate reference values for random z.*)
+
+
+h3DTabRandom=ParallelTable[
+		With[
+			{res=SetPrecision[h[k0[j]][z0[j],\[Alpha]0[j]],200]}
+			,Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@res}
+		]
+	,{j,range}
+];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+Export[NotebookDirectory[]<>"csv/harmonic_h_3D_random_ref.csv",h3DTabRandom];
