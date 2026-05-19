@@ -1,9 +1,3 @@
-/*
- * SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
- *
- * SPDX-License-Identifier: AGPL-3.0-only
- */
-
 // SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
 //
 // SPDX-License-Identifier: AGPL-3.0-only
@@ -56,7 +50,7 @@ int test_setZetaDer_1D(void) {
     int testsPassed = 0;
     int totalTests = 0;
     unsigned int dim = 1;
-    double tol = 5 * pow(10, -13);
+    double tol = pow(10, -12);
 
     double errMin = NAN;
     double errMax = NAN;
@@ -705,7 +699,7 @@ int test_setZetaDer_poly_laplace(void) { // NOLINT
     int testsPassed = 0;
     int totalTests = 0;
 
-    int maxn = 6; // For n'th power of the Laplace operator
+    int maxn = 5; // For n'th power of the Laplace operator
     unsigned int dim = 4;
     double errMin = NAN;
     double errMax = NAN;

@@ -1,9 +1,3 @@
-/*
- * SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
- *
- * SPDX-License-Identifier: AGPL-3.0-only
- */
-
 // SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
 //
 // SPDX-License-Identifier: AGPL-3.0-only
@@ -1181,6 +1175,152 @@ int test_crandall_gReg_der_d2k_prototype(void) {
 }
 
 /*!
+ * @brief Tests crandall_gReg_harmonic for random inputs in dimensions 1 to 4
+ * by comparing against Mathematica reference values.
+ *
+ * @return number of failed tests.
+ */
+int test_crandall_gReg_harmonic(void) { // NOLINT
+    printf("%s ", __func__);
+    char path[MAX_PATH_LENGTH];
+    int result =
+        snprintf(path, sizeof(path), "%s/crandall_gReg_harmonic_ref.csv", BASE_PATH);
+    if (result < 0 || result >= sizeof(path)) {
+        return fprintf(stderr, "Error creating file path\n");
+    }
+    FILE *data = fopen(path, "r");
+    if (data == NULL) {
+        return fprintf(stderr, "Error opening file: %s\n", path);
+    }
+
+    char line[4096];
+    int testsPassed = 0;
+    int totalTests = 0;
+    double tol = pow(10, -14);
+    double errMin = NAN;
+    double errMax = NAN;
+    double errSum = 0.;
+
+    unsigned int max_test_dim = 4;
+
+    printf("\n\t ... ");
+    printf("processing %s ", path);
+
+    while (fgets(line, sizeof(line), data) != NULL) {
+        totalTests++;
+
+        char *ptr = line;
+        char *endptr;
+
+        // Parse dimension
+        unsigned int dim = (unsigned int)strtoul(ptr, &endptr, 10);
+        if (*endptr != ',') {
+            continue;
+        }
+        ptr = endptr + 1;
+
+        // Bounds check on dimension
+        if (dim < 1 || dim > max_test_dim) {
+            (void)fclose(data);
+            return fprintf(stderr, "Invalid dimension: %u\n", dim);
+        }
+
+        // Parse nu
+        double nu = strtod(ptr, &endptr);
+        if (*endptr != ',') {
+            continue;
+        }
+        ptr = endptr + 1;
+
+        // Use stack allocation with fixed max size
+        double z[max_test_dim];
+
+        // Parse z (dim values)
+        int parseOk = 1;
+        for (unsigned int i = 0; i < dim && parseOk; i++) {
+            z[i] = strtod(ptr, &endptr);
+            if (*endptr != ',') {
+                parseOk = 0;
+            } else {
+                ptr = endptr + 1;
+            }
+        }
+
+        // Parse k
+        int k = (int)strtol(ptr, &endptr, 10);
+        if (*endptr != ',') {
+            continue;
+        }
+        ptr = endptr + 1;
+
+        // Parse alpha (dim values) and accumulate n = |alpha|
+        int n = 0;
+        for (unsigned int i = 0; i < dim && parseOk; i++) {
+            n += (int)lround(strtod(ptr, &endptr));
+            if (*endptr != ',') {
+                parseOk = 0;
+            } else {
+                ptr = endptr + 1;
+            }
+        }
+        if (!parseOk) {
+            continue;
+        }
+
+        // Parse reference result (real scalar)
+        double ref = strtod(ptr, &endptr);
+
+        // Compute result
+        double num = crandall_gReg_harmonic(k, n, dim, nu, z, 1.0);
+
+        // Compute errors
+        double errorAbs = fabs(ref - num);
+        double errorRel = (fabs(ref) > 0.) ? fabs((ref - num) / ref) : errorAbs;
+        double errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+
+        errMin =
+            (isnan(errMin) || errorMaxAbsRel < errMin) ? errorMaxAbsRel : errMin;
+        errMax =
+            (isnan(errMax) || errorMaxAbsRel > errMax) ? errorMaxAbsRel : errMax;
+        errSum += errorMaxAbsRel;
+
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
+            printf("\n\n");
+            printf("Warning! ");
+            printf("crandall_gReg_harmonic: ");
+            printf(" %0*.16lf (this implementation) \n\t\t!= "
+                   "%.16lf (reference implementation)\n",
+                   4, num, ref);
+            printf("Min(Eabs, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
+                   tol);
+            printf("\n");
+            printf("dim:\t\t %u\n", dim);
+            printf("nu:\t\t %.16lf\n", nu);
+            printf("k:\t\t %d\n", k);
+            printf("n (|alpha|):\t %d\n", n);
+            printVectorUnitTest("z:\t\t", z, dim);
+            printf("\n");
+        }
+    }
+
+    if (fclose(data) != 0) {
+        return fprintf(stderr, "Error closing file: %d", errno);
+    }
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
+           tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
+
+    return totalTests - testsPassed;
+}
+
+/*!
  * @brief Main function to run all set crandall and related derivatives function
  * tests.
  *
@@ -1198,5 +1338,6 @@ int main(void) {
     failed += run_timed_test(test_crandall_gReg_der_d2k_prototype);
     failed += run_timed_test(test_crandall_g_der_taylor);
     failed += run_timed_test(test_crandall_gReg_der_taylor);
+    failed += run_timed_test(test_crandall_gReg_harmonic);
     return failed;
 }

@@ -74,7 +74,7 @@ AHex={{1,1/2},{0,Sqrt@3/2}};
 BMat[a_] = 1/Sqrt[a + 1]*DiagonalMatrix[{Sqrt[a], 1, 1}] . {{1, 1, 0}, {1, 0, 1}, {0, 1, 1}};
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Reference functions*)
 
 
@@ -90,23 +90,23 @@ SetZetaDerAnalytic[\[Nu]_,{{a_}},{x_},{y_},{n_?EvenQ}]:=(-4 Pi^2)^Floor[n/2] Set
 
 
 p[y_,\[Alpha]_,\[Beta]_]:=Apply[Times,(-\[Pi])^(\[Alpha]-\[Beta])Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2y)^(\[Alpha]-2\[Beta])]
-g[\[Nu]_,y_]=Piecewise[{
+GUpper[\[Nu]_,y_]=Piecewise[{
 	{-2/\[Nu],Norm[y]<10^(-64)}
 	,{ExpIntegralE[1-\[Nu]/2,Pi y . y],Norm[y]<4}
 	},0
 ];
-gLower[\[Nu]_,y_]=Piecewise[{
+GLower[\[Nu]_,y_]=Piecewise[{
 	{2/\[Nu],Norm[y]<10^(-64)}
 	,{Gamma[\[Nu]/2,0,Pi y . y]/(Pi y . y)^(\[Nu]/2),Norm[y]<4}
 	}
 ];
-gDer[\[Nu]_,y_,\[Alpha]_]:=Total[Flatten[Table[
+GUpperDer[\[Nu]_,y_,\[Alpha]_]:=Total[Flatten[Table[
 	Module[
 		{pol}
 		,pol=p[y,\[Alpha],\[Beta]]
 		;If[Abs[pol]<10^-60
 			,0
-			,pol g[\[Nu]+2Total[\[Alpha]-\[Beta]],y]
+			,pol GUpper[\[Nu]+2Total[\[Alpha]-\[Beta]],y]
 		]
 	]
 	,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}
@@ -117,8 +117,8 @@ gDer[\[Nu]_,y_,\[Alpha]_]:=Total[Flatten[Table[
 (*Derivatives of sums in real and reciprocal space.*)
 
 
-SumRealDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[Apply[Times,(-2Pi I z)^\[Alpha]]g[\[Nu],z]Exp[-2Pi I y . z],{z,(A . #-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}]
-SumFourierDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[gDer[Length[\[Alpha]]-\[Nu],k+y,\[Alpha]]Exp[-2Pi I x . k],{k,(Inverse[Transpose[A]] . #)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}]
+SumRealDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[Apply[Times,(-2Pi I z)^\[Alpha]]GUpper[\[Nu],z]Exp[-2Pi I y . z],{z,(A . #-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}]
+SumFourierDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[GUpperDer[Length[\[Alpha]]-\[Nu],k+y,\[Alpha]]Exp[-2Pi I x . k],{k,(Inverse[Transpose[A]] . #)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}]
 
 
 (* ::Text:: *)
@@ -178,12 +178,12 @@ hHarmonic[k_/;Element[k,NonNegativeIntegers]][x_List,\[Alpha]_List]:=Module[
 SumRealHarmonic[\[Nu]_,A_,x_,y_,\[Alpha]_,kIndex_,sumLim_]:=Total[Table[
 	Module[{h}
 		,h=hHarmonic[kIndex][z,\[Alpha]]
-		;If[PossibleZeroQ[h],0,h g[\[Nu],z]Exp[-2\[Pi] I y . z]]
+		;If[PossibleZeroQ[h],0,h GUpper[\[Nu],z]Exp[-2\[Pi] I y . z]]
 	]
 	,{z,(A . #-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}
 ]]
 SumFourierHarmonic[\[Nu]_,A_,x_,y_,\[Alpha]_,kIndex_,sumLim_]:=Total[Table[
-	hHarmonic[kIndex][y+k,\[Alpha]]g[Length[x]-\[Nu]+2Total[\[Alpha]]-4kIndex,k+y]Exp[-2\[Pi] I x . k]
+	hHarmonic[kIndex][y+k,\[Alpha]]GUpper[Length[x]-\[Nu]+2Total[\[Alpha]]-4kIndex,k+y]Exp[-2\[Pi] I x . k]
 	,{k,(Inverse[Transpose[A]] . #)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}
 ]]
 
@@ -218,7 +218,6 @@ setZetaDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modu
 							,0
 							,sumReal=-I^n hHarmonic[k][xN,\[Alpha]]
 							;resk=\[Pi]^(\[Nu]N/2)sumReal
-							;resk*=(-2Pi)^n
 							;resk
 						]
 						,sumReal=I^n SumRealHarmonic[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
@@ -245,7 +244,7 @@ SumRealHarmonicHighExp[\[Nu]_,A_,x_,y_,\[Alpha]_,kIndex_,sumLim_]:=Total[Table[
 		;If[
 			PossibleZeroQ[h]
 			,0
-			,h g[\[Nu],z] Exp[-2\[Pi] I y . z]
+			,h GUpper[\[Nu],z] Exp[-2\[Pi] I y . z]
 		]
 	]
 	,{z,(A . #-x)&/@Select[Tuples[Range[-sumLim,sumLim],Length[A]],Not[MemberQ[{0,1},Norm[#]]]&]}
@@ -254,7 +253,7 @@ SumRealHarmonicHighExp[\[Nu]_,A_,x_,y_,\[Alpha]_,kIndex_,sumLim_]:=Total[Table[
 		,h=hHarmonic[kIndex][z,\[Alpha]]
 		;If[PossibleZeroQ[h]
 			,0
-			,h (-gLower[\[Nu],z])Exp[-2\[Pi] I y . z]
+			,h (-GLower[\[Nu],z])Exp[-2\[Pi] I y . z]
 		]
 	]
 	,{z,(A . #-x)&/@Select[Tuples[Range[-sumLim,sumLim],Length[A]],MemberQ[{0,1},Norm[#]]&]}
@@ -335,7 +334,7 @@ setZetaDerHighExp[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modul
 ]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Create Epstein zeta 1D analytic reference values in x = 0*)
 
 
@@ -343,14 +342,14 @@ setZetaDerHighExp[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modul
 (*Setup test parameters.*)
 
 
-range = Range[100];
+range = Range[999];
 SeedRandom[2]; (* TODO: cancellation error, seed 2 and up to 40 ders *)
 Do[
 	\[Nu]1D[i]=10 randRational
-	;a1D[i]={{1/2+i/100}}
-	;x1D[i]=If[i<5,{0},{randRational}]
+	;a1D[i]=1+{{RandomInteger[{-2^10,2^8}]/2^10/2}}
+	;x1D[i]=If[i<5,{0},{1+randRational}]
 	;y1D[i]=If[i<10,{0},{randRational}]
-	;n1D[i]={RandomInteger[{0,40}]}
+	;n1D[i]={RandomInteger[{0,20}]}
 	,{i,range}
 ]
 
@@ -360,7 +359,7 @@ Do[
 
 
 zDerTab1D=ParallelTable[
-	With[{result=N[setZetaDer[\[Nu]1D[i],a1D[i],x1D[i],y1D[i],n1D[i],InputPrecision->100,SumLim->8]]}
+	With[{result=N[setZetaDer[\[Nu]1D[i],a1D[i],x1D[i],y1D[i],n1D[i],InputPrecision->200,SumLim->8]]}
 	,Flatten[{N[\[Nu]1D[i]]
 	,N[a1D[i]]
 	,N[x1D[i]]
@@ -380,7 +379,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_1D_ref.csv",zDerTab1D];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create set zeta 2D reference values*)
 
 

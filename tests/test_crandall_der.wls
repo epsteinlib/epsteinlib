@@ -31,7 +31,7 @@ Protect[Power];
 ];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Reference functions*)
 
 
@@ -97,31 +97,82 @@ sDer[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=(
 
 
 (* ::Text:: *)
+(*Crandall functions.*)
+
+
+GLower[\[Nu]_,z_]:=Piecewise[
+	{{2/\[Nu],Norm[z]<10^(-64)}}
+	,Gamma[\[Nu]/2,0,Pi z . z]/(Pi z . z)^(\[Nu]/2)
+]
+GUpper[\[Nu]_,z_]:=Piecewise[{
+	{-2/\[Nu],Norm[z]<10^(-64)}
+	,{ExpIntegralE[1-\[Nu]/2,Pi z . z],Norm[z]<4}
+}]
+GReg[\[Nu]_,z_]:=With[{\[Nu]Z=Round[\[Nu]]}
+	,Piecewise[{{
+			GUpper[\[Nu],z]-\[Pi]^(-(Length[z]-\[Nu])/2)Gamma[(Length[z]-\[Nu])/2]sDer[Round[-\[Nu]/2]
+			,z,ConstantArray[0,Length[z]]],(Norm[z]>10^(-64))&&PossibleZeroQ[\[Nu]-\[Nu]Z]&&Element[-\[Nu]Z/2,NonNegativeIntegers]
+		}}
+		,-GLower[\[Nu],z]
+	]
+]
+
+
+(* ::Text:: *)
 (*Derivatives of Crandall functions.*)
 
 
-G[\[Nu]_,z_]=Piecewise[{{-2/\[Nu],Norm[z]<10^(-64)},{ExpIntegralE[1-\[Nu]/2,Pi z . z],Norm[z]>=10^(-64)}}];
-p[y_,\[Alpha]_,\[Beta]_]:=Apply[Times,(-\[Pi])^(\[Alpha]-\[Beta])Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2y)^(\[Alpha]-2\[Beta])];
-GDer[\[Nu]_,y_,\[Alpha]_]:=Total[Flatten[Table[p[y,\[Alpha],\[Beta]]G[\[Nu]+2Total[\[Alpha]-\[Beta]],y],{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}]]]
-GReg[\[Nu]_,z_]=Piecewise[{
-	{-2/\[Nu],Norm[z]<10^(-64)&&Not[Element[-\[Nu]/2,NonNegativeIntegers]]}
-	,{-Gamma[\[Nu]/2,0,Pi z . z]/(Pi z . z)^(\[Nu]/2),Norm[z]>=10^(-64)&&Not[Element[-\[Nu]/2,NonNegativeIntegers]]}}
-];
+GDer[\[Nu]_,y_,\[Alpha]_]:=Piecewise[{
+	{GUpper[\[Nu],y],Total[\[Alpha]]==0}
+	,{Total[Flatten[Table[p[y,\[Alpha],\[Beta]]GUpper[\[Nu]+2Total[\[Alpha]-\[Beta]],y],{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}]]],Total[\[Alpha]]>0}
+}]
 GRegDer[\[Nu]_,z_,\[Alpha]_]:=Piecewise[{
 	{
+		GReg[\[Nu],z]
+		,Total[\[Alpha]]==0
+	}
+	,{
 		(-1)^(-\[Nu]/2)/Round[-\[Nu]/2]!(HarmonicNumber[Round[-\[Nu]/2]]-EulerGamma)YDer[Round[-\[Nu]/2],z,\[Alpha]]-Total[
 			Table[Piecewise[{{0,n==Round[-\[Nu]/2]},{(-1)^n YDer[n,z,\[Alpha]]/(n-Round[-\[Nu]/2])/n!,n!=Round[-\[Nu]/2]}}],{n,0,100}]
-		],(Norm[z]<=1/10)&&Element[-\[Nu]/2,NonNegativeIntegers]
+		],Norm[z]<=1/10&&Element[-\[Nu]/2,NonNegativeIntegers]&&Total[\[Alpha]]>0
 	},{
 		GDer[\[Nu],z,\[Alpha]]-\[Pi]^(-(Length[z]-\[Nu])/2)Gamma[(Length[z]-\[Nu])/2]sDer[Round[-\[Nu]/2],z,\[Alpha]]
-		,(Norm[z]>1/10)&&Element[-\[Nu]/2,NonNegativeIntegers]
+		,Norm[z]>1/10&&Element[-\[Nu]/2,NonNegativeIntegers]&&Total[\[Alpha]]>0
 	},{
 		Total[Flatten[Table[p[z,\[Alpha],\[Beta]]GReg[\[Nu]+2Total[\[Alpha]-\[Beta]],z],{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}]]]
-		,Not[Element[-\[Nu]/2,NonNegativeIntegers]]
+		,Not[Element[-\[Nu]/2,NonNegativeIntegers]]&&Total[\[Alpha]]>0
 	}
 }]
 GRegDerAnalytic[\[Nu]_,z_,\[Alpha]_]:=Derivative[0,\[Alpha]][GReg][\[Nu],z]
-GDerAnalytic[\[Nu]_,z_,\[Alpha]_]:=Derivative[0,\[Alpha]][G][\[Nu],z]
+GDerAnalytic[\[Nu]_,z_,\[Alpha]_]:=Derivative[0,\[Alpha]][GUpper][\[Nu],z]
+
+
+(* ::Text:: *)
+(*Regularized Crandall function.*)
+
+
+GRegHarmonic[\[Nu]_,z_,k_,\[Alpha]_]:=Module[
+	{ell,d,n,res}
+	,d=Length[z]
+	;ell=Max[0,Round[-\[Nu]/2]]
+	;n=Total[\[Alpha]]
+	;res=Which[
+		ell>=Max[k,n-k]&&PossibleZeroQ[\[Nu]+2ell]
+			,Which [
+				z . z<1/100
+					,(-\[Pi] z . z)^(ell+k-n)/(ell+k-n)!
+					(HarmonicNumber[ell]+PolyGamma[ell+d/2]-PolyGamma[ell+d/2-k]-EulerGamma)
+					-Total[Table[If[j==ell+k-n,0,(-\[Pi] z . z)^j/(j-(ell+k-n))/j!],{j,0,100}]]
+				,True
+					,GUpper[-2(k+ell-n),z]
+					+(-\[Pi] z . z)^(ell+k-n)/(ell+k-n)!
+					(Log[\[Pi] z . z]+HarmonicNumber[ell]-HarmonicNumber[ell+k-n]+PolyGamma[ell+Length[z]/2]-PolyGamma[ell+Length[z]/2-k])
+			]
+		,True
+			,-GLower[\[Nu]+2(n-k),z]
+	]
+	;res
+]
 
 
 (* ::Subsection::Closed:: *)
@@ -533,3 +584,72 @@ GRegKDerTab=ParallelTable[Flatten[Join[{\[Nu]0[i]},N[z0[i],16],\[Alpha]0[i],{N[S
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/crandall_gReg_der_d2k_prototype_ref.csv",GRegKDerTab];
+
+
+(* ::Subsection:: *)
+(*Create regularized Crandall harmonic prototype reference values*)
+
+
+(* ::Text:: *)
+(*Generate random reference data.*)
+
+
+randomGeneralData=Table[
+	Module[
+		{d,\[Nu],z,k,\[Alpha],res}
+		,d=RandomChoice[Range[4]]
+		;\[Nu]=RandomInteger[{-10^(16), 10^(16)}]/10^15
+		;z=RandomChoice[
+			{0.05,0.05,0.9}->{
+				ConstantArray[0,d]
+				,PadRight[{10^-14},d]
+				,RandomInteger[{-10^(16), 10^(16)},{d}]/10^15
+			}
+		]
+		;\[Alpha]=RandomInteger[{0,Floor[80/d]},{d}]
+		;k=RandomInteger[{0,Floor[Total[\[Alpha]]/2]}]
+		;res=SetPrecision[GRegHarmonic[\[Nu],z,k,\[Alpha]],200]
+		;Flatten[{d,N@\[Nu],N@z,k,\[Alpha],N@res}]
+	]
+	,{500}
+];
+
+
+(* ::Text:: *)
+(*Generate special reference data where nu an non-positive even integer.*)
+
+
+randomIntegerData=Table[
+	Module[
+		{d,\[Nu],z,k,\[Alpha],res}
+		,d=RandomChoice[Range[4]]
+		;\[Nu]=2 RandomInteger[{-6,0}]
+		;z=RandomChoice[
+			{0.05,0.05,0.9}->{
+				ConstantArray[0,d]
+				,PadRight[{10^-14},d]
+				,RandomInteger[{-10^(16), 10^(16)},{d}]/10^15
+			}
+		]
+		;\[Alpha]=RandomInteger[{0,Floor[80/d]},{d}]
+		;k=RandomInteger[{0,Floor[Total[\[Alpha]]/2]}]
+		;res=SetPrecision[GRegHarmonic[\[Nu],z,k,\[Alpha]],200]
+		;Flatten[{d,N@\[Nu],N@z,k,\[Alpha],N@res}]
+	]
+	,{i,499}
+];
+Export[NotebookDirectory[]<>"csv/crandall_gReg_harmonic_ref.csv",%];
+
+
+(* ::Text:: *)
+(*Combine tests data.*)
+
+
+testData=Join[randomGeneralData,randomIntegerData];
+
+
+(* ::Text:: *)
+(*Save reference values to file*)
+
+
+Export[NotebookDirectory[]<>"csv/crandall_gReg_harmonic_ref.csv",testData];

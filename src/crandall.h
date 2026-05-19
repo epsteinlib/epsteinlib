@@ -15,6 +15,32 @@
 
 #ifndef EPSTEIN_CRANDALL
 #define EPSTEIN_CRANDALL
+
+/**
+ * @brief calculates bounds on when to use asymptotic expansion of the
+ * upper incomplete gamma function, depending on the value of nu.
+ * @param[in] nu: exponent of the regularized Epstein zeta function.
+ * @return minimum value of z, when to use the fast asymptotic expansion in the
+ * calculation of the incomplete upper gamma function upperGamma(nu, z).
+ */
+double assignzArgBound(double nu);
+
+/**
+ * @brief Calculates the upper Crandall function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] nu: exponent of the regularized Epstein zeta function.
+ * @param[in] z: input vector of the function.
+ * @param[in] prefactor: prefactor of the vector, e. g. lambda or 1/lambda in
+ *      Crandall's formula
+ * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
+ * expansion in the calculation of the Crandall function.
+ * @return upperGamma(nu / 2,pi prefactor * z**2) / (pi * prefactor z**2)^(nu / 2) if
+ |z| > 0 and - 2 / nu otherwise.
+
+ */
+double complex crandall_g(unsigned int dim, double nu, const double *z,
+                          double prefactor, double zArgBound);
+
 /**
  * @brief Calculates the regularization of the zero summand in the second
  * sum in Crandall's formula in the special case of
@@ -47,29 +73,22 @@ double complex crandall_gReg(unsigned int dim, double nu, const double *z,
                              double prefactor);
 
 /**
- * @brief calculates bounds on when to use asymptotic expansion of the
- * upper incomplete gamma function, depending on the value of nu.
- * @param[in] nu: exponent of the regularized Epstein zeta function.
- * @return minimum value of z, when to use the fast asymptotic expansion in the
- * calculation of the incomplete upper gamma function upperGamma(nu, z).
- */
-double assignzArgBound(double nu);
-
-/**
- * @brief Calculates the upper Crandall function.
+ * @brief Calculates the regularization of the zero summand in the second
+ * sum in Crandall's formula for the harmonic method.
+ * @param[in] k: specifies degree |alpha| - 2k.
+ * @param[in] n: |alpha|.
+ * @param[in] s: dimension minus exponent of the regularized Epstein zeta function,
+ * that is d - nu.
  * @param[in] dim: dimension of the input vectors.
- * @param[in] nu: exponent of the regularized Epstein zeta function.
  * @param[in] z: input vector of the function.
- * @param[in] prefactor: prefactor of the vector, e. g. lambda or 1/lambda in
- *      Crandall's formula
- * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
- * expansion in the calculation of the Crandall function.
- * @return upperGamma(nu / 2,pi prefactor * z**2) / (pi * prefactor z**2)^(nu / 2) if
- |z| > 0 and - 2 / nu otherwise.
-
+ * @param[in] prefactor: prefactor of the vector, e. g. lambda.
+ * @return - gamma(s/2) * gammaStar(s/2, pi * prefactor * z**2),
+ * where gammaStar is the twice regularized lower incomplete gamma function if s is
+ * and the special definition if s is  equal to - 2k for non negative natural number
+ * k <= l.
  */
-double complex crandall_g(unsigned int dim, double nu, const double *z,
-                          double prefactor, double zArgBound);
+double crandall_gReg_harmonic(int k, int n, unsigned int dim, double s,
+                              const double *z, double prefactor);
 
 /**
  * @brief Calculates the lower Crandall function.
