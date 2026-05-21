@@ -252,8 +252,11 @@ double complex log_l_der(unsigned int dim, const double *z,
  * @parma[in] alphaAbs: absolute value of the multi-index alpha.
  * @return partial derivative of s_{d+2k}(z).
  */
-double singularity_s_der(unsigned int k, unsigned int dim, const double *z,
+double singularity_s_der(double nu, unsigned int dim, const double *z,
                          const unsigned int *alpha, unsigned int alphaAbs) {
+
+    // only works in this case
+    unsigned int k = (unsigned int)fmax(0., nearbyint((nu - (double)dim) / 2));
 
     double res;
 
@@ -392,7 +395,7 @@ double crandall_gReg_nuequalsdimplus2k_der(double s, unsigned int k,
         // Evaluate difference of
         res = crandall_g_der(dim, s, z, lambda, zArgBound, alpha, alphaAbs) -
               pow(M_PI, -((double)dim - s) / 2.) * tgamma(((double)dim - s) / 2.) *
-                  singularity_s_der(k, dim, z, alpha, alphaAbs);
+                  singularity_s_der(dim + (2 * k), dim, z, alpha, alphaAbs);
     }
 
     return res;

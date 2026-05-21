@@ -91,7 +91,7 @@ double complex log_l_der(unsigned int dim, const double *z,
  * @parma[in] alphaAbs: absolute value of the multi-index alpha.
  * @return partial derivative of s_{d+2k}(z).
  */
-double singularity_s_der(unsigned int k, unsigned int dim, const double *z,
+double singularity_s_der(double nu, unsigned int dim, const double *z,
                          const unsigned int *alpha, unsigned int alphaAbs);
 
 /**

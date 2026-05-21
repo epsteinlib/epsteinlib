@@ -780,7 +780,8 @@ int test_singularity_s_der(void) {
 
         k = kRef[0];
 
-        num = (double complex)singularity_s_der(k, dim, z, alpha, alphaAbs);
+        num = (double complex)singularity_s_der((double)dim + (2 * (double)k), dim,
+                                                z, alpha, alphaAbs);
         ref = refRead[0] + 0 * I;
 
         errorAbs = errAbs(ref, num);

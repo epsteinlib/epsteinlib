@@ -9,6 +9,10 @@
 (*Unit tests for epsteinZeta . c*)
 
 
+(* ::Text:: *)
+(*This file introduces reference functions beyond the methods employed in EpsteinLib. In particular, there are multiple strategies for computing the derivatives of helper functions such as the Crandall functions. Here, we favor simple, but unstable representations for the derivatives, that we compare for high precision with the involved harmonic methods in EpsteinLib.*)
+
+
 (* ::Subsection::Closed:: *)
 (*Setup*)
 
@@ -94,6 +98,43 @@ sDer[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=(
 			,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]]]}
 	]
 )
+
+
+(* ::Text:: *)
+(*This is the harmonic method for the singularity derivatives as employed in EpsteinLib.*)
+
+
+sing[\[Nu]_,y_]:=Module[
+	{ell,d}
+	,d=Length[y]
+	;ell=Max[0,Round[(\[Nu]-d)/2]]
+	;Which[
+		PossibleZeroQ[\[Nu]-(d+2 ell)]
+			,\[Pi]^(ell+d/2)/Gamma[ell+d/2](-1)^(ell+1)/ell!(\[Pi] y . y)^ell Log[Pi y . y]
+		,True
+			,\[Pi]^(\[Nu]/2)/Gamma[\[Nu]/2]Gamma[(d-\[Nu])/2](\[Pi] y . y)^((\[Nu]-d)/2)
+	]
+]
+sDerHarmonic[\[Nu]_,y_,\[Alpha]_]:=Module[
+	{n,k,d}
+	,d=Length[\[Alpha]]
+	;n=Total[\[Alpha]]
+	;If[PossibleZeroQ[Norm[y]],Return[0]]
+	;Sum[
+		Module[
+			{ell,m,c,q,res}
+			,m=n-2k
+			;ell=Max[m+k,Round[(\[Nu]-d)/2]]
+			;If[
+				PossibleZeroQ[\[Nu]-(d+2ell)]
+				,c=1+(HarmonicNumber[ell]-HarmonicNumber[ell+k-(m+2k)]+PolyGamma[ell+d/2]-PolyGamma[ell+d/2-k])/Log[Pi y . y]
+				,c=1
+			]
+			;c 2^k (-2 \[Pi]^2)^(m+k)/FactorialPower[\[Nu]/2-k-1,m]h[k][y,\[Alpha]]sing[\[Nu]-2(m+k),y]
+		]
+		,{k,0,n/2}
+	]
+]
 
 
 (* ::Text:: *)
@@ -494,7 +535,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/log_l_der_ref.csv",LDerTab];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Create singularity derivatives reference values*)
 
 
@@ -586,7 +627,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/crandall_gReg_der_d2k_prototype_ref.csv",GRegKDerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create regularized Crandall harmonic prototype reference values*)
 
 
