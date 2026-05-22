@@ -15,7 +15,7 @@
 #include "../src/tools.h"
 #include <complex.h>
 #include <math.h>
-#include <stdbool.h>
+#include <stdlib.h>
 
 /** @brief Computes a single summand of h_inner; explicitly
  * (−1/2)^{i} / cn,i,k binom(i+k,k) binom(i,β) binom(α,θ1) θ2! / (θ2 - θ1)!,
@@ -243,94 +243,144 @@ double complex log_l_der(unsigned int dim, const double *z,
     return sum;
 }
 
-/** @brief Calculates the singularity s_{d+2k}(z) = pi**(k + d / 2) / gamma(k + d /
- * 2) * (-1)**(k+1) / k! * (pi * z**2)**k * log(pi * z**2)
- * @param[in] k: non-negative integer so that d + 2k is the argument of s.
+/**
+ * @brief Computes the singularity s_ν(z).
+ * For the generic case (ν ≠ d + 2ℓ for any non-negative integer ℓ):
+ * s_ν(z) = π^(ν/2) / Γ(ν/2) · Γ((d−ν)/2) · (π z·z)^((ν−d)/2)
+ * and for the logarithmic case (ν = d + 2ℓ, ℓ ≥ 0):
+ * s_{d+2ℓ}(z) = π^(ℓ+d/2) / Γ(ℓ+d/2) · (−1)^(ℓ+1) / ℓ! · (π z·z)^ℓ · log(π z·z)
+ * @param[in] nu: epxonent of singularity.
+ * @param[in] dim: dimension of z.
+ * @param[in] zSquared: |z|^2 for vector z of the singularity.
+ * @return s_ν(z).
+ */
+static double singularity_s(double nu, unsigned int dim, double zSquared) {
+
+    double zArg = M_PI * zSquared;
+    int ell = (int)nearbyint((nu - (double)dim) / 2.);
+
+    if (ell >= 0 && nu == (double)(dim + (2 * ell))) {
+        double fact = 1;
+        for (int i = 2; i <= ell; i++) {
+            fact *= (double)i;
+        }
+
+        return pow(M_PI, nu / 2) / tgamma(nu / 2) * negative_one_pow(ell + 1) /
+               fact * real_int_pow(zArg, ell) * log(zArg);
+    }
+
+    return pow(M_PI, nu / 2) / tgamma(nu / 2) * tgamma(((double)dim - nu) / 2.) *
+           pow(zArg, (nu - (double)dim) / 2);
+}
+
+/** @brief Computes the derivatives singularity s_ν(z) where the coefficients for the
+ * harmonic polynomials are provided as arguments. For the generic case (ν ≠ d + 2ℓ
+ * for any non-negative integer ℓ): s_ν(z) = π^(ν/2) / Γ(ν/2) · Γ((d−ν)/2) · (π
+ * z·z)^((ν−d)/2) and for the logarithmic case (ν = d + 2ℓ, ℓ ≥ 0): s_{d+2ℓ}(z) =
+ * π^(ℓ+d/2) / Γ(ℓ+d/2) · (−1)^(ℓ+1) / ℓ! · (π z·z)^ℓ · log(π z·z)
+ * @param[in] nu: epxonent of singularity.
  * @param[in] dim: dimension of z.
  * @param[in] z: vector of the singularity.
- * @parma[in] alpha: multi-index for the derivative.
  * @parma[in] alphaAbs: absolute value of the multi-index alpha.
- * @return partial derivative of s_{d+2k}(z).
+ * @param[in] chunk_offset: starting offsets for each k.
+ * @param[in] valid_count: number of valid gamma entries for each k.
+ * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
+ * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
+ * @return partial derivative of s_nu(z).
+ */
+static double singularity_s_der_harmonic(double nu, unsigned int dim,
+                                         const double *z, unsigned int alphaAbs,
+                                         const unsigned long long *chunk_offset,
+                                         const unsigned long long *valid_count,
+                                         const double *coeffs,
+                                         const unsigned int *exponents) {
+
+    double res = 0;
+    double zSquared = dot(dim, z, z);
+
+    if (zSquared == 0) {
+        return 0;
+    }
+
+    // Compute set zeta derivatives by harmonic method
+    for (int k = 0; k <= alphaAbs / 2; k++) {
+
+        double h = harmonic_h(k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
+                              exponents);
+
+        int ell = (int)nearbyint((nu - (double)dim) / 2.);
+        if (h) {
+
+            int m = (int)alphaAbs - (2 * k);
+
+            if (ell >= m + k && nu == (double)(dim + (2 * ell))) {
+                double poch = 1;
+                for (int i = 1; i <= m; i++) {
+                    poch *= nu / 2 - k - i;
+                }
+                // difference of digamma functions ψ(ℓ+d/2)−ψ(ℓ+d/2−k)
+                double digamma = 0;
+                for (int i = 1; i <= k; i++) {
+                    digamma += 1. / ((double)(ell - i) + ((double)dim) / 2.);
+                }
+
+                // difference of harmonic numbers Hₗ−Hₗ₊ₖ₋ₙ for n = alphaAbs
+                double harmonic = 0;
+                for (int i = 1; i <= (int)alphaAbs - k; i++) {
+                    harmonic += 1. / ((double)(ell + k - (int)alphaAbs) + (double)i);
+                }
+
+                res += h * ldexp(1., k) * real_int_pow(-2 * M_PI * M_PI, m + k) /
+                       poch *
+                       singularity_s(nu - (2 * (double)(m + k)), dim, zSquared) *
+                       (1 + (harmonic + digamma) / log(M_PI * zSquared));
+
+                // skip zeros 1/gamma(s) of the reciprocal gamma function, where s =
+                // nu/2 -k is an even, non-positive integer
+            } else if (!((nu / 2.) - (double)k <= 0. &&
+                         nearbyint((nu / 2.) - (double)k) ==
+                             (nu / 2.) - (double)k)) {
+
+                res += h * tgamma((((double)dim - nu) / 2.) + k + m) /
+                       tgamma((nu / 2.) - (double)k) * negative_one_pow(k + m) *
+                       ldexp(1., (2 * k) + m) * pow(M_PI, nu - ((double)dim / 2)) *
+                       pow(dot(dim, z, z), ((nu - (double)dim) / 2.) - k - m);
+            }
+        }
+    }
+
+    return res;
+}
+
+/** @brief Computes the derivatives singularity s_ν(z).
+ * For the generic case (ν ≠ d + 2ℓ for any
+ * non-negative integer ℓ): s_ν(z) = π^(ν/2) / Γ(ν/2) · Γ((d−ν)/2) · (π
+ * z·z)^((ν−d)/2) and for the logarithmic case (ν = d + 2ℓ, ℓ ≥ 0): s_{d+2ℓ}(z) =
+ * π^(ℓ+d/2) / Γ(ℓ+d/2) · (−1)^(ℓ+1) / ℓ! · (π z·z)^ℓ · log(π z·z)
+ * @param[in] nu: epxonent of singularity.
+ * @param[in] dim: dimension of z.
+ * @param[in] z: vector of the singularity.
+ * @parma[in] alphaAbs: absolute value of the multi-index alpha.
+ * @return partial derivative of s_ν(z).
  */
 double singularity_s_der(double nu, unsigned int dim, const double *z,
                          const unsigned int *alpha, unsigned int alphaAbs) {
 
-    // only works in this case
-    unsigned int k = (unsigned int)fmax(0., nearbyint((nu - (double)dim) / 2));
+    // Precompute coefficients for harmonic polynomials
+    unsigned int kMax = alphaAbs / 2;
+    unsigned long long *chunk_offset =
+        malloc((kMax + 1) * sizeof(unsigned long long));
+    unsigned long long *valid_count =
+        malloc((kMax + 1) * sizeof(unsigned long long));
+    unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
+        alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
+    double *coeffs = malloc(coeffs_size * sizeof(double));
+    unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
+    precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
+                                    exponents);
 
-    double res;
-
-    unsigned long long kFact = 1;
-    for (int j = 1; j < k + 1; j++) {
-        kFact *= j;
-    }
-
-    double prefactor = pow(M_PI, (double)k + ((double)dim / 2.)) /
-                       tgamma((double)k + ((double)dim / 2.)) *
-                       ((k % 2) ? 1. : -1.) / (double)kFact;
-
-    unsigned int beta[dim];
-    unsigned int gamma[dim]; // gamma = alpha - beta
-    for (int i = 0; i < dim; i++) {
-        beta[i] = 0;
-        gamma[i] = alpha[i];
-    }
-
-    // Return function if there is no derivative
-    if (!alphaAbs) {
-        double zArg = M_PI * dot(dim, z, z);
-        res = prefactor * real_int_pow(zArg, k) * log(zArg);
-        return res;
-    }
-
-    unsigned int betaAbs = 0;
-    unsigned int gammaAbs = alphaAbs;
-
-    double sum = 0.0;
-    double epsilon = 0.0;
-
-    unsigned int multBinom;
-
-    bool done = false;
-    // Iterate over every multi-index beta so that beta + gamma = alpha
-    while (1) {
-
-        if (betaAbs / 2 < k + dim) {
-            multBinom = 1;
-            for (int i = 0; i < dim; i++) {
-                multBinom *= binom((long long)alpha[i], (long long)beta[i]);
-            }
-            double summand = (double)multBinom *
-                             polynomial_y_der(k, dim, z, beta, betaAbs, 1) *
-                             log_l_der(dim, z, gamma, gammaAbs);
-            kahan_add_r(&sum, &epsilon, summand);
-        }
-
-        done = true;
-        for (unsigned int idx = 0; idx < dim; idx++) {
-            if (beta[idx] < alpha[idx]) {
-                betaAbs++;
-                gammaAbs--;
-                beta[idx]++;
-                gamma[idx]--;
-                done = false;
-                break;
-            }
-            betaAbs -= beta[idx];
-            gammaAbs += beta[idx];
-            gamma[idx] += beta[idx];
-            beta[idx] = 0;
-            done = true;
-        }
-
-        if (done) {
-            break;
-        }
-    }
-
-    res = prefactor * sum;
-
-    return res;
+    return singularity_s_der_harmonic(nu, dim, z, alphaAbs, chunk_offset,
+                                      valid_count, coeffs, exponents);
 }
 
 /**
@@ -342,7 +392,8 @@ double singularity_s_der(double nu, unsigned int dim, const double *z,
  * @param[in] dim: dimension of the input vectors.
  * @param[in] z: input vector of the function.
  * @param[in] lambda: scaling parameter of crandalls formula.
- * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
+ * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast
+ * asymptotic
  * @return partial derivative of the regularized Crandall function. */
 double crandall_gReg_nuequalsdimplus2k_der(double s, unsigned int k,
                                            unsigned int dim, const double *z,
@@ -402,21 +453,24 @@ double crandall_gReg_nuequalsdimplus2k_der(double s, unsigned int k,
 }
 
 /**
- * @brief Calculates the derivatives of the regularization of the zero summand in the
- * second sum in Crandall's formula.
+ * @brief Calculates the derivatives of the regularization of the zero summand in
+ * the second sum in Crandall's formula.
  * @param[in] dim: dimension of the input vectors.
- * @param[in] s: dimension minus exponent of the regularized Epstein zeta function,
- * that is d - nu.
+ * @param[in] s: dimension minus exponent of the regularized Epstein zeta
+ * function, that is d - nu.
  * @param[in] z: input vector of the function.
  * @param[in] prefactor: prefactor of the vector, e. g. lambda.
  * @param[in] alpha: multi-index of the partial derivatives
  * @param[in] alphaAbs: sum of the elements of alpha
- * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
+ * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast
+ * asymptotic
  * @return partial derivatives of - gamma(s/2) * gammaStar(s/2, pi * prefactor *
- * z**2), where gammaStar is the twice regularized lower incomplete gamma function if
- * s is not equal to - 2k and partial derivatives of (pi * prefactor * y ** 2) ** (-
- * s / 2) (gamma(s / 2, pi * prefactor * z ** 2) + ((-1)^k / k! ) * (log(pi * y ** 2)
- * - log(prefactor ** 2))) if s is  equal to - 2k for non negative natural number k.
+ * z**2), where gammaStar is the twice regularized lower incomplete gamma
+ * function if s is not equal to - 2k and partial derivatives of (pi * prefactor
+ * * y ** 2) ** (- s / 2) (gamma(s / 2, pi * prefactor * z ** 2) + ((-1)^k / k! )
+ * * (log(pi * y ** 2)
+ * - log(prefactor ** 2))) if s is  equal to - 2k for non negative natural number
+ * k.
  */
 double complex crandall_gReg_der(unsigned int dim, double s, const double *z,
                                  double prefactor, const unsigned int *alpha,

@@ -110,6 +110,10 @@ YDerGeneral[\[Nu]_,z_,\[Alpha]_]:=\[Pi]^\[Nu] Total[Flatten[Table[
 ]]]
 
 
+(* ::Text:: *)
+(*Derivatives of singularity for real arguments \[Nu].*)
+
+
 sing[\[Nu]_,y_]:=Module[
 	{ell,d}
 	,d=Length[y]
@@ -127,7 +131,7 @@ sDerFull[\[Nu]_,z_,\[Alpha]_]:=Module[
 	;ell=Max[0,Round[(\[Nu]-d)/2]]
 	;Which[
 		PossibleZeroQ[\[Nu]-(d+2 ell)]
-			,Print["here"];sDer[ell,z,\[Alpha]]
+			,sDer[ell,z,\[Alpha]]
 		,True
 			,\[Pi]^(\[Nu]/2)Gamma[(d-\[Nu])/2]/Gamma[\[Nu]/2]YDerGeneral[(\[Nu]-d)/2,z,\[Alpha]]
 	]
@@ -571,7 +575,7 @@ range = Range[100];
 Do[
 	k0[i]=RandomInteger[{0,10}];
 	z0[i]={randRational,randRational,randRational};
-	\[Alpha]0[i]=If[i<10,{0,0,i-1},{RandomInteger[{0,4}],RandomInteger[{0,4}],RandomInteger[{0,4}]}];
+	\[Alpha]0[i]=If[i<10,{0,0,i-1},{RandomInteger[{0,10}],RandomInteger[{0,10}],RandomInteger[{0,10}]}];
 	,{i,range}
 ]
 
@@ -580,7 +584,7 @@ Do[
 (*Generate reference values.*)
 
 
-sDerTab=ParallelTable[Flatten[{N[3+2*k0[i]],N[z0[i]],\[Alpha]0[i],N[SetPrecision[Derivative[\[Alpha]0[i]][sing[3+2 *k0[i], #]&][z0[i]],200],30]}],{i,range}];
+sDerTab=ParallelTable[Flatten[{N[3+2*k0[i]],N[z0[i]],\[Alpha]0[i],N[SetPrecision[sDerFull[3+2 *k0[i], z0[i],\[Alpha]0[i]],200]]}],{i,range}];
 
 
 (* ::Text:: *)
