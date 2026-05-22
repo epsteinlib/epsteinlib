@@ -6,164 +6,347 @@ SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
 SPDX-License-Identifier: AGPL-3.0-only
 -->
 
-<testsuites tests="10" errors="0" failures="0"><testsuite name="epsteinlib" tests="10" errors="0" failures="0" skipped="0" time="0.04000711441040039"><testcase name="test_crandall" classname="epsteinlib" time="0.04000711441040039"><system-out>test_crandall_g 
-	 ... processing csv/crandall_g_ref.csv 
-	 ... 200 out of 200 tests passed with tolerance 1.000000E-13.	    [ Error →  min: 0.000000E+00 | max: 1.128955E-14 | avg: 1.307951E-16 ]
-									    [ Time  →  sec: 0.000446     ]</system-out></testcase><testcase name="test_tools" classname="epsteinlib" time="0.02187943458557129"><system-out>test_matrix_transpose_inverse 
-	 ... processing csv/svd_ref.csv 
-	 ... 999 out of 999 tests passed with tolerance 5.000000E-14.	    [ Error →  min: 0.000000E+00 | max: 5.551115E-16 | avg: 6.209775E-17 ]
-									    [ Time  →  sec: 0.002405     ]</system-out></testcase><testcase name="Minimal working example" classname="epsteinlib" time="0.012801885604858398"><system-out>Madelung sum in 3 dimensions:	 -1.7475645946331821
-Reference value:		 -1.7475645946331821
-Relative error:			 +0.00e+00</system-out></testcase><testcase name="test_hpdyad" classname="epsteinlib" time="0.02350139617919922"><system-out>test_ctzmsb 
-	 ... processing csv/ctzmsb_ref.csv 
-	 ... 999 out of 999 tests passed.
-test_hpdyad_set_ull 
-	 ... processing csv/hpdyad_set_ull_ref.csv 
-	 ... 999 out of 999 tests passed.
-test_hpdyad_normalize 
-	 ... processing csv/hpdyad_normalize_ref.csv 
-	 ... 999 out of 999 tests passed.
-test_hpdyad_mul 
-	 ... processing csv/hpdyad_mul_ref.csv 
-	 ... 999 out of 999 tests passed.
-test_hpdyad_shr_bits_sticky 
-	 ... processing csv/hpdyad_shr_sticky_ref.csv 
-	 ... 999 out of 999 tests passed.
-test_hpdyad_add
-	 ... processing hpdyad_add_ref.csv 
-	 ... 999 out of 999 tests passed.
-test_hpdyad_add_fractional
-	 ... processing hpdyad_add_fractional_ref.csv 
-	 ... 999 out of 999 tests passed.
-test_hpdyad_to_double 
-	 ... processing csv/hpdyad_to_double_ref.csv 
-	 ... 999 out of 999 tests passed.</system-out></testcase><testcase name="test_epsteinZeta" classname="epsteinlib" time="0.11637234687805176"><system-out>test_epsteinZeta 
-	 ... processing csv/epsteinZeta_ref.csv 
-	 ... 300 out of 300 tests passed with tolerance 6.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.822089E-15 | avg: 2.766178E-16 ]
-									    [ Time  →  sec: 0.007008     ]
-test_epsteinZetaReg 
-	 ... processing file: csv/epsteinZetaReg_ref.csv 
-	 ... 200 out of 200 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.133043E-15 | avg: 1.747445E-16 ]
-									    [ Time  →  sec: 0.003294     ]
-test_epsteinZeta_random_matrices 
-	 ... processing csv/epsteinZeta_random_matrices_ref.csv 
-	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 2.168404E-18 | max: 1.613647E-15 | avg: 2.249099E-16 ]
-									    [ Time  →  sec: 0.038523     ]
-test_epsteinZetaReg_random_matrices 
-	 ... processing csv/epsteinZetaReg_random_matrices_ref.csv 
-	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 9.697399E-19 | max: 1.180183E-15 | avg: 1.530408E-16 ]
-									    [ Time  →  sec: 0.031467     ]
-test_epsteinZeta_epsteinZetaReg_represent_as_each_other 
-	 ... 200 out of 200 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 9.424515E-16 | avg: 1.707986E-16 ]
-									    [ Time  →  sec: 0.007121     ]
-test_epsteinZeta_cutoff 
-	 ... 100 out of 100 tests passed with tolerance 1.000000E-15.
-									    [ Time  →  sec: 0.022077     ]</system-out></testcase><testcase name="test_crandall_derivatives" classname="epsteinlib" time="0.1565704345703125"><system-out>test_polynomial_p 
+<testsuites tests="1" errors="0" failures="1"><testsuite name="epsteinlib" tests="1" errors="0" failures="1" skipped="0" time="0.10460448265075684"><testcase name="test_crandall_derivatives" classname="epsteinlib" time="0.10460448265075684"><failure /><system-out>test_polynomial_p 
 	 ... processing csv/polynomial_p_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 7.486101E-16 | avg: 2.143548E-16 ]
-									    [ Time  →  sec: 0.000402     ]
+									    [ Time  →  sec: 0.000212     ]
 test_polynomial_l 
 	 ... processing csv/polynomial_l_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 8.548077E-16 | avg: 1.494514E-16 ]
-									    [ Time  →  sec: 0.000332     ]
+									    [ Time  →  sec: 0.000169     ]
 test_polynomial_y_der 
 	 ... processing csv/polynomial_y_der_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.081439E-15 | avg: 1.747025E-16 ]
-									    [ Time  →  sec: 0.000431     ]
+									    [ Time  →  sec: 0.000225     ]
 test_log_l_der 
 	 ... processing csv/log_l_der_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-12.	    [ Error →  min: 0.000000E+00 | max: 1.531882E-12 | avg: 3.771422E-14 ]
-									    [ Time  →  sec: 0.000535     ]
+									    [ Time  →  sec: 0.000258     ]
 test_singularity_s_der 
-	 ... processing csv/singularity_s_der_ref.csv 
-	 ... 100 out of 100 tests passed with tolerance 5.000000E-11.	    [ Error →  min: 0.000000E+00 | max: 1.632727E-11 | avg: 4.399605E-13 ]
-									    [ Time  →  sec: 0.007217     ]
+	 ... processing csv/singularity_s_der_ref.csv Error reading line: "7. + x",0.2366173856546279,-0.9479499512789312,-0.5718188837251877,0,0,0,-186.68089574970672565051379064
+
+Scanned 0 values instead of 8
+Error reading line: "13. + x",-0.0728684522823857,0.4590585599797216,-0.636952343738519,0,0,1,-12.4933574581329615002605863407
+
+Scanned 0 values instead of 8
+Error reading line: "3. + x",-0.7481848941199459,0.9515708887545477,-0.3536368685708896,0,0,2,-6.65900813350369240127584757313
+
+Scanned 0 values instead of 8
+Error reading line: "3. + x",0.6188347594476568,0.2018118766318859,0.1428361376757346,0,0,3,51.2638281251434593179874267245
+
+Scanned 0 values instead of 8
+Error reading line: "19. + x",-0.3426141591372658,-0.429342497799458,0.1828758685432893,0,0,4,-0.174433588903351885475386141105
+
+Scanned 0 values instead of 8
+Error reading line: "15. + x",-0.5794475403944567,-0.5059674500674027,0.464485932825414,0,0,5,-51522.7938113515479332505666463
+
+Scanned 0 values instead of 8
+Error reading line: "9. + x",0.0521556306090369,0.2594406921000049,-0.7140451795948576,0,0,6,294993.316184260766084588389039
+
+Scanned 0 values instead of 8
+Error reading line: "21. + x",-0.2469575708275882,-0.0022493291189569,0.3367558252305988,0,0,7,14.8083690616251699726949014662
+
+Scanned 0 values instead of 8
+Error reading line: "7. + x",-0.981992637477364,0.8404208452947696,-0.6251200601422939,0,0,8,-40866.8472292499639586758942083
+
+Scanned 0 values instead of 8
+Error reading line: "19. + x",0.1470866303824607,-0.3006658405549345,0.7964001903693237,4,0,3,-49375.8516236876627918047442539
+
+Scanned 0 values instead of 8
+Error reading line: "13. + x",0.8812232929289753,0.6741595184938618,0.4194506353771012,1,2,0,18775.9424468109007688547348407
+
+Scanned 0 values instead of 8
+Error reading line: "7. + x",0.540136886475604,0.0556224918238013,0.8594317626656137,4,3,3,97456.2877161773508011683101439
+
+Scanned 0 values instead of 8
+Error reading line: "9. + x",-0.7292324607775061,0.2211160823030423,-0.3898194677476487,2,0,2,9774.39371979482538978095082054
+
+Scanned 0 values instead of 8
+Error reading line: "3. + x",-0.3609325436668869,0.7838960458926608,0.1461069036164867,1,2,3,1355.98832325439950820873932113
+
+Scanned 0 values instead of 8
+Error reading line: "11. + x",-0.319182786210285,0.2536481450498512,0.8739313991606591,1,4,3,41033.9183689080891729118329847
+
+Scanned 0 values instead of 8
+Error reading line: "9. + x",0.9694861119784852,-0.19324792187619,-0.7744358965900796,1,2,4,-1271.36820319867658770345860983
+
+Scanned 0 values instead of 8
+Error reading line: "3. + x",0.8114782713335806,0.2669280096703697,0.4153903661433969,2,2,3,-875.485137636243400664674723957
+
+Scanned 0 values instead of 8
+Error reading line: "13. + x",0.8606107399350762,0.8850080826234711,0.1479321627044883,2,3,0,564808.737652087301343187364018
+
+Scanned 0 values instead of 8
+Error reading line: "21. + x",0.7142743818535627,-0.8210609704840266,0.4693923374930296,0,1,4,-10739.5122852444649130198353406
+
+Scanned 0 values instead of 8
+Error reading line: "3. + x",0.3234012964541447,0.3938814992124084,0.1988770521080899,1,3,4,-2.57611672171794957197555448722e6
+
+Scanned 0 values instead of 8
+Error reading line: "5. + x",0.5440271629205174,0.4993146455110723,-0.8959116802322727,4,2,3,-26181.498760912256658957084805
+
+Scanned 0 values instead of 8
+Error reading line: "9. + x",-0.6649241025316533,0.4562449572760326,-0.8465533647888103,3,1,3,-5864.43079538309475466720771028
+
+Scanned 0 values instead of 8
+Error reading line: "9. + x",0.7735055369621145,0.0083093993367595,0.5282766563701754,0,0,3,6274.84697967409237662862266364
+
+Scanned 0 values instead of 8
+Error reading line: "21. + x",-0.9141611928385882,0.6919865128675335,-0.945120020012536,0,3,4,1.1188767295785260744673603656e7
+
+Scanned 0 values instead of 8
+Error reading line: "19. + x",0.9421478792922486,0.499126651261503,-0.5076729590456626,0,4,0,-6509.60009563220943192489773852
+
+Scanned 0 values instead of 8
+Error reading line: "13. + x",0.1070150492646967,0.1439023034103209,-0.0409076223180615,1,0,4,-4.89175393024300282541609967007
+
+Scanned 0 values instead of 8
+Error reading line: "5. + x",0.0855553882866071,0.7677648191042937,-0.6435319902479082,0,0,3,-229.559223146667700351634999557
+
+Scanned 0 values instead of 8
+Error reading line: "13. + x",0.6163104895592105,-0.2130459519927022,0.7866652543271933,2,3,1,-77872.7378065790514850107115186
+
+Scanned 0 values instead of 8
+Error reading line: "11. + x",-0.593482974051902,0.5273580046733318,-0.8215834398618251,4,3,1,18976.816510630117904645891414
+
+Scanned 0 values instead of 8
+Error reading line: "23. + x",-0.6983505728741677,-0.3123282250746354,0.7121270543133142,4,1,1,3971.86819557954998073335354044
+
+Scanned 0 values instead of 8
+Error reading line: "15. + x",-0.1320055027238164,-0.1537285184389053,0.2884616381867546,4,3,2,67524.1498141695034400552052833
+
+Scanned 0 values instead of 8
+Error reading line: "19. + x",0.9564203414233095,0.286656808008226,-0.7672765421713895,3,0,3,1.37579294752826969020036765645e6
+
+Scanned 0 values instead of 8
+Error reading line: "3. + x",-0.6578658886588977,0.6344758807185298,0.7204613209658765,1,0,1,-6.49361466219182815156819493906
+
+Scanned 0 values instead of 8
+Error reading line: "17. + x",-0.1693288103960006,-0.1529524974368194,0.1931681025168082,0,3,2,0.110663683091077888742378443107
+
+Scanned 0 values instead of 8
+Error reading line: "13. + x",0.8424627426836379,0.2227945086288623,-0.2898990550202221,4,4,1,-841980.672689524599207727927379
+
+Scanned 0 values instead of 8
+Error reading line: "7. + x",0.3495073569572894,-0.0601118971151845,-0.0537871186425715,4,3,1,-496124.676443098634047995553011
+
+Scanned 0 values instead of 8
+Error reading line: "15. + x",0.7584130997235815,0.5619901405600208,0.4210127778807263,3,2,4,-5.96098542014801242085129970747e6
+
+Scanned 0 values instead of 8
+Error reading line: "7. + x",0.7218649959340484,0.8182161872318352,0.2559845637328816,0,3,1,-421.076880166230018977572593232
+
+Scanned 0 values instead of 8
+Error reading line: "7. + x",0.8072329128464334,-0.1802055705812142,-0.3609760659935959,1,1,2,158.590059899806049276748229009
+
+Scanned 0 values instead of 8
+Error reading line: "19. + x",-0.8478256732623428,0.7708104137960898,0.5718758217780517,2,0,1,-3329.13922743333253803370956975
+
+Scanned 0 values instead of 8
+Error reading line: "7. + x",0.3795361271962329,0.9630516875635448,0.8575479507889309,0,0,3,-5891.23760057810629501283852911
+
+Scanned 0 values instead of 8
+Error reading line: "21. + x",-0.2965057267724414,-0.1870469046898458,-0.0038299072660528,1,2,0,1.30529660995868603880423912838e-6
+
+Scanned 0 values instead of 8
+Error reading line: "15. + x",0.5798188348376235,0.7909021328648812,-0.8805410929625617,3,0,4,-6.54063268867288874741378899613e6
+
+Scanned 0 values instead of 8
+Error reading line: "21. + x",0.6810193308536546,-0.5417403255638886,-0.9173684492257638,2,3,2,-774662.777823867876346774241794
+
+Scanned 0 values instead of 8
+Error reading line: "13. + x",0.3859051334405762,0.6667490613016827,-0.7799574749182062,1,1,0,959.251258881131305690241840627
+
+Scanned 0 values instead of 8
+Error reading line: "15. + x",0.3144091740072843,-0.003987216944118,0.4771808648794431,3,4,4,-6.74953388400987668253296072173e6
+
+Scanned 0 values instead of 8
+Error reading line: "3. + x",-0.2538278686581552,-0.6879731927604738,-0.4765372411186351,0,1,2,5.54706174116670465623253138216
+
+Scanned 0 values instead of 8
+Error reading line: "15. + x",0.863319539174917,0.7740285064332216,0.3789274726693037,1,1,4,-478683.090724957993397339720243
+
+Scanned 0 values instead of 8
+Error reading line: "21. + x",0.0655015995513392,0.5388152075780926,-0.1545259233257211,2,4,0,6.52945824932388900650010121537
+
+Scanned 0 values instead of 8
+Error reading line: "5. + x",-0.7728627727119906,-0.7404778937508597,0.3925106494800715,0,2,2,40.6188398935621990199355730891
+
+Scanned 0 values instead of 8
+Error reading line: "11. + x",0.2952392876904663,0.0265820129039685,-0.6262943617385425,2,0,3,28820.341385997799970615130443
+
+Scanned 0 values instead of 8
+Error reading line: "23. + x",0.0983224144326759,-0.1813806425210951,-0.3592418204397463,3,0,3,0.0000593668756847354578407676788568
+
+Scanned 0 values instead of 8
+Error reading line: "13. + x",0.9833303369121206,0.2110294693578649,-0.6097636298355359,3,0,3,-1.13734176626044146485981411716e6
+
+Scanned 0 values instead of 8
+Error reading line: "19. + x",-0.1649879411982132,-0.9354324970626465,-0.8970585935818125,4,3,1,-5.50872880019651851593116563342e6
+
+Scanned 0 values instead of 8
+Error reading line: "19. + x",0.7996588068997514,-0.5499366640862808,-0.3680703383267453,4,4,0,-6.30085750975552961595937854503e6
+
+Scanned 0 values instead of 8
+Error reading line: "13. + x",-0.701624511534824,0.3133709982811287,0.3640524096453763,1,1,3,-12493.9619179126392991465985985
+
+Scanned 0 values instead of 8
+Error reading line: "23. + x",0.4509694526361777,0.8082419329449079,-0.4424767922885212,4,3,2,-850055.461228275874805539130864
+
+Scanned 0 values instead of 8
+Error reading line: "23. + x",0.3974686458371192,0.1337121284680702,0.1777221875189326,2,3,3,-0.680853940651393342494056072096
+
+Scanned 0 values instead of 8
+Error reading line: "19. + x",0.5698393308293913,0.3432767516095716,0.6623450698079112,4,1,1,-20434.2481593187621476474898419
+
+Scanned 0 values instead of 8
+Error reading line: "3. + x",-0.2240487896303428,0.790695601788093,0.1862205845160019,2,2,1,89.9003539132289892580578110758
+
+Scanned 0 values instead of 8
+Error reading line: "5. + x",0.1573180626870634,-0.1574059816946937,0.3962223430488257,4,4,0,502566.216964684542693091694261
+
+Scanned 0 values instead of 8
+Error reading line: "15. + x",-0.1184191132984588,0.3997115326782176,-0.5874678067596171,0,2,1,69.8623642953495166775589997049
+
+Scanned 0 values instead of 8
+Error reading line: "5. + x",0.5208580852401374,0.3776417131875339,-0.1504122583841682,0,3,0,335.702066309714962470605601867
+
+Scanned 0 values instead of 8
+Error reading line: "15. + x",-0.5078557175299117,-0.8695866957381408,0.9652733148447108,0,4,1,-1.50526391590423042135444628938e6
+
+Scanned 0 values instead of 8
+Error reading line: "21. + x",-0.2780826670360657,-0.8608614657752507,0.6883400030202426,1,4,0,-10706.3309316707338968506964275
+
+Scanned 0 values instead of 8
+Error reading line: "9. + x",-0.7920911985706985,0.95807024383033,-0.7458450729603989,3,3,3,11626.7106640837207067652896579
+
+Scanned 0 values instead of 8
+Error reading line: "5. + x",-0.10238660982508,0.5723057986619313,0.3983445718276411,0,1,0,68.3753799504409753288799972937
+
+Scanned 0 values instead of 8
+Error reading line: "9. + x",-0.2517154759596349,-0.4338037141203402,0.3553289515444954,2,4,1,95.8066121414731059514450614117
+
+Scanned 0 values instead of 8
+Error reading line: "19. + x",-0.2433683867784468,0.9555303660793136,-0.1935203986800277,1,2,2,1710.27969650829410546329646106
+
+Scanned 0 values instead of 8
+Error reading line: "5. + x",-0.9563091905034838,-0.4548743887392204,-0.9137668111854814,2,3,4,2873.82249328396684056411050016
+
+Scanned 0 values instead of 8
+Error reading line: "7. + x",-0.4906788262995142,-0.0609900429175437,-0.4919892479555285,0,3,2,4.93216872393648419772736161073
+
+Scanned 0 values instead of 8
+Error reading line: "7. + x",-0.227818112275933,0.7604192732591776,-0.9527049029078252,1,0,3,-335.313284656667738604787107228
+
+Scanned 0 values instead of 8
+Error reading line: "11. + x",-0.310306420795392,0.7291061075706649,0.385109666688712,4,1,0,-47592.2130484679776198384063451
+
+Scanned 0 values instead of 8
+Error reading line: "23. + x",0.6378147690780428,-0.7665576797455541,-0.9021845279762636,0,3,0,593.309114948386385682409070082
+
+Scanned 0 values instead of 8
+Error reading line: "3. + x",-0.9490635980554673,0.4511042270951803,0.8780174585549594,2,3,0,26.1049655690518025698420186641
+
+Scanned 0 values instead of 8
+Error reading line: "15. + x",-0.9400794434000455,0.2428271586057733,0.93548863215924,2,1,4,-2.12328909865228375258595162168e6
+
+Scanned 0 values instead of 8
+Error reading line: "7. + x",0.7533276866901069,0.4117469352670512,0.6282026635321637,2,3,4,-49382.9421672038290683745199435
+
+Scanned 0 values instead of 8
+Error reading line: "5. + x",-0.7592350057749829,0.58362956951679,0.8660725386333405,1,1,2,-42.1660912583715088299779455628
+
+Scanned 0 values instead of 8
+Error reading line: "5. + x",-0.0626311775271844,0.215311589913247,0.8595217022477554,0,2,1,158.967359087896058826550158007
+
+Scanned 0 values instead of 8
+Error reading line: "21. + x",-0.6259266129087213,-0.8857714871281082,0.7066499114733726,2,3,0,-65368.3790117805822039333361722
+
+Scanned 0 values instead of 8
+Error reading line: "23. + x",0.7091429169321056,-0.0165661791897128,-0.7514526340384537,3,2,3,100874.482049335483154304874715
+
+Scanned 0 values instead of 8
+Error reading line: "21. + x",0.1065933152319772,-0.7177966518154653,0.094539293282817,0,0,4,0.156688207465849551107073190467
+
+Scanned 0 values instead of 8
+Error reading line: "23. + x",-0.7725374605289121,0.2748710092315617,-0.6104972921696319,2,0,1,5.42300618535174133490577584465
+
+Scanned 0 values instead of 8
+Error reading line: "21. + x",-0.9474748309987308,-0.6478197336184474,0.0197185594360643,1,0,4,-1309.48277389991656595149179049
+
+Scanned 0 values instead of 8
+Error reading line: "7. + x",0.4414293826387995,0.2606645431889944,0.9007127528382859,4,0,3,8568.8412246896607175499109569
+
+Scanned 0 values instead of 8
+Error reading line: "19. + x",0.7480954229661912,-0.5139264876414578,-0.8323211541757579,3,3,0,343083.957205802037767373338234
+
+Scanned 0 values instead of 8
+Error reading line: "17. + x",-0.0951976816734308,-0.6444358071342311,-0.1408621108107484,3,4,1,31765.4066735289554322222372609
+
+Scanned 0 values instead of 8
+Error reading line: "5. + x",0.7693499649890192,0.7880911980503467,0.8229192094635184,0,3,0,161.533030776160519462778712841
+
+Scanned 0 values instead of 8
+Error reading line: "11. + x",0.168033259867364,0.7857347186866336,-0.8934007983246933,2,2,0,-29365.2374452804966737188627583
+
+Scanned 0 values instead of 8
+Error reading line: "7. + x",0.290174228901966,-0.7230552157167058,-0.974561265739432,2,1,4,1925.71079355365655139681928674
+
+Scanned 0 values instead of 8
+Error reading line: "21. + x",0.5356482349976972,-0.916914961276866,-0.7438780817921483,4,1,0,-41862.5597032709434425979743107
+
+Scanned 0 values instead of 8
+Error reading line: "11. + x",0.3659542738015242,0.7712190395306096,0.7834820003683731,3,4,4,508345.560512687447273767841544
+
+Scanned 0 values instead of 8
+Error reading line: "9. + x",-0.8971603126139318,-0.766844240564625,-0.7595385905669279,1,2,4,-4521.39730205755878059164764179
+
+Scanned 0 values instead of 8
+Error reading line: "19. + x",-0.4597138281343469,-0.9548083386286774,0.3471172100293417,3,1,1,-9233.3715035966989601177346404
+
+Scanned 0 values instead of 8
+Error reading line: "9. + x",0.4643580189651194,0.269703086953333,-0.4335935222445101,0,1,0,20.7459541114036844721484508308
+
+Scanned 0 values instead of 8
+Error reading line: "9. + x",0.324752156438046,-0.6933977714552204,0.8798703663967454,4,1,0,-27480.1551867236456137925590429
+
+Scanned 0 values instead of 8
+Error reading line: "11. + x",0.7909543585411851,-0.8007795640361854,0.205387972892047,1,0,3,-13252.9395454799680574823591492
+
+Scanned 0 values instead of 8
+Error reading line: "21. + x",-0.915389446044544,-0.2808865198358945,0.4880797953075031,1,3,1,1035.36270948523601271786152791
+
+Scanned 0 values instead of 8
+Error reading line: "9. + x",-0.8834746170465257,0.0017944289912516,0.9160653321070475,0,0,4,89358.754541036643597468846164
+
+Scanned 0 values instead of 8
+Error reading line: "17. + x",0.1156323300512181,0.0505111238743347,0.3073843989672853,0,3,3,-0.383683256649668865675443999519
+
+Scanned 0 values instead of 8
+
+	 ... 0 out of 100 tests passed with tolerance 5.000000E-11.	    [ Error →  min: NAN | max: NAN | avg: 0.000000E+00 ]
+									    [ Time  →  sec: 0.000052     ]
 test_crandall_g_der 
 	 ... processing csv/crandall_g_der_ref.csv 
 	 ... 10 out of 10 tests passed with tolerance 5.000000E-14.	    [ Error →  min: 3.913984E-16 | max: 2.431066E-14 | avg: 7.936357E-15 ]
-									    [ Time  →  sec: 0.000165     ]
+									    [ Time  →  sec: 0.000101     ]
 test_crandall_gReg_der 
 	 ... processing csv/crandall_gReg_der_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-11.	    [ Error →  min: 0.000000E+00 | max: 8.235915E-12 | avg: 1.292117E-13 ]
-									    [ Time  →  sec: 0.001116     ]
+									    [ Time  →  sec: 0.000708     ]
 test_crandall_gReg_der_d2k_prototype 
 	 ... processing csv/crandall_gReg_der_d2k_prototype_ref.csv 
 	 ... 100 out of 100 tests passed with tolerance 5.000000E-10.	    [ Error →  min: 0.000000E+00 | max: 7.883412E-11 | avg: 8.475243E-13 ]
-									    [ Time  →  sec: 0.002730     ]
+									    [ Time  →  sec: 0.001939     ]
 test_crandall_g_der_taylor 
 	 ... generating test values
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-14.	    [ Error →  min: 0.000000E+00 | max: 7.490270E-15 | avg: 3.891047E-16 ]
-									    [ Time  →  sec: 0.082774     ]
+									    [ Time  →  sec: 0.051403     ]
 test_crandall_gReg_der_taylor 
 	 ... generating test values
 	 ... 100 out of 100 tests passed with tolerance 1.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 7.880421E-16 | avg: 1.069885E-16 ]
-									    [ Time  →  sec: 0.053601     ]
+									    [ Time  →  sec: 0.043785     ]
 test_crandall_gReg_harmonic 
 	 ... processing csv/crandall_gReg_harmonic_ref.csv 
 	 ... 999 out of 999 tests passed with tolerance 1.000000E-14.	    [ Error →  min: 0.000000E+00 | max: 8.783848E-15 | avg: 2.725298E-17 ]
-									    [ Time  →  sec: 0.000977     ]</system-out></testcase><testcase name="test_epsteinZetaRegDer" classname="epsteinlib" time="0.8450663089752197"><system-out>test_epsteinZetaRegDer_1D 
-	 ... processing csv/setZetaDer_1D_ref.csv 
-	 ... 999 out of 999 tests passed with tolerance 1.000000E-12.	    [ Error →  min: 0.000000E+00 | max: 9.319853E-13 | avg: 9.526128E-15 ]
-									    [ Time  →  sec: 0.046739     ]
-test_epsteinZetaRegDer_d2k_prototype 
-	 ... processing csv/epsteinZetaRegDer_d2k_prototype_ref.csv 
-	 ... 100 out of 100 tests passed with tolerance 1.000000E-11.	    [ Error →  min: 6.217223E-19 | max: 9.886890E-14 | avg: 3.829826E-15 ]
-									    [ Time  →  sec: 0.010421     ]
-test_epsteinZetaRegDer_prototype 
-	 ... processing csv/epsteinZetaRegDer_prototype_ref.csv 
-	 ... 999 out of 999 tests passed with tolerance 4.000000E-12.	    [ Error →  min: 0.000000E+00 | max: 1.902202E-12 | avg: 9.834287E-15 ]
-									    [ Time  →  sec: 0.146745     ]
-test_epsteinZetaRegDer_bain_prototype 
-	 ... processing csv/epsteinZetaRegDer_bain_prototype_ref.csv 
-	 ... 12 out of 12 tests passed with tolerance 5.000000E-08.	    [ Error →  min: 4.777063E-22 | max: 2.115936E-09 | avg: 2.290397E-10 ]
-									    [ Time  →  sec: 0.049254     ]
-test_epsteinZetaRegDer_taylor 
-	 ... generating test values
-	 ... 10 out of 10 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 2.602090E-18 | max: 5.323143E-16 | avg: 1.945170E-16 ]
-									    [ Time  →  sec: 0.585322     ]</system-out></testcase><testcase name="test_setZetaDer" classname="epsteinlib" time="1.7451703548431396"><system-out>test_setZetaDer_1D 
-	 ... processing csv/setZetaDer_1D_ref.csv 
-	 ... 999 out of 999 tests passed with tolerance 1.000000E-12.	    [ Error →  min: 0.000000E+00 | max: 9.319853E-13 | avg: 9.526128E-15 ]
-									    [ Time  →  sec: 0.067179     ]
-test_setZetaDer_2D 
-	 ... processing csv/setZetaDer_2D_ref.csv 
-	 ... 320 out of 320 tests passed with tolerance 5.000000E-12.	    [ Error →  min: 0.000000E+00 | max: 4.247408E-12 | avg: 8.362846E-14 ]
-									    [ Time  →  sec: 0.239259     ]
-test_setZetaDer_taylor 
-	 ... generating test values
-	 ... 10  out of 10  tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.008703E-15 | avg: 2.689972E-16 ]
-									    [ Time  →  sec: 0.783652     ]
-test_setZetaDer_odd 
-	 ... processing csv/setZetaDer_odd_ref.csv 
-	 ... 100 out of 100 tests passed with tolerance 1.000000E-16.	    [ Error →  min: 0.000000E+00 | max: 0.000000E+00 | avg: 0.000000E+00 ]
-									    [ Time  →  sec: 0.000214     ]
-test_setZetaDer_special_exponents 
-	 ... processing csv/setZetaDer_special_exponents_ref.csv 
-	 ... 872 out of 872 tests passed with tolerance 5.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.546177E-15 | avg: 1.338730E-16 ]
-									    [ Time  →  sec: 0.018151     ]
-test_setZetaDer_poly_laplace 
-	 ... building the 4D PolyLaplace operator Δⁿ, n = 1,2,...,5
-	 ... 5 out of 5 tests passed with tolerance 1.000000E-13.	    [ Error →  min: 3.925372E-17 | max: 2.825844E-14 | avg: 7.312241E-15 ]
-									    [ Time  →  sec: 0.629342     ]</system-out></testcase><testcase name="test_harmonics" classname="epsteinlib" time="2.2820820808410645"><system-out>test_coeffs_c_inner 
-	 ... processing csv/coeffs_c_inner_ref.csv 
-	 ... 999 out of 999 tests passed with tolerance 1.000000E-16.	    [ Error →  min: 0.000000E+00 | max: 0.000000E+00 | avg: 0.000000E+00 ]
-									    [ Time  →  sec: 0.000926     ]
-test_harmonic_h_inner 
-	 ... processing csv/harmonic_h_inner_ref.csv 
-	 ... 999 out of 999 tests passed with tolerance 1.000000E-16.	    [ Error →  min: 0.000000E+00 | max: 0.000000E+00 | avg: 0.000000E+00 ]
-									    [ Time  →  sec: 0.006776     ]
-test_harmonic_h_1D 
-	 ... processing csv/harmonic_h_1D_ref.csv 
-	 ... 999 out of 999 tests passed with tolerance 1.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 5.551115E-16 | avg: 6.556873E-18 ]
-									    [ Time  →  sec: 0.167046     ]
-test_harmonic_h_3D_unity 
-	 ... processing csv/harmonic_h_3D_unity_ref.csv 
-	 ... 200 out of 200 tests passed with tolerance 1.000000E-15.	    [ Error →  min: 0.000000E+00 | max: 1.546072E-16 | avg: 6.961291E-18 ]
-									    [ Time  →  sec: 1.052965     ]
-test_harmonic_h_3D_random 
-	 ... processing csv/harmonic_h_3D_random_ref.csv 
-	 ... 200 out of 200 tests passed with tolerance 5.000000E-13.	    [ Error →  min: 0.000000E+00 | max: 1.725075E-13 | avg: 2.137668E-15 ]
-									    [ Time  →  sec: 1.046115     ]</system-out></testcase><testcase name="test_epsteinlib" classname="epsteinlib" time="2.4813106060028076"><system-err>.................
-----------------------------------------------------------------------
-Ran 17 tests in 2.220s
-
-OK</system-err></testcase></testsuite></testsuites>
+									    [ Time  →  sec: 0.000852     ]</system-out></testcase></testsuite></testsuites>

@@ -738,7 +738,7 @@ int test_singularity_s_der(void) {
         return fprintf(stderr, "Error opening file: %s\n", path);
     }
 
-    unsigned int k;
+    double nu;
     unsigned int alphaAbs;
     double errorAbs;
     double errorRel;
@@ -757,7 +757,7 @@ int test_singularity_s_der(void) {
     int dim = 3;
     double tol = 5 * pow(10, -11);
 
-    unsigned int *kRef = malloc(sizeof(unsigned int));
+    double *nuRef = malloc(sizeof(double));
     double *z = malloc(dim * sizeof(double));
     unsigned int *alpha = malloc(dim * sizeof(unsigned int));
     double *refRead = malloc(sizeof(double));
@@ -765,10 +765,11 @@ int test_singularity_s_der(void) {
     printf("\n\t ... ");
     printf("processing %s ", path);
     while (fgets(line, sizeof(line), data) != NULL) {
-        // Scan: k, {z1, z2, z3}, {alpha1, alpha2, alpha3}, result
+        totalTests++;
+        // Scan: nu, {z1, z2, z3}, {alpha1, alpha2, alpha3}, result
         scanResult =
-            sscanf(line, "%u,%lf,%lf,%lf,%u,%u,%u,%lf", // NOLINT
-                   kRef, z, z + 1, z + 2, alpha, alpha + 1, alpha + 2, refRead);
+            sscanf(line, "%lf,%lf,%lf,%lf,%u,%u,%u,%lf", // NOLINT
+                   nuRef, z, z + 1, z + 2, alpha, alpha + 1, alpha + 2, refRead);
 
         if (scanResult != 8) {
             printf("Error reading line: %s\n", line);
@@ -778,10 +779,9 @@ int test_singularity_s_der(void) {
 
         alphaAbs = mult_abs(dim, alpha);
 
-        k = kRef[0];
+        nu = nuRef[0];
 
-        num = (double complex)singularity_s_der((double)dim + (2 * (double)k), dim,
-                                                z, alpha, alphaAbs);
+        num = (double complex)singularity_s_der(nu, dim, z, alpha, alphaAbs);
         ref = refRead[0] + 0 * I;
 
         errorAbs = errAbs(ref, num);
@@ -806,17 +806,16 @@ int test_singularity_s_der(void) {
             printf("Min(Emax, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
                    tol);
             printf("\n");
-            printf("k:\t\t %u\t\t", k);
+            printf("nu:\t\t %.16lf\t\t", nu);
             printf("\n");
             printVectorUnitTest("z:\t\t", z, dim);
             printMultiindexUnitTest("alpha:\t\t", alpha, dim);
             printf("\n");
         }
-        totalTests++;
     }
 
-    free(kRef);
     free(z);
+    free(nuRef);
     free(alpha);
     free(refRead);
 

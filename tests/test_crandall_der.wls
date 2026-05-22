@@ -46,7 +46,7 @@ Protect[Power];
 cInner[n_,i_,k_,d_]:= Product[2n+d-2-4k-2j,{j,i+1,n/2-k}]
 cOuter[n_,k_,d_]:=2^-k/cInner[n,0,k,d] Product[(2n+d-2ell)/((2n+d+2-4ell)(2n+d-4ell)),{ell,k}]
 hInner[\[Alpha]_,\[Beta]_,\[Gamma]_,n_,k_,d_]:=(-1/2)^Total[\[Beta]] cInner[n,Total[\[Beta]],k,d]Binomial[Total[\[Beta]]+k,k]Total[\[Beta]]!/Apply[Times,Factorial[\[Beta]]] Apply[Times,Binomial[\[Alpha],\[Alpha]+\[Beta]-\[Gamma]](\[Gamma]-\[Beta])!/(2\[Gamma]-\[Alpha]-2\[Beta])!]
-h[k_][x_,\[Alpha]_]:=Module[
+hHarmonic[k_][x_,\[Alpha]_]:=Module[
 	{d,n}
 	,d=Length[\[Alpha]]
 	;n=Total[\[Alpha]]
@@ -88,10 +88,9 @@ LDer[z_,\[Alpha]_]:=Piecewise[{
 
 
 (* ::Text:: *)
-(*Derivatives of singularity for arguments nu = dim + 2k.*)
+(*Derivatives of singularity for arguments nu = dim + 2k in 3D.*)
 
 
-s[k_,{z1_,z2_,z3_}]=\[Pi]^(k+Length[{z1,z2,z3}]/2)/Gamma[k+Length[{z1,z2,z3}]/2](-1)^(k+1)/k!(\[Pi] {z1,z2,z3} . {z1,z2,z3})^k Log[Pi {z1,z2,z3} . {z1,z2,z3}]
 sDer[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=(
 	\[Pi]^(k+Length[z]/2)/Gamma[k+Length[z]/2](-1)^(k+1)/k!Total@Table[
 			Apply[Times,Binomial[\[Alpha],\[Beta]]]YDer[k,z,\[Beta]]LDer[z,\[Alpha]-\[Beta]]
@@ -101,7 +100,14 @@ sDer[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=(
 
 
 (* ::Text:: *)
-(*This is the harmonic method for the singularity derivatives as employed in EpsteinLib.*)
+(*YDerGeneral  implements the \[Alpha]-derivatives of \|01d42b \[RightTeeArrow] (\[Pi] \|01d42b \[CenterDot] \|01d42b)^\[Nu] for real arguments \[Nu].*)
+
+
+polalt[z_,\[Alpha]_,\[Beta]_]:=Apply[Times,Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2z)^(\[Alpha]-2\[Beta])]
+YDerGeneral[\[Nu]_,z_,\[Alpha]_]:=\[Pi]^\[Nu] Total[Flatten[Table[
+	FactorialPower[\[Nu],Total[\[Alpha]]-Total[\[Beta]]]polalt[z,\[Alpha],\[Beta]]/(z . z)^(Total[\[Alpha]]-Total[\[Beta]]-\[Nu])
+	,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}
+]]]
 
 
 sing[\[Nu]_,y_]:=Module[
@@ -115,22 +121,40 @@ sing[\[Nu]_,y_]:=Module[
 			,\[Pi]^(\[Nu]/2)/Gamma[\[Nu]/2]Gamma[(d-\[Nu])/2](\[Pi] y . y)^((\[Nu]-d)/2)
 	]
 ]
-sDerHarmonic[\[Nu]_,y_,\[Alpha]_]:=Module[
+sDerFull[\[Nu]_,z_,\[Alpha]_]:=Module[
+	{ell,d}
+	,d=Length[z]
+	;ell=Max[0,Round[(\[Nu]-d)/2]]
+	;Which[
+		PossibleZeroQ[\[Nu]-(d+2 ell)]
+			,Print["here"];sDer[ell,z,\[Alpha]]
+		,True
+			,\[Pi]^(\[Nu]/2)Gamma[(d-\[Nu])/2]/Gamma[\[Nu]/2]YDerGeneral[(\[Nu]-d)/2,z,\[Alpha]]
+	]
+]
+
+
+(* ::Text:: *)
+(*This is the harmonic method for the singularity derivatives as employed in EpsteinLib.*)
+
+
+sDerHarmonic[\[Nu]_,z_,\[Alpha]_]:=Module[
 	{n,k,d}
 	,d=Length[\[Alpha]]
 	;n=Total[\[Alpha]]
-	;If[PossibleZeroQ[Norm[y]],Return[0]]
+	;If[PossibleZeroQ[Norm[z]],Return[0]]
 	;Sum[
 		Module[
 			{ell,m,c,q,res}
 			,m=n-2k
 			;ell=Max[m+k,Round[(\[Nu]-d)/2]]
-			;If[
+			;hHarmonic[k][z,\[Alpha]]Which[
 				PossibleZeroQ[\[Nu]-(d+2ell)]
-				,c=1+(HarmonicNumber[ell]-HarmonicNumber[ell+k-(m+2k)]+PolyGamma[ell+d/2]-PolyGamma[ell+d/2-k])/Log[Pi y . y]
-				,c=1
+					,2^k (-2 \[Pi]^2)^(m+k)/FactorialPower[\[Nu]/2-k-1,m]sing[\[Nu]-2(m+k),z]
+				(1+(HarmonicNumber[ell]-HarmonicNumber[ell+k-(m+2k)]+PolyGamma[ell+d/2]-PolyGamma[ell+d/2-k])/Log[Pi z . z])
+				,True
+					,Gamma[(d-\[Nu])/2+k+m]/Gamma[\[Nu]/2-k](-1)^(k+m)2^(2k+m)Pi^(\[Nu]-d/2)(z . z)^((\[Nu]-d)/2-k-m)
 			]
-			;c 2^k (-2 \[Pi]^2)^(m+k)/FactorialPower[\[Nu]/2-k-1,m]h[k][y,\[Alpha]]sing[\[Nu]-2(m+k),y]
 		]
 		,{k,0,n/2}
 	]
@@ -351,7 +375,7 @@ Do[
 (*Generate reference values.*)
 
 
-h1DTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@h[k0[j]][z0[j],\[Alpha]0[j]]},{j,range}];
+h1DTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@hHarmonic[k0[j]][z0[j],\[Alpha]0[j]]},{j,range}];
 
 
 (* ::Text:: *)
@@ -393,7 +417,7 @@ Clear[j,tups]
 (*Generate reference values.*)
 
 
-h3DTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@h[k0[j]][z0[j],\[Alpha]0[j]]},{j,range}];
+h3DTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@hHarmonic[k0[j]][z0[j],\[Alpha]0[j]]},{j,range}];
 
 
 (* ::Text:: *)
@@ -556,7 +580,7 @@ Do[
 (*Generate reference values.*)
 
 
-sDerTab=ParallelTable[Flatten[{k0[i],N[z0[i],30],\[Alpha]0[i],N[SetPrecision[Derivative[\[Alpha]0[i]][s[k0[i], #]&][z0[i]],200],30]}],{i,range}];
+sDerTab=ParallelTable[Flatten[{N[3+2*k0[i]],N[z0[i]],\[Alpha]0[i],N[SetPrecision[Derivative[\[Alpha]0[i]][sing[3+2 *k0[i], #]&][z0[i]],200],30]}],{i,range}];
 
 
 (* ::Text:: *)
@@ -567,7 +591,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/singularity_s_der_ref.csv",sDerTab];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Create regularized Crandall derivatives reference values*)
 
 
