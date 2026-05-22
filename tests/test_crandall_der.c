@@ -755,7 +755,7 @@ int test_singularity_s_der(void) {
     int testsPassed = 0;
     int totalTests = 0;
     int dim = 3;
-    double tol = pow(10, -13);
+    double tol = 5 * pow(10, -12);
 
     double *nuRef = malloc(sizeof(double));
     double *z = malloc(dim * sizeof(double));

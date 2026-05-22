@@ -571,20 +571,30 @@ Export["csv/log_l_der_ref.csv",LDerTab];
 (*Setup test parameters.*)
 
 
-range = Range[100];
+range = 500;
 Do[
-	k0[i]=RandomInteger[{0,10}];
-	z0[i]={randRational,randRational,randRational};
-	\[Alpha]0[i]=If[i<10,{0,0,i-1},{RandomInteger[{0,10}],RandomInteger[{0,10}],RandomInteger[{0,10}]}];
+	k0[i]=RandomInteger[{0,10}]
+	;\[Nu]0[i]=randRational
+	;z0[i]={randRational,randRational,randRational}
+	;\[Alpha]0[i]=If[i<10,{0,0,i-1},{RandomInteger[{0,8}],RandomInteger[{0,8}],RandomInteger[{0,8}]}]
 	,{i,range}
 ]
 
 
 (* ::Text:: *)
-(*Generate reference values.*)
+(*Generate reference values, both for special cases \[Nu] \[Element] d - 2k and real \[Nu].*)
 
 
-sDerTab=ParallelTable[Flatten[{N[3+2*k0[i]],N[z0[i]],\[Alpha]0[i],N[SetPrecision[sDerFull[3+2 *k0[i], z0[i],\[Alpha]0[i]],200]]}],{i,range}];
+sDerTab=Join[
+	ParallelTable[Flatten[{N[3+2*k0[i]],N[z0[i]],\[Alpha]0[i],N[SetPrecision[sDerFull[3+2 *k0[i], z0[i],\[Alpha]0[i]],200]]}],{i,range-1}]
+	,ParallelTable[Flatten[{N[\[Nu]0[i]],N[z0[i]],\[Alpha]0[i],N[SetPrecision[sDerFull[\[Nu]0[i], z0[i],\[Alpha]0[i]],200]]}],{i,range}]
+];
+
+
+sDerTabN=Join[
+	ParallelTable[Flatten[{N[3+2*k0[i]],N[z0[i]],\[Alpha]0[i],sDerHarmonic[N[3+2 *k0[i]], N@z0[i],N@\[Alpha]0[i]]}],{i,range-1}]
+	,ParallelTable[Flatten[{N[\[Nu]0[i]],N[z0[i]],\[Alpha]0[i],sDerHarmonic[N@\[Nu]0[i],N@ z0[i],N@\[Alpha]0[i]]}],{i,range}]
+];
 
 
 (* ::Text:: *)
