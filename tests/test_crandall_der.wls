@@ -254,38 +254,6 @@ randDerivativeBeta[a_] := RandomInteger[{0,Floor[a/2]}]
 
 
 (* ::Subsection::Closed:: *)
-(*Create polynomial p reference values*)
-
-
-(* ::Text:: *)
-(*Setup test parameters.*)
-
-
-range = Range[100];
-Do[
-	z0[i]=10{randRational,randRational,randRational};
-	\[Alpha]0[i]={randDerivative,randDerivative,randDerivative};
-	\[Beta]0[i]={randDerivativeBeta[\[Alpha]0[i][[1]]],randDerivativeBeta[\[Alpha]0[i][[2]]],randDerivativeBeta[\[Alpha]0[i][[3]]]};
-	,{i,range}
-]
-
-
-(* ::Text:: *)
-(*Generate reference values.*)
-
-
-pTab=ParallelTable[Flatten[Join[N[z0[i],30],\[Alpha]0[i],\[Beta]0[i],{N[SetPrecision[p[z0[i],\[Alpha]0[i],\[Beta]0[i]],200],30]}]],{i,range}];
-
-
-(* ::Text:: *)
-(*Save reference values to file.*)
-
-
-SetDirectory[NotebookDirectory[]];
-Export["csv/polynomial_p_ref.csv",pTab];
-
-
-(* ::Subsection::Closed:: *)
 (*Create coefficients c reference values*)
 
 
@@ -469,38 +437,6 @@ Export["csv/crandall_g_der_ref.csv",crandallDerTab];
 
 
 (* ::Subsection::Closed:: *)
-(*Create polynomial l reference values*)
-
-
-(* ::Text:: *)
-(*Setup test parameters.*)
-
-
-range = Range[100];
-Do[
-	z0[i]=10{randRational,randRational,randRational};
-	\[Alpha]0[i]={Max[randDerivative,1],randDerivative,randDerivative};
-	\[Beta]0[i]={randDerivativeBeta[\[Alpha]0[i][[1]]],randDerivativeBeta[\[Alpha]0[i][[2]]],randDerivativeBeta[\[Alpha]0[i][[3]]]};
-	,{i,range}
-]
-
-
-(* ::Text:: *)
-(*Generate reference values.*)
-
-
-lTab=ParallelTable[Flatten[Join[N[z0[i],30],\[Alpha]0[i],\[Beta]0[i],{N[SetPrecision[l[z0[i],\[Alpha]0[i],\[Beta]0[i]],200],30]}]],{i,range}];
-
-
-(* ::Text:: *)
-(*Save reference values to file.*)
-
-
-SetDirectory[NotebookDirectory[]];
-Export["csv/polynomial_l_ref.csv",lTab];
-
-
-(* ::Subsection::Closed:: *)
 (*Create (\[Pi] y\.b2)^k derivatives reference values*)
 
 
@@ -533,37 +469,6 @@ Export["csv/polynomial_y_der_ref.csv",YDerTab];
 
 
 (* ::Subsection::Closed:: *)
-(*Create Log[\[Pi] y\.b2] derivatives reference values*)
-
-
-(* ::Text:: *)
-(*Setup test parameters.*)
-
-
-range = Range[100];
-Do[
-	z0[i]={randRational,randRational,randRational};
-	\[Alpha]0[i]=If[i<10,{0,0,i-1},{randDerivative,randDerivative,randDerivative}];
-	,{i,range}
-]
-
-
-(* ::Text:: *)
-(*Generate reference values.*)
-
-
-LDerTab=ParallelTable[Flatten[{N[z0[i],30],\[Alpha]0[i],N[SetPrecision[Derivative[\[Alpha]0[i]][Log[Pi # . #]&][z0[i]],200],30]}],{i,range}];
-
-
-(* ::Text:: *)
-(*Save reference values to file.*)
-
-
-SetDirectory[NotebookDirectory[]];
-Export["csv/log_l_der_ref.csv",LDerTab];
-
-
-(* ::Subsection:: *)
 (*Create singularity derivatives reference values*)
 
 
@@ -589,80 +494,6 @@ sDerTab=Join[
 	ParallelTable[Flatten[{N[3+2*k0[i]],N[z0[i]],\[Alpha]0[i],N[SetPrecision[sDerFull[3+2 *k0[i], z0[i],\[Alpha]0[i]],200]]}],{i,range-1}]
 	,ParallelTable[Flatten[{N[\[Nu]0[i]],N[z0[i]],\[Alpha]0[i],N[SetPrecision[sDerFull[\[Nu]0[i], z0[i],\[Alpha]0[i]],200]]}],{i,range}]
 ];
-
-
-sDerTabN=Join[
-	ParallelTable[Flatten[{N[3+2*k0[i]],N[z0[i]],\[Alpha]0[i],sDerHarmonic[N[3+2 *k0[i]], N@z0[i],N@\[Alpha]0[i]]}],{i,range-1}]
-	,ParallelTable[Flatten[{N[\[Nu]0[i]],N[z0[i]],\[Alpha]0[i],sDerHarmonic[N@\[Nu]0[i],N@ z0[i],N@\[Alpha]0[i]]}],{i,range}]
-];
-
-
-(* ::Text:: *)
-(*Save reference values to file.*)
-
-
-SetDirectory[NotebookDirectory[]];
-Export["csv/singularity_s_der_ref.csv",sDerTab];
-
-
-(* ::Subsection:: *)
-(*Create regularized Crandall derivatives reference values*)
-
-
-(* ::Text:: *)
-(*Setup test parameters.*)
-
-
-range = Range[100];
-Do[
-	\[Nu]0[i]=With[{\[Nu]=10 randRational},If[PossibleZeroQ@(\[Nu]-2),1/2,\[Nu]]];
-	z0[i]=If[i<10,{0,0,0},{randRational,randRational,randRational}];
-	\[Alpha]0[i]={randDerivative,randDerivative,randDerivative};
-	,{i,range}
-]
-
-
-(* ::Text:: *)
-(*Generate reference values.*)
-
-
-crandallgRegDerTab=ParallelTable[With[{g=GRegDer[\[Nu]0[i],z0[i],\[Alpha]0[i]]},{N[\[Nu]0[i],30], N[z0[i][[1]],30],N[z0[i][[2]],30],N[z0[i][[3]],30],\[Alpha]0[i][[1]],\[Alpha]0[i][[2]],\[Alpha]0[i][[3]],N[Re[g],30],N[Im[g],30]}],{i,range}];
-
-
-(* ::Text:: *)
-(*Save reference values to file.*)
-
-
-SetDirectory[NotebookDirectory[]];
-Export["csv/crandall_gReg_der_ref.csv",crandallgRegDerTab];
-
-
-(* ::Subsection::Closed:: *)
-(*Create regularized Crandall function prototype reference values for nu = dim + 2*k*)
-
-
-(* ::Text:: *)
-(*Setup test parameters.*)
-
-
-range = Range[100];
-Do[
-	\[Nu]0[i]=-2 RandomInteger[{0,12}]
-	;z0[i]={randRational,randRational}
-	;\[Alpha]0[i]={randDerivative,randDerivative}
-	,{i,range}
-]
-
-
-GRegKDerTab=ParallelTable[Flatten[Join[{\[Nu]0[i]},N[z0[i],16],\[Alpha]0[i],{N[SetPrecision[GRegDer[\[Nu]0[i],z0[i],\[Alpha]0[i]],200],30],i}]],{i,range}];
-
-
-(* ::Text:: *)
-(*Save reference values to file.*)
-
-
-SetDirectory[NotebookDirectory[]];
-Export["csv/crandall_gReg_der_d2k_prototype_ref.csv",GRegKDerTab];
 
 
 (* ::Subsection::Closed:: *)
