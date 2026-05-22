@@ -88,7 +88,22 @@ LDer[z_,\[Alpha]_]:=Piecewise[{
 
 
 (* ::Text:: *)
-(*Derivatives of singularity for arguments nu = dim + 2k in 3D.*)
+(*This is the method we use in EpsteinLib for the derivatives of for  \|01d42b \[RightTeeArrow] (\[Pi] \|01d42b \[CenterDot] \|01d42b)^(d+2 ell).*)
+
+
+YDerHarmonic[ell_/;Element[ell,NonNegativeIntegers],z_,\[Alpha]_]:=Module[
+	{n,d}
+	,d=Length[\[Alpha]]
+	;n=Total[\[Alpha]]
+	;\[Pi]^ell 2^Total[\[Alpha]]Total[Table[
+		hHarmonic[k][z,\[Alpha]]FactorialPower[ell,n-k]FactorialPower[ell+d/2-1,k](z . z)^(ell+k-n)
+		,{k,0,Total[\[Alpha]]/2}
+	]]
+]
+
+
+(* ::Text:: *)
+(*Derivatives of singularity for arguments nu = dim + 2k.*)
 
 
 sDer[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=(
@@ -436,7 +451,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/crandall_g_der_ref.csv",crandallDerTab];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Create (\[Pi] y\.b2)^k derivatives reference values*)
 
 
@@ -444,11 +459,11 @@ Export["csv/crandall_g_der_ref.csv",crandallDerTab];
 (*Setup test parameters.*)
 
 
-range = Range[100];
+range = Range[10];
 Do[
-	k0[i]=RandomInteger[{0,10}];
-	z0[i]={randRational,randRational,randRational};
-	\[Alpha]0[i]=If[i<10,{0,0,i-1},{randDerivative,randDerivative,randDerivative}];
+	k0[i]=RandomInteger[{0,10}]
+	;z0[i]={randRational,randRational,randRational}
+	;\[Alpha]0[i]=If[i<10,{0,0,i-1},{RandomInteger[{0,30}],RandomInteger[{0,30}],RandomInteger[{0,50}]}]
 	,{i,range}
 ]
 
@@ -457,7 +472,7 @@ Do[
 (*Generate reference values.*)
 
 
-YDerTab=ParallelTable[Flatten[{k0[i],N[z0[i],30],\[Alpha]0[i],N[SetPrecision[Derivative[\[Alpha]0[i]][(Pi # . #)^k0[i]&][z0[i]],200],30]}],{i,range}];
+YDerTab=ParallelTable[Flatten[{k0[i],N[z0[i],30],\[Alpha]0[i],N[SetPrecision[Derivative[\[Alpha]0[i]][(Pi # . #)^k0[i]&][z0[i]],200]]}],{i,range}]
 
 
 (* ::Text:: *)
@@ -468,7 +483,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/polynomial_y_der_ref.csv",YDerTab];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Create singularity derivatives reference values*)
 
 

@@ -105,7 +105,6 @@ static double singularity_s_der_harmonic(double nu, unsigned int dim,
         return 0;
     }
 
-    // Compute set zeta derivatives by harmonic method
     for (int k = 0; k <= alphaAbs / 2; k++) {
 
         double h = harmonic_h(k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
@@ -118,6 +117,7 @@ static double singularity_s_der_harmonic(double nu, unsigned int dim,
 
             if (ell >= m + k && nu == (double)(dim + (2 * ell))) {
                 double poch = 1;
+                // falling pochhamer symbol (nu/2-k-1)_m
                 for (int i = 1; i <= m; i++) {
                     poch *= nu / 2 - k - i;
                 }
@@ -184,4 +184,36 @@ double singularity_s_der(double nu, unsigned int dim, const double *z,
 
     return singularity_s_der_harmonic(nu, dim, z, alphaAbs, chunk_offset,
                                       valid_count, coeffs, exponents);
+}
+
+/** @brief Calculates the derivatives of Y_k(z)= (pi * z**2)**k.
+ * @param[in] k: integer power.
+ * @param[in] dim: dimension of z.
+ * @param[in] z: vector z of the polynomial.
+ * @parma[in] alpha: multi-index for the derivative.
+ * @param[in] alphaAbs: |alpha| .
+ * @param[in] chunk_offset: starting offsets for each k.
+ * @param[in] valid_count: number of valid gamma entries for each k.
+ * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
+ * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
+ * @return partial derivative of Y_k(z).
+ */
+double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NOLINT
+                        const unsigned int *alpha, unsigned int alphaAbs) {
+
+    // Precompute coefficients for harmonic polynomials
+    unsigned int kMax = alphaAbs / 2;
+    unsigned long long *chunk_offset =
+        malloc((kMax + 1) * sizeof(unsigned long long));
+    unsigned long long *valid_count =
+        malloc((kMax + 1) * sizeof(unsigned long long));
+    unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
+        alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
+    double *coeffs = malloc(coeffs_size * sizeof(double));
+    unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
+    precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
+                                    exponents);
+
+    return polynomial_y_der_harmonic((int)k, dim, z, (int)alphaAbs, chunk_offset,
+                                     valid_count, coeffs, exponents);
 }

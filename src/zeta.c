@@ -647,27 +647,23 @@ static double complex sum_fourier_harmonic(
  * @param[in] diag: true, if the lattice matrix is diagonal.
  * the incomplete gamma evaluation.
  * @param[in] xfactor: precomputed prefactor for the real sum.
+ * @param[in] chunk_offset: starting offsets for each k.
+ * @param[in] valid_count: number of valid gamma entries for each k.
+ * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
+ * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
+
  * @return updated res after adding the general harmonic contribution.
  */
 static double complex summation_harmonic_reg(
-    double nu, unsigned int dim, unsigned int alphaAbs, const unsigned int *alpha,
-    double lambda, double ms, const double *m_real, const double *m_fourier,
-    const double *x_t1, const double *x_t2, const double *y_t1, const double *y_t2,
+    double nu, unsigned int dim, unsigned int alphaAbs, double lambda, double ms,
+    const double *m_real, const double *m_fourier, const double *x_t1,
+    const double *x_t2, const double *y_t1, const double *y_t2,
     const int cutoffsReal[], const int cutoffsFourier[], bool diag,
-    double complex xfactor) {
+    double complex xfactor, const unsigned long long *chunk_offset,
+    const unsigned long long *valid_count, const double *coeffs,
+    const unsigned int *exponents) {
 
-    // Precompute coefficients for harmonic polynomials once
     unsigned int kMax = alphaAbs / 2;
-    unsigned long long *chunk_offset =
-        malloc((kMax + 1) * sizeof(unsigned long long));
-    unsigned long long *valid_count =
-        malloc((kMax + 1) * sizeof(unsigned long long));
-    unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
-        alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
-    double *coeffs = malloc(coeffs_size * sizeof(double));
-    unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
-    precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
-                                    exponents);
 
     // Decide when to isolate singularies in the real sum for large exponents
     bool largeExp = nu > 10;
@@ -764,11 +760,6 @@ static double complex summation_harmonic_reg(
 
     res *= real_int_pow(-2 * M_PI, alphaAbs) / real_int_pow(ms, alphaAbs);
 
-    free(chunk_offset);
-    free(valid_count);
-    free(coeffs);
-    free(exponents);
-
     return res;
 }
 
@@ -791,28 +782,22 @@ static double complex summation_harmonic_reg(
  * @param[in] diag: true, if the lattice matrix is diagonal.
  * the incomplete gamma evaluation.
  * @param[in] xfactor: precomputed prefactor for the real sum.
+ * @param[in] chunk_offset: starting offsets for each k.
+ * @param[in] valid_count: number of valid gamma entries for each k.
+ * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
+ * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
  * @return updated res after adding the general harmonic contribution.
  */
 static double complex summation_harmonic(
-    double nu, unsigned int dim, unsigned int alphaAbs, const unsigned int *alpha,
-    double lambda, double ms, const double *m_real, const double *m_fourier,
-    const double *x_t1, const double *x_t2, const double *y_t1, const double *y_t2,
+    double nu, unsigned int dim, unsigned int alphaAbs, double lambda, double ms,
+    const double *m_real, const double *m_fourier, const double *x_t1,
+    const double *x_t2, const double *y_t1, const double *y_t2,
     const int cutoffsReal[], const int cutoffsFourier[], bool diag,
-    double complex xfactor) {
+    double complex xfactor, const unsigned long long *chunk_offset,
+    const unsigned long long *valid_count, const double *coeffs,
+    const unsigned int *exponents) {
 
-    // Precompute coefficients for harmonic polynomials once
     unsigned int kMax = alphaAbs / 2;
-    unsigned long long *chunk_offset =
-        malloc((kMax + 1) * sizeof(unsigned long long));
-    unsigned long long *valid_count =
-        malloc((kMax + 1) * sizeof(unsigned long long));
-    unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
-        alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
-    double *coeffs = malloc(coeffs_size * sizeof(double));
-    unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
-    precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
-                                    exponents);
-
     // Decide when to isolate singularies in the real sum for large exponents
     bool largeExp = nu > 10;
 
@@ -895,11 +880,6 @@ static double complex summation_harmonic(
     }
 
     res *= real_int_pow(-2 * M_PI, alphaAbs) / real_int_pow(ms, alphaAbs);
-
-    free(chunk_offset);
-    free(valid_count);
-    free(coeffs);
-    free(exponents);
 
     return res;
 }
@@ -997,6 +977,23 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             cutoffsFourier[k] = floor(cutoff_id * ev_abs_max);
         }
     }
+    // Precompute coefficients for harmonic polynomials once
+    unsigned long long *chunk_offset = NULL;
+    unsigned long long *valid_count = NULL;
+    double *coeffs = NULL;
+    unsigned int *exponents = NULL;
+    unsigned long long coeffs_size = 0;
+    if (variant > 1) {
+        unsigned int kMax = alphaAbs / 2;
+        chunk_offset = malloc((kMax + 1) * sizeof(unsigned long long));
+        valid_count = malloc((kMax + 1) * sizeof(unsigned long long));
+        coeffs_size = precompute_harmonic_h_inner_chunk_size(
+            alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
+        coeffs = malloc(coeffs_size * sizeof(double));
+        exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
+        precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
+                                        exponents);
+    }
     // handle special case of non-positive integer values nu.
     double complex res = NAN;
     double x_t2_squared = dot(dim, x_t2, x_t2);
@@ -1050,13 +1047,15 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                  rot * xfactor;
             xfactor = 1;
         } else if (variant == 2) {
-            res = summation_harmonic(nu, dim, alphaAbs, alpha, lambda, ms, m_real,
+            res = summation_harmonic(nu, dim, alphaAbs, lambda, ms, m_real,
                                      m_fourier, x_t1, x_t2, y_t1, y_t2, cutoffsReal,
-                                     cutoffsFourier, diag, xfactor);
+                                     cutoffsFourier, diag, xfactor, chunk_offset,
+                                     valid_count, coeffs, exponents);
         } else if (variant == 3) {
-            res = summation_harmonic_reg(nu, dim, alphaAbs, alpha, lambda, ms,
-                                         m_real, m_fourier, x_t1, x_t2, y_t1, y_t2,
-                                         cutoffsReal, cutoffsFourier, diag, xfactor);
+            res = summation_harmonic_reg(
+                nu, dim, alphaAbs, lambda, ms, m_real, m_fourier, x_t1, x_t2, y_t1,
+                y_t2, cutoffsReal, cutoffsFourier, diag, xfactor, chunk_offset,
+                valid_count, coeffs, exponents);
         }
 
         // In the harmonic method, the res is already set as there is no global
@@ -1066,17 +1065,22 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                   (s1 + pow(lambda, dim) * s2);
         }
     }
-    free(x_t2);
-    free(y_t2);
     res *= pow(ms, nu);
     // apply correction to matrix scaling if nu = d + 2k
     unsigned int k = (unsigned int)fmax(0., nearbyint((nu - (double)dim) / 2));
     if ((variant == 1 || variant == 3) && (nu == (dim + 2 * (double)k))) {
         if (alphaAbs) {
+            double fact = 1;
+            for (int i = 2; i <= k; i++) {
+                fact *= i;
+            }
             res -= pow(M_PI, (double)k + ((double)dim / 2)) /
-                   tgamma((double)k + ((double)dim / 2)) * negative_one_pow(k + 1) *
-                   polynomial_y_der(k, dim, y, alpha, alphaAbs, k) * log(ms * ms) /
-                   vol;
+                   tgamma((double)k + ((double)dim / 2)) * negative_one_pow(k + 1) /
+                   fact *
+                   polynomial_y_der_harmonic((int)k, dim, y, (int)alphaAbs,
+                                             chunk_offset, valid_count, coeffs,
+                                             exponents) *
+                   log(ms * ms) / vol;
         } else {
             if (k) {
                 double ySquared = 0;
@@ -1094,6 +1098,12 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             }
         }
     }
+    free(chunk_offset);
+    free(valid_count);
+    free(coeffs);
+    free(exponents);
+    free(x_t2);
+    free(y_t2);
     return res;
 }
 #undef G_BOUND

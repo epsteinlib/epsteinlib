@@ -103,9 +103,24 @@ double crandall_gReg_harmonic(int k, int n, unsigned int dim, double s,
 double complex crandall_g_lower(unsigned int dim, double nu, const double *z,
                                 double prefactor);
 
-double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NOLINT
-                        const unsigned int *alpha, unsigned int alphaAbs,
-                        unsigned int n);
+/** @brief Calculates the derivatives of Y_ell(z) = (pi * z**2)**ell.
+ * @param[in] ell: integer power.
+ * @param[in] dim: dimension of z.
+ * @param[in] z: vector z of the polynomial.
+ * @parma[in] alpha: multi-index for the derivative.
+ * @param[in] n: |alpha| .
+ * @param[in] chunk_offset: starting offsets for each k.
+ * @param[in] valid_count: number of valid gamma entries for each k.
+ * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
+ * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
+ * @return partial derivative of Y_ell(z).
+ */
+double polynomial_y_der_harmonic(int ell, unsigned int dim,
+                                 const double *z, // NOLINT
+                                 int n, const unsigned long long *chunk_offset,
+                                 const unsigned long long *valid_count,
+                                 const double *coeffs,
+                                 const unsigned int *exponents);
 
 /**
  * @brief Calculates the regularization of the zero summand in the second

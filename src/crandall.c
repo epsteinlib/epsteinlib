@@ -12,6 +12,7 @@
  */
 
 #include "gamma.h"
+#include "harmonics.h"
 #include "stdbool.h"
 #include "tools.h"
 #include <complex.h>
@@ -286,6 +287,51 @@ double complex crandall_gReg_harmonic(int k, int n, unsigned int dim, double s,
     double exp = s + (2 * (n - k));
 
     return -crandall_g_lower(dim, exp, z, prefactor);
+}
+
+/** @brief Calculates the derivatives of Y_ell(z) = (pi * z**2)**ell.
+ * @param[in] ell: integer power.
+ * @param[in] dim: dimension of z.
+ * @param[in] z: vector z of the polynomial.
+ * @parma[in] alpha: multi-index for the derivative.
+ * @param[in] n: |alpha| .
+ * @param[in] chunk_offset: starting offsets for each k.
+ * @param[in] valid_count: number of valid gamma entries for each k.
+ * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
+ * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
+ * @return partial derivative of Y_ell(z).
+ */
+double polynomial_y_der_harmonic(int ell, unsigned int dim,
+                                 const double *z, // NOLINT
+                                 int n, const unsigned long long *chunk_offset,
+                                 const unsigned long long *valid_count,
+                                 const double *coeffs,
+                                 const unsigned int *exponents) {
+
+    double zSquared = dot(dim, z, z);
+    double res = 0;
+
+    for (int k = 0; k <= n / 2; k++) {
+        double h =
+            harmonic_h(k, dim, z, n, chunk_offset, valid_count, coeffs, exponents);
+
+        // falling pochhammer symbol (ell)_(n-k)(ell + dim/2 -1)_k
+        double poch = 1;
+        for (int i = 0; i < n - k; i++) {
+            poch *= ell - i;
+        }
+        for (int i = 1; i <= k; i++) {
+            poch *= ell + ((double)dim / 2.) - i;
+        }
+
+        if (h && poch) {
+            res += h * poch * real_int_pow(zSquared, ell + k - n);
+        }
+    }
+
+    res *= real_int_pow(M_PI, ell) * ldexp(1., n);
+
+    return res;
 }
 
 /** @brief Calculates the derivatives of Y_k(z) / n! = (pi * z**2)**k / n! where n <=
