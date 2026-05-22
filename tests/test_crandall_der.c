@@ -88,7 +88,7 @@ int test_polynomial_y_der(void) {
 
         alphaAbs = mult_abs(dim, alpha);
 
-        num = polynomial_y_der(k, dim, z, alpha, alphaAbs);
+        num = polynomial_y_der(k, dim, z, alpha, alphaAbs, 1);
         ref = refRead[0] + 0 * I;
 
         errorAbs = errAbs(ref, num);

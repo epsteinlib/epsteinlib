@@ -43,19 +43,4 @@ double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
 double singularity_s_der(double nu, unsigned int dim, const double *z,
                          const unsigned int *alpha, unsigned int alphaAbs);
 
-/** @brief Calculates the derivatives of Y_k(z)= (pi * z**2)**k.
- * @param[in] k: integer power.
- * @param[in] dim: dimension of z.
- * @param[in] z: vector z of the polynomial.
- * @parma[in] alpha: multi-index for the derivative.
- * @param[in] alphaAbs: |alpha| .
- * @param[in] chunk_offset: starting offsets for each k.
- * @param[in] valid_count: number of valid gamma entries for each k.
- * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
- * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
- * @return partial derivative of Y_k(z).
- */
-double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NOLINT
-                        const unsigned int *alpha, unsigned int alphaAbs);
-
 #endif
