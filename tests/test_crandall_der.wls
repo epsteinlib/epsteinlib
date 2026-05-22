@@ -10,7 +10,7 @@
 
 
 (* ::Text:: *)
-(*This file introduces reference functions beyond the methods employed in EpsteinLib. In particular, there are multiple strategies for computing the derivatives of helper functions such as the Crandall functions. Here, we favor simple, but unstable representations for the derivatives, that we compare for high precision with the involved harmonic methods in EpsteinLib.*)
+(*This file introduces reference functions beyond the methods employed in EpsteinLib. In particular, there are multiple strategies for computing the derivatives of helper functions for the singularity. Most of the derivatives for helper functions are provided here based on straightforward Fa\[AGrave] di Bruno applications, as well as the harmonic approach. Here, we favor using the opposite method to compute high-precision reference values, than the one employed in EspteinLib for the particular function.*)
 
 
 (* ::Subsection::Closed:: *)
@@ -88,7 +88,7 @@ LDer[z_,\[Alpha]_]:=Piecewise[{
 
 
 (* ::Text:: *)
-(*This is the method we use in EpsteinLib for the derivatives of for  \|01d42b \[RightTeeArrow] (\[Pi] \|01d42b \[CenterDot] \|01d42b)^(d+2 ell).*)
+(*Harmonic method for the derivatives of for  \|01d42b \[RightTeeArrow] (\[Pi] \|01d42b \[CenterDot] \|01d42b)^(d+2 ell).*)
 
 
 YDerHarmonic[ell_/;Element[ell,NonNegativeIntegers],z_,\[Alpha]_]:=Module[
@@ -115,7 +115,7 @@ sDer[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=(
 
 
 (* ::Text:: *)
-(*YDerGeneral  implements the \[Alpha]-derivatives of \|01d42b \[RightTeeArrow] (\[Pi] \|01d42b \[CenterDot] \|01d42b)^\[Nu] for real arguments \[Nu].*)
+(*YDerGeneral implements the \[Alpha]-derivatives of \|01d42b \[RightTeeArrow] (\[Pi] \|01d42b \[CenterDot] \|01d42b)^\[Nu] for real arguments \[Nu].*)
 
 
 polalt[z_,\[Alpha]_,\[Beta]_]:=Apply[Times,Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2z)^(\[Alpha]-2\[Beta])]
@@ -459,11 +459,11 @@ Export["csv/crandall_g_der_ref.csv",crandallDerTab];
 (*Setup test parameters.*)
 
 
-range = Range[100];
+range = Range[999];
 Do[
 	k0[i]=RandomInteger[{0,10}]
 	;z0[i]={randRational,randRational,randRational}
-	;\[Alpha]0[i]=If[i<10,{0,0,i-1},{RandomInteger[{0,40}],RandomInteger[{0,40}],RandomInteger[{0,40}]}]
+	;\[Alpha]0[i]=If[i<10,{0,0,i-1},{RandomInteger[{0,50}],RandomInteger[{0,50}],RandomInteger[{0,50}]}]
 	,{i,range}
 ]
 
@@ -472,7 +472,7 @@ Do[
 (*Generate reference values.*)
 
 
-YDerTab=ParallelTable[Flatten[{k0[i],N[z0[i],30],\[Alpha]0[i],N[SetPrecision[Derivative[\[Alpha]0[i]][(Pi # . #)^k0[i]&][z0[i]],200]]}],{i,range}];
+YDerTab=ParallelTable[Flatten[{k0[i],N[z0[i],30],\[Alpha]0[i],N[YDer[k0[i],z0[i],\[Alpha]0[i]]]}],{i,range}];
 
 
 (* ::Text:: *)
@@ -483,7 +483,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/polynomial_y_der_ref.csv",YDerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create singularity derivatives reference values*)
 
 
