@@ -451,7 +451,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/crandall_g_der_ref.csv",crandallDerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create (\[Pi] y\.b2)^k derivatives reference values*)
 
 
@@ -483,7 +483,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/polynomial_y_der_ref.csv",YDerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create singularity derivatives reference values for fast, low-precision naive method*)
 
 
@@ -518,7 +518,7 @@ sDerTab=Join[
 Export[NotebookDirectory[]<>"csv/singularity_s_der_ref.csv",sDerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create singularity derivatives reference values for high-precision harmonic method*)
 
 
