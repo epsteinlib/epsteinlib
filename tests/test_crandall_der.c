@@ -147,7 +147,7 @@ int test_polynomial_y_der(void) {
  *
  * @return number of failed tests.
  * */
-int test_singularity_s_der(void) {
+int test_singularity_s_der_harmonic(void) {
     printf("%s ", __func__);
 
     char path[MAX_PATH_LENGTH];
@@ -206,7 +206,8 @@ int test_singularity_s_der(void) {
 
         nu = nuRef[0];
 
-        num = (double complex)singularity_s_der(nu, dim, z, alpha, alphaAbs);
+        num = (double complex)singularity_s_der_harmonic_wrapper(nu, dim, z, alpha,
+                                                                 alphaAbs);
         ref = refRead[0] + 0 * I;
 
         errorAbs = errAbs(ref, num);
@@ -414,7 +415,7 @@ int test_crandall_gReg_harmonic(void) { // NOLINT
 int main(void) {
     int failed = 0;
     failed += run_timed_test(test_polynomial_y_der);
-    failed += run_timed_test(test_singularity_s_der);
+    failed += run_timed_test(test_singularity_s_der_harmonic);
     failed += run_timed_test(test_crandall_gReg_harmonic);
     return failed;
 }

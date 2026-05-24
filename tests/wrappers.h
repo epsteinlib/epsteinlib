@@ -40,7 +40,8 @@ double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
  * @parma[in] alphaAbs: absolute value of the multi-index alpha.
  * @return partial derivative of s_ν(z).
  */
-double singularity_s_der(double nu, unsigned int dim, const double *z,
-                         const unsigned int *alpha, unsigned int alphaAbs);
+double singularity_s_der_harmonic_wrapper(double nu, unsigned int dim,
+                                          const double *z, const unsigned int *alpha,
+                                          unsigned int alphaAbs);
 
 #endif
