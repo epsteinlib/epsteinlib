@@ -483,20 +483,20 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/polynomial_y_der_ref.csv",YDerTab];
 
 
-(* ::Subsection::Closed:: *)
-(*Create singularity derivatives reference values*)
+(* ::Subsection:: *)
+(*Create singularity derivatives reference values for fast, low-precision naive method*)
 
 
 (* ::Text:: *)
 (*Setup test parameters.*)
 
 
-range = 500;
+range = 250;
 Do[
 	k0[i]=RandomInteger[{0,10}]
 	;\[Nu]0[i]=randRational
 	;z0[i]={randRational,randRational,randRational}
-	;\[Alpha]0[i]=If[i<10,{0,0,i-1},{RandomInteger[{0,8}],RandomInteger[{0,8}],RandomInteger[{0,8}]}]
+	;\[Alpha]0[i]=If[i<10,{0,0,i-1},{RandomInteger[{0,6}],RandomInteger[{0,6}],RandomInteger[{0,6}]}]
 	,{i,range}
 ]
 
@@ -506,9 +506,56 @@ Do[
 
 
 sDerTab=Join[
-	ParallelTable[Flatten[{N[3+2*k0[i]],N[z0[i]],\[Alpha]0[i],N[SetPrecision[sDerFull[3+2 *k0[i], z0[i],\[Alpha]0[i]],200]]}],{i,range-1}]
+	ParallelTable[Flatten[{N[3+2*k0[i]],N[z0[i]],\[Alpha]0[i],N[SetPrecision[sDerFull[3+2 *k0[i], z0[i],\[Alpha]0[i]],200]]}],{i,range}]
 	,ParallelTable[Flatten[{N[\[Nu]0[i]],N[z0[i]],\[Alpha]0[i],N[SetPrecision[sDerFull[\[Nu]0[i], z0[i],\[Alpha]0[i]],200]]}],{i,range}]
 ];
+
+
+(* ::Text:: *)
+(*Safe reference values.*)
+
+
+Export[NotebookDirectory[]<>"csv/singularity_s_der_ref.csv",sDerTab];
+
+
+(* ::Subsection:: *)
+(*Create singularity derivatives reference values for high-precision harmonic method*)
+
+
+(* ::Text:: *)
+(*We include the prior reference values and add high order derivatives on top. If one replaces "sDerTab " above with the here computed "sDerTabHarmonic" the tests for the naive method fail dramatically.*)
+
+
+(* ::Text:: *)
+(*Setup test parameters.*)
+
+
+range = 250;
+Do[
+	k0[i]=RandomInteger[{0,20}]
+	;\[Nu]0[i]=randRational
+	;z0[i]={randRational,randRational,randRational}
+	;\[Alpha]0[i]=If[i<10,{0,0,i-1},{RandomInteger[{0,10}],RandomInteger[{0,10}],RandomInteger[{0,10}]}]
+	,{i,range}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values, both for special cases \[Nu] \[Element] d - 2k and real \[Nu].*)
+
+
+sDerTabHarmonic=Join[
+	sDerTab
+	,ParallelTable[Flatten[{N[3+2*k0[i]],N[z0[i]],\[Alpha]0[i],N[SetPrecision[sDerFull[3+2 *k0[i], z0[i],\[Alpha]0[i]],200]]}],{i,range-1}]
+	,ParallelTable[Flatten[{N[\[Nu]0[i]],N[z0[i]],\[Alpha]0[i],N[SetPrecision[sDerFull[\[Nu]0[i], z0[i],\[Alpha]0[i]],200]]}],{i,range}]
+];
+
+
+(* ::Text:: *)
+(*Safe reference values.*)
+
+
+Export[NotebookDirectory[]<>"csv/singularity_s_der_harmonic_ref.csv",sDerTabHarmonic];
 
 
 (* ::Subsection::Closed:: *)

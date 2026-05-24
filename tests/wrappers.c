@@ -12,6 +12,8 @@
 #include "../src/harmonics.h"
 #include "../src/hpdyad.h"
 #include "../src/tools.h"
+#include "complex.h"
+#include "stdbool.h"
 #include <math.h>
 #include <stdlib.h>
 
@@ -76,10 +78,10 @@ static double singularity_s(double nu, unsigned int dim, double zSquared) {
            pow(zArg, (nu - (double)dim) / 2);
 }
 
-/** @brief Computes the derivatives singularity s_ν(z) where the coefficients for the
- * harmonic polynomials are provided as arguments. For the generic case (ν ≠ d + 2ℓ
- * for any non-negative integer ℓ): s_ν(z) = π^(ν/2) / Γ(ν/2) · Γ((d−ν)/2) · (π
- * z·z)^((ν−d)/2) and for the logarithmic case (ν = d + 2ℓ, ℓ ≥ 0): s_{d+2ℓ}(z) =
+/** @brief Computes the derivatives of the singularity s_ν(z) where the coefficients
+ * for the harmonic polynomials are provided as arguments. For the generic case (ν ≠
+ * d + 2ℓ for any non-negative integer ℓ): s_ν(z) = π^(ν/2) / Γ(ν/2) · Γ((d−ν)/2) ·
+ * (π z·z)^((ν−d)/2) and for the logarithmic case (ν = d + 2ℓ, ℓ ≥ 0): s_{d+2ℓ}(z) =
  * π^(ℓ+d/2) / Γ(ℓ+d/2) · (−1)^(ℓ+1) / ℓ! · (π z·z)^ℓ · log(π z·z)
  * @param[in] nu: epxonent of singularity.
  * @param[in] dim: dimension of z.
@@ -117,6 +119,7 @@ static double singularity_s_der_harmonic(double nu, unsigned int dim,
             int m = (int)alphaAbs - (2 * k);
 
             if (ell >= m + k && nu == (double)(dim + (2 * ell))) {
+                // pochhamer symbol (nu/2-k-1)_m
                 double poch = 1;
                 for (int i = 1; i <= m; i++) {
                     poch *= nu / 2 - k - i;
@@ -155,7 +158,8 @@ static double singularity_s_der_harmonic(double nu, unsigned int dim,
     return res;
 }
 
-/** @brief Computes the derivatives singularity s_ν(z).
+/** @brief Wraps the derivatives of the singularity s_ν(z) by the harmonic method.
+ *
  * For the generic case (ν ≠ d + 2ℓ for any
  * non-negative integer ℓ): s_ν(z) = π^(ν/2) / Γ(ν/2) · Γ((d−ν)/2) · (π
  * z·z)^((ν−d)/2) and for the logarithmic case (ν = d + 2ℓ, ℓ ≥ 0): s_{d+2ℓ}(z) =
@@ -185,4 +189,280 @@ double singularity_s_der_harmonic_wrapper(double nu, unsigned int dim,
 
     return singularity_s_der_harmonic(nu, dim, z, alphaAbs, chunk_offset,
                                       valid_count, coeffs, exponents);
+}
+
+/** @brief Calculates the polynomial l_(alpha,beta)(y) = - (-1)**|alpha - beta| *
+ * binom(alpha,beta) * (alpha-beta)! / (alpha - 2 beta)! |alpha - beta|! / |alpha -
+ * beta| * (2 * y)**(alpha - 2 beta) where 2 beta =< alpha
+ * @param[in] dim: dimension of alpha, beta and y.
+ * @param[in] y: vector of the polynomial.
+ * @parma[in] alpha: upper multi-index.
+ * @parma[in] beta: lower multi-index.
+ * @return p(y).
+ */
+static double polynomial_l(unsigned int dim, const double *z,
+                           const unsigned int *alpha, const unsigned int *beta) {
+
+    double res = 1;
+    unsigned int ai = 0;
+    unsigned int bi = 0;
+    unsigned long long factFrac;
+    unsigned int aMinusb = 0;
+
+    for (int i = 0; i < dim; i++) {
+        ai = alpha[i];
+        bi = beta[i];
+        aMinusb += ai - bi;
+        factFrac = 1; // Calculate (alpha - beta)!/(alpha - 2beta)!
+        for (unsigned int j = ai - (2 * bi) + 1; j <= ai - bi; j++) {
+            factFrac *= j;
+        }
+        res *= (double)binom((long long)ai, (long long)bi) * (double)factFrac *
+               real_int_pow(2 * z[i], ai - (2 * bi));
+    }
+
+    unsigned long long factorial = 1;
+    for (int j = 1; j < aMinusb; j++) {
+        factorial *= j;
+    }
+
+    res *= (double)factorial;
+
+    if (!(aMinusb % 2)) {
+        res *= -1.;
+    }
+
+    return res;
+}
+
+/** @brief Calculates the derivatives of L(z) = log(pi * z**2)
+ * @param[in] dim: dimension of z.
+ * @param[in] z: vector of the polynomial.
+ * @parma[in] alpha: multi-index for the derivative.
+ * @parma[in] alphaAbs: absolute value of the multi-index alpha.
+ * @return partial derivative of L(z).
+ */
+static double log_l_der(unsigned int dim, const double *z, const unsigned int *alpha,
+                        unsigned int alphaAbs) {
+    double zArg = dot(dim, z, z);
+    // Return function if there is no derivative
+    if (!alphaAbs) {
+        return log(M_PI * zArg);
+    }
+
+    unsigned int beta[dim];
+    for (unsigned int j = 0; j < dim; j++) {
+        beta[j] = 0;
+    }
+    unsigned int aMinusb = alphaAbs;
+
+    unsigned long long totalCount = 1;
+    for (unsigned int j = 0; j < dim; j++) {
+        totalCount *= alpha[j] / 2 + 1;
+    }
+
+    double sum = 0.0;
+    double epsilon = 0.0;
+
+    // Iterate over every multi-index beta so that 2 * beta <= alpha
+    for (unsigned long long i = 0; i < totalCount; i++) {
+
+        double complex summand =
+            polynomial_l(dim, z, alpha, beta) / real_int_pow(zArg, aMinusb);
+        kahan_add_r(&sum, &epsilon, summand);
+
+        for (unsigned int idx = 0; idx < dim; idx++) {
+            if (beta[idx] + 1 <= alpha[idx] / 2) {
+                beta[idx]++;
+                aMinusb--;
+                break;
+            }
+            aMinusb += beta[idx];
+            beta[idx] = 0;
+        }
+    }
+
+    return sum;
+}
+
+/** @brief Computes p_(alpha,beta)(y) = (alpha choose beta)
+ * ((alpha - beta)! / (alpha - 2*beta)!) * (2*y)^(alpha - 2*beta)
+ * where 2 beta =< alpha
+ * @param[in] dim: dimension of alpha, beta and y.
+ * @param[in] y: vector of the polynomial.
+ * @parma[in] alpha: upper multi-index.
+ * @parma[in] beta: lower multi-index.
+ * @return p(y).
+ */
+static double polynomial_p(unsigned int dim, const double *z,
+                           const unsigned int *alpha, const unsigned int *beta) {
+
+    double res = 1;
+    unsigned int ai = 0;
+    unsigned int bi = 0;
+    unsigned long long factFrac;
+
+    for (int i = 0; i < dim; i++) {
+        ai = alpha[i];
+        bi = beta[i];
+        factFrac = 1; // Calculate (alpha - beta)!/(alpha - 2beta)!
+        for (unsigned int j = ai - (2 * bi) + 1; j <= ai - bi; j++) {
+            factFrac *= j;
+        }
+        res *= (double)binom((long long)ai, (long long)bi) * (double)factFrac *
+               real_int_pow(2 * z[i], ai - (2 * bi));
+    }
+
+    return res;
+}
+
+/** @brief Calculates the derivatives of Y_nu(z) = (pi * z**2)**nu for real nu
+ * where nu != dim + 2*k for any non-negative integer k.
+ * @param[in] k: integer power.
+ * @param[in] dim: dimension of z.
+ * @param[in] y: vector of the polynomial.
+ * @parma[in] alpha: multi-index for the derivative.
+ * @param[in] n: factorial divisor smaller than k.
+ * @return partial derivative of Y_k(z) / n!.
+ */
+static double polynomial_y_der_general(double nu, unsigned int dim,
+                                       const double *z, // NOLINT
+                                       const unsigned int *alpha,
+                                       unsigned int alphaAbs) {
+
+    double zArg = dot(dim, z, z);
+
+    unsigned int beta[dim];
+    for (unsigned int j = 0; j < dim; j++) {
+        beta[j] = 0;
+    }
+    unsigned int aMinusb = alphaAbs;
+
+    unsigned long long totalCount = 1;
+    for (unsigned int j = 0; j < dim; j++) {
+        totalCount *= alpha[j] / 2 + 1;
+    }
+
+    double sum = 0.0;
+    double epsilon = 0.0;
+
+    // Iterate over every multi-index beta so that 2 * beta <= alpha
+    for (unsigned long long i = 0; i < totalCount; i++) {
+
+        double poch = 1;
+        for (int j = 0; j < aMinusb; j++) {
+            poch *= nu - j;
+        }
+
+        double complex summand = poch * polynomial_p(dim, z, alpha, beta) /
+                                 pow(zArg, (double)aMinusb - nu);
+        kahan_add_r(&sum, &epsilon, summand);
+
+        for (unsigned int idx = 0; idx < dim; idx++) {
+            if (beta[idx] + 1 <= alpha[idx] / 2) {
+                beta[idx]++;
+                aMinusb--;
+                break;
+            }
+            aMinusb += beta[idx];
+            beta[idx] = 0;
+        }
+    }
+
+    return pow(M_PI, nu) * sum;
+}
+
+/** @brief Computes the derivatives singularity s_ν(z) by the harmonic method.
+ * For the generic case (ν ≠ d + 2ℓ for any
+ * non-negative integer ℓ): s_ν(z) = π^(ν/2) / Γ(ν/2) · Γ((d−ν)/2) · (π
+ * z·z)^((ν−d)/2) and for the logarithmic case (ν = d + 2ℓ, ℓ ≥ 0): s_{d+2ℓ}(z) =
+ * π^(ℓ+d/2) / Γ(ℓ+d/2) · (−1)^(ℓ+1) / ℓ! · (π z·z)^ℓ · log(π z·z)
+ * @param[in] nu: epxonent of singularity.
+ * @param[in] dim: dimension of z.
+ * @param[in] z: vector of the singularity.
+ * @parma[in] alphaAbs: absolute value of the multi-index alpha.
+ * @return partial derivative of s_ν(z).
+ */
+double singularity_s_der(double nu, unsigned int dim, const double *z, // NOLINT
+                         const unsigned int *alpha, unsigned int alphaAbs) {
+
+    // only works in this case
+    unsigned int k = (unsigned int)fmax(0., nearbyint((nu - (double)dim) / 2));
+
+    if (!(nu == (dim + 2 * (double)k))) {
+        return pow(M_PI, nu / 2.) * tgamma(((double)dim - nu) / 2.) /
+               tgamma(nu / 2.) *
+               polynomial_y_der_general((nu - (double)dim) / 2., dim, z, alpha,
+                                        alphaAbs);
+    }
+
+    // derivatives for special case nu = dim + 2* k
+    unsigned long long kFact = 1;
+    for (int j = 1; j < k + 1; j++) {
+        kFact *= j;
+    }
+
+    double prefactor = pow(M_PI, (double)k + ((double)dim / 2.)) /
+                       tgamma((double)k + ((double)dim / 2.)) *
+                       ((k % 2) ? 1. : -1.) / (double)kFact;
+
+    unsigned int beta[dim];
+    unsigned int gamma[dim]; // gamma = alpha - beta
+    for (int i = 0; i < dim; i++) {
+        beta[i] = 0;
+        gamma[i] = alpha[i];
+    }
+
+    // Return function if there is no derivative
+    if (!alphaAbs) {
+        double zArg = M_PI * dot(dim, z, z);
+        return prefactor * real_int_pow(zArg, k) * log(zArg);
+    }
+
+    unsigned int betaAbs = 0;
+    unsigned int gammaAbs = alphaAbs;
+
+    double sum = 0.0;
+    double epsilon = 0.0;
+
+    unsigned int multBinom;
+
+    bool done = false;
+    // Iterate over every multi-index beta so that beta + gamma = alpha
+    while (1) {
+
+        if (betaAbs / 2 < k + dim) {
+            multBinom = 1;
+            for (int i = 0; i < dim; i++) {
+                multBinom *= binom((long long)alpha[i], (long long)beta[i]);
+            }
+            double summand = (double)multBinom *
+                             polynomial_y_der(k, dim, z, beta, betaAbs, 1) *
+                             log_l_der(dim, z, gamma, gammaAbs);
+            kahan_add_r(&sum, &epsilon, summand);
+        }
+
+        done = true;
+        for (unsigned int idx = 0; idx < dim; idx++) {
+            if (beta[idx] < alpha[idx]) {
+                betaAbs++;
+                gammaAbs--;
+                beta[idx]++;
+                gamma[idx]--;
+                done = false;
+                break;
+            }
+            betaAbs -= beta[idx];
+            gammaAbs += beta[idx];
+            gamma[idx] += beta[idx];
+            beta[idx] = 0;
+            done = true;
+        }
+
+        if (done) {
+            break;
+        }
+    }
+
+    return prefactor * sum;
 }
