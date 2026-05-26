@@ -78,6 +78,80 @@ static double singularity_s(double nu, unsigned int dim, double zSquared) {
            pow(zArg, (nu - (double)dim) / 2);
 }
 
+/** @brief Calculates the derivatives of Y_ell(z) = (pi * z**2)**ell.
+ * @param[in] ell: integer power.
+ * @param[in] dim: dimension of z.
+ * @param[in] z: vector z of the polynomial.
+ * @param[in] n: |alpha| .
+ * @param[in] chunk_offset: starting offsets for each k.
+ * @param[in] valid_count: number of valid gamma entries for each k.
+ * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
+ * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
+ * @return partial derivative of Y_ell(z).
+ */
+double polynomial_y_der_harmonic(int ell, unsigned int dim,
+                                 const double *z, // NOLINT
+                                 int n, const unsigned long long *chunk_offset,
+                                 const unsigned long long *valid_count,
+                                 const double *coeffs,
+                                 const unsigned int *exponents) {
+
+    double zSquared = dot(dim, z, z);
+    double res = 0;
+
+    for (int k = 0; k <= n / 2; k++) {
+        double h =
+            harmonic_h(k, dim, z, n, chunk_offset, valid_count, coeffs, exponents);
+
+        // falling pochhammer symbol (ell)_(n-k)(ell + dim/2 -1)_k
+        double poch = 1;
+        for (int i = 0; i < n - k; i++) {
+            poch *= ell - i;
+        }
+        for (int i = 1; i <= k; i++) {
+            poch *= ell + ((double)dim / 2.) - i;
+        }
+
+        if (h && poch) {
+            res += h * poch * real_int_pow(zSquared, ell + k - n);
+        }
+    }
+
+    res *= real_int_pow(M_PI, ell) * ldexp(1., n);
+
+    return res;
+}
+
+/** @brief Calculates the derivatives of Y_ell(z) = (pi * z**2)**ell.
+ * @param[in] ell: integer power.
+ * @param[in] dim: dimension of z.
+ * @param[in] z: vector z of the polynomial.
+ * @parma[in] alpha: multi-index for the derivative.
+ * @param[in] alphaAbs: |alpha|.
+ * @return partial derivative of Y_ell(z).
+ */
+double polynomial_y_der_harmonic_wrapper(int ell, unsigned int dim,
+                                         const double *z, // NOLINT
+                                         const unsigned int *alpha,
+                                         unsigned int alphaAbs) {
+
+    // Precompute coefficients for harmonic polynomials
+    unsigned int kMax = alphaAbs / 2;
+    unsigned long long *chunk_offset =
+        malloc((kMax + 1) * sizeof(unsigned long long));
+    unsigned long long *valid_count =
+        malloc((kMax + 1) * sizeof(unsigned long long));
+    unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
+        alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
+    double *coeffs = malloc(coeffs_size * sizeof(double));
+    unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
+    precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
+                                    exponents);
+
+    return polynomial_y_der_harmonic(ell, dim, z, (int)alphaAbs, chunk_offset,
+                                     valid_count, coeffs, exponents);
+}
+
 /** @brief Computes the derivatives of the singularity s_ν(z) where the coefficients
  * for the harmonic polynomials are provided as arguments. For the generic case (ν ≠
  * d + 2ℓ for any non-negative integer ℓ): s_ν(z) = π^(ν/2) / Γ(ν/2) · Γ((d−ν)/2) ·

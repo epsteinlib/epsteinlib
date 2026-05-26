@@ -451,19 +451,19 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/crandall_g_der_ref.csv",crandallDerTab];
 
 
-(* ::Subsection::Closed:: *)
-(*Create (\[Pi] y\.b2)^k derivatives reference values*)
+(* ::Subsection:: *)
+(*Create (\[Pi] y\.b2)^k derivatives reference values for slow harmonic method*)
 
 
 (* ::Text:: *)
 (*Setup test parameters.*)
 
 
-range = Range[999];
+range = Range[500];
 Do[
 	k0[i]=RandomInteger[{0,10}]
 	;z0[i]={randRational,randRational,randRational}
-	;\[Alpha]0[i]=If[i<10,{0,0,i-1},{RandomInteger[{0,50}],RandomInteger[{0,50}],RandomInteger[{0,50}]}]
+	;\[Alpha]0[i]=If[i<10,{0,0,i-1},{RandomInteger[{0,10}],RandomInteger[{0,10}],RandomInteger[{0,10}]}]
 	,{i,range}
 ]
 
@@ -472,7 +472,42 @@ Do[
 (*Generate reference values.*)
 
 
-YDerTab=ParallelTable[Flatten[{k0[i],N[z0[i],30],\[Alpha]0[i],N[YDer[k0[i],z0[i],\[Alpha]0[i]]]}],{i,range}];
+YDerTabH=ParallelTable[Flatten[{k0[i],N[z0[i],30],\[Alpha]0[i],N[YDer[k0[i],z0[i],\[Alpha]0[i]]]}],{i,range}];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+SetDirectory[NotebookDirectory[]];
+Export["csv/polynomial_y_der_harmonic_ref.csv",YDerTabH];
+
+
+(* ::Subsection:: *)
+(*Create (\[Pi] y\.b2)^k derivatives reference values for fast, naive method*)
+
+
+(* ::Text:: *)
+(*Setup test parameters.  The harmonic method is out-scaled for these parameters and has an higher-error in the C implementation than the naive method used in YDer. The latter method for the computation of the derivatives of (\[Pi] y\.b2)^k (which is used in EpsteinLib)  has reasonable scaling in |\[Alpha]| and d.*)
+
+
+range = Range[499];
+Do[
+	k0[i]=RandomInteger[{0,10}]
+	;z0[i]={randRational,randRational,randRational}
+	;\[Alpha]0[i]=If[i<10,{0,0,i-1},{RandomInteger[{10,50}],RandomInteger[{0,50}],RandomInteger[{0,50}]}]
+	,{i,range}
+]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+YDerTab=Join[
+	YDerTabH
+	,ParallelTable[Flatten[{k0[i],N[z0[i],30],\[Alpha]0[i],N[YDer[k0[i],z0[i],\[Alpha]0[i]]]}],{i,range}]
+];
 
 
 (* ::Text:: *)

@@ -29,6 +29,19 @@ double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
                              const unsigned int *beta, const unsigned int *theta1,
                              const unsigned int *theta2);
 
+/** @brief Calculates the derivatives of Y_ell(z) = (pi * z**2)**ell.
+ * @param[in] ell: integer power.
+ * @param[in] dim: dimension of z.
+ * @param[in] z: vector z of the polynomial.
+ * @parma[in] alpha: multi-index for the derivative.
+ * @param[in] alphaAbs: |alpha|.
+ * @return partial derivative of Y_ell(z).
+ */
+double polynomial_y_der_harmonic_wrapper(int ell, unsigned int dim,
+                                         const double *z, // NOLINT
+                                         const unsigned int *alpha,
+                                         unsigned int alphaAbs);
+
 /** @brief Wraps the derivatives of the singularity s_ν(z) by the harmonic method.
  *
  * For the generic case (ν ≠ d + 2ℓ for any
