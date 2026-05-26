@@ -60,7 +60,7 @@ test_hpdyad= executable('epsteinlib_test_hpdyad',
 )
 
 test_harmonics= executable('epsteinlib_test_harmonics',
-    ['utils.c','test_harmonics.c'],
+    ['wrappers.c','utils.c','test_harmonics.c'],
     include_directories : incdir,
     dependencies: deps,
     install: false,
@@ -69,7 +69,7 @@ test_harmonics= executable('epsteinlib_test_harmonics',
 )
 
 test_crandall_der = executable('epsteinlib_test_crandall_derivatives',
-    ['utils.c','test_crandall_der.c'],
+    ['wrappers.c','utils.c','test_crandall_der.c'],
     include_directories : incdir,
     dependencies: deps,
     install: false,

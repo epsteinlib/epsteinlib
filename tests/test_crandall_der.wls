@@ -9,6 +9,10 @@
 (*Unit tests for epsteinZeta . c*)
 
 
+(* ::Text:: *)
+(*This file introduces reference functions beyond the methods employed in EpsteinLib. In particular, there are multiple strategies for computing the derivatives of helper functions for the singularity. Most of the derivatives for helper functions are provided here based on straightforward Fa\[AGrave] di Bruno applications, as well as the harmonic approach. Here, we favor using the opposite method to compute high-precision reference values, than the one employed in EspteinLib for the particular function.*)
+
+
 (* ::Subsection::Closed:: *)
 (*Setup*)
 
@@ -42,7 +46,7 @@ Protect[Power];
 cInner[n_,i_,k_,d_]:= Product[2n+d-2-4k-2j,{j,i+1,n/2-k}]
 cOuter[n_,k_,d_]:=2^-k/cInner[n,0,k,d] Product[(2n+d-2ell)/((2n+d+2-4ell)(2n+d-4ell)),{ell,k}]
 hInner[\[Alpha]_,\[Beta]_,\[Gamma]_,n_,k_,d_]:=(-1/2)^Total[\[Beta]] cInner[n,Total[\[Beta]],k,d]Binomial[Total[\[Beta]]+k,k]Total[\[Beta]]!/Apply[Times,Factorial[\[Beta]]] Apply[Times,Binomial[\[Alpha],\[Alpha]+\[Beta]-\[Gamma]](\[Gamma]-\[Beta])!/(2\[Gamma]-\[Alpha]-2\[Beta])!]
-h[k_][x_,\[Alpha]_]:=Module[
+hHarmonic[k_][x_,\[Alpha]_]:=Module[
 	{d,n}
 	,d=Length[\[Alpha]]
 	;n=Total[\[Alpha]]
@@ -84,16 +88,96 @@ LDer[z_,\[Alpha]_]:=Piecewise[{
 
 
 (* ::Text:: *)
+(*Harmonic method for the derivatives of for  \|01d42b \[RightTeeArrow] (\[Pi] \|01d42b \[CenterDot] \|01d42b)^(d+2 ell).*)
+
+
+YDerHarmonic[ell_/;Element[ell,NonNegativeIntegers],z_,\[Alpha]_]:=Module[
+	{n,d}
+	,d=Length[\[Alpha]]
+	;n=Total[\[Alpha]]
+	;\[Pi]^ell 2^Total[\[Alpha]]Total[Table[
+		hHarmonic[k][z,\[Alpha]]FactorialPower[ell,n-k]FactorialPower[ell+d/2-1,k](z . z)^(ell+k-n)
+		,{k,0,Total[\[Alpha]]/2}
+	]]
+]
+
+
+(* ::Text:: *)
 (*Derivatives of singularity for arguments nu = dim + 2k.*)
 
 
-s[k_,{z1_,z2_,z3_}]=\[Pi]^(k+Length[{z1,z2,z3}]/2)/Gamma[k+Length[{z1,z2,z3}]/2](-1)^(k+1)/k!(\[Pi] {z1,z2,z3} . {z1,z2,z3})^k Log[Pi {z1,z2,z3} . {z1,z2,z3}]
 sDer[k_/;Element[k,NonNegativeIntegers],z_,\[Alpha]_]:=(
 	\[Pi]^(k+Length[z]/2)/Gamma[k+Length[z]/2](-1)^(k+1)/k!Total@Table[
 			Apply[Times,Binomial[\[Alpha],\[Beta]]]YDer[k,z,\[Beta]]LDer[z,\[Alpha]-\[Beta]]
 			,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]]]}
 	]
 )
+
+
+(* ::Text:: *)
+(*YDerGeneral implements the \[Alpha]-derivatives of \|01d42b \[RightTeeArrow] (\[Pi] \|01d42b \[CenterDot] \|01d42b)^\[Nu] for real arguments \[Nu].*)
+
+
+polalt[z_,\[Alpha]_,\[Beta]_]:=Apply[Times,Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2z)^(\[Alpha]-2\[Beta])]
+YDerGeneral[\[Nu]_,z_,\[Alpha]_]:=\[Pi]^\[Nu] Total[Flatten[Table[
+	FactorialPower[\[Nu],Total[\[Alpha]]-Total[\[Beta]]]polalt[z,\[Alpha],\[Beta]]/(z . z)^(Total[\[Alpha]]-Total[\[Beta]]-\[Nu])
+	,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}
+]]]
+
+
+(* ::Text:: *)
+(*Derivatives of singularity for real arguments \[Nu].*)
+
+
+sing[\[Nu]_,y_]:=Module[
+	{ell,d}
+	,d=Length[y]
+	;ell=Max[0,Round[(\[Nu]-d)/2]]
+	;Which[
+		PossibleZeroQ[\[Nu]-(d+2 ell)]
+			,\[Pi]^(ell+d/2)/Gamma[ell+d/2](-1)^(ell+1)/ell!(\[Pi] y . y)^ell Log[Pi y . y]
+		,True
+			,\[Pi]^(\[Nu]/2)/Gamma[\[Nu]/2]Gamma[(d-\[Nu])/2](\[Pi] y . y)^((\[Nu]-d)/2)
+	]
+]
+sDerFull[\[Nu]_,z_,\[Alpha]_]:=Module[
+	{ell,d}
+	,d=Length[z]
+	;ell=Max[0,Round[(\[Nu]-d)/2]]
+	;Which[
+		PossibleZeroQ[\[Nu]-(d+2 ell)]
+			,sDer[ell,z,\[Alpha]]
+		,True
+			,\[Pi]^(\[Nu]/2)Gamma[(d-\[Nu])/2]/Gamma[\[Nu]/2]YDerGeneral[(\[Nu]-d)/2,z,\[Alpha]]
+	]
+]
+
+
+(* ::Text:: *)
+(*This is the harmonic method for the singularity derivatives as employed in EpsteinLib.*)
+
+
+sDerHarmonic[\[Nu]_,z_,\[Alpha]_]:=Module[
+	{n,k,d}
+	,d=Length[\[Alpha]]
+	;n=Total[\[Alpha]]
+	;If[PossibleZeroQ[Norm[z]],Return[0]]
+	;Sum[
+		Module[
+			{ell,m,c,q,res}
+			,m=n-2k
+			;ell=Max[m+k,Round[(\[Nu]-d)/2]]
+			;hHarmonic[k][z,\[Alpha]]Which[
+				PossibleZeroQ[\[Nu]-(d+2ell)]
+					,2^k (-2 \[Pi]^2)^(m+k)/FactorialPower[\[Nu]/2-k-1,m]sing[\[Nu]-2(m+k),z]
+				(1+(HarmonicNumber[ell]-HarmonicNumber[ell+k-(m+2k)]+PolyGamma[ell+d/2]-PolyGamma[ell+d/2-k])/Log[Pi z . z])
+				,True
+					,Gamma[(d-\[Nu])/2+k+m]/Gamma[\[Nu]/2-k](-1)^(k+m)2^(2k+m)Pi^(\[Nu]-d/2)(z . z)^((\[Nu]-d)/2-k-m)
+			]
+		]
+		,{k,0,n/2}
+	]
+]
 
 
 (* ::Text:: *)
@@ -182,38 +266,6 @@ GRegHarmonic[\[Nu]_,z_,k_,\[Alpha]_]:=Module[
 randRational := RandomInteger[{-10^(16),10^(16)}]/10^(16)
 randDerivative := RandomInteger[{0,6}]
 randDerivativeBeta[a_] := RandomInteger[{0,Floor[a/2]}]
-
-
-(* ::Subsection::Closed:: *)
-(*Create polynomial p reference values*)
-
-
-(* ::Text:: *)
-(*Setup test parameters.*)
-
-
-range = Range[100];
-Do[
-	z0[i]=10{randRational,randRational,randRational};
-	\[Alpha]0[i]={randDerivative,randDerivative,randDerivative};
-	\[Beta]0[i]={randDerivativeBeta[\[Alpha]0[i][[1]]],randDerivativeBeta[\[Alpha]0[i][[2]]],randDerivativeBeta[\[Alpha]0[i][[3]]]};
-	,{i,range}
-]
-
-
-(* ::Text:: *)
-(*Generate reference values.*)
-
-
-pTab=ParallelTable[Flatten[Join[N[z0[i],30],\[Alpha]0[i],\[Beta]0[i],{N[SetPrecision[p[z0[i],\[Alpha]0[i],\[Beta]0[i]],200],30]}]],{i,range}];
-
-
-(* ::Text:: *)
-(*Save reference values to file.*)
-
-
-SetDirectory[NotebookDirectory[]];
-Export["csv/polynomial_p_ref.csv",pTab];
 
 
 (* ::Subsection::Closed:: *)
@@ -310,7 +362,7 @@ Do[
 (*Generate reference values.*)
 
 
-h1DTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@h[k0[j]][z0[j],\[Alpha]0[j]]},{j,range}];
+h1DTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@hHarmonic[k0[j]][z0[j],\[Alpha]0[j]]},{j,range}];
 
 
 (* ::Text:: *)
@@ -352,7 +404,7 @@ Clear[j,tups]
 (*Generate reference values.*)
 
 
-h3DTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@h[k0[j]][z0[j],\[Alpha]0[j]]},{j,range}];
+h3DTab=ParallelTable[Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@hHarmonic[k0[j]][z0[j],\[Alpha]0[j]]},{j,range}];
 
 
 (* ::Text:: *)
@@ -399,19 +451,19 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/crandall_g_der_ref.csv",crandallDerTab];
 
 
-(* ::Subsection::Closed:: *)
-(*Create polynomial l reference values*)
+(* ::Subsection:: *)
+(*Create (\[Pi] y\.b2)^k derivatives reference values for slow harmonic method*)
 
 
 (* ::Text:: *)
 (*Setup test parameters.*)
 
 
-range = Range[100];
+range = Range[500];
 Do[
-	z0[i]=10{randRational,randRational,randRational};
-	\[Alpha]0[i]={Max[randDerivative,1],randDerivative,randDerivative};
-	\[Beta]0[i]={randDerivativeBeta[\[Alpha]0[i][[1]]],randDerivativeBeta[\[Alpha]0[i][[2]]],randDerivativeBeta[\[Alpha]0[i][[3]]]};
+	k0[i]=RandomInteger[{0,10}]
+	;z0[i]={randRational,randRational,randRational}
+	;\[Alpha]0[i]=If[i<10,{0,0,i-1},{RandomInteger[{0,10}],RandomInteger[{0,10}],RandomInteger[{0,10}]}]
 	,{i,range}
 ]
 
@@ -420,7 +472,7 @@ Do[
 (*Generate reference values.*)
 
 
-lTab=ParallelTable[Flatten[Join[N[z0[i],30],\[Alpha]0[i],\[Beta]0[i],{N[SetPrecision[l[z0[i],\[Alpha]0[i],\[Beta]0[i]],200],30]}]],{i,range}];
+YDerTabH=ParallelTable[Flatten[{k0[i],N[z0[i],30],\[Alpha]0[i],N[YDer[k0[i],z0[i],\[Alpha]0[i]]]}],{i,range}];
 
 
 (* ::Text:: *)
@@ -428,22 +480,22 @@ lTab=ParallelTable[Flatten[Join[N[z0[i],30],\[Alpha]0[i],\[Beta]0[i],{N[SetPreci
 
 
 SetDirectory[NotebookDirectory[]];
-Export["csv/polynomial_l_ref.csv",lTab];
+Export["csv/polynomial_y_der_harmonic_ref.csv",YDerTabH];
 
 
-(* ::Subsection::Closed:: *)
-(*Create (\[Pi] y\.b2)^k derivatives reference values*)
+(* ::Subsection:: *)
+(*Create (\[Pi] y\.b2)^k derivatives reference values for fast, naive method*)
 
 
 (* ::Text:: *)
-(*Setup test parameters.*)
+(*Setup test parameters.  The harmonic method is out-scaled for these parameters and has an higher-error in the C implementation than the naive method used in YDer. The latter method for the computation of the derivatives of (\[Pi] y\.b2)^k (which is used in EpsteinLib)  has reasonable scaling in |\[Alpha]| and d.*)
 
 
-range = Range[100];
+range = Range[499];
 Do[
-	k0[i]=RandomInteger[{0,10}];
-	z0[i]={randRational,randRational,randRational};
-	\[Alpha]0[i]=If[i<10,{0,0,i-1},{randDerivative,randDerivative,randDerivative}];
+	k0[i]=RandomInteger[{0,10}]
+	;z0[i]={randRational,randRational,randRational}
+	;\[Alpha]0[i]=If[i<10,{0,0,i-1},{RandomInteger[{10,50}],RandomInteger[{0,50}],RandomInteger[{0,50}]}]
 	,{i,range}
 ]
 
@@ -452,7 +504,10 @@ Do[
 (*Generate reference values.*)
 
 
-YDerTab=ParallelTable[Flatten[{k0[i],N[z0[i],30],\[Alpha]0[i],N[SetPrecision[Derivative[\[Alpha]0[i]][(Pi # . #)^k0[i]&][z0[i]],200],30]}],{i,range}];
+YDerTab=Join[
+	YDerTabH
+	,ParallelTable[Flatten[{k0[i],N[z0[i],30],\[Alpha]0[i],N[YDer[k0[i],z0[i],\[Alpha]0[i]]]}],{i,range}]
+];
 
 
 (* ::Text:: *)
@@ -464,129 +519,81 @@ Export["csv/polynomial_y_der_ref.csv",YDerTab];
 
 
 (* ::Subsection::Closed:: *)
-(*Create Log[\[Pi] y\.b2] derivatives reference values*)
+(*Create singularity derivatives reference values for fast, low-precision naive method*)
 
 
 (* ::Text:: *)
 (*Setup test parameters.*)
 
 
-range = Range[100];
+range = 250;
 Do[
-	z0[i]={randRational,randRational,randRational};
-	\[Alpha]0[i]=If[i<10,{0,0,i-1},{randDerivative,randDerivative,randDerivative}];
+	k0[i]=RandomInteger[{0,10}]
+	;\[Nu]0[i]=randRational
+	;z0[i]={randRational,randRational,randRational}
+	;\[Alpha]0[i]=If[i<10,{0,0,i-1},{RandomInteger[{0,6}],RandomInteger[{0,6}],RandomInteger[{0,6}]}]
 	,{i,range}
 ]
 
 
 (* ::Text:: *)
-(*Generate reference values.*)
+(*Generate reference values, both for special cases \[Nu] \[Element] d - 2k and real \[Nu].*)
 
 
-LDerTab=ParallelTable[Flatten[{N[z0[i],30],\[Alpha]0[i],N[SetPrecision[Derivative[\[Alpha]0[i]][Log[Pi # . #]&][z0[i]],200],30]}],{i,range}];
+sDerTab=Join[
+	ParallelTable[Flatten[{N[3+2*k0[i]],N[z0[i]],\[Alpha]0[i],N[SetPrecision[sDerFull[3+2 *k0[i], z0[i],\[Alpha]0[i]],200]]}],{i,range}]
+	,ParallelTable[Flatten[{N[\[Nu]0[i]],N[z0[i]],\[Alpha]0[i],N[SetPrecision[sDerFull[\[Nu]0[i], z0[i],\[Alpha]0[i]],200]]}],{i,range}]
+];
 
 
 (* ::Text:: *)
-(*Save reference values to file.*)
+(*Safe reference values.*)
 
 
-SetDirectory[NotebookDirectory[]];
-Export["csv/log_l_der_ref.csv",LDerTab];
+Export[NotebookDirectory[]<>"csv/singularity_s_der_ref.csv",sDerTab];
 
 
 (* ::Subsection::Closed:: *)
-(*Create singularity derivatives reference values*)
+(*Create singularity derivatives reference values for high-precision harmonic method*)
+
+
+(* ::Text:: *)
+(*We include the prior reference values and add high order derivatives on top. If one replaces "sDerTab " above with the here computed "sDerTabHarmonic" the tests for the naive method fail dramatically.*)
 
 
 (* ::Text:: *)
 (*Setup test parameters.*)
 
 
-range = Range[100];
+range = 250;
 Do[
-	k0[i]=RandomInteger[{0,10}];
-	z0[i]={randRational,randRational,randRational};
-	\[Alpha]0[i]=If[i<10,{0,0,i-1},{RandomInteger[{0,4}],RandomInteger[{0,4}],RandomInteger[{0,4}]}];
+	k0[i]=RandomInteger[{0,20}]
+	;\[Nu]0[i]=randRational
+	;z0[i]={randRational,randRational,randRational}
+	;\[Alpha]0[i]=If[i<10,{0,0,i-1},{RandomInteger[{0,10}],RandomInteger[{0,10}],RandomInteger[{0,10}]}]
 	,{i,range}
 ]
 
 
 (* ::Text:: *)
-(*Generate reference values.*)
+(*Generate reference values, both for special cases \[Nu] \[Element] d - 2k and real \[Nu].*)
 
 
-sDerTab=ParallelTable[Flatten[{k0[i],N[z0[i],30],\[Alpha]0[i],N[SetPrecision[Derivative[\[Alpha]0[i]][s[k0[i], #]&][z0[i]],200],30]}],{i,range}];
+sDerTabHarmonic=Join[
+	sDerTab
+	,ParallelTable[Flatten[{N[3+2*k0[i]],N[z0[i]],\[Alpha]0[i],N[SetPrecision[sDerFull[3+2 *k0[i], z0[i],\[Alpha]0[i]],200]]}],{i,range-1}]
+	,ParallelTable[Flatten[{N[\[Nu]0[i]],N[z0[i]],\[Alpha]0[i],N[SetPrecision[sDerFull[\[Nu]0[i], z0[i],\[Alpha]0[i]],200]]}],{i,range}]
+];
 
 
 (* ::Text:: *)
-(*Save reference values to file.*)
+(*Safe reference values.*)
 
 
-SetDirectory[NotebookDirectory[]];
-Export["csv/singularity_s_der_ref.csv",sDerTab];
+Export[NotebookDirectory[]<>"csv/singularity_s_der_harmonic_ref.csv",sDerTabHarmonic];
 
 
 (* ::Subsection::Closed:: *)
-(*Create regularized Crandall derivatives reference values*)
-
-
-(* ::Text:: *)
-(*Setup test parameters.*)
-
-
-range = Range[100];
-Do[
-	\[Nu]0[i]=With[{\[Nu]=10 randRational},If[PossibleZeroQ@(\[Nu]-2),1/2,\[Nu]]];
-	z0[i]=If[i<10,{0,0,0},{randRational,randRational,randRational}];
-	\[Alpha]0[i]={randDerivative,randDerivative,randDerivative};
-	,{i,range}
-]
-
-
-(* ::Text:: *)
-(*Generate reference values.*)
-
-
-crandallgRegDerTab=ParallelTable[With[{g=GRegDer[\[Nu]0[i],z0[i],\[Alpha]0[i]]},{N[\[Nu]0[i],30], N[z0[i][[1]],30],N[z0[i][[2]],30],N[z0[i][[3]],30],\[Alpha]0[i][[1]],\[Alpha]0[i][[2]],\[Alpha]0[i][[3]],N[Re[g],30],N[Im[g],30]}],{i,range}];
-
-
-(* ::Text:: *)
-(*Save reference values to file.*)
-
-
-SetDirectory[NotebookDirectory[]];
-Export["csv/crandall_gReg_der_ref.csv",crandallgRegDerTab];
-
-
-(* ::Subsection::Closed:: *)
-(*Create regularized Crandall function prototype reference values for nu = dim + 2*k*)
-
-
-(* ::Text:: *)
-(*Setup test parameters.*)
-
-
-range = Range[100];
-Do[
-	\[Nu]0[i]=-2 RandomInteger[{0,12}]
-	;z0[i]={randRational,randRational}
-	;\[Alpha]0[i]={randDerivative,randDerivative}
-	,{i,range}
-]
-
-
-GRegKDerTab=ParallelTable[Flatten[Join[{\[Nu]0[i]},N[z0[i],16],\[Alpha]0[i],{N[SetPrecision[GRegDer[\[Nu]0[i],z0[i],\[Alpha]0[i]],200],30],i}]],{i,range}];
-
-
-(* ::Text:: *)
-(*Save reference values to file.*)
-
-
-SetDirectory[NotebookDirectory[]];
-Export["csv/crandall_gReg_der_d2k_prototype_ref.csv",GRegKDerTab];
-
-
-(* ::Subsection:: *)
 (*Create regularized Crandall harmonic prototype reference values*)
 
 

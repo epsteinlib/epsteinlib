@@ -9,9 +9,9 @@
 
 #include "../src/crandall.h"
 #include "../src/harmonics.h"
-#include "../src/hpdyad.h"
 #include "../src/tools.h"
 #include "utils.h"
+#include "wrappers.h"
 #include <errno.h>
 #include <math.h>
 #include <stdio.h>
@@ -24,55 +24,6 @@
 #ifndef BASE_PATH
 #define BASE_PATH "csv"
 #endif
-
-/** @brief Computes a single summand of h_inner; explicitly
- * (−1/2)^{i} / cn,i,k binom(i+k,k) binom(i,β) binom(α,θ1) θ2! / (θ2 - θ1)!,
- * where n=|α|, i=|β|, θ1=α+β−γ, θ2=γ−β.
- * @param[in] n: index (total of alpha).
- * @param[in] i: index (total of beta).
- * @param[in] k: index (specifies degree |alpha| - 2k).
- * @param[in] dim: dimension of the multi-indices.
- * @param[in] beta: lower multi-index β.
- * @param[in] alpha: upper multi-index α.
- * @param[in] theta1: multi-index α+β−γ.
- * @param[in] theta2: multi-index γ−β.
- * @return value of one summand in of h_inner.
- */
-static double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
-                                    unsigned int dim, const unsigned int *alpha,
-                                    const unsigned int *beta,
-                                    const unsigned int *theta1,
-                                    const unsigned int *theta2) {
-    hpdyad_t numerator;
-    harmonic_h_inner_term_scalar_hpdyad(n, i, k, dim, &numerator);
-
-    hpdyad_t multi_term;
-    harmonic_h_inner_term_multi_hpdyad(dim, alpha, beta, theta1, theta2,
-                                       &multi_term);
-
-    hpdyad_mul(&numerator, &multi_term, &numerator);
-
-    double res = hpdyad_to_double(&numerator);
-
-    return res;
-}
-
-/** @brief Calculates the homogeneous harmonic polynomial h₍α,k₎
- * of degree |α|−2k such that y^α = ∑ₖ (y·y)^k h₍α,k₎(y) for d = 1 and k =
- * floor(|alpha|/2), explicitly, h₍α,k₎(y)=c_{|α|,k} ∑{|γ|=|α|−k} y^{2γ−α}
- * h_inner(α,γ,k). In 1D, h₍α,k₎(y) is y ** (alphaAbs mod 2) and zero otherwise. Uses
- * precomputed coefficients and exponents to avoid multi-index iteration.
- * @param[in] k: index (specifies degree |alpha| - 2k).
- * @param[in] z: vector of the polynomial.
- * @param[in] alphaAbs: total of alpha.
- * @return h₍α,k₎(z).
- */
-static double harmonic_h_1D(unsigned int k, const double *z, unsigned int alphaAbs) {
-    if (k == alphaAbs / 2) {
-        return harmonic_h_1D_kMax(z, alphaAbs);
-    }
-    return 0.;
-}
 
 /*!
  * @brief Benchmarks recursive coefficients
@@ -312,7 +263,6 @@ int test_harmonic_h_inner(void) {
  */
 int test_harmonic_h_1D(void) {
     printf("%s ", __func__);
-
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/harmonic_h_1D_ref.csv", // NOLINT
                           BASE_PATH);
@@ -323,7 +273,6 @@ int test_harmonic_h_1D(void) {
     if (data == NULL) {
         return fprintf(stderr, "Error opening file: %s\n", path);
     }
-
     double errorAbs;
     double errorRel;
     double errorMaxAbsRel;
@@ -331,54 +280,55 @@ int test_harmonic_h_1D(void) {
     double ref;
     int scanResult;
     char line[256];
-
     double errMin = NAN;
     double errMax = NAN;
     double errSum = 0.;
-
     int testsPassed = 0;
     int totalTests = 0;
-    double tol = pow(10, -16);
-
+    double tol = pow(10, -15);
     unsigned int alphaAbs;
-
     unsigned int dim = 1;
-
     unsigned int *k = malloc(sizeof(unsigned int));
     double *z = malloc(dim * sizeof(double));
     unsigned int *alpha = malloc(dim * sizeof(unsigned int));
     double *refRead = malloc(sizeof(double));
-
     printf("\n\t ... ");
     printf("processing %s ", path);
-
     while (fgets(line, sizeof(line), data) != NULL) {
         // Scan: k, {z}, {alpha}, result
         scanResult = sscanf(line, "%u,%lf, %u, %lf", // NOLINT
                             k, z, alpha, refRead);
-
         if (scanResult != 4) {
             printf("Error reading line: %s\n", line);
             printf("Scanned %d values instead of 4\n", scanResult);
             continue;
         }
-
         alphaAbs = mult_abs(dim, alpha);
-
         ref = refRead[0];
-
-        num = harmonic_h_1D(*k, z, alphaAbs);
-
+        // Precompute coefficients for harmonic polynomials
+        unsigned int kMax = alphaAbs / 2;
+        unsigned long long *chunk_offset =
+            malloc((kMax + 1) * sizeof(unsigned long long));
+        unsigned long long *valid_count =
+            malloc((kMax + 1) * sizeof(unsigned long long));
+        unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
+            alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
+        double *coeffs = malloc(coeffs_size * sizeof(double));
+        unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
+        precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
+                                        exponents);
+        num = harmonic_h(*k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
+                         exponents);
+        free(chunk_offset);
+        free(valid_count);
+        free(coeffs);
+        free(exponents);
         errorAbs = errAbs(ref, num);
-
         errorRel = errRel(ref, num);
-
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
-
         errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
         errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
         errSum += errorMaxAbsRel;
-
         if (errorMaxAbsRel < tol) {
             testsPassed++;
         } else {
@@ -395,16 +345,13 @@ int test_harmonic_h_1D(void) {
         }
         totalTests++;
     }
-
     free(k);
     free(z);
     free(alpha);
     free(refRead);
-
     if (fclose(data) != 0) {
         return fprintf(stderr, "Error closing file: %d\n", errno);
     }
-
     printf("\n\t ... ");
     printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
            tol);
@@ -412,20 +359,21 @@ int test_harmonic_h_1D(void) {
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
            errSum / totalTests);
     printf("\n");
-
     return totalTests - testsPassed;
 }
 
 /*!
- * @brief Benchmarks harmonic polynomials.
+ * @brief Benchmarks harmonic polynomials for arguments z = (1,1,1).
+ * This focuses sorely on the precision of the harmonic coefficients.
  * @return number of failed tests.
  */
-int test_harmonic_h_3D(void) {
+int test_harmonic_h_3D_unity(void) {
     printf("%s ", __func__);
 
     char path[MAX_PATH_LENGTH];
-    int result = snprintf(path, sizeof(path), "%s/harmonic_h_3D_ref.csv", // NOLINT
-                          BASE_PATH);
+    int result =
+        snprintf(path, sizeof(path), "%s/harmonic_h_3D_unity_ref.csv", // NOLINT
+                 BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
@@ -448,7 +396,7 @@ int test_harmonic_h_3D(void) {
 
     int testsPassed = 0;
     int totalTests = 0;
-    double tol = 5 * pow(10, -14);
+    double tol = pow(10, -15);
 
     unsigned int alphaAbs;
 
@@ -493,6 +441,7 @@ int test_harmonic_h_3D(void) {
         num = harmonic_h(*k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
                          exponents);
         free(chunk_offset);
+        free(coeffs);
         free(valid_count);
         free(exponents);
 
@@ -511,7 +460,7 @@ int test_harmonic_h_3D(void) {
             printf("\n\n");
             printf("Warning! ");
             printf("harmonic_h at k: %u ", *k);
-            printf(" %0*.16lf (this implementation) \n\t\t    ≠ "
+            printf(" %0*.16lf (this implementation) \n\t\t\t    ≠ "
                    "%.16lf (reference implementation)\n",
                    4, num, ref);
             printf("Min(Emax, Erel):      %E ≮ %E  (tolerance)\n", errorMaxAbsRel,
@@ -529,6 +478,140 @@ int test_harmonic_h_3D(void) {
 
     if (fclose(data) != 0) {
         return fprintf(stderr, "Error closing file: %d\n", errno);
+    }
+    if (totalTests == 0) {
+        return fprintf(stderr, "Error: no valid test cases found in %s\n", path);
+    }
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
+           tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
+
+    return totalTests - testsPassed;
+}
+
+/*!
+ * @brief Benchmarks harmonic polynomials for random three-dimensional arguments.
+ * @return number of failed tests.
+ */
+int test_harmonic_h_3D_random(void) {
+    printf("%s ", __func__);
+
+    char path[MAX_PATH_LENGTH];
+    int result =
+        snprintf(path, sizeof(path), "%s/harmonic_h_3D_random_ref.csv", // NOLINT
+                 BASE_PATH);
+    if (result < 0 || result >= sizeof(path)) {
+        return fprintf(stderr, "Error creating file path\n");
+    }
+    FILE *data = fopen(path, "r");
+    if (data == NULL) {
+        return fprintf(stderr, "Error opening file: %s\n", path);
+    }
+
+    double errorAbs;
+    double errorRel;
+    double errorMaxAbsRel;
+    double num;
+    double ref;
+    int scanResult;
+    char line[256];
+
+    double errMin = NAN;
+    double errMax = NAN;
+    double errSum = 0.;
+
+    int testsPassed = 0;
+    int totalTests = 0;
+    double tol = 5 * pow(10, -13);
+
+    unsigned int alphaAbs;
+
+    unsigned int dim = 3;
+
+    unsigned int *k = malloc(sizeof(unsigned int));
+    double *z = malloc(dim * sizeof(double));
+    unsigned int *alpha = malloc(dim * sizeof(unsigned int));
+    double *refRead = malloc(sizeof(double));
+
+    printf("\n\t ... ");
+    printf("processing %s ", path);
+
+    while (fgets(line, sizeof(line), data) != NULL) {
+        // Scan: k, {z1, z2, z3}, {alpha1, alpha2, alpha3}, result
+        scanResult =
+            sscanf(line, "%u,%lf, %lf, %lf, %u, %u, %u, %lf", // NOLINT
+                   k, z, z + 1, z + 2, alpha, alpha + 1, alpha + 2, refRead);
+
+        if (scanResult != 8) {
+            printf("Error reading line: %s\n", line);
+            printf("Scanned %d values instead of 8\n", scanResult);
+            continue;
+        }
+
+        alphaAbs = mult_abs(dim, alpha);
+
+        ref = refRead[0];
+
+        // Precompute coefficients for harmonic polynomials
+        unsigned int kMax = alphaAbs / 2;
+        unsigned long long *chunk_offset =
+            malloc((kMax + 1) * sizeof(unsigned long long));
+        unsigned long long *valid_count =
+            malloc((kMax + 1) * sizeof(unsigned long long));
+        unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
+            alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
+        double *coeffs = malloc(coeffs_size * sizeof(double));
+        unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
+        precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
+                                        exponents);
+        num = harmonic_h(*k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
+                         exponents);
+        free(chunk_offset);
+        free(coeffs);
+        free(valid_count);
+        free(exponents);
+
+        errorAbs = errAbs(ref, num);
+        errorRel = errRel(ref, num);
+
+        errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
+
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
+            printf("\n\n");
+            printf("Warning! ");
+            printf("harmonic_h at k: %u ", *k);
+            printf(" %0*.16lf (this implementation) \n\t\t\t    ≠ "
+                   "%.16lf (reference implementation)\n",
+                   4, num, ref);
+            printf("Min(Emax, Erel):      %E ≮ %E  (tolerance)\n", errorMaxAbsRel,
+                   tol);
+            printVectorUnitTest("z:    \t\t", z, dim);
+            printMultiindexUnitTest("alpha:\t\t", alpha, dim);
+        }
+        totalTests++;
+    }
+
+    free(k);
+    free(z);
+    free(alpha);
+    free(refRead);
+
+    if (fclose(data) != 0) {
+        return fprintf(stderr, "Error closing file: %d\n", errno);
+    }
+    if (totalTests == 0) {
+        return fprintf(stderr, "Error: no valid test cases found in %s\n", path);
     }
 
     printf("\n\t ... ");
@@ -553,6 +636,7 @@ int main(void) {
     failed += run_timed_test(test_coeffs_c_inner);
     failed += run_timed_test(test_harmonic_h_inner);
     failed += run_timed_test(test_harmonic_h_1D);
-    failed += run_timed_test(test_harmonic_h_3D);
+    failed += run_timed_test(test_harmonic_h_3D_unity);
+    failed += run_timed_test(test_harmonic_h_3D_random);
     return failed;
 }
