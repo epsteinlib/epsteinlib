@@ -39,8 +39,7 @@ double complex setZetaDer(double nu, unsigned int dim, const double *a,
 }
 
 /**
- * @brief calculates the derivatives of the regularized Epstein zeta function for
- * lattices.
+ * @brief calculates the derivatives of the regularized Epstein zeta function.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] a: matrix that transforms the lattice in the Epstein zeta
@@ -53,8 +52,10 @@ double complex setZetaDer(double nu, unsigned int dim, const double *a,
 double complex epsteinZetaRegDer(double nu, unsigned int dim, const double *a,
                                  const double *x, const double *y,
                                  const unsigned int *alpha) {
-
-    return epsteinZetaInternal(nu, dim, a, x, y, 1, 3, alpha);
+    unsigned int alphaAbs = mult_abs(dim, alpha);
+    double complex prefactor =
+        imaginary_int_pow(alphaAbs) * real_int_pow(-2 * M_PI, alphaAbs);
+    return prefactor * epsteinZetaInternal(nu, dim, a, x, y, 1, 3, alpha);
 }
 
 /** @brief Computes a single summand of h_inner; explicitly

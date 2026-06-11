@@ -629,7 +629,8 @@ static double complex sum_fourier_harmonic(
 }
 
 /**
- * @brief calculates set zeta derivatives by the harmonic method.
+ * @brief calculates set zeta derivatives (sans the prefactor (- 2 pi i)^|alpha|) by
+ * the harmonic method.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] alphaAbs: total |α| of the multi-index.
@@ -761,8 +762,7 @@ static double complex summation_harmonic_reg(
         res += s1_singularity;
     }
 
-    res *= imaginary_int_pow(alphaAbs) * real_int_pow(-2 * M_PI, alphaAbs) /
-           real_int_pow(ms, alphaAbs);
+    res /= real_int_pow(ms, alphaAbs);
 
     free(chunk_offset);
     free(valid_count);
@@ -894,7 +894,7 @@ static double complex summation_harmonic(
         res += s1_singularity;
     }
 
-    res *= 1 / real_int_pow(ms, alphaAbs);
+    res /= real_int_pow(ms, alphaAbs);
 
     free(chunk_offset);
     free(valid_count);
@@ -914,10 +914,11 @@ static double complex summation_harmonic(
  * @param[in] x: x vector of the Epstein zeta function.
  * @param[in] y: y vector of the Epstein zeta function.
  * @param[in] lambda: relative weight of the sums in Crandall's formula.
- * @param[in] variant: 0 for no regularization
- *                    1 for the regularization
- *                    2 for set Zeta (including derivatives)
- *                    3 for the regularization (including Derivatives).
+ * @param[in] variant:
+ *      0 for no regularization
+ *      1 for the regularization
+ *      2 for set zeta derivatives (divided by (-2 pi i)^|alpha|)
+ *      3 for the regularized set zeta derivatives (divided by (-2 pi i)^|alpha|).
  * @param[in] alpha: multiindex for the derivatives of the set zeta function. *
  * @return function value of the regularized Epstein zeta.
  */
@@ -1076,7 +1077,8 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             res -= pow(M_PI, (double)k + ((double)dim / 2)) /
                    tgamma((double)k + ((double)dim / 2)) * negative_one_pow(k + 1) *
                    polynomial_y_der(k, dim, y, alpha, alphaAbs, k) * log(ms * ms) /
-                   vol;
+                   vol /
+                   (imaginary_int_pow(alphaAbs) * real_int_pow(-2 * M_PI, alphaAbs));
         } else {
             if (k) {
                 double ySquared = 0;
