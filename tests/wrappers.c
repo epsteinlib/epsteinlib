@@ -32,8 +32,10 @@
 double complex setZetaDer(double nu, unsigned int dim, const double *a,
                           const double *x, const double *y,
                           const unsigned int *alpha) {
-
-    return epsteinZetaInternal(nu, dim, a, x, y, 1, 2, alpha);
+    unsigned int alphaAbs = mult_abs(dim, alpha);
+    double complex prefactor =
+        imaginary_int_pow(alphaAbs) * real_int_pow(-2 * M_PI, alphaAbs);
+    return prefactor * epsteinZetaInternal(nu, dim, a, x, y, 1, 2, alpha);
 }
 
 /**

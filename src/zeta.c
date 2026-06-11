@@ -773,7 +773,8 @@ static double complex summation_harmonic_reg(
 }
 
 /**
- * @brief calculates set zeta derivatives by the harmonic method.
+ * @brief calculates set zeta derivatives (sans the prefactor (- 2 pi i)^|alpha|) by
+ * the harmonic method.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] alphaAbs: total |α| of the multi-index.
@@ -893,8 +894,7 @@ static double complex summation_harmonic(
         res += s1_singularity;
     }
 
-    res *= imaginary_int_pow(alphaAbs) * real_int_pow(-2 * M_PI, alphaAbs) /
-           real_int_pow(ms, alphaAbs);
+    res *= 1 / real_int_pow(ms, alphaAbs);
 
     free(chunk_offset);
     free(valid_count);
