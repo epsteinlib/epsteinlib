@@ -355,7 +355,7 @@ def epstein_zeta_aniso(
     )
 
 
-def epstein_zeta_reg_der_c_call(  # pylint: disable=too-many-arguments, too-many-positional-arguments
+def epstein_zeta_aniso_reg_c_call(  # pylint: disable=too-many-arguments, too-many-positional-arguments
     nu: cython.double,
     dim: cython.int,
     a: cython.double[::1],
@@ -376,7 +376,7 @@ def epstein_zeta_reg_der_c_call(  # pylint: disable=too-many-arguments, too-many
     )
 
 
-def epstein_zeta_reg_der(
+def epstein_zeta_aniso_reg(
     nu: Union[float, int],
     A: NDArray[  # pylint: disable=invalid-name
         Union[np.integer[Any], np.floating[Any]]
@@ -392,6 +392,6 @@ def epstein_zeta_reg_der(
     nu_cython, dim, a_cython, x_cython, y_cython, alpha_cython = (
         prepare_inputs_der(nu, A, x, y, alpha)
     )
-    return epstein_zeta_reg_der_c_call(
+    return epstein_zeta_aniso_reg_c_call(
         nu_cython, dim, a_cython, x_cython, y_cython, alpha_cython
     )

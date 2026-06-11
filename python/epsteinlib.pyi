@@ -87,7 +87,7 @@ def epstein_zeta_aniso(
     y: NDArray[Union[np.integer[Any], np.floating[Any]]],
     alpha: NDArray[np.integer[Any]],
 ) -> complex: ...
-def epstein_zeta_reg_der_c_call(
+def epstein_zeta_aniso_reg_c_call(
     nu: cython.double,
     dim: cython.int,
     a: cython.double[::1],
@@ -95,7 +95,7 @@ def epstein_zeta_reg_der_c_call(
     y: cython.double[::1],
     alpha: cython.uint[::1],
 ) -> complex: ...
-def epstein_zeta_reg_der(
+def epstein_zeta_aniso_reg(
     nu: Union[float, int],
     A: NDArray[Union[np.integer[Any], np.floating[Any]]],
     x: NDArray[Union[np.integer[Any], np.floating[Any]]],

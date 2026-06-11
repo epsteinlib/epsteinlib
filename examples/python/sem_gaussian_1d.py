@@ -23,9 +23,10 @@ from nearby ν-values.
 
 The SEM of some order is calculated as:
 
-    SEM(order) = ∑_{α ∈ {0, 2, …, order}} 1 / (α! (−2πi)^|α|) Z_{Λ,ν}^{reg,(α)}{x}{y=0} g^{(α)}(x)
+    SEM(order) = ∑_{α ∈ {0, 2, …, order}} 1 / α! Z_{Λ,ν,α}^{reg}{x}{y=0} g^{(α)}(x)
 
-similar to equation (8) in (*), where (α) denotes differentiation with respect to y.
+similar to equation (8) in (*), where Z_{Λ,ν,α}^{reg} is the anisotropic regularized Epstein zeta
+function, which differs from the derivatives of the regularized Epstein zeta function by a constant.
 
 (*): Andreas A. Buchheit et al. “Exact Continuum Representation of Long-range Interacting Systems
 and Emerging Exotic Phases in Unconventional Superconductors”, Phys. Rev. Research 5, 043065 (2023)
@@ -41,7 +42,7 @@ The script generates plots comparing the different approximations and their
 errors for the specified ν value.
 """
 
-# SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
+# SPDX-FileCopyrightText: 2025-2026 Jonathan Busse <jonathan@jbusse.de>
 # SPDX-License-Identifier: AGPL-3.0-only
 
 
@@ -54,7 +55,7 @@ from matplotlib.axes import Axes
 from mpmath import factorial, gamma, hyp1f1
 from numpy.typing import NDArray
 
-from epsteinlib import epstein_zeta_reg_der
+from epsteinlib import epstein_zeta_aniso_reg
 
 EPS_TAYLOR = 1e-8  # taylor expansion at nu = 1 - 2 EPS in integral and lattice_contribution
 EPS_IS_CLOSE = 1e-12
@@ -184,7 +185,7 @@ def lattice_contribution(
     def epstein_zeta_reg_wrapper(y: float, alpha: int) -> float:
         return float(
             np.real(
-                epstein_zeta_reg_der(
+                epstein_zeta_aniso_reg(
                     nu,
                     np.array([[1.0]]),
                     np.array([0.0]),
@@ -198,7 +199,6 @@ def lattice_contribution(
         np.real(
             sum(
                 (1 / factorial(j))
-                * (1j / (2 * np.pi)) ** j
                 * epstein_zeta_reg_wrapper(0, j)
                 * gaussian_derivative(x_val, sigma, j)
                 for j in range(0, order + 1, 2)
