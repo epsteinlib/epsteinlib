@@ -15,9 +15,9 @@ import cython
 import numpy as np
 from cython.cimports.epsteinlib import (
     epsteinZeta,
+    epsteinZetaAniso,
+    epsteinZetaAnisoReg,
     epsteinZetaReg,
-    epsteinZetaRegDer,
-    setZetaDer,
 )
 from numpy.typing import NDArray
 
@@ -313,7 +313,7 @@ def epstein_zeta_reg(
     )
 
 
-def set_zeta_der_c_call(  # pylint: disable=too-many-arguments, too-many-positional-arguments
+def epstein_zeta_aniso_c_call(  # pylint: disable=too-many-arguments, too-many-positional-arguments
     nu: cython.double,
     dim: cython.int,
     a: cython.double[::1],
@@ -322,9 +322,9 @@ def set_zeta_der_c_call(  # pylint: disable=too-many-arguments, too-many-positio
     alpha: cython.uint[::1],
 ) -> complex:
     """
-    Call the C function to calculate the set zeta function.
+    Call the C function to calculate the anisotropic Epstein zeta function.
     """
-    return setZetaDer(  # type: ignore [no-any-return]
+    return epsteinZetaAniso(  # type: ignore [no-any-return]
         nu,
         dim,
         cython.address(a[0]),
@@ -334,7 +334,7 @@ def set_zeta_der_c_call(  # pylint: disable=too-many-arguments, too-many-positio
     )
 
 
-def set_zeta_der(
+def epstein_zeta_aniso(
     nu: Union[float, int],
     A: NDArray[  # pylint: disable=invalid-name
         Union[np.integer[Any], np.floating[Any]]
@@ -344,13 +344,13 @@ def set_zeta_der(
     alpha: NDArray[np.integer[Any]],
 ) -> complex:
     """
-    Calculate the derivatives of the set zeta function.
+    Calculate the anisotropic Epstein zeta function.
     """
     validate_inputs_der(nu, A, x, y, alpha)
     nu_cython, dim, a_cython, x_cython, y_cython, alpha_cython = (
         prepare_inputs_der(nu, A, x, y, alpha)
     )
-    return set_zeta_der_c_call(
+    return epstein_zeta_aniso_c_call(
         nu_cython, dim, a_cython, x_cython, y_cython, alpha_cython
     )
 
@@ -364,9 +364,9 @@ def epstein_zeta_reg_der_c_call(  # pylint: disable=too-many-arguments, too-many
     alpha: cython.uint[::1],
 ) -> complex:
     """
-    Call the C function to calculate the regularized Epstein zeta function.
+    Call the C function to calculate regularized anisotropic Epstein zeta function.
     """
-    return epsteinZetaRegDer(  # type: ignore [no-any-return]
+    return epsteinZetaAnisoReg(  # type: ignore [no-any-return]
         nu,
         dim,
         cython.address(a[0]),
@@ -386,7 +386,7 @@ def epstein_zeta_reg_der(
     alpha: NDArray[np.integer[Any]],
 ) -> complex:
     """
-    Calculate the derivatives of the regularized Epstein zeta function.
+    Calculate the regularized anisotropic Epstein zeta function.
     """
     validate_inputs_der(nu, A, x, y, alpha)
     nu_cython, dim, a_cython, x_cython, y_cython, alpha_cython = (

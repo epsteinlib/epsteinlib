@@ -8,8 +8,40 @@
  * is in the core library.
  */
 
+#include <complex.h>
+
 #ifndef WRAPPERS_H
 #define WRAPPERS_H
+
+/**
+ * @brief calculates the derivatives of the set zeta function for lattices.
+ * @param[in] nu: exponent for the set zeta function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] a: matrix that transforms the lattice in the set zeta
+ * function.
+ * @param[in] x: x vector of the set zeta function.
+ * @param[in] y: y vector of the set zeta function.
+ * @param[in] alpha: multiindex for the derivative of the set zeta function.
+ * @return function value of the set zeta.
+ */
+double complex setZetaDer(double nu, unsigned int dim, const double *a,
+                          const double *x, const double *y,
+                          const unsigned int *alpha);
+/**
+ * @brief calculates the derivatives of the regularized Epstein zeta function for
+ * lattices.
+ * @param[in] nu: exponent for the set zeta function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] a: matrix that transforms the lattice in the set zeta
+ * function.
+ * @param[in] x: x vector of the set zeta function.
+ * @param[in] y: y vector of the set zeta function.
+ * @param[in] alpha: multiindex for the derivative of the set zeta function.
+ * @return function value of the set zeta.
+ */
+double complex epsteinZetaRegDer(double nu, unsigned int dim, const double *a,
+                                 const double *x, const double *y,
+                                 const unsigned int *alpha);
 
 /** @brief Computes a single summand of h_inner; explicitly
  * (−1/2)^{i} / cn,i,k binom(i+k,k) binom(i,β) binom(α,θ1) θ2! / (θ2 - θ1)!,

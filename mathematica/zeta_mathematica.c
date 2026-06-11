@@ -58,10 +58,10 @@ int epstein_zeta_reg_mathematica_call(double *out, double nu, int dim,
 }
 
 /*
- * @brief Saves real and imaginary parts of the derivatives of the set zeta function
+ * @brief Saves real and imaginary parts of the regularized Epstein zeta function
  * in an array.
- * @param[in, out] out: 2D array, where real and imaginary parts of the set zeta
- * function derivatives will be stored.
+ * @param[in, out] out: 2D array, where real and imaginary parts of the regularized
+ * Epstein zeta function will be stored.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] a: matrix that transforms the lattice in the Epstein zeta
@@ -70,20 +70,20 @@ int epstein_zeta_reg_mathematica_call(double *out, double nu, int dim,
  * @param[in] y: y vector of the Epstein zeta function.
  *  @return 0
  */
-int set_zeta_der_mathematica_call(double *out, double nu, int dim, const double *a,
-                                  const double *x, const double *y,
-                                  const unsigned int *alpha) {
-    double complex asg = setZetaDer(nu, dim, a, x, y, alpha);
+int epstein_zeta_aniso_mathematica_call(double *out, double nu, int dim,
+                                        const double *a, const double *x,
+                                        const double *y, const unsigned int *alpha) {
+    double complex asg = epsteinZetaAniso(nu, dim, a, x, y, alpha);
     out[0] = creal(asg);
     out[1] = cimag(asg);
     return 0;
 }
 
 /*
- * @brief Saves real and imaginary parts of the derivatives of the regularized
- * Epstein zeta function in an array.
+ * @brief Saves real and imaginary parts of the anisotropic Epstein zeta function
+ * in an array.
  * @param[in, out] out: 2D array, where real and imaginary parts of the regularized
- * Epstein zeta function derivatives will be stored.
+ * Epstein zeta function will be stored.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] a: matrix that transforms the lattice in the Epstein zeta
@@ -92,11 +92,11 @@ int set_zeta_der_mathematica_call(double *out, double nu, int dim, const double 
  * @param[in] y: y vector of the Epstein zeta function.
  *  @return 0
  */
-int epstein_zeta_reg_der_mathematica_call(double *out, double nu, int dim,
-                                          const double *a, const double *x,
-                                          const double *y,
-                                          const unsigned int *alpha) {
-    double complex asg = epsteinZetaRegDer(nu, dim, a, x, y, alpha);
+int epstein_zeta_aniso_reg_mathematica_call(double *out, double nu, int dim,
+                                            const double *a, const double *x,
+                                            const double *y,
+                                            const unsigned int *alpha) {
+    double complex asg = epsteinZetaAnisoReg(nu, dim, a, x, y, alpha);
     out[0] = creal(asg);
     out[1] = cimag(asg);
     return 0;

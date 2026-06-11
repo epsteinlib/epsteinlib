@@ -10,6 +10,7 @@
  */
 
 #include "utils.h"
+#include "wrappers.h"
 #include <complex.h>
 #include <errno.h>
 #include <stdio.h>

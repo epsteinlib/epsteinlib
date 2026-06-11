@@ -51,7 +51,7 @@ double complex epsteinZetaReg(double nu, unsigned int dim, const double *a,
 }
 
 /**
- * @brief calculates the derivatives of the set zeta function for lattices.
+ * @brief calculates the anisotropic Epstein zeta function.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] a: matrix that transforms the lattice in the Epstein zeta
@@ -61,16 +61,15 @@ double complex epsteinZetaReg(double nu, unsigned int dim, const double *a,
  * @param[in] alpha: multiindex for the derivative of the set zeta function.
  * @return function value of the Epstein zeta.
  */
-double complex setZetaDer(double nu, unsigned int dim, const double *a,
-                          const double *x, const double *y,
-                          const unsigned int *alpha) {
+double complex epsteinZetaAniso(double nu, unsigned int dim, const double *a,
+                                const double *x, const double *y,
+                                const unsigned int *alpha) {
 
     return epsteinZetaInternal(nu, dim, a, x, y, 1, 2, alpha);
 }
 
 /**
- * @brief calculates the derivatives of the regularized Epstein zeta function for
- * lattices.
+ * @brief calculates the regularized anisotropic Epstein zeta function.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] a: matrix that transforms the lattice in the Epstein zeta
@@ -80,9 +79,9 @@ double complex setZetaDer(double nu, unsigned int dim, const double *a,
  * @param[in] alpha: multiindex for the derivative of the set zeta function.
  * @return function value of the Epstein zeta.
  */
-double complex epsteinZetaRegDer(double nu, unsigned int dim, const double *a,
-                                 const double *x, const double *y,
-                                 const unsigned int *alpha) {
+double complex epsteinZetaAnisoReg(double nu, unsigned int dim, const double *a,
+                                   const double *x, const double *y,
+                                   const unsigned int *alpha) {
 
     return epsteinZetaInternal(nu, dim, a, x, y, 1, 3, alpha);
 }

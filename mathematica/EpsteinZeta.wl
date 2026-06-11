@@ -8,12 +8,12 @@
 BeginPackage["EpsteinZeta`"];
 
 
-EpsteinZeta::usage="EpsteinZeta[\[Nu],A,x,y] computes the Epstein zeta function sum_{z in Lambda} exp(- 2 Pi I y.z)/|z - x|^\[Nu]
+EpsteinZeta::usage="EpsteinZeta[\[Nu],A,x,y] computes the Epstein zeta function sum_{z in \[CapitalLambda]} exp(- 2 Pi I y.z)/|z - x|^\[Nu]
 using the algorithm in Crandall, R., Unified algorithms for polylogarithm, L-series, and zeta variants. Algorithmic Reflections: Selected Works. PSIpress (2012).";
-EpsteinZetaReg::usage="EpsteinZetaReg[\[Nu],A,x,y] computes the regularized Epstein zeta function exp(2 Pi I x.y) sum_{z in Lambda} exp(- 2 Pi I y.(z - x))/|z - x|^\[Nu]  - s\:0302(y)/|det(\[CapitalLambda])|
+EpsteinZetaReg::usage="EpsteinZetaReg[\[Nu],A,x,y] computes the regularized Epstein zeta function exp(2 Pi I x.y) sum_{z in \[CapitalLambda]} exp(- 2 Pi I y.z)/|z - x|^\[Nu]  - s\:0302(y)/|det(\[CapitalLambda])|
 as in Andreas A. Buchheit et al., Exact continuum representation of long-range interacting systems and emerging exotic phases in unconventional superconductors. Phys. Rev. Res. 5 (4 Oct. 2023), p. 043065.  using a modification of the algorithm in Crandall, R., Unified algorithms for polylogarithm, L-series, and zeta variants. Algorithmic Reflections: Selected Works. PSIpress (2012).";
-SetZetaDer::usage="SetZetaDer[\[Nu],A,x,y,\[Alpha]] computes the partiall derivatives of the set zeta function sum_{z in (Lambda - x)} exp(- 2 Pi I y.z)/|z|^\[Nu] with respect to y and some multi-index \[Alpha].";
-EpsteinZetaRegDer::usage="EpsteinZetaRegDer[\[Nu],A,x,y] computes the partiall derivatives of the regularized Epstein zeta function exp(2 Pi I x.y) sum_{z in Lambda} exp(- 2 Pi I y.(z - x))/|z - x|^\[Nu]  - s\:0302(y)/|det(\[CapitalLambda])| with respect to y and some multi-index \[Alpha]."
+EpsteinZetaAniso::usage="EpsteinZetaAniso[\[Nu],A,x,y,\[Alpha]] computes the anisotropic Epstein zeta function sum_{z in \[CapitalLambda]} z^\[Alpha] exp(- 2 Pi I y.z)/|z-x|^\[Nu] with respect to y and some multi-index \[Alpha].";
+EpsteinZetaAnisoReg::usage="EpsteinZetaAnisoReg[\[Nu],A,x,y] computes the regularized anisotropic Epstein zeta function exp(2 Pi I x.y) sum_{z in Lambda} exp(- 2 Pi I y.z)/|z - x|^\[Nu]  - s\:0302(y)/((-2 \[Pi] I)^|\[Alpha]| |det(\[CapitalLambda])|) with respect to y and some multi-index \[Alpha]."
 
 
 Begin["Private`"];
@@ -61,14 +61,14 @@ If[Head[foreignFunctionEpsteinZetaReg] =!= ForeignFunction,
   Print["ForeignFunctionLoad for epstein_zeta_reg_mathematica_call failed."]
 ]
 
-foreignFunctionSetZetaDer = ForeignFunctionLoad[libPath, "set_zeta_der_mathematica_call", {"RawPointer"::["CDouble"], "CDouble", "CInt", "RawPointer"::["CDouble"], "RawPointer"::["CDouble"], "RawPointer"::["CDouble"], "RawPointer"::["CUnsignedInt"]} -> "CInt"]
+foreignFunctionEpsteinZetaAniso = ForeignFunctionLoad[libPath, "epstein_zeta_aniso_mathematica_call", {"RawPointer"::["CDouble"], "CDouble", "CInt", "RawPointer"::["CDouble"], "RawPointer"::["CDouble"], "RawPointer"::["CDouble"], "RawPointer"::["CUnsignedInt"]} -> "CInt"]
 If[Head[foreignFunctionEpsteinZetaReg] =!= ForeignFunction,
-  Print["ForeignFunctionLoad for set_zeta_der_mathematica_call failed."]
+  Print["ForeignFunctionLoad for epstein_zeta_aniso_mathematica_call failed."]
 ]
 
-foreignFunctionEpsteinZetaRegDer = ForeignFunctionLoad[libPath, "epstein_zeta_reg_der_mathematica_call", {"RawPointer"::["CDouble"], "CDouble", "CInt", "RawPointer"::["CDouble"], "RawPointer"::["CDouble"], "RawPointer"::["CDouble"], "RawPointer"::["CUnsignedInt"]} -> "CInt"]
-If[Head[foreignFunctionEpsteinZetaRegDer] =!= ForeignFunction,
-  Print["ForeignFunctionLoad for epstein_zeta_reg_der_mathematica_call failed."]
+foreignFunctionEpsteinZetaAnisoReg = ForeignFunctionLoad[libPath, "epstein_zeta_aniso_reg_mathematica_call", {"RawPointer"::["CDouble"], "CDouble", "CInt", "RawPointer"::["CDouble"], "RawPointer"::["CDouble"], "RawPointer"::["CDouble"], "RawPointer"::["CUnsignedInt"]} -> "CInt"]
+If[Head[foreignFunctionEpsteinZetaAnisoReg] =!= ForeignFunction,
+  Print["ForeignFunctionLoad for epstein_zeta_aniso_reg_mathematica_call failed."]
 ]
 
 (* For checking nan output of C function *)
@@ -157,19 +157,19 @@ EpsteinZeta::dimerrx = "Input vector x = `3` has incorrect dimension. Expected d
 EpsteinZeta::dimerry = "Input vector y = `4` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
 EpsteinZetaReg::dimerrx = "Input vector x = `3` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
 EpsteinZetaReg::dimerry = "Input vector y = `4` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
-SetZetaDer::dimerrx = "Input vector x = `3` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
-SetZetaDer::dimerry = "Input vector y = `4` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
-SetZetaDer::dimerr\[Alpha] = "Input vector \[Alpha] = `6` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
-EpsteinZetaRegDer::dimerrx = "Input vector x = `3` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
-EpsteinZetaRegDer::dimerry = "Input vector y = `4` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
-EpsteinZetaRegDer::dimerr\[Alpha] = "Input vector \[Alpha] = `6` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
+EpsteinZetaAniso::dimerrx = "Input vector x = `3` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
+EpsteinZetaAniso::dimerry = "Input vector y = `4` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
+EpsteinZetaAniso::dimerr\[Alpha] = "Input vector \[Alpha] = `6` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
+EpsteinZetaAnisoReg::dimerrx = "Input vector x = `3` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
+EpsteinZetaAnisoReg::dimerry = "Input vector y = `4` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
+EpsteinZetaAnisoReg::dimerr\[Alpha] = "Input vector \[Alpha] = `6` has incorrect dimension. Expected dimension `1` (matching `1`\[Times]`1` matrix A = `5`), but got `2`."
 
 
 (* Define the public Epstein and set zeta functions *)
 EpsteinZeta[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ], x_/;VectorQ[x] && AllTrue[x, NumericQ], y_/;VectorQ[y] && AllTrue[y, NumericQ]] := epsteinZetaInternal[\[Nu], A, x, y, EpsteinZeta, foreignFunctionEpsteinZeta]
 EpsteinZetaReg[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ], x_/;VectorQ[x] && AllTrue[x, NumericQ], y_/;VectorQ[y] && AllTrue[y, NumericQ]] := epsteinZetaInternal[\[Nu], A, x, y, EpsteinZetaReg, foreignFunctionEpsteinZetaReg]
-SetZetaDer[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ], x_/;VectorQ[x] && AllTrue[x, NumericQ], y_/;VectorQ[y] && AllTrue[y, NumericQ],  \[Alpha]_/;VectorQ[\[Alpha]] && AllTrue[\[Alpha], Element[#, NonNegativeIntegers]&]] := epsteinZetaDerivativesInternal[\[Nu], A, x, y, \[Alpha], SetZetaDer, foreignFunctionSetZetaDer]
-EpsteinZetaRegDer[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ], x_/;VectorQ[x] && AllTrue[x, NumericQ], y_/;VectorQ[y] && AllTrue[y, NumericQ],  \[Alpha]_/;VectorQ[\[Alpha]] && AllTrue[\[Alpha], Element[#, NonNegativeIntegers]&]] := epsteinZetaDerivativesInternal[\[Nu], A, x, y, \[Alpha], EpsteinZetaRegDer, foreignFunctionEpsteinZetaRegDer]
+EpsteinZetaAniso[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ], x_/;VectorQ[x] && AllTrue[x, NumericQ], y_/;VectorQ[y] && AllTrue[y, NumericQ],  \[Alpha]_/;VectorQ[\[Alpha]] && AllTrue[\[Alpha], Element[#, NonNegativeIntegers]&]] := epsteinZetaDerivativesInternal[\[Nu], A, x, y, \[Alpha], EpsteinZetaAniso, foreignFunctionEpsteinZetaAniso]
+EpsteinZetaAnisoReg[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ], x_/;VectorQ[x] && AllTrue[x, NumericQ], y_/;VectorQ[y] && AllTrue[y, NumericQ],  \[Alpha]_/;VectorQ[\[Alpha]] && AllTrue[\[Alpha], Element[#, NonNegativeIntegers]&]] := epsteinZetaDerivativesInternal[\[Nu], A, x, y, \[Alpha], EpsteinZetaAnisoReg, foreignFunctionEpsteinZetaAnisoReg]
 
 
 (* Check if package loaded successfully *)
@@ -177,18 +177,18 @@ epsteinLoad::info = "`1`";
 If[libPath =!= $Failed &&
    Head[foreignFunctionEpsteinZeta] === ForeignFunction &&
    Head[foreignFunctionEpsteinZetaReg] === ForeignFunction &&
-   Head[foreignFunctionSetZetaDer] === ForeignFunction &&
-   Head[foreignFunctionEpsteinZetaRegDer] === ForeignFunction &&
+   Head[foreignFunctionEpsteinZetaAniso] === ForeignFunction &&
+   Head[foreignFunctionEpsteinZetaAnisoReg] === ForeignFunction &&
    PossibleZeroQ[EpsteinZeta[-2, {{1}}, {1}, {0}]] &&
    PossibleZeroQ[EpsteinZetaReg[-2, {{1}}, {1}, {0}]]&&
-   PossibleZeroQ[SetZetaDer[-2, {{1}}, {1}, {0}, {0}]]&&
-   PossibleZeroQ[EpsteinZetaRegDer[-2, {{1}}, {1}, {0}, {0}]],
+   PossibleZeroQ[EpsteinZetaAniso[-2, {{1}}, {1}, {0}, {0}]]&&
+   PossibleZeroQ[EpsteinZetaAnisoReg[-2, {{1}}, {1}, {0}, {0}]],
   Message[epsteinLoad::info,
    "The (regularized) Epstein zeta and the derivatives of the set zeta function can be called using:
 	EpsteinZeta[\[Nu], A, x, y]
 	EpsteinZetaReg[\[Nu], A, x, y]
-	SetZetaDer[\[Nu], A, x, y, \[Alpha]]
-	EpsteinZetaRegDer[\[Nu], A, x, y, \[Alpha]]
+	EpsteinZetaAniso[\[Nu], A, x, y, \[Alpha]]
+	EpsteinZetaAnisoReg[\[Nu], A, x, y, \[Alpha]]
 
 	\[Nu] is a real number
 	A is a square matrix

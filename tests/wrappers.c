@@ -12,10 +12,48 @@
 #include "../src/harmonics.h"
 #include "../src/hpdyad.h"
 #include "../src/tools.h"
+#include "../src/zeta.h"
 #include "complex.h"
 #include "stdbool.h"
 #include <math.h>
 #include <stdlib.h>
+
+/**
+ * @brief calculates the derivatives of the set zeta function for lattices.
+ * @param[in] nu: exponent for the Epstein zeta function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] a: matrix that transforms the lattice in the Epstein zeta
+ * function.
+ * @param[in] x: x vector of the Epstein zeta function.
+ * @param[in] y: y vector of the Epstein zeta function.
+ * @param[in] alpha: multiindex for the derivative of the set zeta function.
+ * @return function value of the Epstein zeta.
+ */
+double complex setZetaDer(double nu, unsigned int dim, const double *a,
+                          const double *x, const double *y,
+                          const unsigned int *alpha) {
+
+    return epsteinZetaInternal(nu, dim, a, x, y, 1, 2, alpha);
+}
+
+/**
+ * @brief calculates the derivatives of the regularized Epstein zeta function for
+ * lattices.
+ * @param[in] nu: exponent for the Epstein zeta function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] a: matrix that transforms the lattice in the Epstein zeta
+ * function.
+ * @param[in] x: x vector of the Epstein zeta function.
+ * @param[in] y: y vector of the Epstein zeta function.
+ * @param[in] alpha: multiindex for the derivative of the set zeta function.
+ * @return function value of the Epstein zeta.
+ */
+double complex epsteinZetaRegDer(double nu, unsigned int dim, const double *a,
+                                 const double *x, const double *y,
+                                 const unsigned int *alpha) {
+
+    return epsteinZetaInternal(nu, dim, a, x, y, 1, 3, alpha);
+}
 
 /** @brief Computes a single summand of h_inner; explicitly
  * (−1/2)^{i} / cn,i,k binom(i+k,k) binom(i,β) binom(α,θ1) θ2! / (θ2 - θ1)!,

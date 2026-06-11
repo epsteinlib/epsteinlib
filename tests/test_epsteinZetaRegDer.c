@@ -4,6 +4,7 @@
 
 #include "epsteinZeta.h"
 #include "utils.h"
+#include "wrappers.h"
 #include <complex.h>
 #include <errno.h>
 #include <math.h>
