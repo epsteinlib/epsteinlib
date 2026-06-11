@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-(* SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
+(* SPDX-FileCopyrightText: 2024-2026 Jonathan Busse <jonathan@jbusse.de>
    SPDX-FileCopyrightText: 2024 Jan Schmitz <schmitz@num.uni-sb.de>
    SPDX-License-Identifier: AGPL-3.0-only *)
 
@@ -12,8 +12,8 @@ EpsteinZeta::usage="EpsteinZeta[\[Nu],A,x,y] computes the Epstein zeta function 
 using the algorithm in Crandall, R., Unified algorithms for polylogarithm, L-series, and zeta variants. Algorithmic Reflections: Selected Works. PSIpress (2012).";
 EpsteinZetaReg::usage="EpsteinZetaReg[\[Nu],A,x,y] computes the regularized Epstein zeta function exp(2 Pi I x.y) sum_{z in \[CapitalLambda]} exp(- 2 Pi I y.z)/|z - x|^\[Nu]  - s\:0302(y)/|det(\[CapitalLambda])|
 as in Andreas A. Buchheit et al., Exact continuum representation of long-range interacting systems and emerging exotic phases in unconventional superconductors. Phys. Rev. Res. 5 (4 Oct. 2023), p. 043065.  using a modification of the algorithm in Crandall, R., Unified algorithms for polylogarithm, L-series, and zeta variants. Algorithmic Reflections: Selected Works. PSIpress (2012).";
-EpsteinZetaAniso::usage="EpsteinZetaAniso[\[Nu],A,x,y,\[Alpha]] computes the anisotropic Epstein zeta function sum_{z in \[CapitalLambda]} z^\[Alpha] exp(- 2 Pi I y.z)/|z-x|^\[Nu] with respect to y and some multi-index \[Alpha].";
-EpsteinZetaAnisoReg::usage="EpsteinZetaAnisoReg[\[Nu],A,x,y] computes the regularized anisotropic Epstein zeta function exp(2 Pi I x.y) sum_{z in Lambda} exp(- 2 Pi I y.z)/|z - x|^\[Nu]  - s\:0302(y)/((-2 \[Pi] I)^|\[Alpha]| |det(\[CapitalLambda])|) with respect to y and some multi-index \[Alpha]."
+EpsteinZetaAniso::usage="EpsteinZetaAniso[\[Nu],A,x,y,\[Alpha]] computes the anisotropic Epstein zeta function sum_{z in \[CapitalLambda]} z^\[Alpha] exp(- 2 Pi I y.z)/|z-x|^\[Nu].";
+EpsteinZetaAnisoReg::usage="EpsteinZetaAnisoReg[\[Nu],A,x,y] computes the regularized anisotropic Epstein zeta function exp(2 Pi I x.y) sum_{z in Lambda} exp(- 2 Pi I y.z)/|z - x|^\[Nu]  - s\:0302(y)/((-2 \[Pi] I)^|\[Alpha]| |det(\[CapitalLambda])|)."
 
 
 Begin["Private`"];
