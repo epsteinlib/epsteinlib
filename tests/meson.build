@@ -95,8 +95,8 @@ benchmark_gamma = executable('epsteinlib_benchmark_gamma',
     link_with : epsteinlib
 )
 
-benchmark_derivatives_timing = executable('epsteinlib_benchmark_derivatives_timing',
-    ['wrappers.c','utils.c','benchmark_derivatives_timing.c'],
+benchmark_aniso_timing = executable('epsteinlib_benchmark_aniso_timing',
+    ['wrappers.c','utils.c','benchmark_aniso_timing.c'],
     include_directories : incdir,
     dependencies: deps,
     install: false,
