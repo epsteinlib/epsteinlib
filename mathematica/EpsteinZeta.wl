@@ -184,7 +184,7 @@ If[libPath =!= $Failed &&
    PossibleZeroQ[EpsteinZetaAniso[-2, {{1}}, {1}, {0}, {0}]]&&
    PossibleZeroQ[EpsteinZetaAnisoReg[-2, {{1}}, {1}, {0}, {0}]],
   Message[epsteinLoad::info,
-   "The (regularized) Epstein zeta and the derivatives of the set zeta function can be called using:
+   "The (regularized) Epstein zeta and the (regularized) anisotropic Epstein zeta function can be called using:
 	EpsteinZeta[\[Nu], A, x, y]
 	EpsteinZetaReg[\[Nu], A, x, y]
 	EpsteinZetaAniso[\[Nu], A, x, y, \[Alpha]]
