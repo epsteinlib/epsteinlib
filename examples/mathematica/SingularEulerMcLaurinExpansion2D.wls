@@ -57,7 +57,7 @@ Needs["MaTeX`"];
 
 
 (* ::Text:: *)
-(*Set options for pretty plots.*)
+(*Set options for figures.*)
 
 
 SetOptions[RegionPlot,TicksStyle->{FontSize->18},LabelStyle->{FontSize->18}];
@@ -66,11 +66,11 @@ SetOptions[MaTeX,FontSize->18];
 
 
 (* ::Subsection::Closed:: *)
-(*Define functions*)
+(*Define Functions*)
 
 
 (* ::Text:: *)
-(*Sum2DCompiled computes the sum  \[Sum]\:208dy\:2081,y\:2082\:208e\[Element]\:2124\.b2 ((y\:2081-x\:2081)\.b2 + (y\:2082-x\:2082)\.b2)^(-\[Nu]/2) \:22c5 exp(-\[Pi] (y\:2081\.b2 + y\:2082\.b2)/\[Sigma]\.b2)*)
+(*Sum2DCompiled computes the sum  \[Sum]\:208dy\:2081,y\:2082\:208e\[Element]\:2124\.b2 ((y\:2081-x\:2081)\.b2 + (y\:2082-x\:2082)\.b2)^(-\[Nu]/2) \:22c5 exp(-\[Pi] (y\:2081\.b2 + y\:2082\.b2)/\[Sigma]\.b2).*)
 
 
 Sum2DCompiled=Compile[{
@@ -97,14 +97,14 @@ Sum2D[{x1_,x2_},\[Nu]_,\[Sigma]_,lim_:100]:=Sum2DCompiled[N[x1],N[x2],N[\[Nu]],N
 
 
 (* ::Text:: *)
-(*Analytic expression for the indefinite integral \[Integral] \:208d\:208b\[Infinity],\[Infinity]\:208e ((y\:2081-x\:2081)\.b2 + (y\:2082-x\:2082)\.b2)^(-\[Nu]/2) \:22c5 exp(-\[Pi] (y\:2081\.b2 + y\:2082\.b2)/\[Sigma]\.b2) dy\:2081 dy\:2082*)
+(*Analytic expression for the indefinite integral \[Integral] \:208d\:208b\[Infinity],\[Infinity]\:208e ((y\:2081-x\:2081)\.b2 + (y\:2082-x\:2082)\.b2)^(-\[Nu]/2) \:22c5 exp(-\[Pi] (y\:2081\.b2 + y\:2082\.b2)/\[Sigma]\.b2) dy\:2081 dy\:2082.*)
 
 
 Integral2D[{x1_,x2_},\[Nu]_,\[Sigma]_]:=\[Pi]^(\[Nu]/2) (\[Sigma]^2)^(1-\[Nu]/2) Gamma[1-\[Nu]/2] LaguerreL[-(\[Nu]/2),-((\[Pi] (x1^2+x2^2))/\[Sigma]^2)]
 
 
 (* ::Text:: *)
-(*Analytic expression for the partial derivatives of the Gaussian exp(-(\[Pi] (y\:2081\.b2 + y\:2082\.b2)/\[Sigma]\.b2))*)
+(*Analytic expression for the partial derivatives of the Gaussian exp(-(\[Pi] (y\:2081\.b2 + y\:2082\.b2)/\[Sigma]\.b2)).*)
 
 
 Gaussian2D[{y1_,y2_},\[Sigma]_]=Exp[-((\[Pi] (y1^2+y2^2))/\[Sigma]^2)];
@@ -115,17 +115,17 @@ GaussianDerivatives2D[{y1_,y2_},\[Sigma]_,\[Alpha]_]:=Gaussian2D[{y1,y2},\[Sigma
 
 
 (* ::Text:: *)
-(*SEM Operator*)
+(*SEM Operator.*)
 
 
 SEM2D[{x1_,x2_},\[Nu]_,\[Sigma]_,n_:0] := Integral2D[{x1,x2},\[Nu],\[Sigma]]+Total[Table[
-	Apply[Times,1/\[Beta]!/(-2 Pi I)^\[Beta]] Re@EpsteinZetaRegDer[\[Nu],IdentityMatrix[2],ConstantArray[0,2],ConstantArray[0,2],\[Beta]]GaussianDerivatives2D[{x1,x2},\[Sigma],\[Beta]]
+	Apply[Times,1/\[Beta]!] Re@EpsteinZetaAnisoReg[\[Nu],IdentityMatrix[2],ConstantArray[0,2],ConstantArray[0,2],\[Beta]]GaussianDerivatives2D[{x1,x2},\[Sigma],\[Beta]]
 		,{\[Beta],Tuples[Range[0,n,2],2]}
 	]]
 
 
 (* ::Subsection::Closed:: *)
-(*Error Analysis*)
+(*Compose Error Figure*)
 
 
 (* ::Text:: *)

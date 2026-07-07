@@ -1,7 +1,7 @@
 <!--
 SPDX-FileCopyrightText: 2025 Andreas Buchheit <buchheit@num.uni-sb.de>
 SPDX-FileCopyrightText: 2025 Jan Schmitz <schmitz@num.uni-sb.de>
-SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
+SPDX-FileCopyrightText: 2025-2026 Jonathan Busse <jonathan@jbusse.de>
 SPDX-FileCopyrightText: 2025 Ruben Gutendorf <ruben.gutendorf@uni-saarland.de>
 
 SPDX-License-Identifier: AGPL-3.0-only
@@ -27,6 +27,7 @@ EpsteinLib is a C library designed for the fast and efficient computation of the
 
 Originally studied by Epstein [1,2], the Epstein zeta function forms the basis for computing general multidimensional lattice sums in classical and quantum physics applications [3]. Together with its regularization, it serves as the central ingredient in the singular Euler-Maclaurin (SEM) expansion, which generalizes the 300-year-old Euler summation formula to lattice sums in higher dimensions with physically relevant power-law interactions [4-5]. An efficiently computable representation of the Epstein zeta function is provided in [6,7,8]. In [8], we discuss in detail the analytical properties of the Epstein zeta function and present an algorithm for its computation, complete with error bounds.
 
+## Epstein zeta function
 For a $d$-dimensional lattice $\Lambda=A\mathbb Z^d$, with $A\in \mathbb R^{d\times d}$ regular, $\boldsymbol x,\boldsymbol y \in \mathbb R^d$, and $\nu \in \mathbb C$, the Epstein zeta function is defined by the Dirichlet series
 
 $$
@@ -66,15 +67,13 @@ EpsteinZeta[\[Nu],A,x,y]
 ```
 and evaluates to full precision over the whole parameter range up to ten dimensions.
 
-The Epstein zeta function admits singularities in the lattice $\boldsymbol x\in\Lambda$ and in the reciprocal lattice $\boldsymbol y\in\Lambda^*$.
-To ensure numerical stability when evaluating the Epstein zeta function, we implement the following cutoffs:
+The Epstein zeta function admits singularities in the lattice $\boldsymbol x\in\Lambda$ and in the reciprocal lattice $\boldsymbol y\in\Lambda^*$. To ensure numerical stability when evaluating the Epstein zeta function, we implement the following cutoffs:
 - If $(\boldsymbol x-\boldsymbol z)^2 < 10^{-64}$ for some $\boldsymbol z \in \Lambda$, we numerically set $\boldsymbol x = \boldsymbol z$.
 - Similarly, if $(\boldsymbol y-\boldsymbol k)^2 < 10^{-64}$, for some $\boldsymbol k \in\Lambda^*$, we numerically set $\boldsymbol y = \boldsymbol k$.
 
 When evaluating $\boldsymbol x\in\Lambda$ or $\boldsymbol y \in\Lambda^*$, users should set $\boldsymbol x= \boldsymbol 0$ or $\boldsymbol y = \boldsymbol 0$ and use the quasi-periodicity of the Epstein zeta function.
 
-
-In addition, this library includes the regularized Epstein zeta function, which is analytic around $\boldsymbol y=0$, and is defined via
+In addition, this library includes the regularized Epstein zeta function, which is analytic around $\boldsymbol y= \boldsymbol 0$, and is defined via
 
 $$
 Z_{\Lambda,\nu}^{\mathrm{reg}}\begin{vmatrix} \boldsymbol x \newline\boldsymbol y \end{vmatrix} =
@@ -125,35 +124,58 @@ EpsteinZetaReg[\[Nu],A,x,y]
 To ensure numerical stability when evaluating the regularized Epstein zeta function as a function of $\boldsymbol x$, we again implement the following cutoff:
 - If $(\boldsymbol x-\boldsymbol z)^2 < 10^{-64}$ for some $\boldsymbol z \in \Lambda$, we numerically set $\boldsymbol x = \boldsymbol z$.
 
-## In Development: Derivatives
+## Anisotropic Epstein zeta function
 
-EpsteinLib offers the partial derivatives of the set zeta function and the regularized Epstein zeta function with respect to the multi-index $\boldsymbol{\alpha}$ and the vector argument $\boldsymbol y$.
 
-For some multi-index $\boldsymbol{\alpha}$ and $L=\Lambda -\boldsymbol x$, the partial derivatives of the set zeta function are defined as meromorphic continuation of
-
-$$
-Z_{L,\nu}^{(\boldsymbol\alpha)}(\boldsymbol y)
-=\sum_{\boldsymbol{z}\in L}{}^{'}
-(-2\pi i\boldsymbol z)^{\boldsymbol\alpha}
-\frac{e^{-2\pi i \boldsymbol{y}\cdot \boldsymbol{z}}}{|\boldsymbol{z}|^{\nu}}
-,\qquad\mathrm{Re}(\nu) > d-|\boldsymbol\alpha|
-$$
-
-to $\nu\in\mathbb C$. Note, that the derivatives of the set zeta function are the derivatives of the Epstein zeta function with respect to $\boldsymbol y$ with a phase factor
+Let $\nu\in\mathbb C$ and signify by the multi-index $\boldsymbol\alpha\in\mathbb N_0^d$ the anisotropy strength of
 
 $$
-Z_{L, \nu}^{(\boldsymbol\alpha)}(\boldsymbol y)
-=\partial_{\boldsymbol y}^{\boldsymbol\alpha}
-\Big(e^{2\pi i \boldsymbol x \cdot\boldsymbol y}Z_{\Lambda,\nu}\begin{vmatrix} \boldsymbol x \newline\boldsymbol y \end{vmatrix} \Big).
+V_{\nu,\boldsymbol \alpha}(\boldsymbol z)
+= \frac{\boldsymbol z^{\boldsymbol \alpha}}{\vert \boldsymbol z \vert^\nu}
+,\qquad
+\boldsymbol z\in\mathbb R^d\setminus\{\boldsymbol 0\},
 $$
 
-The derivatives of the set zeta function are implemented in this library as
+with $\boldsymbol z^{\boldsymbol\alpha}=z_1^{\alpha_1}z_2^{\alpha_2}\ldots z_d^{\alpha_d}$. For a $d$-dimensional lattice $\Lambda$ and $\boldsymbol x,\boldsymbol y \in \mathbb R^d$, and $\nu \in \mathbb C$, the anisotropic Epstein zeta function is then define as
+
+$$
+Z_{\Lambda,\nu}(\boldsymbol x,\boldsymbol y)
+= \sum_{z \in \Lambda}{}^{'} e^{-2\pi i \boldsymbol y \cdot \boldsymbol z}V_{\nu,\boldsymbol \alpha}(\boldsymbol z-\boldsymbol x),\quad \mathrm{Re}(\nu)>d
++|\boldsymbol \alpha|,
+$$
+
+meromorphically continued to $\nu \in \mathbb C$.  Here, we recover the Epstein zeta function for $\boldsymbol \alpha=\boldsymbol 0$. The anisotropic Epstein zeta function is closely related to the partial vector derivatives of the Epstein zeta function. In particular, the $\boldsymbol{\alpha}$ derivatives of the Epstein zeta function with respect to the wave vector $\boldsymbol{y}$ can be obtained by
+
+```math
+\nabla_{\boldsymbol{y}}^{\boldsymbol{\alpha}}
+Z_{\Lambda,\nu}(\boldsymbol{x},\boldsymbol{y})
+=
+(-2\pi i)^{|\boldsymbol\alpha|}
+\sum_{\boldsymbol\beta \le \boldsymbol\alpha}
+\binom{\boldsymbol\alpha}{\boldsymbol\beta}\boldsymbol x^{\boldsymbol\alpha-\boldsymbol\beta}
+Z_{\Lambda,\nu,\boldsymbol\beta}(\boldsymbol x,\boldsymbol y)
+\,,
+```
+
+where the summation goes over $`\{\boldsymbol \beta\in\mathbb N_0^d:\beta_i\le\alpha_i,\ 1\le i\le d\}`$
+and where we define $|\boldsymbol\alpha|=\alpha_1+\ldots+\alpha_d$,
+$`\nabla^{\boldsymbol\alpha}_{\boldsymbol y}=\partial_{y_1}^{\alpha_1}\ldots\partial_{y_d}^{\alpha_d}`$, and
+$`\binom{\boldsymbol\alpha}{\boldsymbol\beta}=\binom{\alpha_1}{\beta_1}\ldots\binom{\alpha_d}{\beta_d}.`$
+
+The anisotropic Epstein zeta function is implemented in this library as
 ```c
-double complex setZetaDer(double nu, unsigned int dim, const double *A, const double *x, const double *y, const unsigned int *alpha);
+double complex epsteinZetaAniso(
+    double nu,
+    unsigned int dim,
+    const double *A,
+    const double *x,
+    const double *y,
+    const unsigned int *alpha
+);
 ```
 In the Python package, it is implemented as
 ```python
-def set_zeta_der(
+def epstein_zeta_aniso(
     nu: Union[float, int],
     A: NDArray[Union[np.integer[Any], np.floating[Any]]],
     x: NDArray[Union[np.integer[Any], np.floating[Any]]],
@@ -163,23 +185,33 @@ def set_zeta_der(
 ```
 In the Mathematica package, it is implemented as
 ```mathematica
-SetZetaDer[\[Nu],A,x,y,\[alpha]]
+EpsteinZetaAniso[\[Nu],A,x,y,\[alpha]]
 ```
 
-In addition, the library includes the partial derivatives of the regularized Epstein zeta function
+In addition, the library includes the regularized anisotropic Epstein zeta function defined via
 
 $$
-Z_{\Lambda,\nu}^{\mathrm{reg},(\boldsymbol{\alpha})}\begin{vmatrix} \boldsymbol x \newline\boldsymbol y \end{vmatrix}
-=\partial_{\boldsymbol y}^{\boldsymbol\alpha}Z_{\Lambda,\nu}^{\mathrm{reg}}\begin{vmatrix} \boldsymbol x \newline\boldsymbol y \end{vmatrix}
+Z_{\Lambda, \nu,\boldsymbol\alpha}^{(\mathrm{reg})}(\boldsymbol x,\boldsymbol y) = Z_{\Lambda,\nu,\boldsymbol\alpha}(\boldsymbol x,\boldsymbol y) -\frac{\hat s^{(\boldsymbol\alpha)}_{\nu}(\boldsymbol y)}{(-2\pi i)^{|\boldsymbol\alpha|}V_{\Lambda}}
+% -\frac{1}{V_{\Lambda}}\frac{\diffop^{\boldsymbol\alpha}\hat s_{\nu}(\boldsymbol y)}{(-2\pi i)^{|\boldsymbol\alpha|}}
+,\qquad \boldsymbol y\neq \boldsymbol 0,
 $$
 
-who are implemented in this library as
+and continuously extended to $\boldsymbol y=\boldsymbol 0$, where $`\hat s^{(\boldsymbol\alpha)}_\nu`$ denote the $\boldsymbol\alpha$-derivatives of $\hat{s}_\nu$.
+
+The regularized anisotropic Epstein zeta function is implemented in this library as
 ```c
-double complex epsteinZetaRegDer(double nu, unsigned int dim, const double *A, const double *x, const double *y, const unsigned int *alpha);
+double complex epsteinZetaAnisoReg(
+    double nu,
+    unsigned int dim,
+    const double *A,
+    const double *x,
+    const double *y,
+    const unsigned int *alpha
+);
 ```
 In the Python package, it is implemented as
 ```python
-def epstein_zeta_reg_der(
+def epstein_zeta_aniso_reg(
     nu: Union[float, int],
     A: NDArray[Union[np.integer[Any], np.floating[Any]]],
     x: NDArray[Union[np.integer[Any], np.floating[Any]]],
@@ -189,7 +221,7 @@ def epstein_zeta_reg_der(
 ```
 In the Mathematica package, it is implemented as
 ```mathematica
-EpsteinZetaRegDer[\[Nu],A,x,y,\[alpha]]
+EpsteinZetaAnisoReg[\[Nu],A,x,y,\[alpha]]
 ```
 
 ## Installation

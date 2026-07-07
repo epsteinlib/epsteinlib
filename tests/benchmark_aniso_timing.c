@@ -10,6 +10,7 @@
  */
 
 #include "utils.h"
+#include "wrappers.h"
 #include <complex.h>
 #include <errno.h>
 #include <stdio.h>
@@ -19,34 +20,18 @@
 
 #include "epsteinZeta.h"
 
-#define BASE_PATH "src/tests/csv"
+#define BASE_PATH "tests/csv"
 
 #ifndef MAX_PATH_LENGTH
 #define MAX_PATH_LENGTH 1024
 #endif
 
 /**
- * @brief Opens a file.
- * @param path Path to the file.
- * @param mode 'r' to read or 'w' to write.
- * @return FILE* Pointer to the opened file.
- * @note Exits the program if the file cannot be opened.
- */
-static FILE *open(char *path, char *mode) {
-    FILE *file = fopen(path, mode);
-    if (file) {
-        return file;
-    }
-    printf("File '%s' does not exist.\n", path);
-    exit(1); // NOLINT
-}
-
-/**
- * @brief Benchmarks the evaluation time of the setZetaDer function
+ * @brief Benchmarks the evaluation time of the epsteinZetaAniso function
  *
  * @return  0 on successful execution.
  */
-int benchmark_setZetaDer_timing() { // NOLINT
+int benchmark_epsteinZetaAniso_timing() { // NOLINT
 
     printf("\n========== Benchmarking %s ==========\n", __func__);
 
@@ -69,11 +54,12 @@ int benchmark_setZetaDer_timing() { // NOLINT
 
     for (unsigned int dim = 1; dim < dimMax + 1; dim++) {
 
-        if (snprintf(zetaDataString, MAX_PATH_LENGTH, "%s/setZetaDer_timing_%uD.csv",
-                     BASE_PATH, dim) >= MAX_PATH_LENGTH) {
+        if (snprintf(zetaDataString, MAX_PATH_LENGTH,
+                     "%s/epsteinZetaAniso_timing_%uD.csv", BASE_PATH,
+                     dim) >= MAX_PATH_LENGTH) {
             return fprintf(stderr, "Error: filename too long\n");
         }
-        zetaData = open(zetaDataString, "w");
+        zetaData = open_file(zetaDataString, "w");
         if (zetaData == NULL) {
             printf("%s\n", strerror(errno)); // NOLINT
             return 1;
@@ -105,7 +91,7 @@ int benchmark_setZetaDer_timing() { // NOLINT
                 y[0] = (double)i * 0.1;
                 for (int n = 0; n < iterations; n++) {
                     timeStart = clock();
-                    res = setZetaDer(nu, dim, a, x, y, alpha);
+                    res = epsteinZetaAniso(nu, dim, a, x, y, alpha);
                     timeEnd = clock();
                     elapsedTimes[n] =
                         ((double)(timeEnd - timeStart)) / CLOCKS_PER_SEC;
@@ -143,6 +129,6 @@ int benchmark_setZetaDer_timing() { // NOLINT
  */
 int main() {
     int failed = 0;
-    failed += benchmark_setZetaDer_timing();
+    failed += benchmark_epsteinZetaAniso_timing();
     return failed;
 }
