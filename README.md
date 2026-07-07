@@ -158,7 +158,7 @@ Z_{\Lambda,\nu,\boldsymbol\beta}(\boldsymbol x,\boldsymbol y)
 ```
 
 where the summation goes over $`\{\boldsymbol \beta\in\mathbb N_0^d:\beta_i\le\alpha_i,\ 1\le i\le d\}`$
-and where we define $|\boldsymbol\alpha|=\alpha_1+\ldots+\alpha_d$, 
+and where we define $|\boldsymbol\alpha|=\alpha_1+\ldots+\alpha_d$,
 $`\nabla^{\boldsymbol\alpha}_{\boldsymbol y}=\partial_{y_1}^{\alpha_1}\ldots\partial_{y_d}^{\alpha_d}`$, and
 $`\binom{\boldsymbol\alpha}{\boldsymbol\beta}=\binom{\alpha_1}{\beta_1}\ldots\binom{\alpha_d}{\beta_d}.`$
 
