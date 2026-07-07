@@ -126,35 +126,52 @@ To ensure numerical stability when evaluating the regularized Epstein zeta funct
 
 ## Anisotropic Epstein zeta function
 
+
 Let $\nu\in\mathbb C$ and signify by the multi-index $\boldsymbol\alpha\in\mathbb N_0^d$ the anisotropy strength of
+
 $$
 V_{\nu,\boldsymbol \alpha}(\boldsymbol z)
 = \frac{\boldsymbol z^{\boldsymbol \alpha}}{\vert \boldsymbol z \vert^\nu}
 ,\qquad
 \boldsymbol z\in\mathbb R^d\setminus\{\boldsymbol 0\},
 $$
+
 with $\boldsymbol z^{\boldsymbol\alpha}=z_1^{\alpha_1}z_2^{\alpha_2}\ldots z_d^{\alpha_d}$. For a $d$-dimensional lattice $\Lambda$ and $\boldsymbol x,\boldsymbol y \in \mathbb R^d$, and $\nu \in \mathbb C$, the anisotropic Epstein zeta function is then define as
+
 $$
 Z_{\Lambda,\nu}(\boldsymbol x,\boldsymbol y)
 = \sum_{z \in \Lambda}{}^{'} e^{-2\pi i \boldsymbol y \cdot \boldsymbol z}V_{\nu,\boldsymbol \alpha}(\boldsymbol z-\boldsymbol x),\quad \mathrm{Re}(\nu)>d
 +|\boldsymbol \alpha|,
 $$
-meromorphically continued to $\nu \in \mathbb C$.  Here, we recover the Epstein zeta function for $\boldsymbol \alpha=\boldsymbol 0$. The anisotropic Epstein zeta function is closely related to the partial vector derivatives of the Epstein zeta function. In particular, the $\boldsymbol\alpha$ derivatives of the Epstein zeta function with respect to the wave vector $\boldsymbol y$ can be obtained by
-$$
-\nabla^{\boldsymbol\alpha}_{\boldsymbol y}
-Z_{\Lambda,\nu}(\boldsymbol x,\boldsymbol y)
+
+meromorphically continued to $\nu \in \mathbb C$.  Here, we recover the Epstein zeta function for $\boldsymbol \alpha=\boldsymbol 0$. The anisotropic Epstein zeta function is closely related to the partial vector derivatives of the Epstein zeta function. In particular, the $\boldsymbol{\alpha}$ derivatives of the Epstein zeta function with respect to the wave vector $\boldsymbol{y}$ can be obtained by
+
+```math
+\nabla_{\boldsymbol{y}}^{\boldsymbol{\alpha}}
+Z_{\Lambda,\nu}(\boldsymbol{x},\boldsymbol{y})
 =
 (-2\pi i)^{|\boldsymbol\alpha|}
 \sum_{\boldsymbol\beta \le \boldsymbol\alpha}
 \binom{\boldsymbol\alpha}{\boldsymbol\beta}\boldsymbol x^{\boldsymbol\alpha-\boldsymbol\beta}
 Z_{\Lambda,\nu,\boldsymbol\beta}(\boldsymbol x,\boldsymbol y)
 \,,
-$$
-where the summation goes over $\{\boldsymbol \beta\in\mathbb N_0^d:\beta_i\le\alpha_i,\ 1\le i\le d\}$ and where we define $\nabla^{\boldsymbol\alpha}_{\boldsymbol y}=\partial_{y_1}^{\alpha_1}\ldots\partial_{y_d}^{\alpha_d}$ , $\binom{\boldsymbol\alpha}{\boldsymbol\beta}=\binom{\alpha_1}{\beta_1}\ldots\binom{\alpha_d}{\beta_d}$ and $|\boldsymbol\alpha|=\alpha_1+\ldots+\alpha_d$.
+```
+
+where the summation goes over $`\{\boldsymbol \beta\in\mathbb N_0^d:\beta_i\le\alpha_i,\ 1\le i\le d\}`$
+and where we define $|\boldsymbol\alpha|=\alpha_1+\ldots+\alpha_d$, 
+$`\nabla^{\boldsymbol\alpha}_{\boldsymbol y}=\partial_{y_1}^{\alpha_1}\ldots\partial_{y_d}^{\alpha_d}`$, and
+$`\binom{\boldsymbol\alpha}{\boldsymbol\beta}=\binom{\alpha_1}{\beta_1}\ldots\binom{\alpha_d}{\beta_d}.`$
 
 The anisotropic Epstein zeta function is implemented in this library as
 ```c
-double complex epsteinZetaAniso(double nu, unsigned int dim, const double *A, const double *x, const double *y, const unsigned int *alpha);
+double complex epsteinZetaAniso(
+    double nu,
+    unsigned int dim,
+    const double *A,
+    const double *x,
+    const double *y,
+    const unsigned int *alpha
+);
 ```
 In the Python package, it is implemented as
 ```python
@@ -172,16 +189,25 @@ EpsteinZetaAniso[\[Nu],A,x,y,\[alpha]]
 ```
 
 In addition, the library includes the regularized anisotropic Epstein zeta function defined via
+
 $$
 Z_{\Lambda, \nu,\boldsymbol\alpha}^{(\mathrm{reg})}(\boldsymbol x,\boldsymbol y) = Z_{\Lambda,\nu,\boldsymbol\alpha}(\boldsymbol x,\boldsymbol y) -\frac{\hat s^{(\boldsymbol\alpha)}_{\nu}(\boldsymbol y)}{(-2\pi i)^{|\boldsymbol\alpha|}V_{\Lambda}}
 % -\frac{1}{V_{\Lambda}}\frac{\diffop^{\boldsymbol\alpha}\hat s_{\nu}(\boldsymbol y)}{(-2\pi i)^{|\boldsymbol\alpha|}}
 ,\qquad \boldsymbol y\neq \boldsymbol 0,
 $$
-and continuously extended to $\boldsymbol y=\boldsymbol 0$, where $\hat s^{(\boldsymbol\alpha)}_\nu$ denote the $\boldsymbol\alpha$-derivatives of $\hat{s}_\nu$.
+
+and continuously extended to $\boldsymbol y=\boldsymbol 0$, where $`\hat s^{(\boldsymbol\alpha)}_\nu`$ denote the $\boldsymbol\alpha$-derivatives of $\hat{s}_\nu$.
 
 The regularized anisotropic Epstein zeta function is implemented in this library as
 ```c
-double complex epsteinZetaAnisoReg(double nu, unsigned int dim, const double *A, const double *x, const double *y, const unsigned int *alpha);
+double complex epsteinZetaAnisoReg(
+    double nu,
+    unsigned int dim,
+    const double *A,
+    const double *x,
+    const double *y,
+    const unsigned int *alpha
+);
 ```
 In the Python package, it is implemented as
 ```python
