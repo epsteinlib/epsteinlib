@@ -1,7 +1,7 @@
 <!--
 SPDX-FileCopyrightText: 2025 Andreas Buchheit <buchheit@num.uni-sb.de>
 SPDX-FileCopyrightText: 2025 Jan Schmitz <schmitz@num.uni-sb.de>
-SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
+SPDX-FileCopyrightText: 2025-2026 Jonathan Busse <jonathan@jbusse.de>
 SPDX-FileCopyrightText: 2025 Ruben Gutendorf <ruben.gutendorf@uni-saarland.de>
 
 SPDX-License-Identifier: AGPL-3.0-only
@@ -144,14 +144,15 @@ $$
 \nabla^{\boldsymbol\alpha}_{\boldsymbol y}
 Z_{\Lambda,\nu}(\boldsymbol x,\boldsymbol y)
 =
+(-2\pi i)^{|\boldsymbol\alpha|}
 \sum_{\boldsymbol\beta \le \boldsymbol\alpha}
-(-2\pi i)^{|\boldsymbol\alpha|}\binom{\boldsymbol\alpha}{\boldsymbol\beta}\boldsymbol x^{\boldsymbol\alpha-\boldsymbol\beta}
+\binom{\boldsymbol\alpha}{\boldsymbol\beta}\boldsymbol x^{\boldsymbol\alpha-\boldsymbol\beta}
 Z_{\Lambda,\nu,\boldsymbol\beta}(\boldsymbol x,\boldsymbol y)
 \,,
 $$
 where the summation goes over $\{\boldsymbol \beta\in\mathbb N_0^d:\beta_i\le\alpha_i,\ 1\le i\le d\}$ and where we define $\nabla^{\boldsymbol\alpha}_{\boldsymbol y}=\partial_{y_1}^{\alpha_1}\ldots\partial_{y_d}^{\alpha_d}$ , $\binom{\boldsymbol\alpha}{\boldsymbol\beta}=\binom{\alpha_1}{\beta_1}\ldots\binom{\alpha_d}{\beta_d}$ and $|\boldsymbol\alpha|=\alpha_1+\ldots+\alpha_d$.
 
-The derivatives of the anisotropic Epstein zeta function are implemented in this library as
+The anisotropic Epstein zeta function is implemented in this library as
 ```c
 double complex epsteinZetaAniso(double nu, unsigned int dim, const double *A, const double *x, const double *y, const unsigned int *alpha);
 ```
