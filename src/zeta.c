@@ -594,9 +594,8 @@ static double complex sum_fourier_harmonic(
     const unsigned int *exponents) {
     double lambda = 1.; // parameter that decides the weight of each sum
 
-    int zv[dim];     // counting vector in Z^dim
-    int zv_sym[dim]; // -zv
-    double lv[dim];  // lattice vector
+    int zv[dim];    // counting vector in Z^dim
+    double lv[dim]; // lattice vector
     // cuboid cutoffs
     long totalSummands = 1;
     for (int k = 0; k < dim; k++) {
@@ -611,20 +610,22 @@ static double complex sum_fourier_harmonic(
     // second sum (in fourier space)
     for (long n = 0; n < zeroIndex; n++) {
         matrix_intVector(dim, m_invt, zv, lv, diag);
-        double complex left = summand_fourier_harmonic(
+        double complex summand = summand_fourier_harmonic(
             nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
             valid_count, coeffs, exponents);
-        // symmetric addition to catch +- identical terms in y = 0
-        for (int k = 0; k < dim; k++) {
-            zv_sym[k] = -zv[k];
-        }
-        matrix_intVector(dim, m_invt, zv_sym, lv, diag);
-        double complex right = summand_fourier_harmonic(
-            nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
-            valid_count, coeffs, exponents);
-        kahan_add_c(&sum, &epsilon, left + right);
+        kahan_add_c(&sum, &epsilon, summand);
         lattice_vector_increment(dim, cutoffs, zv);
     }
+    lattice_vector_increment(dim, cutoffs, zv); // skips zero
+    for (long n = zeroIndex + 1; n < totalSummands; n++) {
+        matrix_intVector(dim, m_invt, zv, lv, diag);
+        double complex summand = summand_fourier_harmonic(
+            nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
+            valid_count, coeffs, exponents);
+        kahan_add_c(&sum, &epsilon, summand);
+        lattice_vector_increment(dim, cutoffs, zv);
+    }
+
     return sum;
 }
 
