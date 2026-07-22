@@ -10,7 +10,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <img align="right" src="https://avatars.githubusercontent.com/u/177750891?v=4" width="110">
 
-[![DOI](https://img.shields.io/badge/DOI-10.48550%2FarXiv.2412.16317-blue.svg)](https://doi.org/10.48550/arXiv.2412.16317)
+[![DOI](https://img.shields.io/badge/DOI-10.1093%2Fimanum%2Fdrag057-blue.svg)](https://doi.org/10.1093/imanum/drag057)
 [![PyPI package](https://badge.fury.io/py/epsteinlib.svg)](https://badge.fury.io/py/epsteinlib)
 <!-- [![Pipeline status](https://img.shields.io/github/check-runs/epsteinlib/epsteinlib/main)](https://github.com/epsteinlib/epsteinlib/actions/runs/15211465520) -->
 <!-- TODO: We want to point to the latest pipeline in main, this is not possible right now -->
@@ -23,7 +23,7 @@ Authors: Andreas A. Buchheit, Jonathan K. Busse, Ruben Gutendorf, DevOps: Jan Sc
 
 Contact: buchheit@num.uni-sb.de
 
-EpsteinLib is a C library designed for the fast and efficient computation of the Epstein zeta function for arbitrary multidimensional lattices. In addition to the C library, we also offer a Python package, epsteinlib, which can be easily installed via pip. For more information on the properties of the Epstein zeta function and on the underlying algorithm, see our recent preprint https://arxiv.org/abs/2412.16317.
+EpsteinLib is a C library designed for the fast and efficient computation of the Epstein zeta function for arbitrary multidimensional lattices. In addition to the C library, we also offer a Python package, epsteinlib, which can be easily installed via pip. For more information on the properties of the Epstein zeta function and on the underlying algorithm, see our recent manuscript [10.1093/imanum/drag057](https://doi.org/10.1093/imanum/drag057).
 
 Originally studied by Epstein [1,2], the Epstein zeta function forms the basis for computing general multidimensional lattice sums in classical and quantum physics applications [3]. Together with its regularization, it serves as the central ingredient in the singular Euler-Maclaurin (SEM) expansion, which generalizes the 300-year-old Euler summation formula to lattice sums in higher dimensions with physically relevant power-law interactions [4-5]. An efficiently computable representation of the Epstein zeta function is provided in [6,7,8]. In [8], we discuss in detail the analytical properties of the Epstein zeta function and present an algorithm for its computation, complete with error bounds.
 
@@ -31,7 +31,7 @@ Originally studied by Epstein [1,2], the Epstein zeta function forms the basis f
 For a $d$-dimensional lattice $\Lambda=A\mathbb Z^d$, with $A\in \mathbb R^{d\times d}$ regular, $\boldsymbol x,\boldsymbol y \in \mathbb R^d$, and $\nu \in \mathbb C$, the Epstein zeta function is defined by the Dirichlet series
 
 $$
-Z_{\Lambda,\nu}\begin{vmatrix} \boldsymbol x \newline\boldsymbol y \end{vmatrix}
+Z_{\Lambda,\nu}(\boldsymbol x,\boldsymbol y)
 = \sum_{z \in \Lambda}{}^{'} \frac{e^{-2\pi i \boldsymbol y \cdot \boldsymbol z}}{\left| \boldsymbol x- \boldsymbol z\right|^\nu},\quad \mathrm{Re}(\nu)>d,
 $$
 
@@ -76,9 +76,9 @@ When evaluating $\boldsymbol x\in\Lambda$ or $\boldsymbol y \in\Lambda^*$, users
 In addition, this library includes the regularized Epstein zeta function, which is analytic around $\boldsymbol y= \boldsymbol 0$, and is defined via
 
 $$
-Z_{\Lambda,\nu}^{\mathrm{reg}}\begin{vmatrix} \boldsymbol x \newline\boldsymbol y \end{vmatrix} =
+Z_{\Lambda,\nu}^{\mathrm{reg}}(\boldsymbol x,\boldsymbol y) =
 e^{2\pi i \boldsymbol x\cdot\boldsymbol y}
-Z_{\Lambda,\nu}\left|\begin{aligned} \boldsymbol x \newline\boldsymbol y \end{aligned}\right|
+Z_{\Lambda,\nu}(\boldsymbol x,\boldsymbol y )
 -\frac{\hat{s}(\boldsymbol y)}{V_{\Lambda}},
 $$
 
@@ -460,4 +460,4 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 [7] Andreas A. Buchheit, Torsten Keßler, and Kirill Serkh. "On the computation of lattice sums without translational invariance". Mathematics of Computation 94 (2025), pp. 2533-2574.
 
-[8] Andreas A. Buchheit, Jonathan Busse, and Ruben Gutendorf. "Computation and properties of the Epstein zeta function with high-performance implementation in EpsteinLib". arXiv preprint arXiv:2412.16317 (2024).
+[8] Andreas A. Buchheit, Jonathan K. Busse, and Ruben Gutendorf. "Computation and properties of the Epstein zeta function with applications to quantum systems". IMA Journal of Numerical Analysis (2026), drag057.
