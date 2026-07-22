@@ -907,21 +907,21 @@ static double complex summation_harmonic(
 
 /**
  * @brief calculates the (regularized) Epstein zeta function as well es the
- * derivatives of the set zeta function.
- * @param[in] nu: exponent for the Epstein zeta function.
+ * derivatives of the (regularized) set zeta function with a prefactor.
+ * @param[in] nu: exponent.
  * @param[in] dim: dimension of the input vectors.
- * @param[in] m: matrix that transforms the lattice in the Epstein zeta
- * function.
- * @param[in] x: x vector of the Epstein zeta function.
- * @param[in] y: y vector of the Epstein zeta function.
+ * @param[in] m: matrix that transforms the lattice .
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] lambda: relative weight of the sums in Crandall's formula.
  * @param[in] variant:
- *      0 for no regularization
- *      1 for the regularization
- *      2 for set zeta derivatives (divided by (-2 pi i)^|alpha|)
- *      3 for the regularized set zeta derivatives (divided by (-2 pi i)^|alpha|).
- * @param[in] alpha: multiindex for the derivatives of the set zeta function. *
- * @return function value of the regularized Epstein zeta.
+ *      0 for the Epstein zeta function
+ *      1 for the regularized Epstein zeta function
+ *      2 for the set zeta derivatives (divided by (-2 pi i)^|alpha|)
+ *      3 for the derivatives of the regularized Epstein zeta function (divided by
+ * (-2 pi i)^|alpha|).
+ * @param[in] alpha: multiindex for the derivatives.
+ * @return function value.
  */
 double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                    const double *m, const double *x, const double *y,
