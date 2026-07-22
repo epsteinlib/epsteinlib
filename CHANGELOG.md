@@ -9,6 +9,14 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 # Changelog
 
+## [0.5.2] - unreleased
+
+### Changed
+- Moved tests from `src/tests/` to `tests/`
+
+### Added
+- Standalone example notebook `examples/IMAFigures.wls` reproducing the results of the IMA Journal of Numerical Analysis manuscript which deprecates `examples/BenchmarkQuick.wls` and `examples/BenchmarkAndPaperFigures.wls`
+
 ## [0.5.1] - 2026-04-27
 
 ### Changed
