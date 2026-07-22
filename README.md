@@ -27,6 +27,7 @@ EpsteinLib is a C library designed for the fast and efficient computation of the
 
 Originally studied by Epstein [1,2], the Epstein zeta function forms the basis for computing general multidimensional lattice sums in classical and quantum physics applications [3]. Together with its regularization, it serves as the central ingredient in the singular Euler-Maclaurin (SEM) expansion, which generalizes the 300-year-old Euler summation formula to lattice sums in higher dimensions with physically relevant power-law interactions [4-5]. An efficiently computable representation of the Epstein zeta function is provided in [6,7,8]. In [8], we discuss in detail the analytical properties of the Epstein zeta function and present an algorithm for its computation, complete with error bounds.
 
+The anisotropic Epstein zeta function that appears in vector derivatives of Epstein zeta functions is also included in this library.
 ## Epstein zeta function
 For a $d$-dimensional lattice $\Lambda=A\mathbb Z^d$, with $A\in \mathbb R^{d\times d}$ regular, $\boldsymbol x,\boldsymbol y \in \mathbb R^d$, and $\nu \in \mathbb C$, the Epstein zeta function is defined by the Dirichlet series
 
@@ -144,7 +145,7 @@ Z_{\Lambda,\nu}(\boldsymbol x,\boldsymbol y)
 +|\boldsymbol \alpha|,
 $$
 
-meromorphically continued to $\nu \in \mathbb C$; where $|\boldsymbol{\alpha}|=\alpha_1+\ldots+\alpha_d$.  Here, we recover the Epstein zeta function for $\boldsymbol \alpha=\boldsymbol 0$. The anisotropic Epstein zeta function is closely related to the partial vector derivatives of the Epstein zeta function. In particular, the $\boldsymbol{\alpha}$ derivatives of the Epstein zeta function with respect to the wave vector $\boldsymbol{y}$ can be obtained by
+meromorphically continued to $\nu \in \mathbb C$; where we define $|\boldsymbol{\alpha}|=\alpha_1+\ldots+\alpha_d$.  Here, we recover the Epstein zeta function for $\boldsymbol \alpha=\boldsymbol 0$. The anisotropic Epstein zeta function is closely related to the partial vector derivatives of the Epstein zeta function. In particular, the $\boldsymbol{\alpha}$ derivatives of the Epstein zeta function with respect to the wave vector $\boldsymbol{y}$ can be obtained by
 
 ```math
 \nabla_{\boldsymbol{y}}^{\boldsymbol{\alpha}}
@@ -158,7 +159,7 @@ Z_{\Lambda,\nu,\boldsymbol\beta}(\boldsymbol x,\boldsymbol y)
 ```
 
 where the summation goes over $`\{\boldsymbol \beta\in\mathbb N_0^d:\beta_i\le\alpha_i,\ 1\le i\le d\}`$
-and where we define $|\boldsymbol\alpha|=\alpha_1+\ldots+\alpha_d$,
+and where we define
 $`\nabla^{\boldsymbol\alpha}_{\boldsymbol y}=\partial_{y_1}^{\alpha_1}\ldots\partial_{y_d}^{\alpha_d}`$, and
 $`\binom{\boldsymbol\alpha}{\boldsymbol\beta}=\binom{\alpha_1}{\beta_1}\ldots\binom{\alpha_d}{\beta_d}.`$
 
