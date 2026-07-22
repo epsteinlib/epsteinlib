@@ -136,7 +136,7 @@ V_{\nu,\boldsymbol \alpha}(\boldsymbol z)
 \boldsymbol z\in\mathbb R^d\setminus\{\boldsymbol 0\},
 $$
 
-with $\boldsymbol z^{\boldsymbol\alpha}=z_1^{\alpha_1}z_2^{\alpha_2}\ldots z_d^{\alpha_d}$. For a $d$-dimensional lattice $\Lambda$ and $\boldsymbol x,\boldsymbol y \in \mathbb R^d$, and $\nu \in \mathbb C$, the anisotropic Epstein zeta function is then define as
+with $\boldsymbol z^{\boldsymbol\alpha}=z_1^{\alpha_1}z_2^{\alpha_2}\ldots z_d^{\alpha_d}$. For a $d$-dimensional lattice $\Lambda$ and $\boldsymbol x,\boldsymbol y \in \mathbb R^d$, the anisotropic Epstein zeta function is then define as
 
 $$
 Z_{\Lambda,\nu}(\boldsymbol x,\boldsymbol y)
@@ -144,7 +144,7 @@ Z_{\Lambda,\nu}(\boldsymbol x,\boldsymbol y)
 +|\boldsymbol \alpha|,
 $$
 
-meromorphically continued to $\nu \in \mathbb C$.  Here, we recover the Epstein zeta function for $\boldsymbol \alpha=\boldsymbol 0$. The anisotropic Epstein zeta function is closely related to the partial vector derivatives of the Epstein zeta function. In particular, the $\boldsymbol{\alpha}$ derivatives of the Epstein zeta function with respect to the wave vector $\boldsymbol{y}$ can be obtained by
+meromorphically continued to $\nu \in \mathbb C$; where $|\boldsymbol{\alpha}|=\alpha_1+\ldots+\alpha_d$.  Here, we recover the Epstein zeta function for $\boldsymbol \alpha=\boldsymbol 0$. The anisotropic Epstein zeta function is closely related to the partial vector derivatives of the Epstein zeta function. In particular, the $\boldsymbol{\alpha}$ derivatives of the Epstein zeta function with respect to the wave vector $\boldsymbol{y}$ can be obtained by
 
 ```math
 \nabla_{\boldsymbol{y}}^{\boldsymbol{\alpha}}
