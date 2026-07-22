@@ -12,11 +12,12 @@ SPDX-License-Identifier: AGPL-3.0-only
 ## [0.6] - unreleased
 
 ### Added
-- Anisotropic Epstein zeta function `epsteinZetaAniso` including Python and Mathematica bindings with testing in `test_setZetaDer` through the related derivatives of set zeta functions for shifted lattices included in `wrappers.h` and `test_setZetaDer.wls`; run `meson test -v -C build/ test_setZetaDer`
-- Regularized anisotropic Epstein zeta function `epsteinZetaAnisoReg` with testing in `test_epsteinZetaRegDer` through the related derivatives of regularized Epstein zeta functions included in `wrappers.h` and `test_epsteinZetaRegDer`; run `meson test -v -C build/ test_epsteinZetaRegDer`
-- New files `hpdyad.c` and `hpdyad.h` implementing high precision dyadic number arithmetic with tests are included in `test_hpdyad.c` and `test_hpdyad.wls`; run `meson test -v -C build/ test_hpdyad`
-- New files `harmonics.c` and `harmonics.h` for high precision computation of harmonic polynomials with tests included in `test_harmonics.c` and `test_harmonics.wls`; run `meson test -v -C build/ test_harmonics`
-- New files `wrappers.c` and `wrappers.h` for functions included in unit tests that do not appear in the core library
+- Anisotropic Epstein zeta function `epsteinZetaAniso` including Python and Mathematica bindings with testing in `tests/test_setZetaDer` through the related derivatives of set zeta functions for shifted lattices included in `tests/wrappers.h` and `tests/test_setZetaDer.wls`; run `meson test -v -C build/ test_setZetaDer`
+- Regularized anisotropic Epstein zeta function `epsteinZetaAnisoReg` with testing in `tests/test_epsteinZetaRegDer` through the related derivatives of regularized Epstein zeta functions included in `tests/wrappers.h` and `tests/test_epsteinZetaRegDer`; run `meson test -v -C build/ test_epsteinZetaRegDer`
+- New files `src/hpdyad.c` and `src/hpdyad.h` implementing high precision dyadic number arithmetic with tests included in `tests/test_hpdyad.c` and `tests/test_hpdyad.wls`; run `meson test -v -C build/ test_hpdyad`
+- New files `tests/harmonics.c` and `tests/harmonics.h` for high precision computation of harmonic polynomials with tests included in `tests/test_harmonics.c` and `tests/test_harmonics.wls`; run `meson test -v -C build/ test_harmonics`
+- New files `tests/wrappers.c` and `tests/wrappers.h` for functions included in unit tests that do not appear in the core library
+- New file `tests/benchmark_aniso_timing.c`, which builds to an executable of the same name that benchmarks the evaluation times of the anisotropic Epstein zeta function
 
 ## [0.5.1] - 2026-04-27
 
