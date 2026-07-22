@@ -9,6 +9,11 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 # Changelog
 
+## [0.6] - unreleased
+
+## Added
+- Anisotropic Epstein zeta function and regularized anisotropic Epstein zeta function including a Python and Mathematica bindings.
+
 ## [0.5.1] - 2026-04-27
 
 ### Changed
