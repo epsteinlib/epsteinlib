@@ -262,7 +262,11 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     double complex res;
     if (nu < 1 && fabs((nu / 2.) - nearbyint(nu / 2.)) < EPS) {
         if (dot(dim, x_t2, x_t2) == 0 && nu == 0) {
-            res = -1 * cexp(-2 * M_PI * I * dot(dim, x_t1, y_t2));
+            if (reg) {
+                res = -1; // reg already carries phase by definition
+            } else {
+                res = -cexp(-2 * M_PI * I * dot(dim, x_t1, y_t2));
+            }
         } else {
             res = 0;
         }
