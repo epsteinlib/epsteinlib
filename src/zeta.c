@@ -985,9 +985,13 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     double x_t2_squared = dot(dim, x_t2, x_t2);
     double y_t2_squared = dot(dim, y_t2, y_t2);
     unsigned int alphaAbs = (variant > 1) ? mult_abs(dim, alpha) : 0;
-    if (variant < 3 && nu < 1 && fabs((nu / 2.) - nearbyint(nu / 2.)) < EPS) {
-        if (!alphaAbs && x_t2_squared == 0 && nu == 0) {
-            res = -1 * cexp(-2 * M_PI * I * dot(dim, x_t1, y_t2));
+    if (variant < 2 && nu < 1 && fabs((nu / 2.) - nearbyint(nu / 2.)) < EPS) {
+        if (x_t2_squared == 0 && nu == 0) {
+            if (variant == 1) {
+                res = -1; // reg already carries phase by definition
+            } else {
+                res = -cexp(-2 * M_PI * I * dot(dim, x_t1, y_t2));
+            }
         } else {
             res = 0;
         }

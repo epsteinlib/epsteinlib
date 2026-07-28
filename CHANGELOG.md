@@ -23,6 +23,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 - New file `tests/benchmark_aniso_timing.c`, which builds to an executable of the same name that benchmarks the evaluation times of the anisotropic Epstein zeta function
 - Standalone example notebook `examples/IMAFigures.wls` reproducing the results of the IMA Journal of Numerical Analysis manuscript which deprecates `examples/BenchmarkQuick.wls` and `examples/BenchmarkAndPaperFigures.wls`
 
+### Fixed
+- Removed spurious phase factor of the regularized Epstein zeta function at $\nu=0$ and $\boldsymbol{x}\in\Lambda$, now returns $-1$ instead of $-e^{-2\pi i\boldsymbol{x}\cdot\boldsymbol{y}}$
+
 ## [0.5.1] - 2026-04-27
 
 ### Changed
