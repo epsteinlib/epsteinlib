@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2024 Andreas Buchheit <buchheit@num.uni-sb.de>
-// SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
+// SPDX-FileCopyrightText: 2024-2026 Jonathan Busse <jonathan@jbusse.de>
 // SPDX-FileCopyrightText: 2024 Ruben Gutendorf
 // <ruben.gutendorf@uni-saarland.de>
 //
@@ -925,22 +925,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                    const double *m, const double *x, const double *y,
                                    double lambda, unsigned int variant,
                                    const unsigned int *alpha) {
-    // Early return for 0th derivative special cases
-    unsigned int alphaAbs = (variant > 1) ? mult_abs(dim, alpha) : 0;
-    if (variant == 2 && !alphaAbs) {
-        return epsteinZetaInternal(nu, dim, m, x, y, 1, 0, alpha);
-    }
-    if (variant == 3 && !alphaAbs) {
-        return epsteinZetaInternal(nu, dim, m, x, y, 1, 1, alpha);
-    }
-    // Odd derivatives in zero
-    if (variant == 2) {
-        for (int i = 0; i < dim; i++) {
-            if (alpha[i] % 2 && fabs(x[i]) < EPS_ZERO_Y && fabs(y[i]) < EPS_ZERO_Y) {
-                return 0.;
-            }
-        }
-    }
     // 1. Transform: Compute determinant and fourier transformed matrix, scale
     // both of them
     assert(dim > 0);
@@ -1000,8 +984,9 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     double complex res = NAN;
     double x_t2_squared = dot(dim, x_t2, x_t2);
     double y_t2_squared = dot(dim, y_t2, y_t2);
+    unsigned int alphaAbs = (variant > 1) ? mult_abs(dim, alpha) : 0;
     if (variant < 3 && nu < 1 && fabs((nu / 2.) - nearbyint(nu / 2.)) < EPS) {
-        if (variant < 2 && x_t2_squared == 0 && nu == 0) {
+        if (!alphaAbs && x_t2_squared == 0 && nu == 0) {
             res = -1 * cexp(-2 * M_PI * I * dot(dim, x_t1, y_t2));
         } else {
             res = 0;
@@ -1049,6 +1034,13 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                  rot * xfactor;
             xfactor = 1;
         } else if (variant == 2) {
+            // Odd derivatives in zero
+            for (int i = 0; i < dim; i++) {
+                if (alpha[i] % 2 && fabs(x[i]) < EPS_ZERO_Y &&
+                    fabs(y[i]) < EPS_ZERO_Y) {
+                    return 0.;
+                }
+            }
             res = summation_harmonic(nu, dim, alphaAbs, alpha, lambda, ms, m_real,
                                      m_fourier, x_t1, x_t2, y_t2, cutoffsReal,
                                      cutoffsFourier, diag, xfactor);
