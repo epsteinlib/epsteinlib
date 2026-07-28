@@ -669,6 +669,17 @@ static double complex summation_harmonic_reg(
         alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
     double *coeffs = malloc(coeffs_size * sizeof(double));
     unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
+
+    // overflow unreachable for |alpha| < 200 in 2D and |alpha| < 80 in 3D
+    // rather, the hpyad arithmetic is the bottleneck
+    if (!chunk_offset || !valid_count || !coeffs || !exponents) {
+        free(chunk_offset);
+        free(valid_count);
+        free(coeffs);
+        free(exponents);
+        return NAN;
+    }
+
     precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                     exponents);
 
@@ -813,6 +824,17 @@ summation_harmonic(double nu, unsigned int dim, unsigned int alphaAbs,
         alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
     double *coeffs = malloc(coeffs_size * sizeof(double));
     unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
+
+    // overflow unreachable for |alpha| < 200 in 2D and |alpha| < 80 in 3D
+    // rather, the hpyad arithmetic is the bottleneck
+    if (!chunk_offset || !valid_count || !coeffs || !exponents) {
+        free(chunk_offset);
+        free(valid_count);
+        free(coeffs);
+        free(exponents);
+        return NAN;
+    }
+
     precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                     exponents);
 
