@@ -160,10 +160,11 @@ double complex crandall_gReg(unsigned int dim, double s, const double *z,
  * @param[in] lambda: scaling parameter of crandalls formula.
  * @return Regularized upper Crandall function for logarithm special case.
  */
-double complex crandall_gReg_nuequalsdimplus2l_harmonic(int l, int k, int n,
-                                                        double arg, unsigned int dim,
-                                                        const double *z,
-                                                        double lambda) {
+static double complex crandall_gReg_nuequalsdimplus2l_harmonic(int l, int k, int n,
+                                                               double arg,
+                                                               unsigned int dim,
+                                                               const double *z,
+                                                               double lambda) {
     double complex res = NAN;
 
     // difference of digamma functions ψ(ℓ+d/2)−ψ(ℓ+d/2−k)

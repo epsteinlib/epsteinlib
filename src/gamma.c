@@ -35,7 +35,7 @@ enum dom { pt, qt, cf, ua, rek };
  * @param[in] x: lower integral boundary of the upper incomplete gamma function.
  * @return enum for the type of algorithm to use.
  */
-enum dom egf_domain(double a, double x) {
+static enum dom egf_domain(double a, double x) {
     double alpha;
     if (x >= 0.5) {
         alpha = x;
@@ -60,7 +60,7 @@ enum dom egf_domain(double a, double x) {
     return pt;
 }
 
-enum dom egf_ldomain(double a, double x) {
+static enum dom egf_ldomain(double a, double x) {
     double alpha;
     if (x >= 0.5) {
         alpha = x;
@@ -91,7 +91,7 @@ enum dom egf_ldomain(double a, double x) {
  * @param[in] x: lower integral boundary of the upper incomplete gamma function.
  * @return function value of the upper incomplete gamma function.
  */
-double egf_pt(double a, double x) {
+static double egf_pt(double a, double x) {
     // optional für x >= 10000: Prüfe Restglied
     double sn = 1;
     double add = x / (a + 1);
@@ -108,7 +108,7 @@ double egf_pt(double a, double x) {
  * @param[in] x: lower integral boundary of the upper incomplete gamma function.
  * @return function value of the upper incomplete gamma function.
  */
-double egf_qt(double a, double x) {
+static double egf_qt(double a, double x) {
     static double taylor[21] = {
         -0.57721566490153286061,    0.078662406618721020471,
         0.120665041652816256,       -0.045873569729475233502,
@@ -161,7 +161,7 @@ double egf_qt(double a, double x) {
  * @param[in] x: lower integral boundary of the upper incomplete gamma function.
  * @return function value of the upper incomplete gamma function.
  */
-double egf_rek(double a, double x) {
+static double egf_rek(double a, double x) {
     int m = (int)(0.5 - a);
     double epsilon = a + m;
     double g = egf_qt(epsilon, x) * exp(x) * pow(x, -epsilon);
@@ -177,7 +177,7 @@ double egf_rek(double a, double x) {
  * @param[in] x: lower integral boundary of the upper incomplete gamma function.
  * @return function value of the upper incomplete gamma function.
  */
-double egf_cf(double a, double x) {
+static double egf_cf(double a, double x) {
     double s = 1;
     double rp = 1; // t_k-1
     double rv = 0; // rho_0
@@ -197,7 +197,7 @@ double egf_cf(double a, double x) {
  * @param[in] x: lower integral boundary of the upper incomplete gamma function.
  * @return function value of the upper incomplete gamma function.
  */
-double egf_ua_r(double a, double eta) {
+static double egf_ua_r(double a, double eta) {
     static double d[27] = {1.0,
                            -1.0 / 3.0,
                            1.0 / 12.0,
@@ -247,7 +247,7 @@ double egf_ua_r(double a, double eta) {
  * @param[in] x: lower integral boundary of the upper incomplete gamma function.
  * @return function value of the upper incomplete gamma function.
  */
-double egf_ua(double a, double x) {
+static double egf_ua(double a, double x) {
     double lambda = x / a;
     double eta = sqrt(2 * (lambda - 1 - log(lambda)));
     if (lambda - 1 < 0) {

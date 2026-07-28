@@ -9,11 +9,12 @@
 
 #include "../src/tools.h"
 #include "epsteinZeta.h"
-#include "stdbool.h"
 #include "utils.h"
+#include "wrappers.h"
 #include <complex.h>
 #include <errno.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -43,28 +44,6 @@ typedef struct {
 } anisoStats;
 
 /*!
- * @brief Calculates the singularity of the Epstein zeta function as y approaches
- * zero.
- *
- * @param[in] nu The parameter nu of the Epstein zeta function.
- * @param[in] dim The dimension of the lattice.
- * @param[in] y Pointer to the array of y values.
- * @return The value of the singularity function.
- */
-double sHat(double nu, unsigned int dim, double *y) {
-    double ySquared = dot(dim, y, y);
-    double k = fmax(0., nearbyint((nu - (double)dim) / 2));
-    if (nu == (dim + 2 * k)) {
-        return pow(M_PI, (2 * k) + (((double)dim) / 2)) /
-               tgamma(k + (((double)dim) / 2)) * pow(-1, k + 1) / tgamma(k + 1) *
-               pow(ySquared, k) * log(M_PI * ySquared);
-    }
-    return pow(M_PI, nu - (((double)dim) / 2)) *
-           pow(ySquared, (nu - ((double)dim)) / 2) * tgamma(((double)dim - nu) / 2) /
-           tgamma(nu / 2);
-}
-
-/*!
  * @brief Free memory allocated for test resources.
  *
  * This function deallocates memory that was dynamically allocated for various
@@ -76,8 +55,8 @@ double sHat(double nu, unsigned int dim, double *y) {
  * @param[in] y Pointer to the array of y values.
  * @param[in] zetaRef Pointer to the array of reference zeta values.
  */
-void freeTestResources(double *a, double *nu, double *x, double *y,
-                       double *zetaRef) {
+static void freeTestResources(double *a, double *nu, double *x, double *y,
+                              double *zetaRef) {
     free(a);
     free(nu);
     free(x);
@@ -101,9 +80,10 @@ void freeTestResources(double *a, double *nu, double *x, double *y,
  * @param[in] x Pointer to the array of x values.
  * @param[in] y Pointer to the array of y values.
  */
-void reportEpsteinZetaError(double complex valZeta, double complex valZetaReg,
-                            double errorMaxAbsRel, double tol, double *m,
-                            unsigned int dim, double nu, double *x, double *y) {
+static void reportEpsteinZetaError(double complex valZeta, double complex valZetaReg,
+                                   double errorMaxAbsRel, double tol, double *m,
+                                   unsigned int dim, double nu, double *x,
+                                   double *y) {
     printf("\n");
     printf("Warning! ");
     printf("epsteinZeta:");
@@ -130,9 +110,9 @@ void reportEpsteinZetaError(double complex valZeta, double complex valZetaReg,
  * @param[in] y Pointer to the array of y values.
  * @param[in] dim The dimension of the lattice.
  */
-void reportEpsteinZetaCutoffError(const char *testCase, double complex zeta1,
-                                  double complex zeta2, double nu, double *y,
-                                  unsigned int dim) {
+static void reportEpsteinZetaCutoffError(const char *testCase, double complex zeta1,
+                                         double complex zeta2, double nu, double *y,
+                                         unsigned int dim) {
     printf("\n\n");
     printf("Warning! ");
     printf("%s:\n", testCase);
@@ -631,7 +611,7 @@ static int test_epsteinZetaReg() { // NOLINT
  *
  * @return number of failed tests.
  */
-int test_epsteinZeta_random_matrices(void) { // NOLINT
+static int test_epsteinZeta_random_matrices(void) { // NOLINT
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path),
@@ -786,7 +766,7 @@ int test_epsteinZeta_random_matrices(void) { // NOLINT
  *
  * @return number of failed tests.
  */
-int test_epsteinZetaReg_random_matrices(void) { // NOLINT
+static int test_epsteinZetaReg_random_matrices(void) { // NOLINT
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path),
@@ -971,7 +951,8 @@ static int test_epsteinZeta_epsteinZetaReg_represent_as_each_other() { // NOLINT
 
         valZeta = epsteinZeta(nu, dim, m, x, y);
         valZetaReg = cexp(-2 * M_PI * I * dot(dim, x, y)) *
-                     (epsteinZetaReg(nu, dim, m, x, y) + sHat(nu, dim, y) / vol);
+                     (epsteinZetaReg(nu, dim, m, x, y) +
+                      singularity_s(nu, dim, dot(dim, y, y)) / vol);
 
         errorAbs = errAbs(valZeta, valZetaReg);
         errorRel = errRel(valZeta, valZetaReg);
@@ -998,9 +979,9 @@ static int test_epsteinZeta_epsteinZetaReg_represent_as_each_other() { // NOLINT
         nu = -8.5 + (double)i / 5.;
 
         valZeta = epsteinZeta(nu, dim, m, x, yZeta);
-        valZetaReg =
-            cexp(-2 * M_PI * I * dot(dim, x, yZeta)) *
-            (epsteinZetaReg(nu, dim, m, x, yZetaReg) + sHat(nu, dim, yZeta) / vol);
+        valZetaReg = cexp(-2 * M_PI * I * dot(dim, x, yZeta)) *
+                     (epsteinZetaReg(nu, dim, m, x, yZetaReg) +
+                      singularity_s(nu, dim, dot(dim, yZeta, yZeta)) / vol);
 
         errorAbs = errAbs(valZeta, valZetaReg);
         errorRel = errRel(valZeta, valZetaReg);
@@ -1030,7 +1011,7 @@ static int test_epsteinZeta_epsteinZetaReg_represent_as_each_other() { // NOLINT
         valZeta = epsteinZeta(nu, dim, mLat, xLat, yLat);
         valZetaReg = cexp(-2 * M_PI * I * dot(dim, xLat, yLat)) *
                      (epsteinZetaReg(nu, dim, mLat, xLat, yLat) +
-                      sHat(nu, dim, yLat) / volLat);
+                      singularity_s(nu, dim, dot(dim, yLat, yLat)) / volLat);
         errorAbs = errAbs(valZeta, valZetaReg);
         errorRel = errRel(valZeta, valZetaReg);
         errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
@@ -1047,12 +1028,12 @@ static int test_epsteinZeta_epsteinZetaReg_represent_as_each_other() { // NOLINT
     }
 
     // nu = 0 exactly, x a nonzero lattice vector: Z_0 = -exp(-2 pi i x.y),
-    // sHat_0 = 0, hence Z^reg_0 = -1 independently of x and y
+    // singularity_s_0 = 0, hence Z^reg_0 = -1 independently of x and y
     nu = 0.;
     valZeta = epsteinZeta(nu, dim, mLat, xLat, yLat);
-    valZetaReg =
-        cexp(-2 * M_PI * I * dot(dim, xLat, yLat)) *
-        (epsteinZetaReg(nu, dim, mLat, xLat, yLat) + sHat(nu, dim, yLat) / volLat);
+    valZetaReg = cexp(-2 * M_PI * I * dot(dim, xLat, yLat)) *
+                 (epsteinZetaReg(nu, dim, mLat, xLat, yLat) +
+                  singularity_s(nu, dim, dot(dim, yLat, yLat)) / volLat);
     errorAbs = errAbs(valZeta, valZetaReg);
     errorRel = errRel(valZeta, valZetaReg);
     errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;

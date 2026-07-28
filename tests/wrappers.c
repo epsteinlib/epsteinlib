@@ -8,6 +8,7 @@
  * is in the core library.
  */
 
+#include "wrappers.h"
 #include "../src/crandall.h"
 #include "../src/harmonics.h"
 #include "../src/hpdyad.h"
@@ -15,8 +16,8 @@
 #include "../src/zeta.h"
 #include "complex.h"
 #include "epsteinZeta.h"
-#include "stdbool.h"
 #include <math.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 /**
@@ -102,7 +103,7 @@ double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
  * @param[in] zSquared: |z|^2 for vector z of the singularity.
  * @return s_ν(z).
  */
-static double singularity_s(double nu, unsigned int dim, double zSquared) {
+double singularity_s(double nu, unsigned int dim, double zSquared) {
 
     double zArg = M_PI * zSquared;
     int ell = (int)nearbyint((nu - (double)dim) / 2.);
@@ -132,12 +133,13 @@ static double singularity_s(double nu, unsigned int dim, double zSquared) {
  * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
  * @return partial derivative of Y_ell(z).
  */
-double polynomial_y_der_harmonic(int ell, unsigned int dim,
-                                 const double *z, // NOLINT
-                                 int n, const unsigned long long *chunk_offset,
-                                 const unsigned long long *valid_count,
-                                 const double *coeffs,
-                                 const unsigned int *exponents) {
+static double polynomial_y_der_harmonic(int ell, unsigned int dim,
+                                        const double *z, // NOLINT
+                                        int n,
+                                        const unsigned long long *chunk_offset,
+                                        const unsigned long long *valid_count,
+                                        const double *coeffs,
+                                        const unsigned int *exponents) {
 
     double zSquared = dot(dim, z, z);
     double res = 0;

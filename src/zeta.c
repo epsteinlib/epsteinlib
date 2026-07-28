@@ -121,9 +121,9 @@ static inline double complex summand_real(double nu, unsigned int dim, double la
  * sum_{z in m whole_numbers ** dim} G_{nu}((z - x) / lambda))
  * X exp(-2 * PI * I * z * y)
  */
-double complex sum_real(double nu, unsigned int dim, double lambda, const double *m,
-                        const double *x, const double *y, const int cutoffs[],
-                        double zArgBound, bool diag) {
+static double complex sum_real(double nu, unsigned int dim, double lambda,
+                               const double *m, const double *x, const double *y,
+                               const int cutoffs[], double zArgBound, bool diag) {
     int zv[dim];    // counting vector in Z^dim
     double lv[dim]; // lattice vector
     // cuboid cutoffs
@@ -496,9 +496,10 @@ static inline double complex summand_fourier(double nu, unsigned int dim,
  * sum_{k in m_invt whole_numbers ** dim without zero} G_{dim - nu}(lambda * (k + y))
  * X exp(-2 * PI * I * x * (k + y))
  */
-double complex sum_fourier(double nu, unsigned int dim, double lambda,
-                           const double *m_invt, const double *x, const double *y,
-                           const int cutoffs[], double zArgBound, bool diag) {
+static double complex sum_fourier(double nu, unsigned int dim, double lambda,
+                                  const double *m_invt, const double *x,
+                                  const double *y, const int cutoffs[],
+                                  double zArgBound, bool diag) {
     int zv[dim];    // counting vector in Z^dim
     double lv[dim]; // lattice vector
     // cuboid cutoffs

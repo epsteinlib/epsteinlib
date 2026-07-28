@@ -12,7 +12,6 @@
  */
 
 #include "tools.h"
-#include <complex.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -164,28 +163,6 @@ unsigned long long binom(unsigned long long n, unsigned long long k) {
     for (unsigned int i = 1; i <= k; i++) {
         res = res * (n - k + i) / i;
     }
-    return res;
-}
-
-/**
- * @brief Compute the integer power of a double by squaring.
- * @param[in] base: non-negative integer greater or equal k.
- * @param[in] exp: non-negative integer smaller or equal n.
- * @return base ** exp.
- */
-double complex int_pow(double complex base, unsigned int exp) {
-    double complex res = 1.;
-    while (true) {
-        if (exp & 1) {
-            res *= base;
-        }
-        exp >>= 1;
-        if (!exp) {
-            break;
-        }
-        base *= base;
-    }
-
     return res;
 }
 

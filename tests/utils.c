@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+#include "utils.h"
 #include <complex.h>
 #include <math.h>
 #include <stdio.h>
@@ -49,7 +50,7 @@ double errRel(double complex ref, double complex comp) {
  * @param[in] vec: vector.
  * @param[in] dim: size of the vector.
  */
-void printVectorUnitTest(const char *name, double *vec, unsigned int dim) {
+void printVectorUnitTest(const char *name, const double *vec, unsigned int dim) {
     printf("%s[", name);
     for (int i = 0; i < dim; ++i) {
         printf("%.16lf", vec[i]);
@@ -66,7 +67,8 @@ void printVectorUnitTest(const char *name, double *vec, unsigned int dim) {
  * @param[in] vec: vector.
  * @param[in] dim: size of the vector.
  */
-void printMultiindexUnitTest(const char *name, unsigned int *vec, unsigned int dim) {
+void printMultiindexUnitTest(const char *name, const unsigned int *vec,
+                             unsigned int dim) {
     printf("%s[", name);
     for (int i = 0; i < dim; ++i) {
         printf("%u", vec[i]);

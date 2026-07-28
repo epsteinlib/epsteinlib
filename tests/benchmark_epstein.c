@@ -37,8 +37,8 @@
  * data.
  * @return  0 on successful execution.
  */
-int benchmark(int dim, double a[], double x[], double y[], char zetaDataString[],
-              char zetaRegDataString[]) {
+static int benchmark(int dim, double a[], double x[], double y[],
+                     char zetaDataString[], char zetaRegDataString[]) {
     FILE *zetaData = open_file(zetaDataString, "w");
     FILE *zetaRegData = open_file(zetaRegDataString, "w");
     if (zetaData == NULL || zetaRegData == NULL) {
@@ -108,7 +108,7 @@ int benchmark(int dim, double a[], double x[], double y[], char zetaDataString[]
  * analytic representations exist for benchmarking.
  * @return  0 on successful execution.
  */
-int s1() {
+static int s1() {
     int dim = 1;
     double a[] = {1};
     double x[] = {-0.5};
@@ -134,7 +134,7 @@ int s1() {
  * analytic representations exist for benchmarking.
  * @return  0 on successful execution.
  */
-int s21() {
+static int s21() {
     int dim = 2;
     double a[] = {1, 0, 0, 2};
     double x[] = {-1, -2};
@@ -160,7 +160,7 @@ int s21() {
  * parameters.
  * @return  0 on successful execution.
  */
-int s22() {
+static int s22() {
     int dim = 2;
     double a[] = {1, 1. / 2, 0, sqrt(3.) / 2};
     double x[] = {0.0, 0.0};
@@ -186,7 +186,7 @@ int s22() {
  * parameters.
  * @return  0 on successful execution.
  */
-int s31() {
+static int s31() {
     int dim = 3;
     double a[] = {1, 0, 0, 0, 1, 0, 0, 0, 2};
     double x[] = {0, 0, -0.5};
@@ -211,7 +211,7 @@ int s31() {
  * @brief Benchmarks the Epstein Zeta function for another 3D lattice configuration.
  * @return  0 on successful execution.
  */
-int s32() {
+static int s32() {
     int dim = 3;
     double a[] = {6, 0, 0, 0, 6, 0, 0, 0, 6};
     double x[] = {-1, -1, -1};
@@ -237,7 +237,7 @@ int s32() {
  * @brief Benchmarks the Epstein Zeta function for a third 3D lattice configuration.
  * @return  0 on successful execution.
  */
-int s33() {
+static int s33() {
     int dim = 3;
     double a[] = {2 * sqrt(2.), 0, 0, 0, 4, 0, 0, 0, 2};
     double x[] = {0, -1, -1};
@@ -263,7 +263,7 @@ int s33() {
  * parameters.
  * @return  0 on successful execution.
  */
-int s4() {
+static int s4() {
     int dim = 4;
     double a[] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
     double x[] = {0.5, 0.0, 0.0, 0.0};
@@ -289,7 +289,7 @@ int s4() {
  * parameters.
  * @return  0 on successful execution.
  */
-int s6() {
+static int s6() {
     int dim = 6;
     double a[dim * dim];
     for (int i = 0; i < dim; i++) {
@@ -320,7 +320,7 @@ int s6() {
  * parameters.
  * @return  0 on successful execution.
  */
-int s8() {
+static int s8() {
     int dim = 8;
     double a[dim * dim];
     for (int i = 0; i < dim; i++) {

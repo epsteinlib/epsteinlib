@@ -61,6 +61,19 @@ double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
                              const unsigned int *beta, const unsigned int *theta1,
                              const unsigned int *theta2);
 
+/**
+ * @brief Computes the singularity s_ν(z).
+ * For the generic case (ν ≠ d + 2ℓ for any non-negative integer ℓ):
+ * s_ν(z) = π^(ν/2) / Γ(ν/2) · Γ((d−ν)/2) · (π z·z)^((ν−d)/2)
+ * and for the logarithmic case (ν = d + 2ℓ, ℓ ≥ 0):
+ * s_{d+2ℓ}(z) = π^(ℓ+d/2) / Γ(ℓ+d/2) · (−1)^(ℓ+1) / ℓ! · (π z·z)^ℓ · log(π z·z)
+ * @param[in] nu: epxonent of singularity.
+ * @param[in] dim: dimension of z.
+ * @param[in] zSquared: |z|^2 for vector z of the singularity.
+ * @return s_ν(z).
+ */
+double singularity_s(double nu, unsigned int dim, double zSquared);
+
 /** @brief Calculates the derivatives of Y_ell(z) = (pi * z**2)**ell.
  * @param[in] ell: integer power.
  * @param[in] dim: dimension of z.

@@ -7,6 +7,7 @@
  * @brief Calculates the harmonic polynomials.
  */
 
+#include "harmonics.h"
 #include "hpdyad.h"
 #include "stdbool.h"
 #include "tools.h"

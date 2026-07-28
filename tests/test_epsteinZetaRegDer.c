@@ -26,7 +26,7 @@
  *
  * @return number of failed tests.
  * */
-int test_epsteinZetaRegDer_1D(void) {
+static int test_epsteinZetaRegDer_1D(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/setZetaDer_1D_ref.csv", // NOLINT
@@ -145,7 +145,7 @@ int test_epsteinZetaRegDer_1D(void) {
  *
  * @return number of failed tests.
  * */
-int test_epsteinZetaRegDer_prototype(void) {
+static int test_epsteinZetaRegDer_prototype(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path),
@@ -268,7 +268,7 @@ int test_epsteinZetaRegDer_prototype(void) {
  *
  * @return number of failed tests.
  * */
-int test_epsteinZetaRegDer_d2k_prototype(void) {
+static int test_epsteinZetaRegDer_d2k_prototype(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path),
@@ -391,7 +391,7 @@ int test_epsteinZetaRegDer_d2k_prototype(void) {
  *
  * @return number of failed tests.
  * */
-int test_epsteinZetaRegDer_bain_prototype(void) {
+static int test_epsteinZetaRegDer_bain_prototype(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path),
@@ -515,7 +515,7 @@ int test_epsteinZetaRegDer_bain_prototype(void) {
  *
  * @return number of failed tests.
  */
-int test_epsteinZetaRegDer_taylor(void) { // NOLINT
+static int test_epsteinZetaRegDer_taylor(void) { // NOLINT
     printf("%s ", __func__);
     double errorAbs;
     double errorRel;

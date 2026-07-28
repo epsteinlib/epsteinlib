@@ -28,7 +28,7 @@
  *
  * @return number of failed tests.
  */
-int test_crandall_g(void) {
+static int test_crandall_g(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/crandall_g_ref.csv", // NOLINT
