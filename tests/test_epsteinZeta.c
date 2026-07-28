@@ -923,7 +923,7 @@ static int test_epsteinZetaReg_random_matrices(void) { // NOLINT
  * @return number of failed tests.
  * tests pass.
  */
-static int test_epsteinZeta_epsteinZetaReg_represent_as_each_other() { // NOLINT
+static int test_epsteinZeta_epsteinZetaReg_reduction() { // NOLINT
     printf("%s ", __func__);
     double errorAbs;
     double errorRel;
@@ -939,7 +939,7 @@ static int test_epsteinZeta_epsteinZetaReg_represent_as_each_other() { // NOLINT
     double errMax = NAN;
     double errSum = 0.;
 
-    double tol = 5 * pow(10, -14);
+    double tol = pow(10, -13);
     unsigned int dim = 2;
     double m[] = {3. / 2, 1. / 5, 1. / 4, 1.};
     double x[] = {0.1, 0.2};
@@ -1135,8 +1135,7 @@ int main() {
     failed += run_timed_test(test_epsteinZetaReg);
     failed += run_timed_test(test_epsteinZeta_random_matrices);
     failed += run_timed_test(test_epsteinZetaReg_random_matrices);
-    failed +=
-        run_timed_test(test_epsteinZeta_epsteinZetaReg_represent_as_each_other);
+    failed += run_timed_test(test_epsteinZeta_epsteinZetaReg_reduction);
     failed += run_timed_test(test_epsteinZeta_cutoff);
     failed += run_timed_test(test_epsteinZeta_epsteinZetaAniso_reduction);
     failed += run_timed_test(test_epsteinZetaReg_epsteinZetaAnisoReg_reduction);
