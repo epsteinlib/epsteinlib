@@ -840,8 +840,8 @@ summation_harmonic(double nu, unsigned int dim, unsigned int alphaAbs,
             if (dot(dim, x_t2, x_t2) > EPS_ZERO_Y) {
                 resIt = 0.;
             } else {
-                resIt = -harmonic_h(k, dim, x_t2, alphaAbs, chunk_offset,
-                                    valid_count, coeffs, exponents);
+                resIt = -xfactor * harmonic_h(k, dim, x_t2, alphaAbs, chunk_offset,
+                                              valid_count, coeffs, exponents);
             }
         } else {
 
