@@ -316,7 +316,8 @@ static int anisoReductionAllLattices(bool reg) { // NOLINT
                     -3.5, -3., -2.,  -1.,       -0.5,       -0.25, 0.,         0.25,
                     0.5,  1.,  1.5,  2. - 1e-8, 2. - 1e-11, 2.,    2. + 1e-11, 2.5,
                     3.,   3.5, 4.,   4.5,       5.,         6.,    7.,         8.,
-                    9.,   9.5, 9.9,  10.,       10.1,       10.5,  11.,        12.};
+                    9.,   9.5, 9.9,  10.,       10.1,       10.5,  11.,        12.,
+                    18.,  22., 30};
 
     for (int im = 0; im < 6; im++) {
         dataErrors += anisoCheckReciprocal(2, a2[im], b2[im]);
@@ -344,9 +345,9 @@ static int anisoReductionAllLattices(bool reg) { // NOLINT
                        0.3,  0.4,  -0.2, // generic, inside the cell
                        1.3,  -0.6, 0.2,  // generic, outside the cell
                        1e-8, 0.,   0.};  // near zero
-    double nu3[] = {-7.5, -6., -4., -3., -2.,        -1., -0.5,       0.,
-                    0.5,  1.,  2.,  2.5, 3. - 1e-11, 3.,  3. + 1e-11, 4.,
-                    5.,   6.,  7.,  8.,  9.5,        10., 10.5,       12.};
+    double nu3[] = {-7.5, -6., -4., -3.,        -2.,  -1.,        -0.5, 0.,  0.5,
+                    1.,   2.,  2.5, 3. - 1e-11, 3.,   3. + 1e-11, 4.,   5.,  6.,
+                    7.,   8.,  9.5, 10.,        10.5, 12.,        18.,  22., 30};
 
     for (int im = 0; im < 4; im++) {
         dataErrors += anisoCheckReciprocal(3, a3[im], b3[im]);

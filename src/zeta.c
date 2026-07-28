@@ -684,7 +684,7 @@ static double complex summation_harmonic_reg(
                                     exponents);
 
     // Decide when to isolate singularies in the real sum for large exponents
-    bool largeExp = nu > 10;
+    bool largeExp = nu > 10 && alphaAbs > 1;
 
     double complex res = 0.;
     double complex rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
@@ -839,7 +839,7 @@ summation_harmonic(double nu, unsigned int dim, unsigned int alphaAbs,
                                     exponents);
 
     // Decide when to isolate singularies in the real sum for large exponents
-    bool largeExp = nu > 10;
+    bool largeExp = nu > 10 && alphaAbs > 1;
 
     double complex res = 0.;
 
