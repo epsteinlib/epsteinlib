@@ -69,7 +69,7 @@ double complex crandall_gReg_nuequalsdim(double s, double arg, double k,
  * (gamma(s / 2, pi * prefactor * z ** 2) + ((-1)^k / k! ) * (log(pi * y ** 2) -
  * log(prefactor ** 2))) if s is  equal to - 2k for non negative natural number k
  */
-double complex crandall_gReg(unsigned int dim, double nu, const double *z,
+double complex crandall_gReg(unsigned int dim, double s, const double *z,
                              double prefactor);
 
 /**

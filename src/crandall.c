@@ -11,6 +11,7 @@
  * in Crandall's formula.
  */
 
+#include "crandall.h"
 #include "gamma.h"
 #include "stdbool.h"
 #include "tools.h"
