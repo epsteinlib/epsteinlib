@@ -270,8 +270,8 @@ double complex crandall_g_lower(unsigned int dim, double nu, const double *z,
  * and the special definition if s is  equal to - 2k for non negative natural number
  * k <= l.
  */
-double complex crandall_gReg_harmonic(int k, int n, unsigned int dim, double s,
-                                      const double *z, double prefactor) {
+double crandall_gReg_harmonic(int k, int n, unsigned int dim, double s,
+                              const double *z, double prefactor) {
 
     double zArgument = dot(dim, z, z);
     zArgument *= M_PI * prefactor * prefactor;
