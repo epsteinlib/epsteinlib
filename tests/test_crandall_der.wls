@@ -35,7 +35,7 @@ Protect[Power];
 ];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Reference functions*)
 
 
@@ -451,7 +451,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/crandall_g_der_ref.csv",crandallDerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create (\[Pi] y\.b2)^k derivatives reference values for slow harmonic method*)
 
 
@@ -483,7 +483,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/polynomial_y_der_harmonic_ref.csv",YDerTabH];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create (\[Pi] y\.b2)^k derivatives reference values for fast, naive method*)
 
 
@@ -649,10 +649,22 @@ Export[NotebookDirectory[]<>"csv/crandall_gReg_harmonic_ref.csv",%];
 
 
 (* ::Text:: *)
+(*Generate test data for \[Alpha] = 0 and s = 0 which is only  reachable  via  the  alpha = 0  front  end and evaluates the n - k = 0 corner of  the Taylor branch*)
+
+
+zeroAlphaData=Flatten[Table[
+	Flatten[{d,N@nu,N@PadRight[{zval},d],0,ConstantArray[0,d],N@SetPrecision[GRegHarmonic[nu,PadRight[{zval},d],0,ConstantArray[0,d]],200]}]
+	,{d,{1,2,3,4}}
+	,{nu,{0,-2,-4}}
+	,{zval,{0,10^-14,10^-3,1/50,1/20,1/10,1/2,1}}
+],2];
+
+
+(* ::Text:: *)
 (*Combine tests data.*)
 
 
-testData=Join[randomGeneralData,randomIntegerData];
+testData=Join[randomGeneralData,randomIntegerData,zeroAlphaData];
 
 
 (* ::Text:: *)
