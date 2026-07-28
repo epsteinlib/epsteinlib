@@ -795,12 +795,12 @@ static double complex summation_harmonic_reg(
  * @param[in] xfactor: precomputed prefactor for the real sum.
  * @return updated res after adding the general harmonic contribution.
  */
-static double complex summation_harmonic(
-    double nu, unsigned int dim, unsigned int alphaAbs, const unsigned int *alpha,
-    double lambda, double ms, const double *m_real, const double *m_fourier,
-    const double *x_t1, const double *x_t2, const double *y_t1, const double *y_t2,
-    const int cutoffsReal[], const int cutoffsFourier[], bool diag,
-    double complex xfactor) {
+static double complex
+summation_harmonic(double nu, unsigned int dim, unsigned int alphaAbs,
+                   const unsigned int *alpha, double lambda, double ms,
+                   const double *m_real, const double *m_fourier, const double *x_t1,
+                   const double *x_t2, const double *y_t2, const int cutoffsReal[],
+                   const int cutoffsFourier[], bool diag, double complex xfactor) {
 
     // Precompute coefficients for harmonic polynomials once
     unsigned int kMax = alphaAbs / 2;
@@ -819,7 +819,6 @@ static double complex summation_harmonic(
     bool largeExp = nu > 10;
 
     double complex res = 0.;
-    double complex rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
 
     // Compute set zeta derivatives by harmonic method
     for (unsigned int k = 0; k <= kMax; k++) {
@@ -865,19 +864,19 @@ static double complex summation_harmonic(
             s2 = sum_fourier_harmonic(nuReci, k, dim, m_fourier, x_t1, y_t2,
                                       cutoffsFourier, zArgBoundReci, diag, alphaAbs,
                                       chunk_offset, valid_count, coeffs, exponents);
-            s2 = negative_one_pow(k) * rot * (s2 + nc) / imaginary_int_pow(alphaAbs);
+            s2 = negative_one_pow(k) * (s2 + nc) / imaginary_int_pow(alphaAbs);
 
             if (largeExp) {
                 s1 = sum_real_harmonic_large_exp(nuIt, k, dim, m_real, x_t2, y_t2,
                                                  cutoffsReal, zArgBoundIt, diag,
                                                  alphaAbs, chunk_offset, valid_count,
                                                  coeffs, exponents) *
-                     rot * xfactor;
+                     xfactor;
             } else {
                 s1 = sum_real_harmonic(nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal,
                                        zArgBoundIt, diag, alphaAbs, chunk_offset,
                                        valid_count, coeffs, exponents) *
-                     rot * xfactor;
+                     xfactor;
             }
 
             resIt = (s1 + pow(lambda, dim) * s2) / tgamma(nuIt / 2.);
@@ -888,10 +887,9 @@ static double complex summation_harmonic(
 
     if (largeExp) {
         double complex s1_singularity =
-            xfactor * rot *
-            sum_real_harmonic_large_exp_singularity_sum(
-                nu, kMax, dim, m_real, x_t2, y_t2, diag, alphaAbs, chunk_offset,
-                valid_count, coeffs, exponents);
+            xfactor * sum_real_harmonic_large_exp_singularity_sum(
+                          nu, kMax, dim, m_real, x_t2, y_t2, diag, alphaAbs,
+                          chunk_offset, valid_count, coeffs, exponents);
         res += s1_singularity;
     }
 
@@ -930,8 +928,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     // Early return for 0th derivative special cases
     unsigned int alphaAbs = (variant > 1) ? mult_abs(dim, alpha) : 0;
     if (variant == 2 && !alphaAbs) {
-        return cexp(2 * M_PI * I * dot(dim, x, y)) *
-               epsteinZetaInternal(nu, dim, m, x, y, 1, 0, alpha);
+        return epsteinZetaInternal(nu, dim, m, x, y, 1, 0, alpha);
     }
     if (variant == 3 && !alphaAbs) {
         return epsteinZetaInternal(nu, dim, m, x, y, 1, 1, alpha);
@@ -1053,7 +1050,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             xfactor = 1;
         } else if (variant == 2) {
             res = summation_harmonic(nu, dim, alphaAbs, alpha, lambda, ms, m_real,
-                                     m_fourier, x_t1, x_t2, y_t1, y_t2, cutoffsReal,
+                                     m_fourier, x_t1, x_t2, y_t2, cutoffsReal,
                                      cutoffsFourier, diag, xfactor);
         } else if (variant == 3) {
             res = summation_harmonic_reg(nu, dim, alphaAbs, alpha, lambda, ms,

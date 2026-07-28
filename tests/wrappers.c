@@ -14,6 +14,7 @@
 #include "../src/tools.h"
 #include "../src/zeta.h"
 #include "complex.h"
+#include "epsteinZeta.h"
 #include "stdbool.h"
 #include <math.h>
 #include <stdlib.h>
@@ -33,8 +34,9 @@ double complex setZetaDer(double nu, unsigned int dim, const double *a,
                           const double *x, const double *y,
                           const unsigned int *alpha) {
     unsigned int alphaAbs = mult_abs(dim, alpha);
-    double complex prefactor =
-        imaginary_int_pow(alphaAbs) * real_int_pow(-2 * M_PI, alphaAbs);
+    double complex prefactor = imaginary_int_pow(alphaAbs) *
+                               real_int_pow(-2 * M_PI, alphaAbs) *
+                               cexp(2 * M_PI * I * dot(dim, x, y));
     return prefactor * epsteinZetaInternal(nu, dim, a, x, y, 1, 2, alpha);
 }
 
@@ -55,7 +57,7 @@ double complex epsteinZetaRegDer(double nu, unsigned int dim, const double *a,
     unsigned int alphaAbs = mult_abs(dim, alpha);
     double complex prefactor =
         imaginary_int_pow(alphaAbs) * real_int_pow(-2 * M_PI, alphaAbs);
-    return prefactor * epsteinZetaInternal(nu, dim, a, x, y, 1, 3, alpha);
+    return prefactor * epsteinZetaAnisoReg(nu, dim, a, x, y, alpha);
 }
 
 /** @brief Computes a single summand of h_inner; explicitly

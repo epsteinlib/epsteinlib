@@ -16,10 +16,8 @@
  */
 
 #include <complex.h>
-#include <math.h>
 
 #include "epsteinZeta.h"
-#include "tools.h"
 #include "zeta.h"
 
 /**
@@ -66,8 +64,7 @@ double complex epsteinZetaReg(double nu, unsigned int dim, const double *a,
 double complex epsteinZetaAniso(double nu, unsigned int dim, const double *a,
                                 const double *x, const double *y,
                                 const unsigned int *alpha) {
-    double complex prefactor = cexp(-2 * M_PI * I * dot(dim, x, y));
-    return prefactor * epsteinZetaInternal(nu, dim, a, x, y, 1, 2, alpha);
+    return epsteinZetaInternal(nu, dim, a, x, y, 1, 2, alpha);
 }
 
 /**
