@@ -176,8 +176,8 @@ double complex crandall_gReg_nuequalsdimplus2l_harmonic(int l, int k, int n,
     if (l == n - k && arg < taylorCutoff) {
 
         // harmonic number H
-        double harmonic = 1;
-        for (int i = 2; i <= n - k; i++) {
+        double harmonic = 0;
+        for (int i = 1; i <= n - k; i++) {
             harmonic += 1. / (double)i;
         }
 
