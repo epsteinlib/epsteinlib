@@ -192,12 +192,11 @@ EpsteinZetaAniso[\[Nu],A,x,y,\[alpha]]
 In addition, the library includes the regularized anisotropic Epstein zeta function defined via
 
 $$
-Z_{\Lambda, \nu,\boldsymbol\alpha}^{(\mathrm{reg})}(\boldsymbol x,\boldsymbol y) = Z_{\Lambda,\nu,\boldsymbol\alpha}(\boldsymbol x,\boldsymbol y) -\frac{\hat s^{(\boldsymbol\alpha)}_{\nu}(\boldsymbol y)}{(-2\pi i)^{|\boldsymbol\alpha|}V_{\Lambda}}
-% -\frac{1}{V_{\Lambda}}\frac{\diffop^{\boldsymbol\alpha}\hat s_{\nu}(\boldsymbol y)}{(-2\pi i)^{|\boldsymbol\alpha|}}
+Z_{\Lambda, \nu,\boldsymbol\alpha}^{(\mathrm{reg})}(\boldsymbol x,\boldsymbol y) = e^{2\pi i \boldsymbol{x}\cdot\boldsymbol{y}}Z_{\Lambda,\nu,\boldsymbol\alpha}(\boldsymbol x,\boldsymbol y) -\frac{\hat s^{(\boldsymbol\alpha)}_{\nu}(\boldsymbol y)}{(-2\pi i)^{|\boldsymbol\alpha|}V_{\Lambda}}
 ,\qquad \boldsymbol y\neq \boldsymbol 0,
 $$
 
-and continuously extended to $\boldsymbol y=\boldsymbol 0$, where $`\hat s^{(\boldsymbol\alpha)}_\nu`$ denote the $\boldsymbol\alpha$-derivatives of $\hat{s}_\nu$.
+and continuously extended to $\boldsymbol y=\boldsymbol 0$, where $`\hat s^{(\boldsymbol\alpha)}_\nu`$ denotes the $\boldsymbol\alpha$-derivative of $\hat{s}_\nu$.
 
 The regularized anisotropic Epstein zeta function is implemented in this library as
 ```c
