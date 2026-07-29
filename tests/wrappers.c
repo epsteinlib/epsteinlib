@@ -193,8 +193,14 @@ double polynomial_y_der_harmonic_wrapper(int ell, unsigned int dim,
     precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                     exponents);
 
-    return polynomial_y_der_harmonic(ell, dim, z, (int)alphaAbs, chunk_offset,
-                                     valid_count, coeffs, exponents);
+    double res = polynomial_y_der_harmonic(ell, dim, z, (int)alphaAbs, chunk_offset,
+                                           valid_count, coeffs, exponents);
+
+    free(chunk_offset);
+    free(valid_count);
+    free(exponents);
+
+    return res;
 }
 
 /** @brief Computes the derivatives of the singularity s_ν(z) where the coefficients
@@ -306,8 +312,14 @@ double singularity_s_der_harmonic_wrapper(double nu, unsigned int dim,
     precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                     exponents);
 
-    return singularity_s_der_harmonic(nu, dim, z, alphaAbs, chunk_offset,
-                                      valid_count, coeffs, exponents);
+    double res = singularity_s_der_harmonic(nu, dim, z, alphaAbs, chunk_offset,
+                                            valid_count, coeffs, exponents);
+
+    free(chunk_offset);
+    free(valid_count);
+    free(exponents);
+
+    return res;
 }
 
 /** @brief Calculates the polynomial l_(alpha,beta)(y) = - (-1)**|alpha - beta| *
