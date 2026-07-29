@@ -62,7 +62,7 @@ If[Head[foreignFunctionEpsteinZetaReg] =!= ForeignFunction,
 ]
 
 foreignFunctionEpsteinZetaAniso = ForeignFunctionLoad[libPath, "epstein_zeta_aniso_mathematica_call", {"RawPointer"::["CDouble"], "CDouble", "CInt", "RawPointer"::["CDouble"], "RawPointer"::["CDouble"], "RawPointer"::["CDouble"], "RawPointer"::["CUnsignedInt"]} -> "CInt"]
-If[Head[foreignFunctionEpsteinZetaReg] =!= ForeignFunction,
+If[Head[foreignFunctionEpsteinZetaAniso] =!= ForeignFunction,
   Print["ForeignFunctionLoad for epstein_zeta_aniso_mathematica_call failed."]
 ]
 
