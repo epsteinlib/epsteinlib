@@ -11,6 +11,12 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 ## [0.5.2] - unreleased
 
+### Changed
+- Moved tests from `src/tests/` to `tests/`
+
+### Added
+- Standalone example notebook `examples/IMAFigures.wls` reproducing the results of the IMA Journal of Numerical Analysis manuscript which deprecates `examples/BenchmarkQuick.wls` and `examples/BenchmarkAndPaperFigures.wls`
+
 ### Fixed
 - Removed spurious phase factor of the regularized Epstein zeta function at $\nu=0$ and $\boldsymbol{x}\in\Lambda$, now returns $-1$ instead of $-e^{-2\pi i\boldsymbol{x}\cdot\boldsymbol{y}}$
 
