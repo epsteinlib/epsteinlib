@@ -105,7 +105,7 @@ EpsteinZeta[\[Nu]_?NumericQ, A_?numericSquareMatrixQ, x_?numericVectorQ, y_?nume
 
 EpsteinZetaReg[\[Nu]_?NumericQ, A_?numericSquareMatrixQ, x_?numericVectorQ, y_?numericVectorQ] /;
     Length[x] == Length[y] == Length[A] :=
-  epsteinZetaInternal[\[Nu], A, x, y, EpsteinZetaReg, foreignFunctionEpsteinZeta]
+  epsteinZetaInternal[\[Nu], A, x, y, EpsteinZetaReg, foreignFunctionEpsteinZetaReg]
 
 
 (* Check if package loaded successfully *)
