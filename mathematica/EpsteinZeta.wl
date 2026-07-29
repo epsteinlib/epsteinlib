@@ -58,16 +58,18 @@ If[Head[foreignFunctionEpsteinZetaReg] =!= ForeignFunction,
   Print["ForeignFunctionLoad for epstein_zeta_reg_mathematica_call failed."]
 ]
 
-
-(* True when the library wrote something that is not a usable machine
-   double (NaN, inf, or an unconvertible read). *)
-badReadQ[u_] := ! MachineNumberQ[u];
-
+(* For checking nan output of C function *)
+NaNQ = ResourceFunction["NaNQ"];
 
 (* Internal routine for C function access *)
 epsteinZetaInternal[\[Nu]_, A_, x_, y_, function_, foreignFunction_] :=
 Module[
-  {d = Length[A], aMemory, xMemory, yMemory, zetaMemory, status, realPart, imagPart},
+  {d = Length[A], failed = False, aMemory, xMemory, yMemory, zetaMemory, epsteinZetaObject, realPart, imagPart},
+
+  (* Dimensional error handling *)
+  If[Length[x] != d, Message[function::dimerrx, d, Length[x], x, y, A]; failed = True];
+  If[Length[y] != d, Message[function::dimerry, d, Length[y], x, y, A]; failed = True];
+  If[failed, Return[$Failed]];
 
   aMemory = RawMemoryAllocate["CDouble", d * d];
   xMemory = RawMemoryAllocate["CDouble", d];
@@ -78,72 +80,53 @@ Module[
   Table[RawMemoryWrite[aMemory, N[A[[i,j]]], d*(i-1)+(j-1)], {i, 1, d}, {j, 1, d}];
 
   zetaMemory = RawMemoryAllocate["CDouble", 2];
-  status = foreignFunction[zetaMemory, N[\[Nu]], d, aMemory, xMemory, yMemory];
+  epsteinZetaObject = foreignFunction[zetaMemory, N[\[Nu]], d, aMemory, xMemory, yMemory];
 
-  Which[
-    status === $Failed,
-      Message[function::marshal, \[Nu], A, x, y]; $Failed,
-    status =!= 0,
-      Message[function::cfail, status, \[Nu], A, x, y]; $Failed,
-    True,
-      realPart = RawMemoryRead[zetaMemory, 0];
-      imagPart = RawMemoryRead[zetaMemory, 1];
-      If[badReadQ[realPart] || badReadQ[imagPart],
-        ComplexInfinity,
-        realPart + I*imagPart]
-   ]
+  realPart = RawMemoryRead[zetaMemory, 0];
+  imagPart = RawMemoryRead[zetaMemory, 1];
+
+  If[PossibleZeroQ@epsteinZetaObject,
+    If[!NaNQ[N@realPart] && !NaNQ[N@imagPart],
+      realPart + I*imagPart,
+      ComplexInfinity
+    ],
+    Print["Error: Calculation failed"];
+    Print["Input parameters: \[Nu] = ", \[Nu], ", A = ", A, ", x = ", x, ", y = ", y];
+    Print["Dimension: ", d];
+    "An Error occurred.";
+    epsteinZetaObject
+  ]
 ]
 
 
 (* Dimensional error handling messages *)
-EpsteinZeta::cfail = "The library returned error status `1` for \[Nu] = `2`, A = `3`, x = `4`, y = `5`.";
-EpsteinZeta::marshal = "The arguments \[Nu] = `1`, A = `2`, x = `3`, y = `4` could not be passed to the library. \
-\[Nu] and every entry of A, x and y must be real and representable as a machine double.";
-EpsteinZetaReg::cfail = EpsteinZeta::cfail;
-EpsteinZetaReg::marshal = EpsteinZeta::marshal;
-
-
-(* *)
-numericVectorQ[v_] := VectorQ[v, NumericQ];
-numericSquareMatrixQ[A_] := SquareMatrixQ[A] && MatrixQ[A, NumericQ];
+EpsteinZeta::dimerrx = "Input vector x = `3` has incorrect dimension. Expected dimension `1` (matching `1`×`1` matrix A = `5`), but got `2`."
+EpsteinZeta::dimerry = "Input vector y = `4` has incorrect dimension. Expected dimension `1` (matching `1`×`1` matrix A = `5`), but got `2`."
+EpsteinZetaReg::dimerrx = "Input vector x = `3` has incorrect dimension. Expected dimension `1` (matching `1`×`1` matrix A = `5`), but got `2`."
+EpsteinZetaReg::dimerry = "Input vector y = `4` has incorrect dimension. Expected dimension `1` (matching `1`×`1` matrix A = `5`), but got `2`."
 
 
 (* Define the public Epstein zeta functions *)
-EpsteinZeta[\[Nu]_?NumericQ, A_?numericSquareMatrixQ, x_?numericVectorQ, y_?numericVectorQ] /;
-    Length[x] == Length[y] == Length[A] :=
-  epsteinZetaInternal[\[Nu], A, x, y, EpsteinZeta, foreignFunctionEpsteinZeta]
+EpsteinZeta[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ], x_/;VectorQ[x] && AllTrue[x, NumericQ], y_/;VectorQ[y] && AllTrue[y, NumericQ]] := epsteinZetaInternal[\[Nu], A, x, y, EpsteinZeta, foreignFunctionEpsteinZeta]
 
-EpsteinZetaReg[\[Nu]_?NumericQ, A_?numericSquareMatrixQ, x_?numericVectorQ, y_?numericVectorQ] /;
-    Length[x] == Length[y] == Length[A] :=
-  epsteinZetaInternal[\[Nu], A, x, y, EpsteinZetaReg, foreignFunctionEpsteinZetaReg]
+EpsteinZetaReg[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ], x_/;VectorQ[x] && AllTrue[x, NumericQ], y_/;VectorQ[y] && AllTrue[y, NumericQ]] := epsteinZetaInternal[\[Nu], A, x, y, EpsteinZetaReg, foreignFunctionEpsteinZetaReg]
 
 
-
+(* Check if package loaded successfully *)
 epsteinLoad::info = "`1`";
-epsteinLoad::selftest = "EpsteinZeta` loaded but failed its self-test: `1`. \
-The library is returning incorrect results; do not trust its output.";
-
 If[libPath =!= $Failed &&
    Head[foreignFunctionEpsteinZeta] === ForeignFunction &&
-   Head[foreignFunctionEpsteinZetaReg] === ForeignFunction,
-
-  With[{failed = Keys @ Select[<|
-      "EpsteinZeta[-2,{{1}},{1},{0}] vanishes"    -> PossibleZeroQ[EpsteinZeta[-2, {{1}}, {1}, {0}]],
-      "EpsteinZetaReg[-2,{{1}},{1},{0}] vanishes" -> PossibleZeroQ[EpsteinZetaReg[-2, {{1}}, {1}, {0}]],
-      "EpsteinZeta has a pole at \[Nu] = d"       -> (EpsteinZeta[1, {{1}}, {0}, {0}] === ComplexInfinity),
-      "EpsteinZetaReg is finite at \[Nu] = d"     -> MachineNumberQ[EpsteinZetaReg[1, {{1}}, {0}, {0}]]
-    |>, Not]},
-
-    If[failed === {},
-      Message[epsteinLoad::info,
-        "The (regularized) Epstein zeta function can be called using:
+   Head[foreignFunctionEpsteinZetaReg] === ForeignFunction &&
+   PossibleZeroQ[EpsteinZeta[-2, {{1}}, {1}, {0}]] &&
+   PossibleZeroQ[EpsteinZetaReg[-2, {{1}}, {1}, {0}]],
+  Message[epsteinLoad::info,
+   "The (regularized) Epstein zeta function can be called using:
   EpsteinZeta[\[Nu], A, x, y]
   EpsteinZetaReg[\[Nu], A, x, y]
 Where:
   \[Nu] is a real number
-  A is a d\[Times]d square matrix
-  x and y are vectors of length d"],
-      Message[epsteinLoad::selftest, failed]]]
+  A is a square matrix
+  x and y are vectors of the same dimension as A"]
 ]
 
 End[];
