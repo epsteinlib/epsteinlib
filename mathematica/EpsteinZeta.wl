@@ -58,8 +58,10 @@ If[Head[foreignFunctionEpsteinZetaReg] =!= ForeignFunction,
   Print["ForeignFunctionLoad for epstein_zeta_reg_mathematica_call failed."]
 ]
 
-(* For checking nan output of C function *)
-NaNQ = ResourceFunction["NaNQ"];
+
+(* True when the library wrote something that is not a usable machine
+   double (NaN, inf, or an unconvertible read). *)
+badReadQ[u_] := ! MachineNumberQ[u];
 
 
 (* Internal routine for C function access *)
@@ -78,19 +80,27 @@ Module[
   zetaMemory = RawMemoryAllocate["CDouble", 2];
   status = foreignFunction[zetaMemory, N[\[Nu]], d, aMemory, xMemory, yMemory];
 
-  If[status =!= 0,
-    Message[function::cfail, status, \[Nu], A, x, y]; $Failed,
-
-    realPart = RawMemoryRead[zetaMemory, 0];
-    imagPart = RawMemoryRead[zetaMemory, 1];
-    If[NaNQ[N@realPart] || NaNQ[N@imagPart], ComplexInfinity, realPart + I*imagPart]
-  ]
+  Which[
+    status === $Failed,
+      Message[function::marshal, \[Nu], A, x, y]; $Failed,
+    status =!= 0,
+      Message[function::cfail, status, \[Nu], A, x, y]; $Failed,
+    True,
+      realPart = RawMemoryRead[zetaMemory, 0];
+      imagPart = RawMemoryRead[zetaMemory, 1];
+      If[badReadQ[realPart] || badReadQ[imagPart],
+        ComplexInfinity,
+        realPart + I*imagPart]
+   ]
 ]
 
 
 (* Dimensional error handling messages *)
-EpsteinZeta::cfail = "The library call failed with status `1` for \[Nu] = `2`, A = `3`, x = `4`, y = `5`.";
+EpsteinZeta::cfail = "The library returned error status `1` for \[Nu] = `2`, A = `3`, x = `4`, y = `5`.";
+EpsteinZeta::marshal = "The arguments \[Nu] = `1`, A = `2`, x = `3`, y = `4` could not be passed to the library. \
+\[Nu] and every entry of A, x and y must be real and representable as a machine double.";
 EpsteinZetaReg::cfail = EpsteinZeta::cfail;
+EpsteinZetaReg::marshal = EpsteinZeta::marshal;
 
 
 (* *)
