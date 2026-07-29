@@ -129,8 +129,8 @@ static inline void kahan_add_c(double complex *restrict sum,
  */
 static inline void kahan_add_r(double *restrict sum, double *restrict epsilon,
                                double x) {
-    double complex y = x - *epsilon;
-    double complex t = *sum + y;
+    double y = x - *epsilon;
+    double t = *sum + y;
     *epsilon = (t - *sum) - y;
     *sum = t;
 }
