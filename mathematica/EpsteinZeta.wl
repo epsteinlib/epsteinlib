@@ -106,10 +106,18 @@ EpsteinZetaReg::dimerrx = "Input vector x = `3` has incorrect dimension. Expecte
 EpsteinZetaReg::dimerry = "Input vector y = `4` has incorrect dimension. Expected dimension `1` (matching `1`×`1` matrix A = `5`), but got `2`."
 
 
-(* Define the public Epstein zeta functions *)
-EpsteinZeta[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ], x_/;VectorQ[x] && AllTrue[x, NumericQ], y_/;VectorQ[y] && AllTrue[y, NumericQ]] := epsteinZetaInternal[\[Nu], A, x, y, EpsteinZeta, foreignFunctionEpsteinZeta]
+(* Check arguments helpers *)
+numericSquareMatrixQ[A_] := SquareMatrixQ[A] && MatrixQ[A, NumericQ];
+numericVectorQ[v_] := VectorQ[v, NumericQ];
 
-EpsteinZetaReg[\[Nu]_?NumericQ, A_/;MatrixQ[A] && AllTrue[Flatten[A], NumericQ], x_/;VectorQ[x] && AllTrue[x, NumericQ], y_/;VectorQ[y] && AllTrue[y, NumericQ]] := epsteinZetaInternal[\[Nu], A, x, y, EpsteinZetaReg, foreignFunctionEpsteinZetaReg]
+(* Define the public Epstein zeta functions *)
+EpsteinZeta[\[Nu]_?NumericQ, A_?numericSquareMatrixQ, x_?numericVectorQ, y_?numericVectorQ] /;
+    Length[x] == Length[y] == Length[A] :=
+  epsteinZetaInternal[\[Nu], A, x, y, EpsteinZeta, foreignFunctionEpsteinZeta]
+
+EpsteinZetaReg[\[Nu]_?NumericQ, A_?numericSquareMatrixQ, x_?numericVectorQ, y_?numericVectorQ] /;
+    Length[x] == Length[y] == Length[A] :=
+  epsteinZetaInternal[\[Nu], A, x, y, EpsteinZetaReg, foreignFunctionEpsteinZetaReg]
 
 
 (* Check if package loaded successfully *)
