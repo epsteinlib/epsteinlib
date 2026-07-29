@@ -360,7 +360,7 @@ static int anisoReductionAllLattices(bool reg) { // NOLINT
     }
     printf("\n\t ... ");
     printf("%d out of %d tests passed with tolerance %E.", st.passed, st.total, tol);
-    printf("\t    ");
+    printf("   ");
     printf("[ Error →  min: %E | max: %E | avg: %E ]", st.errMin, st.errMax,
            st.errSum / st.total);
     printf("\n");
