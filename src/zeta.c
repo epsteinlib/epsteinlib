@@ -44,7 +44,7 @@
  * @brief Epsilon to catch exact cancellation to zero in inner sum of the singular
  * sum in real space for the set Zeta derivatives.
  */
-#define EPS_CANCELLATION 1e-16
+#define EPS_CANCELLATION 4e-16
 
 /**
  * @brief Increments the integer lattice vector to the next lattice point.
@@ -378,6 +378,7 @@ static inline double complex summand_real_harmonic_large_exp_singularity_sum(
 
     double sumInner = 0.0;
     double epsilonInner = 0.0;
+    double maxInner = 0.0;
 
     for (unsigned int k = 0; k <= kMax; k++) {
 
@@ -394,10 +395,11 @@ static inline double complex summand_real_harmonic_large_exp_singularity_sum(
         if (h && lvSquared > EPS_ZERO_Y) {
             double summand = h * real_int_pow(lvSquared, k);
             kahan_add_r(&sumInner, &epsilonInner, summand);
+            maxInner = fmax(maxInner, fabs(summand));
         }
     }
 
-    if (fabs(sumInner) > EPS_CANCELLATION) {
+    if (fabs(sumInner) > EPS_CANCELLATION * (kMax + 1) * maxInner) {
         return rot * sumInner * pow(lvSquared, -nu / 2);
     }
     return 0;
