@@ -273,7 +273,7 @@ static void anisoReductionSweep(unsigned int dim, const double *a, // NOLINT
 
 /*!
  * @brief Checks that the anisotropic front ends reduce to the ordinary ones at
- * alpha = 0, over a grid chosen to hit every special case in epsteinZetaInternal:
+ * alpha = 0, over a grid chosen to hit every special case in Epstein zeta (aniso):
  * nu a non-positive even integer, nu = 0, nu = d, nu = d + 2k, the nu > 10
  * largeExp branch and its threshold, x = 0, x a nonzero lattice vector, x on the
  * cell boundary, x outside the elementary cell, y = 0, y a nonzero reciprocal

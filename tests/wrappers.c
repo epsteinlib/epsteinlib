@@ -13,7 +13,6 @@
 #include "../src/harmonics.h"
 #include "../src/hpdyad.h"
 #include "../src/tools.h"
-#include "../src/zeta.h"
 #include "complex.h"
 #include "epsteinZeta.h"
 #include <math.h>
@@ -38,7 +37,7 @@ double complex setZetaDer(double nu, unsigned int dim, const double *a,
     double complex prefactor = imaginary_int_pow(alphaAbs) *
                                real_int_pow(-2 * M_PI, alphaAbs) *
                                cexp(2 * M_PI * I * dot(dim, x, y));
-    return prefactor * epsteinZetaInternal(nu, dim, a, x, y, 1, 2, alpha);
+    return prefactor * epsteinZetaAniso(nu, dim, a, x, y, alpha);
 }
 
 /**
