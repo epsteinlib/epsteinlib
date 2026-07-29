@@ -7,15 +7,18 @@
 
 /**
  * @file epsteinZeta.c
- * @brief Calculates the (regularized) Epstein zeta function.
+ * @brief Calculates the (regularized) Epstein zeta function and the (regularized)
+ * anisotropic Epstein zeta function.
  * @author Andreas Buchheit, Jonathan Busse and Ruben Gutendorf.
- * @see Crandall, R., Unified algorithms for polylogarithm, L-series, and zeta
- * variants. Algorithmic Reflections: Selected Works. PSIpress (2012).
+ * @see Buchheit, A. A., Busse, J. K., & Gutendorf, R. (2026). "Computation and
+ * properties of the Epstein zeta function with applications to quantum systems." IMA
+ * Journal of Numerical Analysis, drag057. DOI: 10.1093/imanum/drag057 *
  * @author Andreas Buchheit, Jonathan Busse and Ruben Gutendorf.
  * @date 06/13/2024
  */
 
 #include <complex.h>
+#include <stdbool.h>
 
 #include "epsteinZeta.h"
 #include "zeta.h"
@@ -32,7 +35,8 @@
  */
 double complex epsteinZeta(double nu, unsigned int dim, const double *a,
                            const double *x, const double *y) {
-    return epsteinZetaInternal(nu, dim, a, x, y, 1, 0, (unsigned int[]){0});
+    return epsteinZetaInternal(nu, dim, a, x, y, 1, false, false,
+                               (unsigned int[]){0});
 }
 
 /**
@@ -47,7 +51,8 @@ double complex epsteinZeta(double nu, unsigned int dim, const double *a,
  */
 double complex epsteinZetaReg(double nu, unsigned int dim, const double *a,
                               const double *x, const double *y) {
-    return epsteinZetaInternal(nu, dim, a, x, y, 1, 1, (unsigned int[]){0});
+    return epsteinZetaInternal(nu, dim, a, x, y, 1, true, false,
+                               (unsigned int[]){0});
 }
 
 /**
@@ -64,7 +69,7 @@ double complex epsteinZetaReg(double nu, unsigned int dim, const double *a,
 double complex epsteinZetaAniso(double nu, unsigned int dim, const double *a,
                                 const double *x, const double *y,
                                 const unsigned int *alpha) {
-    return epsteinZetaInternal(nu, dim, a, x, y, 1, 2, alpha);
+    return epsteinZetaInternal(nu, dim, a, x, y, 1, false, true, alpha);
 }
 
 /**
@@ -81,5 +86,5 @@ double complex epsteinZetaAniso(double nu, unsigned int dim, const double *a,
 double complex epsteinZetaAnisoReg(double nu, unsigned int dim, const double *a,
                                    const double *x, const double *y,
                                    const unsigned int *alpha) {
-    return epsteinZetaInternal(nu, dim, a, x, y, 1, 3, alpha);
+    return epsteinZetaInternal(nu, dim, a, x, y, 1, true, true, alpha);
 }

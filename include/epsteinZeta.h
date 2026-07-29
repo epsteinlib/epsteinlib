@@ -8,7 +8,6 @@
 /**
  * @file epsteinZeta.h
  * @brief Calculates the (regularized) Epstein zeta function.
- *
  * Main header file to include when using epsteinZeta library.
  * @author Andreas Buchheit, Jonathan Busse and Ruben Gutendorf.
  * @see Crandall, R., Unified algorithms for polylogarithm, L-series, and zeta

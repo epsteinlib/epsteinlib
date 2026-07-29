@@ -943,18 +943,14 @@ summation_harmonic(double nu, unsigned int dim, unsigned int alphaAbs,
  * @param[in] x: shift vector.
  * @param[in] y: wave vector.
  * @param[in] lambda: relative weight of the sums in Crandall's formula.
- * @param[in] variant:
- *      0 for the Epstein zeta function
- *      1 for the regularized Epstein zeta function
- *      2 for the set zeta derivatives (divided by (-2 pi i)^|alpha|)
- *      3 for the derivatives of the regularized Epstein zeta function (divided by
- * (-2 pi i)^|alpha|).
+ * @param[in] reg: false for no regularization, true for the regularization.
+ * @param[in] aniso: false for no anisotropy, true for the anisotropic variant.
  * @param[in] alpha: multiindex for the derivatives.
  * @return function value.
  */
 double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                    const double *m, const double *x, const double *y,
-                                   double lambda, unsigned int variant,
+                                   double lambda, bool reg, bool aniso,
                                    const unsigned int *alpha) {
     // 1. Transform: Compute determinant and fourier transformed matrix, scale
     // both of them
@@ -1014,10 +1010,10 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     double complex res = NAN;
     double x_t2_squared = dot(dim, x_t2, x_t2);
     double y_t2_squared = dot(dim, y_t2, y_t2);
-    unsigned int alphaAbs = (variant > 1) ? mult_abs(dim, alpha) : 0;
-    if (variant < 2 && nu < 1 && fabs((nu / 2.) - nearbyint(nu / 2.)) < EPS) {
+    unsigned int alphaAbs = aniso ? mult_abs(dim, alpha) : 0;
+    if (!aniso && nu < 1 && fabs((nu / 2.) - nearbyint(nu / 2.)) < EPS) {
         if (x_t2_squared < EPS_ZERO_Y && nu == 0) {
-            if (variant == 1) {
+            if (reg) {
                 res = -1; // reg already carries phase by definition
             } else {
                 res = -cexp(-2 * M_PI * I * dot(dim, x_t1, y_t2));
@@ -1025,7 +1021,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
         } else {
             res = 0;
         }
-    } else if ((variant == 0 || variant == 2) && fabs(nu - dim - alphaAbs) < EPS &&
+    } else if (!reg && fabs(nu - dim - alphaAbs) < EPS &&
                y_t2_squared < EPS_ZERO_Y) {
         res = NAN;
     } else {
@@ -1040,7 +1036,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             vx[i] = x_t1[i] - x_t2[i];
         }
         double complex xfactor = cexp(-2 * M_PI * I * dot(dim, vx, y_t1));
-        if (variant == 0) {
+        if (!reg && !aniso) {
             // calculate non regularized Epstein zeta function values.
             nc = crandall_g(dim, dim - nu, y_t2, lambda, zArgBoundReci) *
                  cexp(-2 * M_PI * I * dot(dim, x_t2, y_t2));
@@ -1049,7 +1045,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
             s2 = sum_fourier(nu, dim, lambda, m_fourier, x_t2, y_t2, cutoffsFourier,
                              zArgBoundReci, diag) +
                  nc;
-        } else if (variant == 1) {
+        } else if (reg && !aniso) {
             // calculate regularized Epstein zeta function values.
             nc = crandall_gReg(dim, dim - nu, y_t1, lambda);
             rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
@@ -1067,7 +1063,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                           zArgBound, diag) *
                  rot * xfactor;
             xfactor = 1;
-        } else if (variant == 2) {
+        } else if (!reg && aniso) {
             // Catch vanishing function values where alpha_i odd an x_i = y_i = 0
             bool oddDersInZero = false;
             for (int i = 0; i < dim; i++) {
@@ -1083,7 +1079,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                          m_real, m_fourier, x_t1, x_t2, y_t2,
                                          cutoffsReal, cutoffsFourier, diag, xfactor);
             }
-        } else if (variant == 3) {
+        } else if (reg && aniso) {
             res = summation_harmonic_reg(nu, dim, alphaAbs, alpha, lambda, ms,
                                          m_real, m_fourier, x_t1, x_t2, y_t1, y_t2,
                                          cutoffsReal, cutoffsFourier, diag, xfactor);
@@ -1091,7 +1087,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
 
         // In the harmonic method, the res is already set as there is no global
         // nu-dependent coefficient there
-        if (variant <= 1) {
+        if (!aniso) {
             res = xfactor * pow(lambda * lambda / M_PI, -nu / 2.) / tgamma(nu / 2.) *
                   (s1 + pow(lambda, dim) * s2);
         }
@@ -1101,7 +1097,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
     res *= pow(ms, nu);
     // apply correction to matrix scaling if nu = d + 2k
     unsigned int k = (unsigned int)fmax(0., nearbyint((nu - (double)dim) / 2));
-    if ((variant == 1 || variant == 3) && (nu == (dim + 2 * (double)k))) {
+    if (reg && (nu == (dim + 2 * (double)k))) {
         if (alphaAbs) {
             res -= pow(M_PI, (double)k + ((double)dim / 2)) /
                    tgamma((double)k + ((double)dim / 2)) * negative_one_pow(k + 1) *
