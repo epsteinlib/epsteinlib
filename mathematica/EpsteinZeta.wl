@@ -104,7 +104,7 @@ Module[
   ]
 ]
 
-epsteinZetaDerivativesInternal[\[Nu]_, A_, x_, y_, \[Alpha]_, function_, foreignFunction_] :=
+epsteinZetaAnisoInternal[\[Nu]_, A_, x_, y_, \[Alpha]_, function_, foreignFunction_] :=
 Module[
   {d = Length[A], aMemory, xMemory, yMemory, \[Alpha]Memory, zetaMemory, status, realPart, imagPart},
 
@@ -159,11 +159,11 @@ EpsteinZetaReg[\[Nu]_?NumericQ, A_?numericSquareMatrixQ, x_?numericVectorQ, y_?n
 
 EpsteinZetaAniso[\[Nu]_?NumericQ, A_?numericSquareMatrixQ, x_?numericVectorQ, y_?numericVectorQ, \[Alpha]_?multiIndexQ] /;
     Length[x] == Length[y] == Length[\[Alpha]] == Length[A] :=
-  epsteinZetaDerivativesInternal[\[Nu], A, x, y, \[Alpha], EpsteinZetaAniso, foreignFunctionEpsteinZetaAniso]
+  epsteinZetaAnisoInternal[\[Nu], A, x, y, \[Alpha], EpsteinZetaAniso, foreignFunctionEpsteinZetaAniso]
 
 EpsteinZetaAnisoReg[\[Nu]_?NumericQ, A_?numericSquareMatrixQ, x_?numericVectorQ, y_?numericVectorQ, \[Alpha]_?multiIndexQ] /;
     Length[x] == Length[y] == Length[\[Alpha]] == Length[A] :=
-  epsteinZetaDerivativesInternal[\[Nu], A, x, y, \[Alpha], EpsteinZetaAnisoReg, foreignFunctionEpsteinZetaAnisoReg]
+  epsteinZetaAnisoInternal[\[Nu], A, x, y, \[Alpha], EpsteinZetaAnisoReg, foreignFunctionEpsteinZetaAnisoReg]
 (* Check if package loaded successfully *)
 epsteinLoad::info = "`1`";
 epsteinLoad::broken = "The Epstein zeta library at `1` loaded but failed its self-test. \
