@@ -634,7 +634,11 @@ static double complex sum_fourier_harmonic(
 
 /**
  * @brief calculates the regularized anisotropic Epstein zeta function by
- * the harmonic method.
+ * the harmonic method. Sibling of summation_harmoonic, the regularized version
+ * carries the oscillating factor rot = exp(2πi x·y), evaluates the harmonic
+ * polynomial in the zero summand at y_t1 rather than y_t2, calls
+ * crandall_gReg_harmonic in place of crandall_g, and corrects the zero summand of
+ * the Fourier sum when y_t1 != y_t2.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] alphaAbs: total |α| of the multi-index.
@@ -652,7 +656,8 @@ static double complex sum_fourier_harmonic(
  * @param[in] diag: true, if the lattice matrix is diagonal.
  * the incomplete gamma evaluation.
  * @param[in] xfactor: precomputed prefactor for the real sum.
- * @return updated res after adding the general harmonic contribution.
+ * @return regularized anisotropic Epstein zeta function value without correction
+ * terms.
  */
 static double complex summation_harmonic_reg(
     double nu, unsigned int dim, unsigned int alphaAbs, const unsigned int *alpha,
