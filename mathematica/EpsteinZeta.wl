@@ -108,21 +108,32 @@ EpsteinZetaReg[\[Nu]_?NumericQ, A_?numericSquareMatrixQ, x_?numericVectorQ, y_?n
   epsteinZetaInternal[\[Nu], A, x, y, EpsteinZetaReg, foreignFunctionEpsteinZetaReg]
 
 
-(* Check if package loaded successfully *)
+
 epsteinLoad::info = "`1`";
+epsteinLoad::selftest = "EpsteinZeta` loaded but failed its self-test: `1`. \
+The library is returning incorrect results; do not trust its output.";
+
 If[libPath =!= $Failed &&
    Head[foreignFunctionEpsteinZeta] === ForeignFunction &&
-   Head[foreignFunctionEpsteinZetaReg] === ForeignFunction &&
-   PossibleZeroQ[EpsteinZeta[-2, {{1}}, {1}, {0}]] &&
-   PossibleZeroQ[EpsteinZetaReg[-2, {{1}}, {1}, {0}]],
-  Message[epsteinLoad::info,
-   "The (regularized) Epstein zeta function can be called using:
+   Head[foreignFunctionEpsteinZetaReg] === ForeignFunction,
+
+  With[{failed = Keys @ Select[<|
+      "EpsteinZeta[-2,{{1}},{1},{0}] vanishes"    -> PossibleZeroQ[EpsteinZeta[-2, {{1}}, {1}, {0}]],
+      "EpsteinZetaReg[-2,{{1}},{1},{0}] vanishes" -> PossibleZeroQ[EpsteinZetaReg[-2, {{1}}, {1}, {0}]],
+      "EpsteinZeta has a pole at \[Nu] = d"       -> (EpsteinZeta[1, {{1}}, {0}, {0}] === ComplexInfinity),
+      "EpsteinZetaReg is finite at \[Nu] = d"     -> MachineNumberQ[EpsteinZetaReg[1, {{1}}, {0}, {0}]]
+    |>, Not]},
+
+    If[failed === {},
+      Message[epsteinLoad::info,
+        "The (regularized) Epstein zeta function can be called using:
   EpsteinZeta[\[Nu], A, x, y]
   EpsteinZetaReg[\[Nu], A, x, y]
 Where:
   \[Nu] is a real number
-  A is a square matrix
-  x and y are vectors of the same dimension as A"]
+  A is a d\[Times]d square matrix
+  x and y are vectors of length d"],
+      Message[epsteinLoad::selftest, failed]]]
 ]
 
 End[];
