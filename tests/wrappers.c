@@ -198,6 +198,7 @@ double polynomial_y_der_harmonic_wrapper(int ell, unsigned int dim,
 
     free(chunk_offset);
     free(valid_count);
+    free(coeffs);
     free(exponents);
 
     return res;
@@ -317,6 +318,7 @@ double singularity_s_der_harmonic_wrapper(double nu, unsigned int dim,
 
     free(chunk_offset);
     free(valid_count);
+    free(coeffs);
     free(exponents);
 
     return res;
