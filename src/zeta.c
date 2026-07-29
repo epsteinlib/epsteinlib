@@ -21,7 +21,6 @@
 #include "tools.h"
 
 #include "zeta.h"
-#include <assert.h>
 
 /*!
    @brief Smallest value z such that G(nu, z) is negligible for
@@ -959,7 +958,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
                                    const unsigned int *alpha) {
     // 1. Transform: Compute determinant and fourier transformed matrix, scale
     // both of them
-    assert(dim > 0);
     double m_fourier[dim * dim];
     double m_copy[dim * dim];
     double m_real[dim * dim];
