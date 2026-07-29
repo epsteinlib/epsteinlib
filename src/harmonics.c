@@ -72,7 +72,7 @@ double coeffs_c_outer(long long n, long long k, long long dim) {
 void coeffs_c_inner_hpdyad(unsigned int n, unsigned int i, unsigned int k,
                            unsigned int dim, hpdyad_t *out) {
 
-    long long end = (n / 2) - k;
+    long long end = (long long)(n / 2) - (long long)k;
 
     hpdyad_set_ull(out, 1, 1);
     if (i >= end) {
@@ -160,6 +160,7 @@ void harmonic_h_inner_term_multi_hpdyad(unsigned int dim, const unsigned int *al
 }
 
 /** @brief Computes the inner sum h_inner(α,γ,k) using exact hpdyad arithmetic.
+ * @pre k ≤ ⌊alphaAbs/2⌋
  * @param[in] k: specifies degree |alpha| - 2k.
  * @param[in] dim: dimension of alpha, beta and gamma.
  * @param[in] alpha: upper multi-index.
