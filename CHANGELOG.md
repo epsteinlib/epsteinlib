@@ -19,6 +19,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 ### Fixed
 - Removed spurious phase factor of the regularized Epstein zeta function at $\nu=0$ and $\boldsymbol{x}\in\Lambda$, now returns $-1$ instead of $-e^{-2\pi i\boldsymbol{x}\cdot\boldsymbol{y}}$
+- Mathematica bindings `EpsteinZeta` and `EpsteinZetaReg` no longer accept non-square `A`, which previously produced silently wrong results
 
 ## [0.5.1] - 2026-04-27
 
