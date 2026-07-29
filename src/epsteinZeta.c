@@ -27,11 +27,10 @@
  * @brief calculates the Epstein zeta function.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
- * @param[in] a: matrix that transforms the lattice in the Epstein zeta
- * function.
- * @param[in] x: x vector of the Epstein zeta function.
- * @param[in] y: y vector of the Epstein zeta function.
- * @return function value of the Epstein zeta.
+ * @param[in] a: matrix that transforms the lattice.
+ * @param[in] x: shift vector.
+ * @param[in] y: wavevector.
+ * @return function value of the Epstein zeta function.
  */
 double complex epsteinZeta(double nu, unsigned int dim, const double *a,
                            const double *x, const double *y) {
@@ -43,11 +42,10 @@ double complex epsteinZeta(double nu, unsigned int dim, const double *a,
  * @brief calculates the regularized Epstein zeta function.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
- * @param[in] a: matrix that transforms the lattice in the Epstein zeta
- * function.
- * @param[in] x: x vector of the Epstein zeta function.
- * @param[in] y: y vector of the Epstein zeta function.
- * @return function value of the regularized Epstein zeta.
+ * @param[in] a: matrix that transforms the lattice.
+ * @param[in] x: shift vector.
+ * @param[in] y: wavevector.
+ * @return function value of the regularized Epstein zeta function.
  */
 double complex epsteinZetaReg(double nu, unsigned int dim, const double *a,
                               const double *x, const double *y) {
@@ -59,12 +57,11 @@ double complex epsteinZetaReg(double nu, unsigned int dim, const double *a,
  * @brief calculates the anisotropic Epstein zeta function.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
- * @param[in] a: matrix that transforms the lattice in the Epstein zeta
- * function.
- * @param[in] x: x vector of the Epstein zeta function.
- * @param[in] y: y vector of the Epstein zeta function.
+ * @param[in] a: matrix that transforms the lattice.
+ * @param[in] x: shift vector.
+ * @param[in] y: wavevector.
  * @param[in] alpha: multiindex for the anisotropy.
- * @return function value of the Epstein zeta.
+ * @return function value of the anisotropic Epstein zeta function.
  */
 double complex epsteinZetaAniso(double nu, unsigned int dim, const double *a,
                                 const double *x, const double *y,
@@ -76,12 +73,11 @@ double complex epsteinZetaAniso(double nu, unsigned int dim, const double *a,
  * @brief calculates the regularized anisotropic Epstein zeta function.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
- * @param[in] a: matrix that transforms the lattice in the Epstein zeta
- * function.
- * @param[in] x: x vector of the Epstein zeta function.
- * @param[in] y: y vector of the Epstein zeta function.
+ * @param[in] a: matrix that transforms the lattice.
+ * @param[in] x: shift vector.
+ * @param[in] y: wavevector.
  * @param[in] alpha: multiindex for the anisotropy.
- * @return function value of the Epstein zeta.
+ * @return function value of the regularized anisotropic Epstein zeta function.
  */
 double complex epsteinZetaAnisoReg(double nu, unsigned int dim, const double *a,
                                    const double *x, const double *y,

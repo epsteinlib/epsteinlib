@@ -8,7 +8,7 @@
 /**
  * @file zeta.c
  * @brief Calculates the (regularized) Epstein zeta function and the (regularized)
- * anisotropic Epstein zeta function
+ * anisotropic Epstein zeta function.
  */
 
 #include <complex.h>
@@ -791,7 +791,7 @@ static double complex summation_harmonic_reg(
 }
 
 /**
- * @brief calculates anisotropic Epstein zeta function by
+ * @brief calculates the anisotropic Epstein zeta function by
  * the harmonic method.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
@@ -935,11 +935,11 @@ summation_harmonic(double nu, unsigned int dim, unsigned int alphaAbs,
 }
 
 /**
- * @brief calculates the (regularized) Epstein zeta function as well es the
+ * @brief calculates the (regularized) Epstein zeta function as well as the
  * (regularized) anisotropic Epstein zeta function with a prefactor.
  * @param[in] nu: exponent.
  * @param[in] dim: dimension of the input vectors.
- * @param[in] m: matrix that transforms the lattice .
+ * @param[in] m: matrix that transforms the lattice.
  * @param[in] x: shift vector.
  * @param[in] y: wave vector.
  * @param[in] lambda: relative weight of the sums in Crandall's formula.

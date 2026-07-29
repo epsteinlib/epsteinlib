@@ -7,7 +7,7 @@
 
 /**
  * @file zeta.h
- * @brief Calculates the (regularized) Epstein zeta function and  (regularized)
+ * @brief Calculates the (regularized) Epstein zeta function and the (regularized)
  * anisotropic Epstein zeta function.
  */
 
@@ -17,12 +17,12 @@
 #include <stdbool.h>
 
 /**
- * @brief calculates the (regularized) Epstein zeta function as well es the
- * derivatives of the (regularized) anisotropic Epstein zeta function with a
+ * @brief calculates the (regularized) Epstein zeta function as well as the
+ * (regularized) anisotropic Epstein zeta function with a
  * prefactor.
  * @param[in] nu: exponent.
  * @param[in] dim: dimension of the input vectors.
- * @param[in] m: matrix that transforms the lattice .
+ * @param[in] m: matrix that transforms the lattice.
  * @param[in] x: shift vector.
  * @param[in] y: wave vector.
  * @param[in] lambda: relative weight of the sums in Crandall's formula.
