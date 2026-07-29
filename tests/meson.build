@@ -104,43 +104,53 @@ benchmark_aniso_timing = executable('epsteinlib_benchmark_aniso_timing',
     link_with : epsteinlib
 )
 
+# bigger timeout budget for debugging
+test_timeout = get_option('debug') ? 600 : 30
 
 test('test_epsteinZeta',
     test_epsteinZeta,
-    workdir: meson.current_source_dir()
+    workdir: meson.current_source_dir(),
+    timeout: test_timeout
 )
 
 test('test_crandall',
     test_crandall,
-    workdir: meson.current_source_dir()
+    workdir: meson.current_source_dir(),
+    timeout: test_timeout
 )
 
 test('test_setZetaDer',
     test_setZetaDer,
-    workdir: meson.current_source_dir()
+    workdir: meson.current_source_dir(),
+    timeout: test_timeout
 )
 
 test('test_epsteinZetaRegDer',
     test_epsteinZetaRegDer,
-    workdir: meson.current_source_dir()
+    workdir: meson.current_source_dir(),
+    timeout: test_timeout
 )
 
 test('test_harmonics',
     test_harmonics,
-    workdir: meson.current_source_dir()
+    workdir: meson.current_source_dir(),
+    timeout: test_timeout
 )
 
 test('test_crandall_derivatives',
     test_crandall_der,
-    workdir: meson.current_source_dir()
+    workdir: meson.current_source_dir(),
+    timeout: test_timeout
 )
 
 test('test_tools',
     test_tools,
-    workdir: meson.current_source_dir()
+    workdir: meson.current_source_dir(),
+    timeout: test_timeout
 )
 
 test('test_hpdyad',
     test_hpdyad,
-    workdir: meson.current_source_dir()
+    workdir: meson.current_source_dir(),
+    timeout: test_timeout
 )
