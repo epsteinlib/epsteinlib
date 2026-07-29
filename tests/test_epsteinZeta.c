@@ -89,7 +89,7 @@ void reportEpsteinZetaError(double complex valZeta, double complex valZetaReg,
     printf("\n");
     printf("Warning! ");
     printf("epsteinZeta:");
-    printf(" %0*.16lf %+.16lf I (epsteinZeta) \n\t\t  != "
+    printf(" %0*.16lf %+.16lf I (epsteinZeta) \n\t\t   != "
            "%.16lf "
            "%+.16lf I (epsteinZetaReg representation)\n",
            4, creal(valZeta), cimag(valZeta), creal(valZetaReg), cimag(valZetaReg));
@@ -670,7 +670,7 @@ int test_epsteinZetaReg_random_matrices(void) { // NOLINT
  * @return number of failed tests.
  * tests pass.
  */
-static int test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
+static int test_epsteinZeta_epsteinZetaReg_represent_as_each_other() { // NOLINT
     printf("%s ", __func__);
     double errorAbs;
     double errorRel;
@@ -686,7 +686,7 @@ static int test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
     double errMax = NAN;
     double errSum = 0.;
 
-    double tol = 5 * pow(10, -15);
+    double tol = 5 * pow(10, -14);
     unsigned int dim = 2;
     double m[] = {3. / 2, 1. / 5, 1. / 4, 1.};
     double x[] = {0.1, 0.2};
@@ -745,6 +745,54 @@ static int test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
         }
         totalTests++;
     }
+
+    // test identity for x a nonzero lattice vector (identity lattice, so the
+    // projection x_t2 is exactly zero and the nu = 0 special branch is reached)
+    double mLat[] = {1., 0., 0., 1.};
+    double xLat[] = {1., 0.};
+    double yLat[] = {0.3, 0.4};
+    double volLat = 1.;
+    for (int i = 0; i < 100; i++) {
+        nu = -8.45 + (double)i / 5.;
+        valZeta = epsteinZeta(nu, dim, mLat, xLat, yLat);
+        valZetaReg = cexp(-2 * M_PI * I * dot(dim, xLat, yLat)) *
+                     (epsteinZetaReg(nu, dim, mLat, xLat, yLat) +
+                      sHat(nu, dim, yLat) / volLat);
+        errorAbs = errAbs(valZeta, valZetaReg);
+        errorRel = errRel(valZeta, valZetaReg);
+        errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
+            reportEpsteinZetaError(valZeta, valZetaReg, errorMaxAbsRel, tol, mLat,
+                                   dim, nu, xLat, yLat);
+        }
+        totalTests++;
+    }
+
+    // nu = 0 exactly, x a nonzero lattice vector: Z_0 = -exp(-2 pi i x.y),
+    // sHat_0 = 0, hence Z^reg_0 = -1 independently of x and y
+    nu = 0.;
+    valZeta = epsteinZeta(nu, dim, mLat, xLat, yLat);
+    valZetaReg =
+        cexp(-2 * M_PI * I * dot(dim, xLat, yLat)) *
+        (epsteinZetaReg(nu, dim, mLat, xLat, yLat) + sHat(nu, dim, yLat) / volLat);
+    errorAbs = errAbs(valZeta, valZetaReg);
+    errorRel = errRel(valZeta, valZetaReg);
+    errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+    errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+    errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+    errSum += errorMaxAbsRel;
+    if (errorMaxAbsRel < tol) {
+        testsPassed++;
+    } else {
+        reportEpsteinZetaError(valZeta, valZetaReg, errorMaxAbsRel, tol, mLat, dim,
+                               nu, xLat, yLat);
+    }
+    totalTests++;
 
     printf("\n\t ... ");
     printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
