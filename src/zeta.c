@@ -633,6 +633,62 @@ static double complex sum_fourier_harmonic(
 }
 
 /**
+ * @brief allocates and fills the scratch buffers for the harmonic polynomial
+ * coefficients.
+ * @param[in] alphaAbs: total of alpha.
+ * @param[in] kMax: largest degree index, alphaAbs / 2.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] alpha: multi-index alpha, length dim.
+ * @param[out] chunk_offset: starting offsets for each k.
+ * @param[out] valid_count: number of valid gamma entries for each k.
+ * @param[out] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
+ * @param[out] exponents: precomputed exponents (2γ-α).
+ * @return 0 on success, 1 on allocation failure.
+ */
+static int harmonic_coeffs_alloc(unsigned int alphaAbs, unsigned int kMax,
+                                 unsigned int dim, const unsigned int *alpha,
+                                 unsigned long long **chunk_offset,
+                                 unsigned long long **valid_count, double **coeffs,
+                                 unsigned int **exponents) {
+    *chunk_offset = malloc((kMax + 1) * sizeof **chunk_offset);
+    *valid_count = malloc((kMax + 1) * sizeof **valid_count);
+    *coeffs = NULL;
+    *exponents = NULL;
+
+    if (!*chunk_offset || !*valid_count) {
+        free(*chunk_offset);
+        free(*valid_count);
+        *chunk_offset = NULL;
+        *valid_count = NULL;
+        return 1;
+    }
+
+    unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
+        alphaAbs, kMax, dim, alpha, *chunk_offset, *valid_count);
+
+    // overflow unreachable for |alpha| < 200 in 2D and |alpha| < 80 in 3D
+    // rather, the hpdyad arithmetic is the bottleneck
+    *coeffs = malloc(coeffs_size * sizeof **coeffs);
+    *exponents = malloc(coeffs_size * dim * sizeof **exponents);
+
+    if (!*coeffs || !*exponents) {
+        free(*chunk_offset);
+        free(*valid_count);
+        free(*coeffs);
+        free(*exponents);
+        *chunk_offset = NULL;
+        *valid_count = NULL;
+        *coeffs = NULL;
+        *exponents = NULL;
+        return 1;
+    }
+
+    precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, *chunk_offset, *coeffs,
+                                    *exponents);
+    return 0;
+}
+
+/**
  * @brief calculates the regularized anisotropic Epstein zeta function by
  * the harmonic method. Sibling of summation_harmoonic, the regularized version
  * carries the oscillating factor rot = exp(2πi x·y), evaluates the harmonic
@@ -668,27 +724,14 @@ static double complex summation_harmonic_reg(
 
     // Precompute coefficients for harmonic polynomials once
     unsigned int kMax = alphaAbs / 2;
-    unsigned long long *chunk_offset =
-        malloc((kMax + 1) * sizeof(unsigned long long));
-    unsigned long long *valid_count =
-        malloc((kMax + 1) * sizeof(unsigned long long));
-    unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
-        alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
-    double *coeffs = malloc(coeffs_size * sizeof(double));
-    unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
-
-    // overflow unreachable for |alpha| < 200 in 2D and |alpha| < 80 in 3D
-    // rather, the hpyad arithmetic is the bottleneck
-    if (!chunk_offset || !valid_count || !coeffs || !exponents) {
-        free(chunk_offset);
-        free(valid_count);
-        free(coeffs);
-        free(exponents);
+    unsigned long long *chunk_offset;
+    unsigned long long *valid_count;
+    double *coeffs;
+    unsigned int *exponents;
+    if (harmonic_coeffs_alloc(alphaAbs, kMax, dim, alpha, &chunk_offset,
+                              &valid_count, &coeffs, &exponents)) {
         return NAN;
     }
-
-    precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
-                                    exponents);
 
     // Decide when to isolate singularies in the real sum for large exponents
     bool largeExp = nu > 10 && alphaAbs > 1;
@@ -824,29 +867,15 @@ summation_harmonic(double nu, unsigned int dim, unsigned int alphaAbs,
                    const double *x_t2, const double *y_t2, const int cutoffsReal[],
                    const int cutoffsFourier[], bool diag, double complex xfactor) {
 
-    // Precompute coefficients for harmonic polynomials once
     unsigned int kMax = alphaAbs / 2;
-    unsigned long long *chunk_offset =
-        malloc((kMax + 1) * sizeof(unsigned long long));
-    unsigned long long *valid_count =
-        malloc((kMax + 1) * sizeof(unsigned long long));
-    unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
-        alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
-    double *coeffs = malloc(coeffs_size * sizeof(double));
-    unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
-
-    // overflow unreachable for |alpha| < 200 in 2D and |alpha| < 80 in 3D
-    // rather, the hpyad arithmetic is the bottleneck
-    if (!chunk_offset || !valid_count || !coeffs || !exponents) {
-        free(chunk_offset);
-        free(valid_count);
-        free(coeffs);
-        free(exponents);
+    unsigned long long *chunk_offset;
+    unsigned long long *valid_count;
+    double *coeffs;
+    unsigned int *exponents;
+    if (harmonic_coeffs_alloc(alphaAbs, kMax, dim, alpha, &chunk_offset,
+                              &valid_count, &coeffs, &exponents)) {
         return NAN;
     }
-
-    precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
-                                    exponents);
 
     // Decide when to isolate singularies in the real sum for large exponents
     bool largeExp = nu > 10 && alphaAbs > 1;
