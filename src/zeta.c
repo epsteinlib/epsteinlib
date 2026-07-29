@@ -7,8 +7,8 @@
 
 /**
  * @file zeta.c
- * @brief Calculates the (regularized) Epstein zeta function and derivavies of the
- * set zeta function.
+ * @brief Calculates the (regularized) Epstein zeta function and the (regularized)
+ * anisotropic Epstein zeta function
  */
 
 #include <complex.h>
@@ -633,7 +633,7 @@ static double complex sum_fourier_harmonic(
 }
 
 /**
- * @brief calculates set zeta derivatives (sans the prefactor (- 2 pi i)^|alpha|) by
+ * @brief calculates the regularized anisotropic Epstein zeta function by
  * the harmonic method.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
@@ -691,7 +691,7 @@ static double complex summation_harmonic_reg(
     double complex res = 0.;
     double complex rot = cexp(2 * M_PI * I * dot(dim, x_t1, y_t1));
 
-    // Compute set zeta derivatives by harmonic method
+    // Outer loop of the harmonic method
     for (unsigned int k = 0; k <= kMax; k++) {
 
         double nuIt = nu - (2 * k);
@@ -791,7 +791,7 @@ static double complex summation_harmonic_reg(
 }
 
 /**
- * @brief calculates set zeta derivatives (sans the prefactor (- 2 pi i)^|alpha|) by
+ * @brief calculates anisotropic Epstein zeta function by
  * the harmonic method.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
@@ -848,7 +848,7 @@ summation_harmonic(double nu, unsigned int dim, unsigned int alphaAbs,
 
     double complex res = 0.;
 
-    // Compute set zeta derivatives by harmonic method
+    // Outer loop of the harmonic method
     for (unsigned int k = 0; k <= kMax; k++) {
 
         double nuIt = nu - (2 * k);
@@ -936,7 +936,7 @@ summation_harmonic(double nu, unsigned int dim, unsigned int alphaAbs,
 
 /**
  * @brief calculates the (regularized) Epstein zeta function as well es the
- * derivatives of the (regularized) set zeta function with a prefactor.
+ * (regularized) anisotropic Epstein zeta function with a prefactor.
  * @param[in] nu: exponent.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] m: matrix that transforms the lattice .

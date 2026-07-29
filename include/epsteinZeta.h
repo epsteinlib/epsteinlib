@@ -26,8 +26,8 @@
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] a: matrix that transforms the lattice in the Epstein zeta function.
- * @param[in] x: x vector of the Epstein Zeta function.
- * @param[in] y: y vector of the Epstein Zeta function.
+ * @param[in] x: x vector of the Epstein zeta function.
+ * @param[in] y: y vector of the Epstein zeta function.
  * @return function value of the regularized Epstein zeta.
  */
 double complex epsteinZeta(double nu, unsigned int dim, const double *a,
@@ -38,8 +38,8 @@ double complex epsteinZeta(double nu, unsigned int dim, const double *a,
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] a: matrix that transforms the lattice in the Epstein zeta function.
- * @param[in] x: x vector of the Epstein Zeta function.
- * @param[in] y: y vector of the Epstein Zeta function.
+ * @param[in] x: x vector of the Epstein zeta function.
+ * @param[in] y: y vector of the Epstein zeta function.
  * @return function value of the regularized Epstein zeta.
  */
 double complex epsteinZetaReg(double nu, unsigned int dim, const double *a,
@@ -53,7 +53,7 @@ double complex epsteinZetaReg(double nu, unsigned int dim, const double *a,
  * function.
  * @param[in] x: x vector of the Epstein zeta function.
  * @param[in] y: y vector of the Epstein zeta function.
- * @param[in] alpha: multiindex for the derivative of the set zeta function.
+ * @param[in] alpha: multiindex for the anisotropy.
  * @return function value of the Epstein zeta.
  */
 double complex epsteinZetaAniso(double nu, unsigned int dim, const double *a,
@@ -68,7 +68,7 @@ double complex epsteinZetaAniso(double nu, unsigned int dim, const double *a,
  * function.
  * @param[in] x: x vector of the Epstein zeta function.
  * @param[in] y: y vector of the Epstein zeta function.
- * @param[in] alpha: multiindex for the derivative of the set zeta function.
+ * @param[in] alpha: multiindex for the anisotropy.
  * @return function value of the Epstein zeta.
  */
 double complex epsteinZetaAnisoReg(double nu, unsigned int dim, const double *a,

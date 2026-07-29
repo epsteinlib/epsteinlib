@@ -7,8 +7,8 @@
 
 /**
  * @file zeta.h
- * @brief Calculates the (regularized) Epstein zeta function and the deriavtives of
- * the set zeta function.
+ * @brief Calculates the (regularized) Epstein zeta function and  (regularized)
+ * anisotropic Epstein zeta function.
  */
 
 #ifndef ZETA_H
@@ -18,7 +18,8 @@
 
 /**
  * @brief calculates the (regularized) Epstein zeta function as well es the
- * derivatives of the (regularized) set zeta function with a prefactor.
+ * derivatives of the (regularized) anisotropic Epstein zeta function with a
+ * prefactor.
  * @param[in] nu: exponent.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] m: matrix that transforms the lattice .
