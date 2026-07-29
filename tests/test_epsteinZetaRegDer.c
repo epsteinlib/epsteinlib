@@ -622,6 +622,11 @@ static int test_epsteinZetaRegDer_taylor(void) { // NOLINT
         totalTests++;
     }
 
+    free(x);
+    free(y0);
+    free(yPlus);
+    free(alpha);
+
     printf("\n\t ... ");
     printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
            tol);

@@ -820,6 +820,7 @@ static int test_setZetaDer_poly_laplace(void) { // NOLINT
     free(a);
     free(x);
     free(y);
+    free(alpha0);
 
     printf("\n\t ... ");
     printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
