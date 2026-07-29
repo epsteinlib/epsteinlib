@@ -273,6 +273,7 @@ static inline double complex summand_real_harmonic_large_exp(
     double h = harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
                           coeffs, exponents);
 
+    // skip for h = 0 for optimization only, as lower crandall smooth near the origin
     if (h) {
         // use lower Crandall for the origin and its the nearest neighbors
         double complex crandall;
@@ -726,6 +727,9 @@ static double complex summation_harmonic_reg(
             // skip zero summand if harmonic polynomial vanishes
             double h = harmonic_h(k, dim, y_t1, alphaAbs, chunk_offset, valid_count,
                                   coeffs, exponents);
+
+            // guards 0 * inf where correct value is h(y) g(y) -> 0 for y -> 0
+            // note that h(0) = 0 exactly without cancellation
             if (h) {
                 nc += h * crandall_gReg_harmonic((int)k, (int)alphaAbs, dim,
                                                  dim - nu, y_t1, lambda);
@@ -880,6 +884,9 @@ summation_harmonic(double nu, unsigned int dim, unsigned int alphaAbs,
             // skip zero summand if harmonic polynomial vanishes
             double h = harmonic_h(k, dim, y_t2, alphaAbs, chunk_offset, valid_count,
                                   coeffs, exponents);
+
+            // guards 0 * inf where correct value is h(y) g(y) -> 0 for y -> 0
+            // note that h(0) = 0 exactly without cancellation
             if (h) {
                 nc += h *
                       crandall_g(dim, dim - nuReci, y_t2, lambda, zArgBoundReci) *
