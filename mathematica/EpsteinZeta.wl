@@ -111,19 +111,27 @@ EpsteinZetaReg[\[Nu]_?NumericQ, A_?numericSquareMatrixQ, x_?numericVectorQ, y_?n
 
 (* Check if package loaded successfully *)
 epsteinLoad::info = "`1`";
+epsteinLoad::broken = "The Epstein zeta library at `1` loaded but failed its self-test. \
+Results cannot be trusted! Check that the library is current and built for this platform.";
+
 If[libPath =!= $Failed &&
    Head[foreignFunctionEpsteinZeta] === ForeignFunction &&
-   Head[foreignFunctionEpsteinZetaReg] === ForeignFunction &&
-   PossibleZeroQ[EpsteinZeta[-2, {{1}}, {1}, {0}]] &&
-   PossibleZeroQ[EpsteinZetaReg[-2, {{1}}, {1}, {0}]],
-  Message[epsteinLoad::info,
-   "The (regularized) Epstein zeta function can be called using:
+   Head[foreignFunctionEpsteinZetaReg] === ForeignFunction,
+
+  If[PossibleZeroQ[EpsteinZeta[-2, {{1}}, {1}, {0}]] &&
+     PossibleZeroQ[EpsteinZetaReg[-2, {{1}}, {1}, {0}]] &&
+     EpsteinZeta[1, {{1}}, {0}, {0}] =!= EpsteinZetaReg[1, {{1}}, {0}, {0}],
+
+    Message[epsteinLoad::info,
+     "The (regularized) Epstein zeta function can be called using:
   EpsteinZeta[\[Nu], A, x, y]
   EpsteinZetaReg[\[Nu], A, x, y]
 Where:
   \[Nu] is a real number
   A is a square matrix
-  x and y are vectors of the same dimension as A"]
+  x and y are vectors of the same dimension as A"],
+
+    Message[epsteinLoad::broken, libPath]]
 ]
 
 End[];
