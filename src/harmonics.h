@@ -73,9 +73,9 @@ void harmonic_h_inner_term_multi_hpdyad(unsigned int dim, const unsigned int *al
  * @param[in] alphaAbs: total of alpha.
  * @return h_inner(α,γ,k).
  */
-double harmonic_h_inner_sum(unsigned int k, // NOLINT
-                            unsigned int dim, const unsigned int *alpha,
-                            const unsigned int *gamma, unsigned int alphaAbs);
+double harmonic_h_inner_sum(unsigned int k, unsigned int dim,
+                            const unsigned int *alpha, const unsigned int *gamma,
+                            unsigned int alphaAbs);
 
 /** @brief Computes chunk offsets and valid entry counts for precomputed
  * inner harmonic sums corresponding to k = 0, ..., floor(|alpha|/2).
@@ -111,8 +111,8 @@ precompute_harmonic_h_inner_chunk_size(unsigned int alphaAbs, unsigned int kMax,
  * @param[out] exponents: array storing precomputed exponents (2γ-α), size =
  * totalSize * dim.
  */
-void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, // NOLINT
-                                     unsigned int dim, const unsigned int *alpha,
+void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, unsigned int dim,
+                                     const unsigned int *alpha,
                                      const unsigned long long *chunk_offset,
                                      double *coeffs, unsigned int *exponents);
 

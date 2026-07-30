@@ -120,7 +120,7 @@ void invert(unsigned int dim, double *m, int *p, double *r) {
  * @param[in] dim: dimension of the vectors.
  * @param[in] m: matrix to compute infinity norm of.
  */
-double inf_norm(unsigned int dim, const double *m) { // NOLINT
+double inf_norm(unsigned int dim, const double *m) {
     double r = 0;
     for (int j = 0; j < dim; j++) {
         r += fabs(m[j]);
