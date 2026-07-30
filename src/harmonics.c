@@ -246,7 +246,6 @@ double harmonic_h_inner_sum(unsigned int k, // NOLINT
                 break;
             }
             betaAbs -= beta[idx];
-            theta2[idx] = beta[idx];
             beta[idx] = 0;
             redotheta1 = true;
         }
