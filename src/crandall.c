@@ -206,10 +206,10 @@ static double complex crandall_gReg_nuequalsdimplus2l_harmonic(int l, int k, int
         return res;
     }
 
-    double exp = l + k - n;
+    double lShift = l + k - n;
 
-    double zArgBound = assignzArgBound(-2 * exp);
-    res = crandall_g(dim, -2 * exp, z, lambda, zArgBound);
+    double zArgBound = assignzArgBound(-2 * lShift);
+    res = crandall_g(dim, -2 * lShift, z, lambda, zArgBound);
 
     // skip correction term in the origin
     if (arg) {
@@ -217,16 +217,16 @@ static double complex crandall_gReg_nuequalsdimplus2l_harmonic(int l, int k, int
         // difference of harmonic numbers Hₗ−Hₗ₊ₖ₋ₙ
         double harmonic = 0;
         for (int i = 1; i <= n - k; i++) {
-            harmonic += 1. / (exp + (double)i);
+            harmonic += 1. / (lShift + (double)i);
         }
 
-        // factorial exp!
+        // factorial lShift !
         double fact = 1;
-        for (int i = 2; i <= exp; i++) {
+        for (int i = 2; i <= lShift; i++) {
             fact *= i;
         }
 
-        res += negative_one_pow((unsigned int)exp) * pow(arg, exp) / fact *
+        res += negative_one_pow((unsigned int)lShift) * pow(arg, lShift) / fact *
                (log(arg) + harmonic + digamma);
     }
 
@@ -285,9 +285,7 @@ double crandall_gReg_harmonic(int k, int n, unsigned int dim, double s,
                                                         z, prefactor);
     }
 
-    double exp = s + (2 * (n - k));
-
-    return -crandall_g_lower(dim, exp, z, prefactor);
+    return -crandall_g_lower(dim, s + (2 * (n - k)), z, prefactor);
 }
 
 /** @brief Calculates the derivatives of Y_k(z) / n! = (pi * z**2)**k / n! where n <=
