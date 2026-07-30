@@ -982,10 +982,11 @@ summation_harmonic(double nu, unsigned int dim, unsigned int alphaAbs,
  * @param[in] alpha: multiindex for the derivatives.
  * @return function value.
  */
-double complex epsteinZetaInternal(double nu, unsigned int dim, // NOLINT
-                                   const double *m, const double *x, const double *y,
-                                   double lambda, bool reg, bool aniso,
-                                   const unsigned int *alpha) {
+// main logic for all four variants, splitting would duplicate shared setup
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
+                                   const double *x, const double *y, double lambda,
+                                   bool reg, bool aniso, const unsigned int *alpha) {
     // 1. Transform: Compute determinant and fourier transformed matrix, scale
     // both of them
     double m_fourier[dim * dim];

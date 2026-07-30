@@ -297,7 +297,9 @@ double crandall_gReg_harmonic(int k, int n, unsigned int dim, double s,
  * @param[in] n: factorial divisor smaller than k.
  * @return partial derivative of Y_k(z) / n!.
  */
-double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NOLINT
+// fast paths for incremental multi-index enumeration increases nesting
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+double polynomial_y_der(unsigned int k, unsigned int dim, const double *z,
                         const unsigned int *alpha, unsigned int alphaAbs,
                         unsigned int n) {
     // Return function if there is no derivative

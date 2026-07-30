@@ -59,7 +59,9 @@ bool equals(unsigned int dim, const double *v1, const double *v2) {
  * @param[out] p: permutation vector.
  * @param[out] r: where inverse matrix is stored.
  */
-void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
+// fast inversion where lots of parameters are reused
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+void invert(unsigned int dim, double *m, int *p, double *r) {
     // initialize p
     for (int i = 0; i < dim; i++) {
         p[i] = i;
@@ -92,7 +94,9 @@ void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
         }
     }
     // Compute inverse
-    double y[dim]; // NOLINT user has to provide dim > 0
+    // the analyzer does not know that dim > 0
+    // NOLINTNEXTLINE(clang-analyzer-core.VLASize)
+    double y[dim];
     for (int i = 0; i < dim; i++) {
         // Solve Ly = P e_i
         for (int k = 0; k < dim; k++) {
@@ -102,7 +106,7 @@ void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
             }
         } // Solve Rx=y
         for (int j = (int)dim - 1; j >= 0; j--) {
-            r[j * dim + i] = y[j]; // NOLINT every entry of p[i] < dim
+            r[(j * dim) + i] = y[j]; // every entry of p[i] < dim
             for (int k = j + 1; k < (int)dim; k++) {
                 r[(j * dim) + i] -= m[(j * dim) + k] * r[(k * dim) + i];
             }

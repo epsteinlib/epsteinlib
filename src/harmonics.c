@@ -168,9 +168,11 @@ void harmonic_h_inner_term_multi_hpdyad(unsigned int dim, const unsigned int *al
  * @param[in] alphaAbs: total of alpha.
  * @return h_inner(α,γ,k).
  */
-double harmonic_h_inner_sum(unsigned int k, // NOLINT
-                            unsigned int dim, const unsigned int *alpha,
-                            const unsigned int *gamma, unsigned int alphaAbs) {
+// fast paths for incremental multi-index enumeration increases nesting
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+double harmonic_h_inner_sum(unsigned int k, unsigned int dim,
+                            const unsigned int *alpha, const unsigned int *gamma,
+                            unsigned int alphaAbs) {
 
     unsigned int beta[dim];
     unsigned int theta1[dim];
@@ -325,8 +327,10 @@ precompute_harmonic_h_inner_chunk_size(unsigned int alphaAbs, unsigned int kMax,
  * @param[out] exponents: array storing precomputed exponents (2γ-α), size =
  * totalSize * dim.
  */
-void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, // NOLINT
-                                     unsigned int dim, const unsigned int *alpha,
+// fast paths for incremental multi-index enumeration increases nesting
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, unsigned int dim,
+                                     const unsigned int *alpha,
                                      const unsigned long long *chunk_offset,
                                      double *coeffs, unsigned int *exponents) {
     unsigned int kMax = alphaAbs / 2;

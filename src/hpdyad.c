@@ -234,8 +234,10 @@ void hpdyad_mul(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) {
  * @param[in] src: source hpdyad
  * @param[in] bits: number of bits to shift right
  */
-void hpdyad_shr_bits_sticky(hpdyad_t *dst, const hpdyad_t *src, // NOLINT
-                            unsigned int bits) {
+// exact arithmetic requires explicit handling distinct alignment, carry and
+// aliasing cases
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+void hpdyad_shr_bits_sticky(hpdyad_t *dst, const hpdyad_t *src, unsigned int bits) {
     hpdyad_t tmp;
     hpdyad_t *target = (dst == src) ? &tmp : dst;
 
@@ -504,7 +506,10 @@ void hpdyad_shl_bits(hpdyad_t *dst, const hpdyad_t *src, int bits) {
  * @param[in] a: first operand
  * @param[in] b: second operand
  */
-void hpdyad_add(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) { // NOLINT
+// exact arithmetic requires explicit handling distinct alignment, carry and
+// aliasing cases
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+void hpdyad_add(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b) {
     hpdyad_t temp_result;
     hpdyad_t *result;
     const hpdyad_t *higher_exp;
