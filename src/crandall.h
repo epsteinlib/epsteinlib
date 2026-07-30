@@ -103,7 +103,7 @@ double crandall_gReg_harmonic(int k, int n, unsigned int dim, double s,
 double complex crandall_g_lower(unsigned int dim, double nu, const double *z,
                                 double prefactor);
 
-double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NOLINT
+double polynomial_y_der(unsigned int k, unsigned int dim, const double *z,
                         const unsigned int *alpha, unsigned int alphaAbs,
                         unsigned int n);
 

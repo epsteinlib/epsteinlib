@@ -423,7 +423,7 @@ static inline double complex summand_real_harmonic_large_exp_singularity_sum(
  * @return (-2πi)^{|α|} ∑_{z ∈ Aℤᵈ − x, |z| = 0 or |z| = 1} e^(−2πi y·z)
  * ∑_{k=0}^{⌊|α|/2⌋} h_{α,k}(−2πi z) (z·z)^{−(ν−2k)/2}
  */
-static double complex sum_real_harmonic_large_exp_singularity_sum( // NOLINT
+static double complex sum_real_harmonic_large_exp_singularity_sum(
     double nu, unsigned int kMax, unsigned int dim, const double *m, const double *x,
     const double *y, bool diag, unsigned int alphaAbs,
     const unsigned long long *chunk_offset, const unsigned long long *valid_count,
