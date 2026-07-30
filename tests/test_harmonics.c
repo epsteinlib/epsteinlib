@@ -29,7 +29,7 @@
  * @brief Benchmarks recursive coefficients
  * @return number of failed tests.
  */
-int test_coeffs_c_inner(void) {
+static int test_coeffs_c_inner(void) {
     printf("%s ", __func__);
 
     char path[MAX_PATH_LENGTH];
@@ -134,7 +134,7 @@ int test_coeffs_c_inner(void) {
  * @brief Benchmarks inner harmonic h function call.
  * @return number of failed tests.
  */
-int test_harmonic_h_inner(void) {
+static int test_harmonic_h_inner(void) {
     printf("%s ", __func__);
 
     char path[MAX_PATH_LENGTH];
@@ -261,7 +261,7 @@ int test_harmonic_h_inner(void) {
  * @brief Benchmarks harmonic polynomials.
  * @return number of failed tests.
  */
-int test_harmonic_h_1D(void) {
+static int test_harmonic_h_1D(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/harmonic_h_1D_ref.csv", // NOLINT
@@ -367,7 +367,7 @@ int test_harmonic_h_1D(void) {
  * This focuses sorely on the precision of the harmonic coefficients.
  * @return number of failed tests.
  */
-int test_harmonic_h_3D_unity(void) {
+static int test_harmonic_h_3D_unity(void) {
     printf("%s ", __func__);
 
     char path[MAX_PATH_LENGTH];
@@ -498,7 +498,7 @@ int test_harmonic_h_3D_unity(void) {
  * @brief Benchmarks harmonic polynomials for random three-dimensional arguments.
  * @return number of failed tests.
  */
-int test_harmonic_h_3D_random(void) {
+static int test_harmonic_h_3D_random(void) {
     printf("%s ", __func__);
 
     char path[MAX_PATH_LENGTH];

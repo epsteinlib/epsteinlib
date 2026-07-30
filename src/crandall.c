@@ -11,6 +11,7 @@
  * in Crandall's formula.
  */
 
+#include "crandall.h"
 #include "gamma.h"
 #include "stdbool.h"
 #include "tools.h"
@@ -159,10 +160,11 @@ double complex crandall_gReg(unsigned int dim, double s, const double *z,
  * @param[in] lambda: scaling parameter of crandalls formula.
  * @return Regularized upper Crandall function for logarithm special case.
  */
-double complex crandall_gReg_nuequalsdimplus2l_harmonic(int l, int k, int n,
-                                                        double arg, unsigned int dim,
-                                                        const double *z,
-                                                        double lambda) {
+static double complex crandall_gReg_nuequalsdimplus2l_harmonic(int l, int k, int n,
+                                                               double arg,
+                                                               unsigned int dim,
+                                                               const double *z,
+                                                               double lambda) {
     double complex res = NAN;
 
     // difference of digamma functions ψ(ℓ+d/2)−ψ(ℓ+d/2−k)
@@ -176,8 +178,8 @@ double complex crandall_gReg_nuequalsdimplus2l_harmonic(int l, int k, int n,
     if (l == n - k && arg < taylorCutoff) {
 
         // harmonic number H
-        double harmonic = 1;
-        for (int i = 2; i <= n - k; i++) {
+        double harmonic = 0;
+        for (int i = 1; i <= n - k; i++) {
             harmonic += 1. / (double)i;
         }
 
@@ -204,10 +206,10 @@ double complex crandall_gReg_nuequalsdimplus2l_harmonic(int l, int k, int n,
         return res;
     }
 
-    double exp = l + k - n;
+    double lShift = l + k - n;
 
-    double zArgBound = assignzArgBound(-2 * exp);
-    res = crandall_g(dim, -2 * exp, z, lambda, zArgBound);
+    double zArgBound = assignzArgBound(-2 * lShift);
+    res = crandall_g(dim, -2 * lShift, z, lambda, zArgBound);
 
     // skip correction term in the origin
     if (arg) {
@@ -215,16 +217,16 @@ double complex crandall_gReg_nuequalsdimplus2l_harmonic(int l, int k, int n,
         // difference of harmonic numbers Hₗ−Hₗ₊ₖ₋ₙ
         double harmonic = 0;
         for (int i = 1; i <= n - k; i++) {
-            harmonic += 1. / (exp + (double)i);
+            harmonic += 1. / (lShift + (double)i);
         }
 
-        // factorial exp!
+        // factorial lShift !
         double fact = 1;
-        for (int i = 2; i <= exp; i++) {
+        for (int i = 2; i <= lShift; i++) {
             fact *= i;
         }
 
-        res += negative_one_pow((unsigned int)exp) * pow(arg, exp) / fact *
+        res += negative_one_pow((unsigned int)lShift) * pow(arg, lShift) / fact *
                (log(arg) + harmonic + digamma);
     }
 
@@ -270,8 +272,8 @@ double complex crandall_g_lower(unsigned int dim, double nu, const double *z,
  * and the special definition if s is  equal to - 2k for non negative natural number
  * k <= l.
  */
-double complex crandall_gReg_harmonic(int k, int n, unsigned int dim, double s,
-                                      const double *z, double prefactor) {
+double crandall_gReg_harmonic(int k, int n, unsigned int dim, double s,
+                              const double *z, double prefactor) {
 
     double zArgument = dot(dim, z, z);
     zArgument *= M_PI * prefactor * prefactor;
@@ -283,9 +285,7 @@ double complex crandall_gReg_harmonic(int k, int n, unsigned int dim, double s,
                                                         z, prefactor);
     }
 
-    double exp = s + (2 * (n - k));
-
-    return -crandall_g_lower(dim, exp, z, prefactor);
+    return -crandall_g_lower(dim, s + (2 * (n - k)), z, prefactor);
 }
 
 /** @brief Calculates the derivatives of Y_k(z) / n! = (pi * z**2)**k / n! where n <=
@@ -297,7 +297,9 @@ double complex crandall_gReg_harmonic(int k, int n, unsigned int dim, double s,
  * @param[in] n: factorial divisor smaller than k.
  * @return partial derivative of Y_k(z) / n!.
  */
-double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NOLINT
+// fast paths for incremental multi-index enumeration increases nesting
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+double polynomial_y_der(unsigned int k, unsigned int dim, const double *z,
                         const unsigned int *alpha, unsigned int alphaAbs,
                         unsigned int n) {
     // Return function if there is no derivative

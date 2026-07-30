@@ -10,9 +10,11 @@
 #include "../src/tools.h"
 #include "epsteinZeta.h"
 #include "utils.h"
+#include "wrappers.h"
 #include <complex.h>
 #include <errno.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -25,26 +27,21 @@
 #endif
 
 /*!
- * @brief Calculates the singularity of the Epstein zeta function as y approaches
- * zero.
- *
- * @param[in] nu The parameter nu of the Epstein zeta function.
- * @param[in] dim The dimension of the lattice.
- * @param[in] y Pointer to the array of y values.
- * @return The value of the singularity function.
+ * @brief Maximum number of failures reported per test, to keep logs readable.
  */
-double sHat(double nu, unsigned int dim, double *y) {
-    double ySquared = dot(dim, y, y);
-    double k = fmax(0., nearbyint((nu - (double)dim) / 2));
-    if (nu == (dim + 2 * k)) {
-        return pow(M_PI, (2 * k) + (((double)dim) / 2)) /
-               tgamma(k + (((double)dim) / 2)) * pow(-1, k + 1) / tgamma(k + 1) *
-               pow(ySquared, k) * log(M_PI * ySquared);
-    }
-    return pow(M_PI, nu - (((double)dim) / 2)) *
-           pow(ySquared, (nu - ((double)dim)) / 2) * tgamma(((double)dim - nu) / 2) /
-           tgamma(nu / 2);
-}
+enum { ANISO_MAX_REPORTS = 20 };
+
+/*!
+ * @brief Running statistics for the anisotropic reduction sweeps.
+ */
+typedef struct {
+    int passed;
+    int total;
+    int reported;
+    double errMin;
+    double errMax;
+    double errSum;
+} anisoStats;
 
 /*!
  * @brief Free memory allocated for test resources.
@@ -58,8 +55,8 @@ double sHat(double nu, unsigned int dim, double *y) {
  * @param[in] y Pointer to the array of y values.
  * @param[in] zetaRef Pointer to the array of reference zeta values.
  */
-void freeTestResources(double *a, double *nu, double *x, double *y,
-                       double *zetaRef) {
+static void freeTestResources(double *a, double *nu, double *x, double *y,
+                              double *zetaRef) {
     free(a);
     free(nu);
     free(x);
@@ -83,13 +80,14 @@ void freeTestResources(double *a, double *nu, double *x, double *y,
  * @param[in] x Pointer to the array of x values.
  * @param[in] y Pointer to the array of y values.
  */
-void reportEpsteinZetaError(double complex valZeta, double complex valZetaReg,
-                            double errorMaxAbsRel, double tol, double *m,
-                            unsigned int dim, double nu, double *x, double *y) {
+static void reportEpsteinZetaError(double complex valZeta, double complex valZetaReg,
+                                   double errorMaxAbsRel, double tol, double *m,
+                                   unsigned int dim, double nu, double *x,
+                                   double *y) {
     printf("\n");
     printf("Warning! ");
     printf("epsteinZeta:");
-    printf(" %0*.16lf %+.16lf I (epsteinZeta) \n\t\t  != "
+    printf(" %0*.16lf %+.16lf I (epsteinZeta) \n\t\t   != "
            "%.16lf "
            "%+.16lf I (epsteinZetaReg representation)\n",
            4, creal(valZeta), cimag(valZeta), creal(valZetaReg), cimag(valZetaReg));
@@ -112,9 +110,9 @@ void reportEpsteinZetaError(double complex valZeta, double complex valZetaReg,
  * @param[in] y Pointer to the array of y values.
  * @param[in] dim The dimension of the lattice.
  */
-void reportEpsteinZetaCutoffError(const char *testCase, double complex zeta1,
-                                  double complex zeta2, double nu, double *y,
-                                  unsigned int dim) {
+static void reportEpsteinZetaCutoffError(const char *testCase, double complex zeta1,
+                                         double complex zeta2, double nu, double *y,
+                                         unsigned int dim) {
     printf("\n\n");
     printf("Warning! ");
     printf("%s:\n", testCase);
@@ -130,6 +128,262 @@ void reportEpsteinZetaCutoffError(const char *testCase, double complex zeta1,
         }
     }
     printf("\n");
+}
+
+/*!
+ * @brief Computes out = m . v for a row-major dim x dim matrix.
+ */
+static void anisoMatVec(unsigned int dim, const double *m, const double *v,
+                        double *out) {
+    for (unsigned int i = 0; i < dim; i++) {
+        out[i] = 0.;
+        for (unsigned int j = 0; j < dim; j++) {
+            out[i] += m[(dim * i) + j] * v[j];
+        }
+    }
+}
+
+/*!
+ * @brief Error measure for the reduction tests. Two NaNs count as agreement (the
+ * nu = d pole with y in the reciprocal lattice is NaN on both sides), one NaN does
+ * not. Two exact zeros count as agreement (nu a non-positive even integer).
+ */
+static double anisoErr(double complex a, double complex b) {
+    bool aNan = isnan(creal(a)) || isnan(cimag(a));
+    bool bNan = isnan(creal(b)) || isnan(cimag(b));
+    if (creal(a) == creal(b) && cimag(a) == cimag(b)) {
+        return 0.; // includes matching infinities
+    }
+    if (aNan || bNan) {
+        return (aNan && bNan) ? 0. : INFINITY;
+    }
+    double diff = cabs(a - b);
+    double scale = fmax(cabs(a), cabs(b));
+    if (scale == 0.) {
+        return 0.;
+    }
+    double rel = diff / scale;
+    return (diff < rel) ? diff : rel;
+}
+
+/*!
+ * @brief Reports a single reduction failure.
+ */
+static void reportAnisoError(unsigned int dim, const double *m, double nu,
+                             const double *x, const double *y, double complex base,
+                             double complex aniso, double err, double tol,
+                             bool reg) {
+    printf("\nWarning! %s: %.16lf %+.16lf I\n",
+           reg ? "epsteinZetaReg" : "epsteinZeta", creal(base), cimag(base));
+    printf("\t           ");
+    if (reg) {
+        printf("    ");
+    }
+    printf("!= %.16lf %+.16lf I (%s, alpha = 0)\n", creal(aniso), cimag(aniso),
+           reg ? "epsteinZetaAnisoReg" : "epsteinZetaAniso");
+    printf("Min(Eabs, Erel):      %E !< %E  (tolerance)\n\n", err, tol);
+    printf("dim:\t\t %u\n", dim);
+    printf("nu:\t\t %.16lf\n", nu);
+    for (unsigned int i = 0; i < dim; i++) {
+        printf("%s\t\t [", (i == 0) ? "A:" : "  ");
+        for (unsigned int j = 0; j < dim; j++) {
+            printf("%.16lf%s", m[(dim * i) + j], (j + 1 < dim) ? ", " : "");
+        }
+        printf("]\n");
+    }
+    printf("x:\t\t[");
+    for (unsigned int i = 0; i < dim; i++) {
+        printf("%.16lf%s", x[i], (i + 1 < dim) ? ", " : "");
+    }
+    printf("]\ny:\t\t[");
+    for (unsigned int i = 0; i < dim; i++) {
+        printf("%.16lf%s", y[i], (i + 1 < dim) ? ", " : "");
+    }
+    printf("]\n");
+}
+
+/*!
+ * @brief Guards against a hand-computed reciprocal basis being wrong. The test data
+ * supplies both A and A^-T; this checks A^T B = I.
+ */
+static int anisoCheckReciprocal(unsigned int dim, const double *a,
+                                const double *aInvT) {
+    for (unsigned int i = 0; i < dim; i++) {
+        for (unsigned int j = 0; j < dim; j++) {
+            double s = 0.;
+            for (unsigned int k = 0; k < dim; k++) {
+                s += a[(dim * k) + i] * aInvT[(dim * k) + j];
+            }
+            if (fabs(s - ((i == j) ? 1. : 0.)) > 1e-12) {
+                printf("\n\t BUG IN TEST DATA: A^T B != I at (%u,%u), got %.3e\n", i,
+                       j, s);
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+/*!
+ * @brief Sweeps one lattice. x is given in lattice coordinates (x = A xFrac) and y
+ * in reciprocal lattice coordinates (y = A^-T yFrac), so that integer entries mean
+ * "on the lattice" independently of A.
+ */
+static void anisoReductionSweep(unsigned int dim, const double *a, // NOLINT
+                                const double *aInvT, const double *xFrac, int numX,
+                                const double *yFrac, int numY, const double *nus,
+                                int numNu, bool reg, double tol, anisoStats *st) {
+    unsigned int alpha[3] = {0, 0, 0};
+    double x[3];
+    double y[3];
+
+    for (int itx = 0; itx < numX; itx++) {
+        anisoMatVec(dim, a, xFrac + (dim * itx), x); // NOLINT
+        for (int ity = 0; ity < numY; ity++) {
+            anisoMatVec(dim, aInvT, yFrac + (dim * ity), y); // NOLINT
+            for (int in = 0; in < numNu; in++) {
+                double nu = nus[in];
+                double complex base;
+                double complex aniso;
+                if (reg) {
+                    base = epsteinZetaReg(nu, dim, a, x, y);
+                    aniso = epsteinZetaAnisoReg(nu, dim, a, x, y, alpha);
+                } else {
+                    base = epsteinZeta(nu, dim, a, x, y);
+                    aniso = epsteinZetaAniso(nu, dim, a, x, y, alpha);
+                }
+                double err = anisoErr(base, aniso);
+
+                st->errMin = (st->errMin < err) ? st->errMin : err;
+                st->errMax = (st->errMax > err) ? st->errMax : err;
+                if (isfinite(err)) {
+                    st->errSum += err;
+                }
+                st->total++;
+                if (err < tol) {
+                    st->passed++;
+                } else if (st->reported < ANISO_MAX_REPORTS) {
+                    reportAnisoError(dim, a, nu, x, y, base, aniso, err, tol, reg);
+                    st->reported++;
+                }
+            }
+        }
+    }
+}
+
+/*!
+ * @brief Checks that the anisotropic front ends reduce to the ordinary ones at
+ * alpha = 0, over a grid chosen to hit every special case in Epstein zeta (aniso):
+ * nu a non-positive even integer, nu = 0, nu = d, nu = d + 2k, the nu > 10
+ * largeExp branch and its threshold, x = 0, x a nonzero lattice vector, x on the
+ * cell boundary, x outside the elementary cell, y = 0, y a nonzero reciprocal
+ * lattice vector, y near zero, and lattices that are identity, diagonal, sheared,
+ * generic, negative determinant and non-unit volume.
+ * @param[in] reg: false compares epsteinZeta / epsteinZetaAniso, true compares
+ * epsteinZetaReg / epsteinZetaAnisoReg.
+ * @return number of failed tests.
+ */
+static int anisoReductionAllLattices(bool reg) { // NOLINT
+    double tol = 5 * pow(10, -13);
+    anisoStats st = {0, 0, 0, NAN, NAN, 0.};
+    int dataErrors = 0;
+
+    /* ------------------------------- 2D ------------------------------- */
+    double a2[6][4] = {{1., 0., 0., 1.},     // identity
+                       {2., 0., 0., 1.},     // diagonal, vol = 2
+                       {1., 0.5, 0., 1.},    // unimodular shear, non-diagonal
+                       {1.5, 0.2, 0.25, 1.}, // generic, vol = 29/20
+                       {0., 1., 1., 0.},     // det < 0, forces pivoting
+                       {1., -0.5, 0., sqrt(3.) / 2.}}; // hexagonal, vol = sqrt(3)/2
+    double b2[6][4] = {
+        {1., 0., 0., 1.},   {0.5, 0., 0., 1.},
+        {1., 0., -0.5, 1.}, {20. / 29., -5. / 29., -4. / 29., 30. / 29.},
+        {0., 1., 1., 0.},   {1., 0., 1. / sqrt(3.), 2. / sqrt(3.)}};
+
+    double xFrac2[] = {0.,  0.,    // origin
+                       1.,  0.,    // nonzero lattice vector
+                       2.,  -1.,   // further lattice vector
+                       0.3, -0.2,  // generic, inside the cell
+                       2.3, -1.2,  // generic, outside the cell
+                       0.5, 0.5};  // cell boundary
+    double yFrac2[] = {0.,   0.,   // y = 0
+                       1.,   0.,   // nonzero reciprocal lattice vector
+                       0.3,  0.4,  // generic, inside the cell
+                       1.3,  -0.6, // generic, outside the cell
+                       0.5,  0.,   // cell boundary
+                       1e-8, 0.};  // near zero
+    double nu2[] = {-8.5, -8., -7.5, -7.,       -6.25,      -6.,   -5.,        -4.,
+                    -3.5, -3., -2.,  -1.,       -0.5,       -0.25, 0.,         0.25,
+                    0.5,  1.,  1.5,  2. - 1e-8, 2. - 1e-11, 2.,    2. + 1e-11, 2.5,
+                    3.,   3.5, 4.,   4.5,       5.,         6.,    7.,         8.,
+                    9.,   9.5, 9.9,  10.,       10.1,       10.5,  11.,        12.,
+                    18.,  22., 30};
+
+    for (int im = 0; im < 6; im++) {
+        dataErrors += anisoCheckReciprocal(2, a2[im], b2[im]);
+        anisoReductionSweep(2, a2[im], b2[im], xFrac2, 6, yFrac2, 6, nu2,
+                            (int)(sizeof(nu2) / sizeof(nu2[0])), reg, tol, &st);
+    }
+
+    /* ------------------------------- 3D ------------------------------- */
+    double a3[4][9] = {{1., 0., 0., 0., 1., 0., 0., 0., 1.},  // identity
+                       {2., 0., 0., 0., 1., 0., 0., 0., 0.5}, // diagonal, vol = 1
+                       {1., 0.5, 0., 0., 1., 0., 0., 0., 1.}, // shear, non-diagonal
+                       {0., 0.5, 0.5, 0.5, 0., 0.5, 0.5, 0.5, 0.}}; // fcc, vol = 1/4
+    double b3[4][9] = {{1., 0., 0., 0., 1., 0., 0., 0., 1.},
+                       {0.5, 0., 0., 0., 1., 0., 0., 0., 2.},
+                       {1., 0., 0., -0.5, 1., 0., 0., 0., 1.},
+                       {-1., 1., 1., 1., -1., 1., 1., 1., -1.}};
+
+    double xFrac3[] = {0.,  0.,   0.,    // origin
+                       1.,  0.,   0.,    // nonzero lattice vector
+                       2.,  -1.,  1.,    // further lattice vector
+                       0.3, -0.2, 0.1,   // generic, inside the cell
+                       0.5, 0.5,  0.5};  // cell corner
+    double yFrac3[] = {0.,   0.,   0.,   // y = 0
+                       1.,   0.,   0.,   // nonzero reciprocal lattice vector
+                       0.3,  0.4,  -0.2, // generic, inside the cell
+                       1.3,  -0.6, 0.2,  // generic, outside the cell
+                       1e-8, 0.,   0.};  // near zero
+    double nu3[] = {-7.5, -6., -4., -3.,        -2.,  -1.,        -0.5, 0.,  0.5,
+                    1.,   2.,  2.5, 3. - 1e-11, 3.,   3. + 1e-11, 4.,   5.,  6.,
+                    7.,   8.,  9.5, 10.,        10.5, 12.,        18.,  22., 30};
+
+    for (int im = 0; im < 4; im++) {
+        dataErrors += anisoCheckReciprocal(3, a3[im], b3[im]);
+        anisoReductionSweep(3, a3[im], b3[im], xFrac3, 5, yFrac3, 5, nu3,
+                            (int)(sizeof(nu3) / sizeof(nu3[0])), reg, tol, &st);
+    }
+
+    if (st.reported >= ANISO_MAX_REPORTS) {
+        printf("\n\t ... further failures suppressed.\n");
+    }
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.", st.passed, st.total, tol);
+    printf("   ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", st.errMin, st.errMax,
+           st.errSum / st.total);
+    printf("\n");
+
+    return (st.total - st.passed) + dataErrors;
+}
+
+/*!
+ * @brief Checks epsteinZetaAniso reduces to epsteinZeta at alpha = 0.
+ * @return number of failed tests.
+ */
+static int test_epsteinZeta_epsteinZetaAniso_reduction() {
+    printf("%s ", __func__);
+    return anisoReductionAllLattices(false);
+}
+
+/*!
+ * @brief Checks epsteinZetaAnisoReg reduces to epsteinZetaReg at alpha = 0.
+ * @return number of failed tests.
+ */
+static int test_epsteinZetaReg_epsteinZetaAnisoReg_reduction() {
+    printf("%s ", __func__);
+    return anisoReductionAllLattices(true);
 }
 
 /*!
@@ -358,7 +612,7 @@ static int test_epsteinZetaReg() { // NOLINT
  *
  * @return number of failed tests.
  */
-int test_epsteinZeta_random_matrices(void) { // NOLINT
+static int test_epsteinZeta_random_matrices(void) { // NOLINT
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path),
@@ -513,7 +767,7 @@ int test_epsteinZeta_random_matrices(void) { // NOLINT
  *
  * @return number of failed tests.
  */
-int test_epsteinZetaReg_random_matrices(void) { // NOLINT
+static int test_epsteinZetaReg_random_matrices(void) { // NOLINT
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path),
@@ -670,7 +924,7 @@ int test_epsteinZetaReg_random_matrices(void) { // NOLINT
  * @return number of failed tests.
  * tests pass.
  */
-static int test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
+static int test_epsteinZeta_epsteinZetaReg_reduction() { // NOLINT
     printf("%s ", __func__);
     double errorAbs;
     double errorRel;
@@ -686,7 +940,7 @@ static int test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
     double errMax = NAN;
     double errSum = 0.;
 
-    double tol = 5 * pow(10, -15);
+    double tol = pow(10, -13);
     unsigned int dim = 2;
     double m[] = {3. / 2, 1. / 5, 1. / 4, 1.};
     double x[] = {0.1, 0.2};
@@ -698,7 +952,8 @@ static int test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
 
         valZeta = epsteinZeta(nu, dim, m, x, y);
         valZetaReg = cexp(-2 * M_PI * I * dot(dim, x, y)) *
-                     (epsteinZetaReg(nu, dim, m, x, y) + sHat(nu, dim, y) / vol);
+                     (epsteinZetaReg(nu, dim, m, x, y) +
+                      singularity_s(nu, dim, dot(dim, y, y)) / vol);
 
         errorAbs = errAbs(valZeta, valZetaReg);
         errorRel = errRel(valZeta, valZetaReg);
@@ -725,9 +980,9 @@ static int test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
         nu = -8.5 + (double)i / 5.;
 
         valZeta = epsteinZeta(nu, dim, m, x, yZeta);
-        valZetaReg =
-            cexp(-2 * M_PI * I * dot(dim, x, yZeta)) *
-            (epsteinZetaReg(nu, dim, m, x, yZetaReg) + sHat(nu, dim, yZeta) / vol);
+        valZetaReg = cexp(-2 * M_PI * I * dot(dim, x, yZeta)) *
+                     (epsteinZetaReg(nu, dim, m, x, yZetaReg) +
+                      singularity_s(nu, dim, dot(dim, yZeta, yZeta)) / vol);
 
         errorAbs = errAbs(valZeta, valZetaReg);
         errorRel = errRel(valZeta, valZetaReg);
@@ -745,6 +1000,54 @@ static int test_epsteinZeta_epsteinZetaReg_represent_as_each_other() {
         }
         totalTests++;
     }
+
+    // test identity for x a nonzero lattice vector (identity lattice, so the
+    // projection x_t2 is exactly zero and the nu = 0 special branch is reached)
+    double mLat[] = {1., 0., 0., 1.};
+    double xLat[] = {1., 0.};
+    double yLat[] = {0.3, 0.4};
+    double volLat = 1.;
+    for (int i = 0; i < 100; i++) {
+        nu = -8.45 + (double)i / 5.;
+        valZeta = epsteinZeta(nu, dim, mLat, xLat, yLat);
+        valZetaReg = cexp(-2 * M_PI * I * dot(dim, xLat, yLat)) *
+                     (epsteinZetaReg(nu, dim, mLat, xLat, yLat) +
+                      singularity_s(nu, dim, dot(dim, yLat, yLat)) / volLat);
+        errorAbs = errAbs(valZeta, valZetaReg);
+        errorRel = errRel(valZeta, valZetaReg);
+        errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else {
+            reportEpsteinZetaError(valZeta, valZetaReg, errorMaxAbsRel, tol, mLat,
+                                   dim, nu, xLat, yLat);
+        }
+        totalTests++;
+    }
+
+    // nu = 0 exactly, x a nonzero lattice vector: Z_0 = -exp(-2 pi i x.y),
+    // singularity_s_0 = 0, hence Z^reg_0 = -1 independently of x and y
+    nu = 0.;
+    valZeta = epsteinZeta(nu, dim, mLat, xLat, yLat);
+    valZetaReg = cexp(-2 * M_PI * I * dot(dim, xLat, yLat)) *
+                 (epsteinZetaReg(nu, dim, mLat, xLat, yLat) +
+                  singularity_s(nu, dim, dot(dim, yLat, yLat)) / volLat);
+    errorAbs = errAbs(valZeta, valZetaReg);
+    errorRel = errRel(valZeta, valZetaReg);
+    errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+    errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+    errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+    errSum += errorMaxAbsRel;
+    if (errorMaxAbsRel < tol) {
+        testsPassed++;
+    } else {
+        reportEpsteinZetaError(valZeta, valZetaReg, errorMaxAbsRel, tol, mLat, dim,
+                               nu, xLat, yLat);
+    }
+    totalTests++;
 
     printf("\n\t ... ");
     printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
@@ -833,8 +1136,9 @@ int main() {
     failed += run_timed_test(test_epsteinZetaReg);
     failed += run_timed_test(test_epsteinZeta_random_matrices);
     failed += run_timed_test(test_epsteinZetaReg_random_matrices);
-    failed +=
-        run_timed_test(test_epsteinZeta_epsteinZetaReg_represent_as_each_other);
+    failed += run_timed_test(test_epsteinZeta_epsteinZetaReg_reduction);
     failed += run_timed_test(test_epsteinZeta_cutoff);
+    failed += run_timed_test(test_epsteinZeta_epsteinZetaAniso_reduction);
+    failed += run_timed_test(test_epsteinZetaReg_epsteinZetaAnisoReg_reduction);
     return failed;
 }

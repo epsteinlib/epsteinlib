@@ -8,14 +8,15 @@
  * is in the core library.
  */
 
+#include "wrappers.h"
 #include "../src/crandall.h"
 #include "../src/harmonics.h"
 #include "../src/hpdyad.h"
 #include "../src/tools.h"
-#include "../src/zeta.h"
 #include "complex.h"
-#include "stdbool.h"
+#include "epsteinZeta.h"
 #include <math.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 /**
@@ -33,9 +34,10 @@ double complex setZetaDer(double nu, unsigned int dim, const double *a,
                           const double *x, const double *y,
                           const unsigned int *alpha) {
     unsigned int alphaAbs = mult_abs(dim, alpha);
-    double complex prefactor =
-        imaginary_int_pow(alphaAbs) * real_int_pow(-2 * M_PI, alphaAbs);
-    return prefactor * epsteinZetaInternal(nu, dim, a, x, y, 1, 2, alpha);
+    double complex prefactor = imaginary_int_pow(alphaAbs) *
+                               real_int_pow(-2 * M_PI, alphaAbs) *
+                               cexp(2 * M_PI * I * dot(dim, x, y));
+    return prefactor * epsteinZetaAniso(nu, dim, a, x, y, alpha);
 }
 
 /**
@@ -55,7 +57,7 @@ double complex epsteinZetaRegDer(double nu, unsigned int dim, const double *a,
     unsigned int alphaAbs = mult_abs(dim, alpha);
     double complex prefactor =
         imaginary_int_pow(alphaAbs) * real_int_pow(-2 * M_PI, alphaAbs);
-    return prefactor * epsteinZetaInternal(nu, dim, a, x, y, 1, 3, alpha);
+    return prefactor * epsteinZetaAnisoReg(nu, dim, a, x, y, alpha);
 }
 
 /** @brief Computes a single summand of h_inner; explicitly
@@ -100,7 +102,7 @@ double harmonic_h_inner_term(unsigned int n, unsigned int i, unsigned int k,
  * @param[in] zSquared: |z|^2 for vector z of the singularity.
  * @return s_ν(z).
  */
-static double singularity_s(double nu, unsigned int dim, double zSquared) {
+double singularity_s(double nu, unsigned int dim, double zSquared) {
 
     double zArg = M_PI * zSquared;
     int ell = (int)nearbyint((nu - (double)dim) / 2.);
@@ -130,12 +132,13 @@ static double singularity_s(double nu, unsigned int dim, double zSquared) {
  * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
  * @return partial derivative of Y_ell(z).
  */
-double polynomial_y_der_harmonic(int ell, unsigned int dim,
-                                 const double *z, // NOLINT
-                                 int n, const unsigned long long *chunk_offset,
-                                 const unsigned long long *valid_count,
-                                 const double *coeffs,
-                                 const unsigned int *exponents) {
+static double polynomial_y_der_harmonic(int ell, unsigned int dim,
+                                        const double *z, // NOLINT
+                                        int n,
+                                        const unsigned long long *chunk_offset,
+                                        const unsigned long long *valid_count,
+                                        const double *coeffs,
+                                        const unsigned int *exponents) {
 
     double zSquared = dot(dim, z, z);
     double res = 0;
@@ -189,8 +192,15 @@ double polynomial_y_der_harmonic_wrapper(int ell, unsigned int dim,
     precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                     exponents);
 
-    return polynomial_y_der_harmonic(ell, dim, z, (int)alphaAbs, chunk_offset,
-                                     valid_count, coeffs, exponents);
+    double res = polynomial_y_der_harmonic(ell, dim, z, (int)alphaAbs, chunk_offset,
+                                           valid_count, coeffs, exponents);
+
+    free(chunk_offset);
+    free(valid_count);
+    free(coeffs);
+    free(exponents);
+
+    return res;
 }
 
 /** @brief Computes the derivatives of the singularity s_ν(z) where the coefficients
@@ -302,8 +312,15 @@ double singularity_s_der_harmonic_wrapper(double nu, unsigned int dim,
     precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                     exponents);
 
-    return singularity_s_der_harmonic(nu, dim, z, alphaAbs, chunk_offset,
-                                      valid_count, coeffs, exponents);
+    double res = singularity_s_der_harmonic(nu, dim, z, alphaAbs, chunk_offset,
+                                            valid_count, coeffs, exponents);
+
+    free(chunk_offset);
+    free(valid_count);
+    free(coeffs);
+    free(exponents);
+
+    return res;
 }
 
 /** @brief Calculates the polynomial l_(alpha,beta)(y) = - (-1)**|alpha - beta| *

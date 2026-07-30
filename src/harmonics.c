@@ -7,6 +7,7 @@
  * @brief Calculates the harmonic polynomials.
  */
 
+#include "harmonics.h"
 #include "hpdyad.h"
 #include "stdbool.h"
 #include "tools.h"
@@ -71,7 +72,7 @@ double coeffs_c_outer(long long n, long long k, long long dim) {
 void coeffs_c_inner_hpdyad(unsigned int n, unsigned int i, unsigned int k,
                            unsigned int dim, hpdyad_t *out) {
 
-    long long end = (n / 2) - k;
+    long long end = (long long)(n / 2) - (long long)k;
 
     hpdyad_set_ull(out, 1, 1);
     if (i >= end) {
@@ -159,6 +160,7 @@ void harmonic_h_inner_term_multi_hpdyad(unsigned int dim, const unsigned int *al
 }
 
 /** @brief Computes the inner sum h_inner(α,γ,k) using exact hpdyad arithmetic.
+ * @pre k ≤ ⌊alphaAbs/2⌋
  * @param[in] k: specifies degree |alpha| - 2k.
  * @param[in] dim: dimension of alpha, beta and gamma.
  * @param[in] alpha: upper multi-index.
@@ -166,9 +168,11 @@ void harmonic_h_inner_term_multi_hpdyad(unsigned int dim, const unsigned int *al
  * @param[in] alphaAbs: total of alpha.
  * @return h_inner(α,γ,k).
  */
-double harmonic_h_inner_sum(unsigned int k, // NOLINT
-                            unsigned int dim, const unsigned int *alpha,
-                            const unsigned int *gamma, unsigned int alphaAbs) {
+// fast paths for incremental multi-index enumeration increases nesting
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+double harmonic_h_inner_sum(unsigned int k, unsigned int dim,
+                            const unsigned int *alpha, const unsigned int *gamma,
+                            unsigned int alphaAbs) {
 
     unsigned int beta[dim];
     unsigned int theta1[dim];
@@ -244,7 +248,6 @@ double harmonic_h_inner_sum(unsigned int k, // NOLINT
                 break;
             }
             betaAbs -= beta[idx];
-            theta2[idx] = beta[idx];
             beta[idx] = 0;
             redotheta1 = true;
         }
@@ -324,8 +327,10 @@ precompute_harmonic_h_inner_chunk_size(unsigned int alphaAbs, unsigned int kMax,
  * @param[out] exponents: array storing precomputed exponents (2γ-α), size =
  * totalSize * dim.
  */
-void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, // NOLINT
-                                     unsigned int dim, const unsigned int *alpha,
+// fast paths for incremental multi-index enumeration increases nesting
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, unsigned int dim,
+                                     const unsigned int *alpha,
                                      const unsigned long long *chunk_offset,
                                      double *coeffs, unsigned int *exponents) {
     unsigned int kMax = alphaAbs / 2;

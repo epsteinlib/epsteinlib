@@ -12,7 +12,6 @@
  */
 
 #include "tools.h"
-#include <complex.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -60,7 +59,9 @@ bool equals(unsigned int dim, const double *v1, const double *v2) {
  * @param[out] p: permutation vector.
  * @param[out] r: where inverse matrix is stored.
  */
-void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
+// fast inversion where lots of parameters are reused
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+void invert(unsigned int dim, double *m, int *p, double *r) {
     // initialize p
     for (int i = 0; i < dim; i++) {
         p[i] = i;
@@ -93,7 +94,9 @@ void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
         }
     }
     // Compute inverse
-    double y[dim]; // NOLINT user has to provide dim > 0
+    // the analyzer does not know that dim > 0
+    // NOLINTNEXTLINE(clang-analyzer-core.VLASize)
+    double y[dim];
     for (int i = 0; i < dim; i++) {
         // Solve Ly = P e_i
         for (int k = 0; k < dim; k++) {
@@ -103,7 +106,7 @@ void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
             }
         } // Solve Rx=y
         for (int j = (int)dim - 1; j >= 0; j--) {
-            r[j * dim + i] = y[j]; // NOLINT every entry of p[i] < dim
+            r[(j * dim) + i] = y[j]; // every entry of p[i] < dim
             for (int k = j + 1; k < (int)dim; k++) {
                 r[(j * dim) + i] -= m[(j * dim) + k] * r[(k * dim) + i];
             }
@@ -117,7 +120,7 @@ void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
  * @param[in] dim: dimension of the vectors.
  * @param[in] m: matrix to compute infinity norm of.
  */
-double inf_norm(unsigned int dim, const double *m) { // NOLINT
+double inf_norm(unsigned int dim, const double *m) {
     double r = 0;
     for (int j = 0; j < dim; j++) {
         r += fabs(m[j]);
@@ -164,28 +167,6 @@ unsigned long long binom(unsigned long long n, unsigned long long k) {
     for (unsigned int i = 1; i <= k; i++) {
         res = res * (n - k + i) / i;
     }
-    return res;
-}
-
-/**
- * @brief Compute the integer power of a double by squaring.
- * @param[in] base: non-negative integer greater or equal k.
- * @param[in] exp: non-negative integer smaller or equal n.
- * @return base ** exp.
- */
-double complex int_pow(double complex base, unsigned int exp) {
-    double complex res = 1.;
-    while (true) {
-        if (exp & 1) {
-            res *= base;
-        }
-        exp >>= 1;
-        if (!exp) {
-            break;
-        }
-        base *= base;
-    }
-
     return res;
 }
 

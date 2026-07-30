@@ -26,7 +26,7 @@
  *
  * @return number of failed tests.
  * */
-int test_setZetaDer_1D(void) {
+static int test_setZetaDer_1D(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/setZetaDer_1D_ref.csv", // NOLINT
@@ -145,7 +145,7 @@ int test_setZetaDer_1D(void) {
  *
  * @return number of failed tests.
  * */
-int test_setZetaDer_2D(void) {
+static int test_setZetaDer_2D(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/setZetaDer_2D_ref.csv", // NOLINT
@@ -265,7 +265,7 @@ int test_setZetaDer_2D(void) {
  *
  * @return number of failed tests.
  */
-int test_setZetaDer_taylor(void) { // NOLINT
+static int test_setZetaDer_taylor(void) { // NOLINT
     printf("%s ", __func__);
     double errorAbs;
     double errorRel;
@@ -394,7 +394,7 @@ int test_setZetaDer_taylor(void) { // NOLINT
  *
  * @return number of failed tests.
  * */
-int test_setZetaDer_odd(void) {
+static int test_setZetaDer_odd(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/setZetaDer_odd_ref.csv", // NOLINT
@@ -518,7 +518,7 @@ int test_setZetaDer_odd(void) {
  *
  * @return number of failed tests.
  */
-int test_setZetaDer_special_exponents(void) { // NOLINT
+static int test_setZetaDer_special_exponents(void) { // NOLINT
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path),
@@ -686,7 +686,7 @@ int test_setZetaDer_special_exponents(void) { // NOLINT
  *
  * @return number of failed tests.
  * */
-int test_setZetaDer_poly_laplace(void) { // NOLINT
+static int test_setZetaDer_poly_laplace(void) { // NOLINT
     printf("%s ", __func__);
 
     double nu;
@@ -820,6 +820,7 @@ int test_setZetaDer_poly_laplace(void) { // NOLINT
     free(a);
     free(x);
     free(y);
+    free(alpha0);
 
     printf("\n\t ... ");
     printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,

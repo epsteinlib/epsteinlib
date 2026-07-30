@@ -31,7 +31,7 @@
  *
  * @return  0 on successful execution.
  */
-int benchmark_epsteinZetaAniso_timing() { // NOLINT
+static int benchmark_epsteinZetaAniso_timing() { // NOLINT
 
     printf("\n========== Benchmarking %s ==========\n", __func__);
 

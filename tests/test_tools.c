@@ -27,7 +27,7 @@
  *
  * @return number of failed tests.
  */
-int test_matrix_transpose_inverse(void) { // NOLINT
+static int test_matrix_transpose_inverse(void) { // NOLINT
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/svd_ref.csv", BASE_PATH);

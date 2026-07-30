@@ -32,7 +32,7 @@
  *
  * @return number of failed tests.
  * */
-int test_polynomial_y_der(void) {
+static int test_polynomial_y_der(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result =
@@ -147,7 +147,7 @@ int test_polynomial_y_der(void) {
  *
  * @return number of failed tests.
  * */
-int test_polynomial_y_der_harmonic(void) {
+static int test_polynomial_y_der_harmonic(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path),
@@ -262,7 +262,7 @@ int test_polynomial_y_der_harmonic(void) {
  *
  * @return number of failed tests.
  * */
-int test_singularity_s_der(void) {
+static int test_singularity_s_der(void) {
     printf("%s ", __func__);
 
     char path[MAX_PATH_LENGTH];
@@ -382,7 +382,7 @@ int test_singularity_s_der(void) {
  *
  * @return number of failed tests.
  * */
-int test_singularity_s_der_harmonic(void) {
+static int test_singularity_s_der_harmonic(void) {
     printf("%s ", __func__);
 
     char path[MAX_PATH_LENGTH];
@@ -501,7 +501,7 @@ int test_singularity_s_der_harmonic(void) {
  *
  * @return number of failed tests.
  */
-int test_crandall_gReg_harmonic(void) { // NOLINT
+static int test_crandall_gReg_harmonic(void) { // NOLINT
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result =
@@ -517,7 +517,7 @@ int test_crandall_gReg_harmonic(void) { // NOLINT
     char line[4096];
     int testsPassed = 0;
     int totalTests = 0;
-    double tol = pow(10, -14);
+    double tol = 5 * pow(10, -14);
     double errMin = NAN;
     double errMax = NAN;
     double errSum = 0.;

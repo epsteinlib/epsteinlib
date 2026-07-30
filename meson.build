@@ -15,6 +15,8 @@ project('epsteinlib', 'c', 'cython',
   )
 
 add_project_arguments('-Wno-error=cpp', language: 'c')
+add_project_arguments('-Wmissing-prototypes', language: 'c',
+)
 if meson.get_compiler('c').get_id() == 'gcc'
   add_project_arguments('-Wno-error=maybe-uninitialized', language: 'c')
 endif

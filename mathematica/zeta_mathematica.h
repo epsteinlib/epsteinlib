@@ -54,7 +54,7 @@ int epstein_zeta_reg_mathematica_call(double *out, double nu, int dim,
  * @param[in] y: y vector of the Epstein zeta function.
  *  @return 0
  */
-int epstien_zeta_aniso_mathematica_call(double *out, double nu, int dim,
+int epstein_zeta_aniso_mathematica_call(double *out, double nu, int dim,
                                         const double *a, const double *x,
                                         const double *y, const unsigned int *alpha);
 

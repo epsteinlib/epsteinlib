@@ -69,7 +69,7 @@ double complex crandall_gReg_nuequalsdim(double s, double arg, double k,
  * (gamma(s / 2, pi * prefactor * z ** 2) + ((-1)^k / k! ) * (log(pi * y ** 2) -
  * log(prefactor ** 2))) if s is  equal to - 2k for non negative natural number k
  */
-double complex crandall_gReg(unsigned int dim, double nu, const double *z,
+double complex crandall_gReg(unsigned int dim, double s, const double *z,
                              double prefactor);
 
 /**
@@ -103,7 +103,7 @@ double crandall_gReg_harmonic(int k, int n, unsigned int dim, double s,
 double complex crandall_g_lower(unsigned int dim, double nu, const double *z,
                                 double prefactor);
 
-double polynomial_y_der(unsigned int k, unsigned int dim, const double *z, // NOLINT
+double polynomial_y_der(unsigned int k, unsigned int dim, const double *z,
                         const unsigned int *alpha, unsigned int alphaAbs,
                         unsigned int n);
 

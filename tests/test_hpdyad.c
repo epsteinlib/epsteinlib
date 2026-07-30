@@ -224,7 +224,7 @@ static int test_hpdyad_add_from_file(const char *filename) { // NOLINT
  *
  * @return number of failed tests.
  * */
-int test_ctzmsb(void) {
+static int test_ctzmsb(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/ctzmsb_ref.csv", BASE_PATH);
@@ -299,7 +299,7 @@ int test_ctzmsb(void) {
  *
  * @return number of failed tests.
  * */
-int test_hpdyad_set_ull(void) {
+static int test_hpdyad_set_ull(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result =
@@ -376,7 +376,7 @@ int test_hpdyad_set_ull(void) {
  *
  * @return number of failed tests.
  */
-int test_hpdyad_normalize(void) {
+static int test_hpdyad_normalize(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result =
@@ -484,7 +484,7 @@ int test_hpdyad_normalize(void) {
  *
  * @return number of failed tests.
  */
-int test_hpdyad_mul(void) {
+static int test_hpdyad_mul(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/hpdyad_mul_ref.csv", BASE_PATH);
@@ -574,7 +574,7 @@ int test_hpdyad_mul(void) {
  *
  * @return number of failed tests.
  */
-int test_hpdyad_shr_bits_sticky(void) {
+static int test_hpdyad_shr_bits_sticky(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result =
@@ -680,7 +680,7 @@ int test_hpdyad_shr_bits_sticky(void) {
  *
  * @return Number of failed tests
  */
-int test_hpdyad_add(void) {
+static int test_hpdyad_add(void) {
     printf("%s\n", __func__);
     return test_hpdyad_add_from_file("hpdyad_add_ref.csv");
 }
@@ -690,7 +690,7 @@ int test_hpdyad_add(void) {
  *
  * @return Number of failed tests
  */
-int test_hpdyad_add_fractional(void) {
+static int test_hpdyad_add_fractional(void) {
     printf("%s\n", __func__);
     return test_hpdyad_add_from_file("hpdyad_add_fractional_ref.csv");
 }
@@ -700,7 +700,7 @@ int test_hpdyad_add_fractional(void) {
  *
  * @return number of failed tests.
  */
-int test_hpdyad_to_double(void) { // NOLINT
+static int test_hpdyad_to_double(void) { // NOLINT
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result =

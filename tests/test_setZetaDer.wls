@@ -9,7 +9,7 @@
 (*Unit tests for epsteinZetaDer in epsteinZeta.c*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Setup*)
 
 
@@ -82,6 +82,7 @@ BMat[a_] = 1/Sqrt[a + 1]*DiagonalMatrix[{Sqrt[a], 1, 1}] . {{1, 1, 0}, {1, 0, 1}
 (*(Stable) analytic even derivatives in 1D.*)
 
 
+SetZetaDer[\[Nu]_,a_,x_,y_,\[Alpha]_]:=(-2Pi I)^Total[\[Alpha]] Exp[2 Pi I x . y]EpsteinZetaAniso[\[Nu],a,x,y,\[Alpha]]
 SetZetaDerAnalytic[\[Nu]_,{{a_}},{x_},{y_},{n_?EvenQ}]:=(-4 Pi^2)^Floor[n/2] SetZetaDer[\[Nu]-Floor[n],{{a}},{x},{y},{0}]
 
 
@@ -117,8 +118,14 @@ GUpperDer[\[Nu]_,y_,\[Alpha]_]:=Total[Flatten[Table[
 (*Derivatives of sums in real and reciprocal space.*)
 
 
-SumRealDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[Apply[Times,(-2Pi I z)^\[Alpha]]GUpper[\[Nu],z]Exp[-2Pi I y . z],{z,(A . #-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}]
-SumFourierDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[GUpperDer[Length[\[Alpha]]-\[Nu],k+y,\[Alpha]]Exp[-2Pi I x . k],{k,(Inverse[Transpose[A]] . #)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}]
+SumRealDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[
+	Apply[Times,(-2Pi I z)^\[Alpha]]GUpper[\[Nu],z]Exp[-2Pi I y . z]
+	,{z,(A . #-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}
+]
+SumFourierDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[
+	GUpperDer[Length[\[Alpha]]-\[Nu],k+y,\[Alpha]]Exp[-2Pi I x . k]
+	,{k,(Inverse[Transpose[A]] . #)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}
+]
 
 
 (* ::Text:: *)
@@ -214,9 +221,9 @@ setZetaDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modu
 				;If[\[Nu]N<-1&&Abs[\[Nu]N/2-Round[\[Nu]N/2]]<EPS
 					,0
 					,If[Abs[\[Nu]N]<EPS
-						,If[Norm[xN]>EPS
+						,If[Norm[Inverse[AN] . xN\[Minus]Round[Inverse[AN] . xN]]>EPS
 							,0
-							,sumReal=-I^n hHarmonic[k][xN,\[Alpha]]
+							,sumReal=-I^n hHarmonic[k][xN*0,\[Alpha]]
 							;resk=\[Pi]^(\[Nu]N/2)sumReal
 							;resk
 						]
@@ -334,7 +341,7 @@ setZetaDerHighExp[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modul
 ]
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create Epstein zeta 1D analytic reference values in x = 0*)
 
 
@@ -628,10 +635,10 @@ zetaSpecialNuEqualsDimMinus2k=Flatten[
 	ParallelTable[
 		Flatten@{d,N@nu,N@IdentityMatrix@d,N@PadRight[{xoffset},d],N[PadRight[{yoffset},d]],n UnitVector[d,1],{N@Re@#,N@Im@#}  &/@ {setZetaDerHarmonic[nu,IdentityMatrix@d,PadRight[{xoffset},d],PadRight[{yoffset},d],n UnitVector[d,1]]}}
 		,{d,{1,2}}
-		,{yoffset,{0,smallVal,2^-20,1/10}}
-		,{xoffset,{0,smallVal,2^-20,1/10}}
-		,{n,{2,4}}
 		,{nu,-10,2,1}
+		,{xoffset,{0,smallVal,2^-20,1/10,1}}
+		,{yoffset,{0,smallVal,2^-20,1/10}}
+		,{n,{2,4}}
 	]
 ,4];
 
