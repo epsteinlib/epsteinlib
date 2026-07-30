@@ -9,6 +9,24 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 # Changelog
 
+## [0.6] - unreleased
+
+### Changed
+- Moved tests from `src/tests/` to `tests/`
+
+### Added
+- Anisotropic Epstein zeta function `epsteinZetaAniso` including Python and Mathematica bindings with testing in `tests/test_setZetaDer` through the related derivatives of set zeta functions for shifted lattices included in `tests/wrappers.h` and `tests/test_setZetaDer.wls`; run `meson test -v -C build/ test_setZetaDer`
+- Regularized anisotropic Epstein zeta function `epsteinZetaAnisoReg` with testing in `tests/test_epsteinZetaRegDer` through the related derivatives of regularized Epstein zeta functions included in `tests/wrappers.h` and `tests/test_epsteinZetaRegDer`; run `meson test -v -C build/ test_epsteinZetaRegDer`
+- New files `src/hpdyad.c` and `src/hpdyad.h` implementing high precision dyadic number arithmetic with tests included in `tests/test_hpdyad.c` and `tests/test_hpdyad.wls`; run `meson test -v -C build/ test_hpdyad`
+- New files `tests/harmonics.c` and `tests/harmonics.h` for high precision computation of harmonic polynomials with tests included in `tests/test_harmonics.c` and `tests/test_harmonics.wls`; run `meson test -v -C build/ test_harmonics`
+- New files `tests/wrappers.c` and `tests/wrappers.h` for functions included in unit tests that do not appear in the core library
+- New file `tests/benchmark_aniso_timing.c`, which builds to an executable of the same name that benchmarks the evaluation times of the anisotropic Epstein zeta function
+- Standalone example notebook `examples/IMAFigures.wls` reproducing the results of the IMA Journal of Numerical Analysis manuscript which deprecates `examples/BenchmarkQuick.wls` and `examples/BenchmarkAndPaperFigures.wls`
+
+### Fixed
+- Removed spurious phase factor of the regularized Epstein zeta function at $\nu=0$ and $\boldsymbol{x}\in\Lambda$, now returns $-1$ instead of $-e^{-2\pi i\boldsymbol{x}\cdot\boldsymbol{y}}$
+- Mathematica bindings `EpsteinZeta` and `EpsteinZetaReg` no longer accept non-square `A`, which previously produced silently wrong results
+
 ## [0.5.1] - 2026-04-27
 
 ### Changed

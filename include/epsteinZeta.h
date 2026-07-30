@@ -1,5 +1,5 @@
-// SPDX-FileCopyrightText: 2024 Andreas Buchheit <buchheit@num.uni-sb.de>
 // SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
+// SPDX-FileCopyrightText: 2024 Andreas Buchheit <buchheit@num.uni-sb.de>
 // SPDX-FileCopyrightText: 2024 Ruben Gutendorf
 // <ruben.gutendorf@uni-saarland.de>
 //
@@ -8,7 +8,6 @@
 /**
  * @file epsteinZeta.h
  * @brief Calculates the (regularized) Epstein zeta function.
- *
  * Main header file to include when using epsteinZeta library.
  * @author Andreas Buchheit, Jonathan Busse and Ruben Gutendorf.
  * @see Crandall, R., Unified algorithms for polylogarithm, L-series, and zeta
@@ -26,10 +25,10 @@
  * @brief calculates the Epstein zeta function.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
- * @param[in] a: matrix that transforms the lattice in the Epstein Zeta function.
- * @param[in] x: x vector of the Epstein Zeta function.
- * @param[in] y: y vector of the Epstein Zeta function.
- * @return function value of the regularized Epstein zeta.
+ * @param[in] a: matrix that transforms the lattice.
+ * @param[in] x: shift vector.
+ * @param[in] y: wavevector.
+ * @return function value of the Epstein zeta function.
  */
 double complex epsteinZeta(double nu, unsigned int dim, const double *a,
                            const double *x, const double *y);
@@ -38,13 +37,41 @@ double complex epsteinZeta(double nu, unsigned int dim, const double *a,
  * @brief calculates the regularized Epstein zeta function.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
- * @param[in] a: matrix that transforms the lattice in the Epstein Zeta function.
- * @param[in] x: x vector of the Epstein Zeta function.
- * @param[in] y: y vector of the Epstein Zeta function.
- * @return function value of the regularized Epstein zeta.
+ * @param[in] a: matrix that transforms the lattice.
+ * @param[in] x: shift vector.
+ * @param[in] y: wavevector.
+ * @return function value of the regularized Epstein zeta function.
  */
 double complex epsteinZetaReg(double nu, unsigned int dim, const double *a,
                               const double *x, const double *y);
+
+/**
+ * @brief calculates the anisotropic Epstein zeta function.
+ * @param[in] nu: exponent for the Epstein zeta function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] a: matrix that transforms the lattice.
+ * @param[in] x: shift vector.
+ * @param[in] y: wavevector.
+ * @param[in] alpha: multiindex for the anisotropy.
+ * @return function value of the anisotropic Epstein zeta function.
+ */
+double complex epsteinZetaAniso(double nu, unsigned int dim, const double *a,
+                                const double *x, const double *y,
+                                const unsigned int *alpha);
+
+/**
+ * @brief calculates the regularized anisotropic Epstein zeta function.
+ * @param[in] nu: exponent for the Epstein zeta function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] a: matrix that transforms the lattice.
+ * @param[in] x: shift vector.
+ * @param[in] y: wavevector.
+ * @param[in] alpha: multiindex for the anisotropy.
+ * @return function value of the regularized anisotropic Epstein zeta function.
+ */
+double complex epsteinZetaAnisoReg(double nu, unsigned int dim, const double *a,
+                                   const double *x, const double *y,
+                                   const unsigned int *alpha);
 
 #ifndef EPSTEIN_CRANDALL
 

@@ -7,13 +7,105 @@
 
 /**
  * @file tools.h
- * @brief  Minimal linear algebra for matrix vector operations.
+ * @brief  Minimal linear algebra for matrix vector and multi-index operations.
  */
 
 #ifndef EPSTEIN_TOOLS
 #define EPSTEIN_TOOLS
 #include <complex.h>
 #include <stdbool.h>
+
+/**
+ * @brief Compute the integer power of a double by squaring.
+ * Uses switch for small exponents to avoid loop overhead.
+ * @param[in] base: the base value.
+ * @param[in] exp: non-negative integer exponent.
+ * @return base ** exp.
+ */
+static inline double real_int_pow(double base, unsigned int exp) {
+    double b2;
+    switch (exp) {
+    case 0:
+        return 1.0;
+    case 1:
+        return base;
+    case 2:
+        return base * base;
+    case 3:
+        return base * base * base;
+    case 4:
+        b2 = base * base;
+        return b2 * b2;
+    case 5:
+        b2 = base * base;
+        return b2 * b2 * base;
+    case 6:
+        b2 = base * base;
+        return b2 * b2 * b2;
+    case 7:
+        b2 = base * base;
+        return b2 * b2 * b2 * base;
+    case 8:
+        b2 = base * base;
+        b2 = b2 * b2;
+        return b2 * b2;
+    default:
+        break;
+    }
+    double res = 1.0;
+    while (1) {
+        if (exp & 1) {
+            res *= base;
+        }
+        exp >>= 1;
+        if (!exp) {
+            break;
+        }
+        base *= base;
+    }
+    return res;
+}
+
+/**
+ * @brief Compute integer powers of the imaginary unit I.
+ * Uses the fact that I^4 = 1, so only exp % 4 matters.
+ * @param[in] exp: non-negative integer exponent.
+ * @return I ** exp.
+ */
+static inline double complex imaginary_int_pow(unsigned int exp) {
+    static const double complex powers[4] = {1.0, I, -1.0, -I};
+    return powers[exp & 3];
+}
+
+/**
+ * @brief Compute integer powers of -1.
+ * Uses the fact that (-1)^exp alternates between 1 and -1.
+ * @param[in] exp: non-negative integer exponent.
+ * @return (-1) ** exp.
+ */
+static inline double negative_one_pow(unsigned int exp) {
+    if (exp & 1) {
+        return -1.;
+    }
+    return 1.;
+}
+
+/**
+ * @brief Compute absolute value of multi-index, that is the sum of its components.
+ * @param[in] dim: dimension of alpha end vec.
+ * @param[in] alpha: multi-index.
+ * @return absolute values of alpha.
+ * @return absolute values of alpha.
+ */
+unsigned int mult_abs(unsigned int dim, const unsigned int *alpha);
+
+/**
+ * @brief Compute the binomial coefficient bionm(n,k).
+ * @param[in] n: non-negative integer greater or equal k.
+ * @param[in] k: non-negative integer smaller or equal n.
+ * @return binom(n)(k).
+ */
+unsigned long long binom(unsigned long long n, unsigned long long k);
 
 /**
  * @brief Kahan compensated summation step for complex sums.
@@ -25,6 +117,20 @@ static inline void kahan_add_c(double complex *restrict sum,
                                double complex *restrict epsilon, double complex x) {
     double complex y = x - *epsilon;
     double complex t = *sum + y;
+    *epsilon = (t - *sum) - y;
+    *sum = t;
+}
+
+/**
+ * @brief Kahan compensated summation step for real sums.
+ * @param[in,out] sum: running compensated sum.
+ * @param[in,out] epsilon: running compensation term.
+ * @param[in] x: summand to add.
+ */
+static inline void kahan_add_r(double *restrict sum, double *restrict epsilon,
+                               double x) {
+    double y = x - *epsilon;
+    double t = *sum + y;
     *epsilon = (t - *sum) - y;
     *sum = t;
 }

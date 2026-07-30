@@ -7,20 +7,22 @@
 
 /**
  * @file tools.c
- * @brief  Minimal linear algebra for matrix vector operations.
+ * @brief  Minimal linear algebra for matrix vector operations, binomials and
+ * factorials.
  */
 
+#include "tools.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
 /*!
- * @brief minimal distance of two vector elements considered unequal.
+ * @brief Minimal distance of two vector elements considered unequal.
  */
 #define EPS ldexp(1, -32)
 
 /**
- * @brief square matrix transpose.
+ * @brief Square matrix transpose.
  * @param[in] dim: dimension of the square matrix.
  * @param[in,out] m: square matrix.
  */
@@ -36,7 +38,7 @@ void transpose(unsigned int dim, double *m) {
 }
 
 /**
- * @brief check if two vectors are equal.
+ * @brief Check if two vectors are equal.
  * @param[in] dim: dimension of the vectors.
  * @param[in] v1: first vector.
  * @param[in] v2: second vector.
@@ -52,12 +54,15 @@ bool equals(unsigned int dim, const double *v1, const double *v2) {
 
 /**
  * @brief Invert matrix.
+ * @pre dim > 0
  * @param[in] dim: dimension of the vectors.
  * @param[in, out] m: matrix to invert. overwritten bei LU-decomposition.
  * @param[out] p: permutation vector.
  * @param[out] r: where inverse matrix is stored.
  */
-void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
+// fast inversion where lots of parameters are reused
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+void invert(unsigned int dim, double *m, int *p, double *r) {
     // initialize p
     for (int i = 0; i < dim; i++) {
         p[i] = i;
@@ -90,7 +95,9 @@ void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
         }
     }
     // Compute inverse
-    double y[dim]; // NOLINT user has to provide dim > 0
+    // the analyzer does not know that dim > 0
+    // NOLINTNEXTLINE(clang-analyzer-core.VLASize)
+    double y[dim];
     for (int i = 0; i < dim; i++) {
         // Solve Ly = P e_i
         for (int k = 0; k < dim; k++) {
@@ -98,10 +105,9 @@ void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
             for (int j = 0; j < k; j++) {
                 y[k] -= m[(k * dim) + j] * y[j];
             }
-        }
-        // Solve Rx=y
+        } // Solve Rx=y
         for (int j = (int)dim - 1; j >= 0; j--) {
-            r[j * dim + i] = y[j]; // NOLINT every entry of p[i] < dim
+            r[(j * dim) + i] = y[j]; // every entry of p[i] < dim
             for (int k = j + 1; k < (int)dim; k++) {
                 r[(j * dim) + i] -= m[(j * dim) + k] * r[(k * dim) + i];
             }
@@ -115,7 +121,7 @@ void invert(unsigned int dim, double *m, int *p, double *r) { // NOLINT
  * @param[in] dim: dimension of the vectors.
  * @param[in] m: matrix to compute infinity norm of.
  */
-double inf_norm(unsigned int dim, const double *m) { // NOLINT
+double inf_norm(unsigned int dim, const double *m) {
     double r = 0;
     for (int j = 0; j < dim; j++) {
         r += fabs(m[j]);
@@ -130,6 +136,39 @@ double inf_norm(unsigned int dim, const double *m) { // NOLINT
         }
     }
     return r;
+}
+
+/**
+ * @brief Compute absolute value of multi-index, that is the sum of its components.
+ * @param[in] dim: dimension of alpha end vec.
+ * @param[in] alpha: multi-index.
+ * @return absolute values of alpha.
+ * @return absolute values of alpha.
+ */
+unsigned int mult_abs(unsigned int dim, const unsigned int *alpha) {
+    unsigned int n = 0;
+    for (int i = 0; i < dim; i++) {
+        n += alpha[i];
+    }
+    return n;
+}
+
+/**
+ * @brief Compute the binomial coefficient bionm(n,k).
+ * @param[in] n: non-negative integer greater or equal k.
+ * @param[in] k: non-negative integer smaller or equal n.
+ * @return binom(n)(k).
+ */
+unsigned long long binom(unsigned long long n, unsigned long long k) {
+    // Calculate binom(n)(n-k) if n - k is smaller than k
+    if (k > n - k) {
+        k = n - k;
+    }
+    unsigned long long res = 1;
+    for (unsigned int i = 1; i <= k; i++) {
+        res = res * (n - k + i) / i;
+    }
+    return res;
 }
 
 /**
@@ -174,5 +213,4 @@ double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
     }
     return vt;
 }
-
 #undef EPS

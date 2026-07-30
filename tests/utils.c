@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+#include "utils.h"
 #include <complex.h>
 #include <math.h>
 #include <stdio.h>
@@ -49,7 +50,7 @@ double errRel(double complex ref, double complex comp) {
  * @param[in] vec: vector.
  * @param[in] dim: size of the vector.
  */
-void printVectorUnitTest(const char *name, double *vec, unsigned int dim) {
+void printVectorUnitTest(const char *name, const double *vec, unsigned int dim) {
     printf("%s[", name);
     for (int i = 0; i < dim; ++i) {
         printf("%.16lf", vec[i]);
@@ -66,7 +67,8 @@ void printVectorUnitTest(const char *name, double *vec, unsigned int dim) {
  * @param[in] vec: vector.
  * @param[in] dim: size of the vector.
  */
-void printMultiindexUnitTest(const char *name, unsigned int *vec, unsigned int dim) {
+void printMultiindexUnitTest(const char *name, const unsigned int *vec,
+                             unsigned int dim) {
     printf("%s[", name);
     for (int i = 0; i < dim; ++i) {
         printf("%u", vec[i]);
@@ -101,6 +103,39 @@ void printMatrixUnitTest(const char *name, const double *mat, unsigned int dim) 
         }
         printf("]\n");
     }
+}
+
+/**
+ * @brief Compute the factorial of a multi-index.
+ * @param[in] alpha: multi-index.
+ * @return factorial of alpha.
+ */
+unsigned int mult_fac(unsigned int dim, const unsigned int *alpha) {
+    unsigned int res = 1;
+    for (int i = 0; i < dim; i++) {
+        for (int j = 0; j < alpha[i]; j++) {
+            res *= j + 1;
+        }
+    }
+    return res;
+}
+
+/**
+ * @brief Compute a vector to the power of a multi-index.
+ * @param[in] dim: dimension of alpha end vec.
+ * @param[in] alpha: multi-index.
+ * @param[in] vec: base vector.
+ * @param[in] prefactor: prefactor of the vector.
+ * @return (prefactor * vec) ** alpha.
+ */
+double mult_pow(unsigned int dim, const unsigned int *alpha, const double *vec) {
+    double res = 1;
+    for (int i = 0; i < dim; i++) {
+        for (int j = 0; j < alpha[i]; j++) {
+            res *= vec[i];
+        }
+    }
+    return res;
 }
 
 /** @brief Runs a test function and prints its runtime.

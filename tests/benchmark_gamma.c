@@ -35,7 +35,8 @@
  * @param filename Name of the output CSV file (without extension).
  * @return  0 on successful execution.
  */
-int benchmark_gamma(double xinc, double nuinc, double xbound, const char *filename) {
+static int benchmark_gamma(double xinc, double nuinc, double xbound,
+                           const char *filename) {
     char gammaString[MAX_PATH_LENGTH];
 
     if (snprintf(gammaString, MAX_PATH_LENGTH, "%s/%s.csv", BASE_PATH, filename) >=
@@ -83,12 +84,12 @@ int benchmark_gamma(double xinc, double nuinc, double xbound, const char *filena
  *
  * @return  0 on successful execution.
  */
-int gamma_big() {
+static int gamma_big() {
     double xinc = ldexp(1, -4);
     double nuinc = ldexp(1, -4);
     double xbound = 20.1;
     // Using larger stepsize to reduce evaluation time and file size
-    // For parameters from "Computation and Properties of the Epstein Zeta Function",
+    // For parameters from "Computation and properties of the Epstein zeta Function",
     // delete these lines
     xinc *= 5.;
     nuinc *= 5.;
@@ -101,13 +102,13 @@ int gamma_big() {
  *
  * @return  0 on successful execution.
  */
-int gamma_small() {
-    // Parameters from "Computation and Properties of the Epstein Zeta Function"
+static int gamma_small() {
+    // Parameters from "Computation and properties of the Epstein zeta Function"
     double xinc = ldexp(1, -7);
     double nuinc = ldexp(1, -4);
     double xbound = 2.01;
     // Using larger stepsize to reduce evaluation time and file size
-    // For parameters from "Computation and Properties of the Epstein Zeta Function",
+    // For parameters from "Computation and properties of the Epstein zeta Function",
     // delete these lines
     xinc *= 5.;
     nuinc *= 5.;
