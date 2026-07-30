@@ -372,8 +372,8 @@ Executing this code snipped in the same folder as `EpsteinZeta.wl` and setting `
 
 In the `examples/mathematica/` folder, you can find two more mathematica examples:
 
-1. `BenchmarkQuick.wls`: Standalone script that compares the (regularized) Epstein zeta function to known formulas in special cases.
-2. `BenchmarkAndPaperFigures.wls`: Script  that reproduces every figure in [8].
+1. `SingularEulerMcLaurinExpansion2D.wls`: Script that showcases the Singular Euler-Maclaurin (SEM) expansion [5] for the Gaussian in two dimensions.
+2. `IMAFigures.wls`: Script  that reproduces every figure in [8].
 
 ## Development environment
 We provide a nix devshell to have a reproducible development environment with the same dependencies across different operating systems. Once you have installed and configured nix, starting developing is as easy as running `nix develop`.
