@@ -798,7 +798,8 @@ static double complex summation_harmonic_reg(
                       cexp(-2 * M_PI * I * dot(dim, x_t1, y_t1));
             }
 
-            s2 = negative_one_pow(k) * (rot * s2 + nc) / imaginary_int_pow(alphaAbs);
+            s2 = negative_one_pow(k) * inverse_imaginary_int_pow(alphaAbs) *
+                 (rot * s2 + nc);
 
             if (largeExp) {
                 s1 = sum_real_harmonic_large_exp(nuIt, k, dim, m_real, x_t2, y_t2,
@@ -929,7 +930,8 @@ summation_harmonic(double nu, unsigned int dim, unsigned int alphaAbs,
             s2 = sum_fourier_harmonic(nuReci, k, dim, m_fourier, x_t1, y_t2,
                                       cutoffsFourier, zArgBoundReci, diag, alphaAbs,
                                       chunk_offset, valid_count, coeffs, exponents);
-            s2 = negative_one_pow(k) * (s2 + nc) / imaginary_int_pow(alphaAbs);
+            s2 = negative_one_pow(k) * inverse_imaginary_int_pow(alphaAbs) *
+                 (s2 + nc);
 
             if (largeExp) {
                 s1 = sum_real_harmonic_large_exp(nuIt, k, dim, m_real, x_t2, y_t2,
@@ -1137,8 +1139,8 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
             res -= pow(M_PI, (double)k + ((double)dim / 2)) /
                    tgamma((double)k + ((double)dim / 2)) * negative_one_pow(k + 1) *
                    polynomial_y_der(k, dim, y, alpha, alphaAbs, k) * log(ms * ms) /
-                   vol /
-                   (imaginary_int_pow(alphaAbs) * real_int_pow(-2 * M_PI, alphaAbs));
+                   vol * inverse_imaginary_int_pow(alphaAbs) /
+                   real_int_pow(-2 * M_PI, alphaAbs);
         } else {
             if (k) {
                 double ySquared = 0;

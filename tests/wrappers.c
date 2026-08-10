@@ -15,6 +15,7 @@
 #include "../src/tools.h"
 #include "complex.h"
 #include "epsteinZeta.h"
+#include "utils.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>

@@ -67,13 +67,13 @@ static inline double real_int_pow(double base, unsigned int exp) {
 }
 
 /**
- * @brief Compute integer powers of the imaginary unit I.
- * Uses the fact that I^4 = 1, so only exp % 4 matters.
+ * @brief Compute integer powers of the inverse imaginary unit, I^(-exp).
+ * Uses I^4 = 1, so only exp % 4 matters.
  * @param[in] exp: non-negative integer exponent.
- * @return I ** exp.
+ * @return I ** (-exp).
  */
-static inline double complex imaginary_int_pow(unsigned int exp) {
-    static const double complex powers[4] = {1.0, I, -1.0, -I};
+static inline double complex inverse_imaginary_int_pow(unsigned int exp) {
+    static const double complex powers[4] = {1.0, -I, -1.0, I};
     return powers[exp & 3];
 }
 
