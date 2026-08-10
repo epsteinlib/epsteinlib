@@ -9,7 +9,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 # Changelog
 
-## [0.6] - unreleased
+## [0.6.0] - 2026-08-10
 
 ### Changed
 - Moved tests from `src/tests/` to `tests/`
