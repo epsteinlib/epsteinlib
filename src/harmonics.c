@@ -184,7 +184,6 @@ double harmonic_h_inner_sum(unsigned int k, unsigned int dim,
     }
 
     bool redotheta1 = false;
-    bool redotheta2 = false;
     unsigned int betaAbs = 0;
 
     unsigned long long totalCount = 1;
@@ -226,12 +225,10 @@ double harmonic_h_inner_sum(unsigned int k, unsigned int dim,
             }
             redotheta1 = false;
 
-            if (redotheta2) {
-                for (unsigned int j = 0; j < dim; j++) {
-                    theta2[j] = gamma[j] - beta[j];
-                }
+            // unconditionally update theta2
+            for (unsigned int j = 0; j < dim; j++) {
+                theta2[j] = gamma[j] - beta[j];
             }
-            redotheta2 = false;
 
             hpdyad_t term;
             harmonic_h_inner_term_multi_hpdyad(dim, alpha, beta, theta1, theta2,
@@ -244,7 +241,6 @@ double harmonic_h_inner_sum(unsigned int k, unsigned int dim,
                 beta[idx]++;
                 theta1[idx]++;
                 betaAbs++;
-                redotheta2 = true;
                 break;
             }
             betaAbs -= beta[idx];
