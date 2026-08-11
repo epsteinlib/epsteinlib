@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
+# SPDX-FileCopyrightText: 2026 Jonathan Busse <jonathan@jbusse.de>
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
@@ -36,7 +36,7 @@ for obj in "$lib".p/*.o; do
 done
 
 if [ "$found" -ne 0 ]; then
-    echo "ERROR: complex-by-complex division or multiplication will not link on darwin."
+    echo "ERROR: complex-by-complex division will not link on darwin."
     exit 1
 fi
 
