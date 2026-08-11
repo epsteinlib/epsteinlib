@@ -1,17 +1,30 @@
 # SPDX-FileCopyrightText: 2024 Jan Schmitz <schmitz@num.uni-sb.de>
 #
 # SPDX-License-Identifier: CC0-1.0
-
 name: "Nix tests"
 on:
   pull_request:
   push:
 jobs:
   nix-tests:
+    name: nix-tests (${{ matrix.os }})
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            asan: true
+          - os: macos-15
+            asan: true
+          # ASan is broken on macOS 26 due to an upstream LLVM/compiler-rt bug:
+          # https://github.com/llvm/llvm-project/issues/200447
+          # This entry keeps coverage of the current macOS without sanitizer
+          # instrumentation. Once the bug is fixed and released, set asan: true
+          # here and drop the macos-15 entry.
+          - os: macos-latest
+            asan: false
     runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v30
