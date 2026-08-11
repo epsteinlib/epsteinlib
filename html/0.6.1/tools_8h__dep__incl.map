@@ -1,0 +1,11 @@
+<map id="src/tools.h" name="src/tools.h">
+<area shape="rect" id="Node000001" title="Minimal linear algebra for matrix vector and multi&#45;index operations." alt="" coords="219,5,307,33"/>
+<area shape="rect" id="Node000002" href="$crandall_8c.html" title="Calculates the summand function G and related functions in Crandall&#39;s formula." alt="" coords="5,81,113,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="213,41,96,83,95,78,211,36"/>
+<area shape="rect" id="Node000003" href="$harmonics_8c.html" title="Calculates the harmonic polynomials." alt="" coords="137,81,261,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="244,47,212,82,208,79,240,43"/>
+<area shape="rect" id="Node000004" href="$tools_8c.html" title="Minimal linear algebra for matrix vector operations, binomials and factorials." alt="" coords="285,81,372,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="287,43,319,79,315,82,283,46"/>
+<area shape="rect" id="Node000005" href="$zeta_8c.html" title="Calculates the (regularized) Epstein zeta function and the (regularized) anisotropic Epstein zeta fun..." alt="" coords="396,81,479,109"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="309,37,408,78,406,83,307,42"/>
+</map>

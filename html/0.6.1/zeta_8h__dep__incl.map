@@ -1,0 +1,7 @@
+<map id="src/zeta.h" name="src/zeta.h">
+<area shape="rect" id="Node000001" title="Calculates the (regularized) Epstein zeta function and the (regularized) anisotropic Epstein zeta fun..." alt="" coords="95,5,180,33"/>
+<area shape="rect" id="Node000002" href="$epsteinZeta_8c.html" title="Calculates the (regularized) Epstein zeta function and the (regularized) anisotropic Epstein zeta fun..." alt="" coords="5,81,139,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="118,46,86,82,82,79,114,43"/>
+<area shape="rect" id="Node000003" href="$zeta_8c.html" title="Calculates the (regularized) Epstein zeta function and the (regularized) anisotropic Epstein zeta fun..." alt="" coords="162,81,246,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="161,43,194,79,190,82,157,46"/>
+</map>

@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['egf_5fgammastar_0',['egf_gammaStar',['../gamma_8c.html#abdb1443cc7d1d666ea903cbd41d4dc59',1,'egf_gammaStar(double a, double x):&#160;gamma.c'],['../gamma_8h.html#abdb1443cc7d1d666ea903cbd41d4dc59',1,'egf_gammaStar(double a, double x):&#160;gamma.c']]],
+  ['egf_5fugamma_1',['egf_ugamma',['../gamma_8c.html#ac519d4e144fc3904c8ef9b8291415f5c',1,'egf_ugamma(double a, double x):&#160;gamma.c'],['../gamma_8h.html#ac519d4e144fc3904c8ef9b8291415f5c',1,'egf_ugamma(double a, double x):&#160;gamma.c']]],
+  ['epstein_5fzeta_2',['epstein_zeta',['../namespace__epsteinlib.html#ad18bdfa80dfc37705faf54fedabca85e',1,'_epsteinlib']]],
+  ['epstein_5fzeta_5f00_5fmhalfmhalf_5fid_3',['epstein_zeta_00_mhalfmhalf_id',['../namespacebenchmark__functions.html#a8b64e4677bafa7d38cbb26275f35252f',1,'benchmark_functions']]],
+  ['epstein_5fzeta_5faniso_4',['epstein_zeta_aniso',['../namespace__epsteinlib.html#a660a0ec931bb856e6071986f4f0d0e05',1,'_epsteinlib']]],
+  ['epstein_5fzeta_5faniso_5fc_5fcall_5',['epstein_zeta_aniso_c_call',['../namespace__epsteinlib.html#a44de7646615d6d21d7efab6b6aa0ab54',1,'_epsteinlib']]],
+  ['epstein_5fzeta_5faniso_5freg_6',['epstein_zeta_aniso_reg',['../namespace__epsteinlib.html#ae67ae80960aeae1a0c947e33d2d19c3d',1,'_epsteinlib']]],
+  ['epstein_5fzeta_5faniso_5freg_5fc_5fcall_7',['epstein_zeta_aniso_reg_c_call',['../namespace__epsteinlib.html#af9478212af6d3f6ee72c5d423e5d15ea',1,'_epsteinlib']]],
+  ['epstein_5fzeta_5fc_5fcall_8',['epstein_zeta_c_call',['../namespace__epsteinlib.html#a5917c7018eab0058f9c59b6d3396b8a0',1,'_epsteinlib']]],
+  ['epstein_5fzeta_5fdiag2sqrt242_5f0m1m1_5f4sqrt2th00_9',['epstein_zeta_diag2sqrt242_0m1m1_4sqrt2th00',['../namespacebenchmark__functions.html#ab13e35a7524f644a386e39657451eda6',1,'benchmark_functions']]],
+  ['epstein_5fzeta_5fdispersion_10',['epstein_zeta_dispersion',['../namespacedispersion__relation__3d.html#a5429db27878a22ef20609cb48d932911',1,'dispersion_relation_3d']]],
+  ['epstein_5fzeta_5fdispersion_5ftab3d_11',['epstein_zeta_dispersion_tab3d',['../namespacedispersion__relation__3d.html#a836aa735b0b5c6fe941a450146a45e79',1,'dispersion_relation_3d']]],
+  ['epstein_5fzeta_5fhalf000_5f0000_5fid_12',['epstein_zeta_half000_0000_id',['../namespacebenchmark__functions.html#a5dcb427a86b5c885f5e7c86854f89887',1,'benchmark_functions']]],
+  ['epstein_5fzeta_5fm1m1_5fhalf0_5fid_13',['epstein_zeta_m1m1_half0_id',['../namespacebenchmark__functions.html#a3b0aa900c88d80abfc094c30a7d35d68',1,'benchmark_functions']]],
+  ['epstein_5fzeta_5fm1m1_5fhalfhalf_5fid_14',['epstein_zeta_m1m1_halfhalf_id',['../namespacebenchmark__functions.html#a5e89370f3dc09fb830372116884af22b',1,'benchmark_functions']]],
+  ['epstein_5fzeta_5fonehalf0sqrt3half_5f00_5f00_15',['epstein_zeta_onehalf0sqrt3half_00_00',['../classtest__epsteinlib_1_1TestEpsteinZeta.html#ac24a283d59bee777d534ec187f003a9d',1,'test_epsteinlib.TestEpsteinZeta.epstein_zeta_onehalf0sqrt3half_00_00()'],['../namespacebenchmark__functions.html#a0b3a1d97a9cad3b26febad527b86489a',1,'benchmark_functions.epstein_zeta_onehalf0sqrt3half_00_00()']]],
+  ['epstein_5fzeta_5freg_16',['epstein_zeta_reg',['../namespace__epsteinlib.html#aef30f576d6940e8621abd59578203232',1,'_epsteinlib']]],
+  ['epstein_5fzeta_5freg_5fc_5fcall_17',['epstein_zeta_reg_c_call',['../namespace__epsteinlib.html#a8498bd42fa7bb3e2f6a310ae3730cee5',1,'_epsteinlib']]],
+  ['epsteinzeta_18',['epsteinZeta',['../epsteinZeta_8c.html#aff1fe7852bf36a72e0da86f19912e870',1,'epsteinZeta.c']]],
+  ['epsteinzetaaniso_19',['epsteinZetaAniso',['../epsteinZeta_8c.html#a39c8b50d4ed4dde87a79dd36cc74f71f',1,'epsteinZeta.c']]],
+  ['epsteinzetaanisoreg_20',['epsteinZetaAnisoReg',['../epsteinZeta_8c.html#a86460e650fa24ab13f251d9fb91f1362',1,'epsteinZeta.c']]],
+  ['epsteinzetainternal_21',['epsteinZetaInternal',['../zeta_8c.html#abaa518202f5af93daa592a1d7e2bc532',1,'epsteinZetaInternal(double nu, unsigned int dim, const double *m, const double *x, const double *y, double lambda, bool reg, bool aniso, const unsigned int *alpha):&#160;zeta.c'],['../zeta_8h.html#abaa518202f5af93daa592a1d7e2bc532',1,'epsteinZetaInternal(double nu, unsigned int dim, const double *m, const double *x, const double *y, double lambda, bool reg, bool aniso, const unsigned int *alpha):&#160;zeta.c']]],
+  ['epsteinzetareg_22',['epsteinZetaReg',['../epsteinZeta_8c.html#aefe3a4ced16ddbd4a7b1727df9e999b2',1,'epsteinZeta.c']]],
+  ['equals_23',['equals',['../tools_8c.html#a90f043e9d6274d24cdc93ea39e4729d4',1,'equals(unsigned int dim, const double *v1, const double *v2):&#160;tools.c'],['../tools_8h.html#a90f043e9d6274d24cdc93ea39e4729d4',1,'equals(unsigned int dim, const double *v1, const double *v2):&#160;tools.c']]]
+];
