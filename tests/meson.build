@@ -111,8 +111,8 @@ test_timeout = get_option('debug') ? 600 : 30
 # for aarch64-apple-darwin, as done by Yggdrasil for the Julia bindings
 nm_prog = find_program('nm', required : false)
 if nm_prog.found()
-    test('no_compiler_rt_symbols',
-        find_program('check_symbols.sh'),
+    test('test_no_compiler_rt_symbols',
+        find_program('test_no_compiler_rt_symbols.sh'),
         args : [epsteinlib.full_path()],
         depends : epsteinlib,
         timeout : test_timeout
