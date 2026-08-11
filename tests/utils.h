@@ -10,6 +10,17 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+/**
+ * @brief Compute integer powers of the imaginary unit I.
+ * Uses the fact that I^4 = 1, so only exp % 4 matters.
+ * @param[in] exp: non-negative integer exponent.
+ * @return I ** exp.
+ */
+static inline double complex imaginary_int_pow(unsigned int exp) {
+    static const double complex powers[4] = {1.0, I, -1.0, -I};
+    return powers[exp & 3];
+}
+
 /*!
  * @brief absolute difference between to complex numbers.
  * @param[in] ref: reference value.

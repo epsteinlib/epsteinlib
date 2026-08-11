@@ -11,18 +11,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        # TODO: macos-latest is pinned to macos-15 internally below (see `runner`).
-        # ASan is currently broken on macOS 26 due to an upstream LLVM/compiler-rt bug:
-        # https://github.com/llvm/llvm-project/issues/200447
-        # Once that's fixed and released, remove the `include` block and set
-        # `runs-on: ${{ matrix.os }}` directly again.
         include:
           - os: ubuntu-latest
-            runner: ubuntu-latest
+            asan: true
+          - os: macos-15
+            asan: true
+          # ASan is broken on macOS 26 due to an upstream LLVM/compiler-rt bug:
+          # https://github.com/llvm/llvm-project/issues/200447
+          # This entry keeps coverage of the current macOS without sanitizer
+          # instrumentation. Once the bug is fixed and released, set asan: true
+          # here and drop the macos-15 entry.
           - os: macos-latest
-            runner: macos-15
-    runs-on: ${{ matrix.runner }}
+            asan: false
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v30
@@ -39,6 +40,7 @@ jobs:
       - run: nix run
       - run: nix build .#epsteinlib_dbg
       - run: nix run .#epsteinlib_dbg
+        if: matrix.asan
       - run: nix flake check
       - run: nix develop -c tests
       - run: nix develop -c docs

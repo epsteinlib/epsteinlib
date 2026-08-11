@@ -9,6 +9,14 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 # Changelog
 
+## [0.6.1] - 2026-08-11
+
+### Fixed
+- Avoid complex-by-complex division to ensure portability to `aarch64-apple-darwin` compiled by Yggdrasil toolchain for the Julia wrapper.
+
+### Added
+- New file `tests/test_no_compiler_rt_symbols.sh` that checks if the library references compiler runtime helpers that are unavailable when cross-compiling for macOS; run `meson test -v -C build/ test_no_compiler_rt_symbols`.
+
 ## [0.6.0] - 2026-08-10
 
 ### Changed
