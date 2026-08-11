@@ -24,7 +24,6 @@ jobs:
           - os: macos-latest
             asan: false
     runs-on: ${{ matrix.os }}
-    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v30
@@ -41,6 +40,7 @@ jobs:
       - run: nix run
       - run: nix build .#epsteinlib_dbg
       - run: nix run .#epsteinlib_dbg
+        if: matrix.asan
       - run: nix flake check
       - run: nix develop -c tests
       - run: nix develop -c docs
