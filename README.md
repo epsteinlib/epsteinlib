@@ -80,7 +80,7 @@ $$
 Z_{\Lambda,\nu}^{\mathrm{reg}}(\boldsymbol x,\boldsymbol y) =
 e^{2\pi i \boldsymbol x\cdot\boldsymbol y}
 Z_{\Lambda,\nu}(\boldsymbol x,\boldsymbol y )
--\frac{\hat{s}(\boldsymbol y)}{V_{\Lambda}},
+-\frac{\hat{s}_{\nu}(\boldsymbol y)}{V_{\Lambda}},
 $$
 
 where $V_{\Lambda}=|\det A|$ is the volume of the elementary lattice cell, and
@@ -140,7 +140,7 @@ $$
 with $\boldsymbol z^{\boldsymbol\alpha}=z_1^{\alpha_1}z_2^{\alpha_2}\ldots z_d^{\alpha_d}$. For a $d$-dimensional lattice $\Lambda$ and $\boldsymbol x,\boldsymbol y \in \mathbb R^d$, the anisotropic Epstein zeta function is then define as
 
 $$
-Z_{\Lambda,\nu}(\boldsymbol x,\boldsymbol y)
+Z_{\Lambda,\nu,\boldsymbol\alpha}(\boldsymbol x,\boldsymbol y)
 = \sum_{z \in \Lambda}{}^{'} e^{-2\pi i \boldsymbol y \cdot \boldsymbol z}V_{\nu,\boldsymbol \alpha}(\boldsymbol z-\boldsymbol x),\quad \mathrm{Re}(\nu)>d
 +|\boldsymbol \alpha|,
 $$
