@@ -11,7 +11,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 <img align="right" src="https://avatars.githubusercontent.com/u/177750891?v=4" width="110">
 
 [![DOI](https://img.shields.io/badge/DOI-10.1093%2Fimanum%2Fdrag057-blue.svg)](https://doi.org/10.1093/imanum/drag057)
-[![PyPI package](https://badge.fury.io/py/epsteinlib.svg)](https://badge.fury.io/py/epsteinlib)
+[![PyPI](https://img.shields.io/pypi/v/epsteinlib)](https://pypi.org/project/epsteinlib/)
 <!-- [![Pipeline status](https://img.shields.io/github/check-runs/epsteinlib/epsteinlib/main)](https://github.com/epsteinlib/epsteinlib/actions/runs/15211465520) -->
 <!-- TODO: We want to point to the latest pipeline in main, this is not possible right now -->
 
