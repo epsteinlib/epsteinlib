@@ -1135,7 +1135,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
     // apply correction to matrix scaling if nu = d + 2k
     unsigned int k = (unsigned int)fmax(0., nearbyint((nu - (double)dim) / 2));
     if (reg && (nu == (dim + 2 * (double)k))) {
-        if (alphaAbs) {
+        if (aniso) {
             res -= pow(M_PI, (double)k + ((double)dim / 2)) /
                    tgamma((double)k + ((double)dim / 2)) * negative_one_pow(k + 1) *
                    polynomial_y_der(k, dim, y, alpha, alphaAbs, k) * log(ms * ms) /
