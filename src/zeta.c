@@ -1142,20 +1142,14 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
                    vol * inverse_imaginary_int_pow(alphaAbs) /
                    real_int_pow(-2 * M_PI, alphaAbs);
         } else {
-            if (k) {
-                double ySquared = 0;
-                for (int i = 0; i < dim; i++) {
-                    ySquared += y[i] * y[i];
-                }
-
-                res -= pow(M_PI, (double)(2 * k) + ((double)dim / 2)) /
-                       tgamma((double)k + ((double)dim / 2)) *
-                       negative_one_pow(k + 1) / tgamma((double)k + 1) *
-                       real_int_pow(ySquared, k) * log(ms * ms) / vol;
-            } else {
-                res += pow(M_PI, (double)dim / 2) / tgamma((double)dim / 2) *
-                       log(ms * ms) / vol;
+            double ySquared = 0;
+            for (int i = 0; i < dim; i++) {
+                ySquared += y[i] * y[i];
             }
+            res -= pow(M_PI, (double)(2 * k) + ((double)dim / 2)) /
+                   tgamma((double)k + ((double)dim / 2)) * negative_one_pow(k + 1) /
+                   tgamma((double)k + 1) * real_int_pow(ySquared, k) * log(ms * ms) /
+                   vol;
         }
     }
     return res;
