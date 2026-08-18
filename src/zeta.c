@@ -1101,21 +1101,10 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
                  rot * xfactor;
             xfactor = 1;
         } else if (!reg && aniso) {
-            // Catch vanishing function values where alpha_i odd an x_i = y_i = 0
-            bool oddDersInZero = false;
-            for (int i = 0; i < dim; i++) {
-                if (alpha[i] % 2 && fabs(x[i]) < EPS_ZERO_Y &&
-                    fabs(y[i]) < EPS_ZERO_Y) {
-                    oddDersInZero = true;
-                }
-            }
-            if (oddDersInZero) {
-                res = 0.;
-            } else {
-                res = summation_harmonic(nu, dim, alphaAbs, alpha, lambda, ms,
-                                         m_real, m_fourier, x_t1, x_t2, y_t2,
-                                         cutoffsReal, cutoffsFourier, diag, xfactor);
-            }
+
+            res = summation_harmonic(nu, dim, alphaAbs, alpha, lambda, ms, m_real,
+                                     m_fourier, x_t1, x_t2, y_t2, cutoffsReal,
+                                     cutoffsFourier, diag, xfactor);
         } else if (reg && aniso) {
             res = summation_harmonic_reg(nu, dim, alphaAbs, alpha, lambda, ms,
                                          m_real, m_fourier, x_t1, x_t2, y_t1, y_t2,
