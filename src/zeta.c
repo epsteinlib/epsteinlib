@@ -1148,7 +1148,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
                     ySquared += y[i] * y[i];
                 }
 
-                res -= pow(M_PI, (double)(2 * k) + ((double)dim / 2)) *
+                res -= pow(M_PI, (double)(2 * k) + ((double)dim / 2)) /
                        tgamma((double)k + ((double)dim / 2)) *
                        negative_one_pow(k + 1) / tgamma((double)k + 1) *
                        real_int_pow(ySquared, k) * log(ms * ms) / vol;
