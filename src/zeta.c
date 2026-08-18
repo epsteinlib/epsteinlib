@@ -1058,8 +1058,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
         } else {
             res = 0;
         }
-    } else if (!reg && fabs(nu - dim - alphaAbs) < EPS &&
-               y_t2_squared < EPS_ZERO_Y) {
+    } else if (!aniso && !reg && fabs(nu - dim) < EPS && y_t2_squared < EPS_ZERO_Y) {
         res = NAN;
     } else {
         double zArgBound = assignzArgBound(nu);
@@ -1101,10 +1100,19 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
                  rot * xfactor;
             xfactor = 1;
         } else if (!reg && aniso) {
+            bool allEvenAlpha = true;
+            for (int i = 0; i < dim && allEvenAlpha; i++) {
+                allEvenAlpha = !(alpha[i] % 2);
+            }
+            if (allEvenAlpha && fabs(nu - dim - alphaAbs) < EPS &&
+                y_t2_squared < EPS_ZERO_Y) {
+                res = NAN;
+            } else {
 
-            res = summation_harmonic(nu, dim, alphaAbs, alpha, lambda, ms, m_real,
-                                     m_fourier, x_t1, x_t2, y_t2, cutoffsReal,
-                                     cutoffsFourier, diag, xfactor);
+                res = summation_harmonic(nu, dim, alphaAbs, alpha, lambda, ms,
+                                         m_real, m_fourier, x_t1, x_t2, y_t2,
+                                         cutoffsReal, cutoffsFourier, diag, xfactor);
+            }
         } else if (reg && aniso) {
             res = summation_harmonic_reg(nu, dim, alphaAbs, alpha, lambda, ms,
                                          m_real, m_fourier, x_t1, x_t2, y_t1, y_t2,
