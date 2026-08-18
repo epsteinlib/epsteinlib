@@ -11,6 +11,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 ## [0.6.2] - unreleased
 
+### Fixed
+- Release `v0.6.0` introduced silently wrong `epsteinZetaReg` return values for $\nu\in d+ 2\mathbb N_+$ and $\boldsymbol{y}\neq\boldsymbol{0}$ on lattices with $\operatorname{det}(A) \neq 1$, which also affected `epsteinZetaAnisoReg` for $\boldsymbol{\alpha}=\boldsymbol{0}$.
+
 ## [0.6.1] - 2026-08-11
 
 ### Fixed
