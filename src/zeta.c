@@ -698,6 +698,8 @@ static int harmonic_coeffs_alloc(unsigned int alphaAbs, unsigned int kMax,
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] alphaAbs: total |α| of the multi-index.
+ * @param[in] allEvenAlpha: true if all components of alpha are even, false
+ * otherwise.
  * @param[in] alpha: multi-index α (length dim).
  * @param[in] lambda: splitting parameter.
  * @param[in] ms: lattice scaling factor, pow(vol, -1./dim).
@@ -716,11 +718,11 @@ static int harmonic_coeffs_alloc(unsigned int alphaAbs, unsigned int kMax,
  * terms.
  */
 static double complex summation_harmonic_reg(
-    double nu, unsigned int dim, unsigned int alphaAbs, const unsigned int *alpha,
-    double lambda, double ms, const double *m_real, const double *m_fourier,
-    const double *x_t1, const double *x_t2, const double *y_t1, const double *y_t2,
-    const int cutoffsReal[], const int cutoffsFourier[], bool diag,
-    double complex xfactor) {
+    double nu, unsigned int dim, unsigned int alphaAbs, bool allEvenAlpha,
+    const unsigned int *alpha, double lambda, double ms, const double *m_real,
+    const double *m_fourier, const double *x_t1, const double *x_t2,
+    const double *y_t1, const double *y_t2, const int cutoffsReal[],
+    const int cutoffsFourier[], bool diag, double complex xfactor) {
 
     // Precompute coefficients for harmonic polynomials once
     unsigned int kMax = alphaAbs / 2;
@@ -751,14 +753,14 @@ static double complex summation_harmonic_reg(
             continue;
         }
 
-        double complex resIt;
+        double complex resIt = 0.;
 
         // if nu = 0, everything except the zero summand in the real sum
         // vanishes
         if (fabs(nuIt / 2) < EPS) {
-            if (dot(dim, x_t2, x_t2) > EPS_ZERO_Y) {
-                resIt = 0.;
-            } else {
+
+            if (dot(dim, x_t2, x_t2) < EPS_ZERO_Y && allEvenAlpha &&
+                2 * k == alphaAbs) {
                 resIt = -harmonic_h(k, dim, x_t2, alphaAbs, chunk_offset,
                                     valid_count, coeffs, exponents);
             }
@@ -845,6 +847,8 @@ static double complex summation_harmonic_reg(
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] alphaAbs: total |α| of the multi-index.
+ * @param[in] allEvenAlpha: true if all components of alpha are even, false
+ * otherwise.
  * @param[in] alpha: multi-index α (length dim).
  * @param[in] lambda: splitting parameter.
  * @param[in] ms: lattice scaling factor, pow(vol, -1./dim).
@@ -861,12 +865,12 @@ static double complex summation_harmonic_reg(
  * @param[in] xfactor: precomputed prefactor for the real sum.
  * @return updated res after adding the general harmonic contribution.
  */
-static double complex
-summation_harmonic(double nu, unsigned int dim, unsigned int alphaAbs,
-                   const unsigned int *alpha, double lambda, double ms,
-                   const double *m_real, const double *m_fourier, const double *x_t1,
-                   const double *x_t2, const double *y_t2, const int cutoffsReal[],
-                   const int cutoffsFourier[], bool diag, double complex xfactor) {
+static double complex summation_harmonic(
+    double nu, unsigned int dim, unsigned int alphaAbs, bool allEvenAlpha,
+    const unsigned int *alpha, double lambda, double ms, const double *m_real,
+    const double *m_fourier, const double *x_t1, const double *x_t2,
+    const double *y_t2, const int cutoffsReal[], const int cutoffsFourier[],
+    bool diag, double complex xfactor) {
 
     unsigned int kMax = alphaAbs / 2;
     unsigned long long *chunk_offset;
@@ -895,14 +899,13 @@ summation_harmonic(double nu, unsigned int dim, unsigned int alphaAbs,
             continue;
         }
 
-        double complex resIt;
+        double complex resIt = 0.;
 
         // if nu = 0, everything except the zero summand in the real sum
         // vanishes
         if (fabs(nuIt / 2) < EPS) {
-            if (dot(dim, x_t2, x_t2) > EPS_ZERO_Y) {
-                resIt = 0.;
-            } else {
+            if (dot(dim, x_t2, x_t2) < EPS_ZERO_Y && allEvenAlpha &&
+                2 * k == alphaAbs) {
                 resIt = -xfactor * harmonic_h(k, dim, x_t2, alphaAbs, chunk_offset,
                                               valid_count, coeffs, exponents);
             }
@@ -1043,11 +1046,16 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
             cutoffsFourier[k] = floor(cutoff_id * ev_abs_max);
         }
     }
-    // handle special case of non-positive integer values nu.
     double complex res = NAN;
     double x_t2_squared = dot(dim, x_t2, x_t2);
     double y_t2_squared = dot(dim, y_t2, y_t2);
     unsigned int alphaAbs = aniso ? mult_abs(dim, alpha) : 0;
+    bool allEvenAlpha = true;
+    for (int i = 0; i < dim && allEvenAlpha; i++) {
+        allEvenAlpha = !(alpha[i] % 2);
+    }
+    // handle special case of non-positive integer values nu for the non-aniso
+    // variants
     if (!aniso && nu < 1 && fabs((nu / 2.) - nearbyint(nu / 2.)) < EPS) {
         if (x_t2_squared < EPS_ZERO_Y && nu == 0) {
             if (reg) {
@@ -1100,23 +1108,21 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
                  rot * xfactor;
             xfactor = 1;
         } else if (!reg && aniso) {
-            bool allEvenAlpha = true;
-            for (int i = 0; i < dim && allEvenAlpha; i++) {
-                allEvenAlpha = !(alpha[i] % 2);
-            }
             // handle pole in dim = nu + |alpha| for all-even alpha
             if (allEvenAlpha && fabs(nu - dim - alphaAbs) < EPS &&
                 y_t2_squared < EPS_ZERO_Y) {
                 res = NAN;
             } else {
-                res = summation_harmonic(nu, dim, alphaAbs, alpha, lambda, ms,
-                                         m_real, m_fourier, x_t1, x_t2, y_t2,
-                                         cutoffsReal, cutoffsFourier, diag, xfactor);
+                res = summation_harmonic(nu, dim, alphaAbs, allEvenAlpha, alpha,
+                                         lambda, ms, m_real, m_fourier, x_t1, x_t2,
+                                         y_t2, cutoffsReal, cutoffsFourier, diag,
+                                         xfactor);
             }
         } else if (reg && aniso) {
-            res = summation_harmonic_reg(nu, dim, alphaAbs, alpha, lambda, ms,
-                                         m_real, m_fourier, x_t1, x_t2, y_t1, y_t2,
-                                         cutoffsReal, cutoffsFourier, diag, xfactor);
+            res = summation_harmonic_reg(nu, dim, alphaAbs, allEvenAlpha, alpha,
+                                         lambda, ms, m_real, m_fourier, x_t1, x_t2,
+                                         y_t1, y_t2, cutoffsReal, cutoffsFourier,
+                                         diag, xfactor);
         }
 
         // In the harmonic method, the res is already set as there is no global
