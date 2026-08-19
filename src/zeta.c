@@ -1104,11 +1104,11 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
             for (int i = 0; i < dim && allEvenAlpha; i++) {
                 allEvenAlpha = !(alpha[i] % 2);
             }
+            // handle pole in dim = nu + |alpha| for all-even alpha
             if (allEvenAlpha && fabs(nu - dim - alphaAbs) < EPS &&
                 y_t2_squared < EPS_ZERO_Y) {
                 res = NAN;
             } else {
-
                 res = summation_harmonic(nu, dim, alphaAbs, alpha, lambda, ms,
                                          m_real, m_fourier, x_t1, x_t2, y_t2,
                                          cutoffsReal, cutoffsFourier, diag, xfactor);
