@@ -404,6 +404,7 @@ randomElemLatticeVector[a_]:=a . Table[RandomInteger[{-10^(16)/2,10^(16)/2}]/10^
 range = Range[186];
 SeedRandom[42];
 AHex={{1,1/2},{0,Sqrt[3]/2}};
+AObl={{1,3/10},{0,1}};
 Do[
 	\[Nu]0[i]=10 randRational
 	;a0[i]=AHex
@@ -443,6 +444,9 @@ zDerSpecialTab={
 	,Flatten@{N@1/2,N@IdentityMatrix@2,1.+{.1,.2},{.1,.0},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,1+{1,2}/10,{1,0}/10,{2,0}]}}
 	,Flatten@{N@1/2,N@IdentityMatrix@2,1.+{.1,.2},3+{.1,.0},{2,0},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,1+{1,2}/10,3+{1,0}/10,{2,0}]}}
 	,Flatten@{N@1/2,N@IdentityMatrix@2,1.+{.1,.2},3+{.1,.0},{2,4},{N@Re@#,N@Im@#}&/@{setZetaDer[1/2,IdentityMatrix@2,1+{1,2}/10,3+{1,0}/10,{2,4}]}}
+	,Flatten@{N@8,N@AObl,{0.,0.},{0.,0.},{1,1},{N@Re@#,N@Im@#}&/@{setZetaDer[8,AObl,{0,0},{0,0},{1,1}]}}
+	,Flatten@{N@8,N@AObl,{0.,0.3},{0.,0.},{1,0},{N@Re@#,N@Im@#}&/@{setZetaDer[8,AObl,{0,3/10},{0,0},{1,0}]}}
+	,Flatten@{N@8,N@AHex,{0.,0.},{0.,0.},{1,1},{N@Re@#,N@Im@#}&/@{setZetaDer[8,AHex,{0,0},{0,0},{1,1}]}}
 };
 
 
@@ -494,7 +498,7 @@ Export[NotebookDirectory[]<>"csv/setZetaDer_2D_ref.csv",zDerTab];
 
 
 (* ::Text:: *)
-(*We employ, that SetZetaDer[\[Nu],A,x,y,\[Alpha]] should be 0 for x\:1d62 = y\:1d62 = 0 and \[Alpha]\:1d62 is odd for some 1 <= i <= d.*)
+(*We employ, that SetZetaDer[\[Nu],A,x,y,\[Alpha]] is 0 for x\:1d62 = y\:1d62 = 0 and \[Alpha]\:1d62 is and where z\:1d62\[RightArrow] \[Minus]z\:1d62 is a lattice symmetry for some 1 <= i <= d.*)
 
 
 (* does not yet work for {{1,1,0},{1,0,1},{0,1,1}} (here |Det(a)|=2) or derivatives > 5*)
