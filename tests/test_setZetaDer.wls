@@ -584,6 +584,7 @@ Export["csv/setZetaDer_laplace_ref.csv",zLaplaceTab];
 
 
 smallVal = 10^-200;
+AObl={{1,3/10},{0,1}};
 zetaSpecialNuBiggerDim = {
 	(* 1D: nu = 1 + Total[alpha] + 2Total[alpha] even => nu odd *)
 	Flatten@{1,5.,N@{{1}},{0.},{0.},{2},{N@Re@#,N@Im@#}  &/@ {setZetaDer[5,{{1}},{0},{0},{2}]}}
@@ -614,6 +615,10 @@ zetaSpecialNuBiggerDim = {
     ,Flatten@{2,10.,N@AHex,{0.,0.},{0.,0.},{4,2},{N@Re@#,N@Im@#}  &/@ {setZetaDer[10,AHex,{0,0},{0,0},{4,2}]}}
     ,Flatten@{2,8.,N@AHex,{0.1,0.2},{0.,0.},{4,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[8,AHex,{1,2}/10,{0,0},{4,0}]}}
     ,Flatten@{2,8.,N@AHex,{0.,0.},{0.,N@smallVal},{4,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[8,AHex,{0,0},{0,smallVal},{4,0}]}}
+    (* nu = d + |alpha| exactly: only a pole if every component of alpha is even *)
+	,Flatten@{2,3.,N@IdentityMatrix@2,{0.3,0.},{0.,0.},{1,0},{N@Re@#,N@Im@#}&/@{setZetaDer[3,IdentityMatrix@2,{3/10,0},{0,0},{1,0}]}}
+	,Flatten@{2,4.,N@IdentityMatrix@2,{0.3,0.},{0.,0.},{1,1},{N@Re@#,N@Im@#}&/@{setZetaDer[4,IdentityMatrix@2,{3/10,0},{0,0},{1,1}]}}
+	,Flatten@{2,4.,N@AObl,{0.,0.},{0.,0.},{1,1},{N@Re@#,N@Im@#}&/@{setZetaDer[4,AObl,{0,0},{0,0},{1,1}]}}
 	(* 3D: nu = 3 + Total[alpha] + 2Total[alpha] even => nu odd *)
 	,Flatten@{3,7.,N@IdentityMatrix@3,{0.,0.,0.},{0.,0.,0.},{2,0,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[7,IdentityMatrix@3,{0,0,0},{0,0,0},{2,0,0}]}}
     ,Flatten@{3,7.,N@IdentityMatrix@3,{0.,0.,0.},{0.,0.,0.},{1,1,0},{N@Re@#,N@Im@#}  &/@ {setZetaDer[7,IdentityMatrix@3,{0,0,0},{0,0,0},{1,1,0}]}}
