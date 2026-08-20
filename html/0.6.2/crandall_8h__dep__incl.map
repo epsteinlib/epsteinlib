@@ -1,0 +1,7 @@
+<map id="src/crandall.h" name="src/crandall.h">
+<area shape="rect" id="Node000001" title="Calculates the summand function G and related functions in Crandall&#39;s formula." alt="" coords="65,5,173,33"/>
+<area shape="rect" id="Node000002" href="$crandall_8c.html" title="Calculates the summand function G and related functions in Crandall&#39;s formula." alt="" coords="5,81,113,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,47,72,82,68,79,96,44"/>
+<area shape="rect" id="Node000003" href="$zeta_8c.html" title="Calculates the (regularized) Epstein zeta function and the (regularized) anisotropic Epstein zeta fun..." alt="" coords="137,81,221,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="142,44,170,79,166,82,137,47"/>
+</map>

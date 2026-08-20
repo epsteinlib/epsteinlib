@@ -1,0 +1,26 @@
+<map id="src/zeta.c" name="src/zeta.c">
+<area shape="rect" id="Node000001" title="Calculates the (regularized) Epstein zeta function and the (regularized) anisotropic Epstein zeta fun..." alt="" coords="246,5,330,33"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="62,157,151,184"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="246,26,184,32,114,44,52,60,29,71,14,83,9,92,8,100,18,117,37,133,61,147,59,152,34,138,13,120,3,101,4,90,10,79,26,66,50,55,113,38,184,27,246,21"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="360,81,427,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="308,31,364,70,361,74,305,36"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="214,157,295,184"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="295,33,303,68,303,89,300,109,291,129,279,146,275,143,286,126,295,108,298,88,297,68,290,34"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="451,81,520,109"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="324,31,437,73,435,78,322,36"/>
+<area shape="rect" id="Node000006" href="$crandall_8h.html" title="Calculates the summand function G and related functions in Crandall&#39;s formula." alt="" coords="24,81,109,109"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="249,36,121,78,120,73,247,31"/>
+<area shape="rect" id="Node000007" href="$harmonics_8h_source.html" title=" " alt="" coords="544,81,645,109"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="330,28,529,75,528,80,329,33"/>
+<area shape="rect" id="Node000009" href="$tools_8h.html" title="Minimal linear algebra for matrix vector and multi&#45;index operations." alt="" coords="134,81,199,109"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="268,36,202,75,200,71,265,31"/>
+<area shape="rect" id="Node000010" href="$zeta_8h.html" title="Calculates the (regularized) Epstein zeta function and the (regularized) anisotropic Epstein zeta fun..." alt="" coords="224,81,285,109"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="284,35,269,68,264,66,279,32"/>
+<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="76,108,94,142,90,144,71,110"/>
+<area shape="rect" id="Node000008" href="$hpdyad_8h.html" title="High&#45;precision dyadic number operations." alt="" coords="554,157,635,184"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="597,109,597,141,592,141,592,109"/>
+<area shape="poly" id="edge10_Node000009_Node000002" title=" " alt="" coords="158,111,129,146,125,143,154,108"/>
+<area shape="poly" id="edge11_Node000009_Node000004" title=" " alt="" coords="184,107,229,145,226,149,181,111"/>
+<area shape="poly" id="edge13_Node000010_Node000002" title=" " alt="" coords="229,112,147,152,145,147,227,107"/>
+<area shape="poly" id="edge14_Node000010_Node000004" title=" " alt="" coords="257,109,257,141,252,141,252,109"/>
+</map>
