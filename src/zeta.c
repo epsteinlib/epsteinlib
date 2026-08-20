@@ -1058,8 +1058,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
         } else {
             res = 0;
         }
-    } else if (!reg && fabs(nu - dim - alphaAbs) < EPS &&
-               y_t2_squared < EPS_ZERO_Y) {
+    } else if (!aniso && !reg && fabs(nu - dim) < EPS && y_t2_squared < EPS_ZERO_Y) {
         res = NAN;
     } else {
         double zArgBound = assignzArgBound(nu);
@@ -1101,16 +1100,14 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
                  rot * xfactor;
             xfactor = 1;
         } else if (!reg && aniso) {
-            // Catch vanishing function values where alpha_i odd an x_i = y_i = 0
-            bool oddDersInZero = false;
-            for (int i = 0; i < dim; i++) {
-                if (alpha[i] % 2 && fabs(x[i]) < EPS_ZERO_Y &&
-                    fabs(y[i]) < EPS_ZERO_Y) {
-                    oddDersInZero = true;
-                }
+            bool allEvenAlpha = true;
+            for (int i = 0; i < dim && allEvenAlpha; i++) {
+                allEvenAlpha = !(alpha[i] % 2);
             }
-            if (oddDersInZero) {
-                res = 0.;
+            // handle pole in dim = nu + |alpha| for all-even alpha
+            if (allEvenAlpha && fabs(nu - dim - alphaAbs) < EPS &&
+                y_t2_squared < EPS_ZERO_Y) {
+                res = NAN;
             } else {
                 res = summation_harmonic(nu, dim, alphaAbs, alpha, lambda, ms,
                                          m_real, m_fourier, x_t1, x_t2, y_t2,
@@ -1135,27 +1132,21 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
     // apply correction to matrix scaling if nu = d + 2k
     unsigned int k = (unsigned int)fmax(0., nearbyint((nu - (double)dim) / 2));
     if (reg && (nu == (dim + 2 * (double)k))) {
-        if (alphaAbs) {
+        if (aniso) {
             res -= pow(M_PI, (double)k + ((double)dim / 2)) /
                    tgamma((double)k + ((double)dim / 2)) * negative_one_pow(k + 1) *
                    polynomial_y_der(k, dim, y, alpha, alphaAbs, k) * log(ms * ms) /
                    vol * inverse_imaginary_int_pow(alphaAbs) /
                    real_int_pow(-2 * M_PI, alphaAbs);
         } else {
-            if (k) {
-                double ySquared = 0;
-                for (int i = 0; i < dim; i++) {
-                    ySquared += y[i] * y[i];
-                }
-
-                res -= pow(M_PI, (double)(2 * k) + ((double)dim / 2)) *
-                       tgamma((double)k + ((double)dim / 2)) *
-                       negative_one_pow(k + 1) / tgamma((double)k + 1) *
-                       real_int_pow(ySquared, k) * log(ms * ms) / vol;
-            } else {
-                res += pow(M_PI, (double)dim / 2) / tgamma((double)dim / 2) *
-                       log(ms * ms) / vol;
+            double ySquared = 0;
+            for (int i = 0; i < dim; i++) {
+                ySquared += y[i] * y[i];
             }
+            res -= pow(M_PI, (double)(2 * k) + ((double)dim / 2)) /
+                   tgamma((double)k + ((double)dim / 2)) * negative_one_pow(k + 1) /
+                   tgamma((double)k + 1) * real_int_pow(ySquared, k) * log(ms * ms) /
+                   vol;
         }
     }
     return res;

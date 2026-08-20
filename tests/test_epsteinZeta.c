@@ -1126,6 +1126,101 @@ static int test_epsteinZeta_cutoff() {
 }
 
 /*!
+ * @brief Tests the scaling symmetry of the regularized Epstein zeta function at
+ * the exceptional exponents nu = dim + 2 * k.
+ *
+ * For a lattice with det(A) != 1, the internal rescaling of the
+ * lattice contributes a logarithmic correction term to the regularized Epstein
+ * zeta function. This test verifies the identity
+ *
+ *     Z^reg_{L,nu}(x, y) = s^nu Z^reg_{sL,nu}(s x, y / s)
+ *                          + (-1)^k pi^(2 k + dim / 2) / (V_L Gamma(k + dim / 2))
+ *                            * log(s^2) * (y . y)^k / k!
+ *
+ * for k in N_0 and s > 0.
+ *
+ * @return number of failed tests.
+ */
+static int test_epsteinZetaReg_scaling() { // NOLINT
+    printf("%s ", __func__);
+    double errorAbs;
+    double errorRel;
+    double errorMaxAbsRel;
+    double complex valZeta;
+    double complex valZetaScaled;
+
+    int testsPassed = 0;
+    int totalTests = 0;
+
+    double tol = pow(10, -13);
+    unsigned int dim = 2;
+    double m[] = {1., 1. / 2, 0., sqrt(3.) / 2};
+    double x[] = {0., 0.};
+    double y[] = {3. / 10, -1. / 5};
+    double vol = sqrt(3.) / 2;
+
+    double mScaled[4];
+    double xScaled[2];
+    double yScaled[2];
+
+    for (unsigned int k = 0; k <= 9; k++) {
+        double nu = (double)dim + (2. * (double)k);
+        for (int i = 0; i < 99; i++) {
+            double s = (3. / 5) + ((double)i * .4 / 5);
+
+            for (unsigned int j = 0; j < dim * dim; j++) {
+                mScaled[j] = s * m[j];
+            }
+            for (unsigned int j = 0; j < dim; j++) {
+                xScaled[j] = s * x[j];
+                yScaled[j] = y[j] / s;
+            }
+
+            double correction = negative_one_pow(k) *
+                                pow(M_PI, (2. * (double)k) + ((double)dim / 2)) /
+                                (vol * tgamma((double)k + ((double)dim / 2))) *
+                                log(s * s) * real_int_pow(dot(dim, y, y), k) /
+                                tgamma((double)k + 1.);
+
+            valZeta = epsteinZetaReg(nu, dim, m, x, y);
+            valZetaScaled =
+                pow(s, nu) * epsteinZetaReg(nu, dim, mScaled, xScaled, yScaled) +
+                correction;
+
+            errorAbs = errAbs(valZeta, valZetaScaled);
+            errorRel = errRel(valZeta, valZetaScaled);
+            errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+
+            if (errorMaxAbsRel < tol) {
+                testsPassed++;
+            } else {
+                printf("\n");
+                printf("Warning! ");
+                printf("scaling symmetry:");
+                printf("   %0*.16lf %+.16lf I (epsteinZetaReg) \n\t\t\t  != "
+                       "%.16lf %+.16lf I (scaled lattice and correction)\n",
+                       4, creal(valZeta), cimag(valZeta), creal(valZetaScaled),
+                       cimag(valZetaScaled));
+                printf("Min(Emax, Erel):\t     %E !< %E  (tolerance)\n",
+                       errorMaxAbsRel, tol);
+                printf("\n");
+                printMatrixUnitTest("m:", m, (int)dim);
+                printf("nu:\t\t %.16lf\n", nu);
+                printf("s:\t\t %.16lf\n", s);
+                printVectorUnitTest("y:\t\t", y, (int)dim);
+            }
+            totalTests++;
+        }
+    }
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.\n", testsPassed, totalTests,
+           tol);
+
+    return totalTests - testsPassed;
+}
+
+/*!
  * @brief Main function to run all Epstein zeta function tests.
  *
  * @return number of failed tests.
@@ -1140,5 +1235,6 @@ int main() {
     failed += run_timed_test(test_epsteinZeta_cutoff);
     failed += run_timed_test(test_epsteinZeta_epsteinZetaAniso_reduction);
     failed += run_timed_test(test_epsteinZetaReg_epsteinZetaAnisoReg_reduction);
+    failed += run_timed_test(test_epsteinZetaReg_scaling);
     return failed;
 }

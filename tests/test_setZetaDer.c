@@ -206,6 +206,13 @@ static int test_setZetaDer_2D(void) {
         num = setZetaDer(nu, dim, a, x, y, alpha);
         ref = refRead[0] + refRead[1] * I;
 
+        // For ref exactly zero, use the epsteinZetaAniso without (potentially big)
+        // prefactor! In the future, this file needs to be rewritten for the
+        // anisotropic variant to avoid such hacks
+        if (cabs(ref) == 0) {
+            num = epsteinZetaAniso(nu, dim, a, x, y, alpha);
+        }
+
         errorAbs = errAbs(ref, num);
         errorRel = errRel(ref, num);
 
@@ -389,12 +396,14 @@ static int test_setZetaDer_taylor(void) { // NOLINT
 }
 
 /*!
- * @brief Benchmarks 2D setZetaDer function by comparing to reference values of the
- * laplacian of set zeta function obtained by finite differences.
+ * @brief Benchmarks 2D epsteinZetaAniso (formerly setZetaDer) function by comparing
+ * to reference values of the laplacian of set zeta function obtained by finite
+ * differences. The reference values are for the setZetaDer function, though they
+ * agree as they vanish.
  *
  * @return number of failed tests.
  * */
-static int test_setZetaDer_odd(void) {
+static int test_epsteinZetaAniso_odd(void) {
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path), "%s/setZetaDer_odd_ref.csv", // NOLINT
@@ -455,7 +464,7 @@ static int test_setZetaDer_odd(void) {
 
         nu = nuRef[0];
 
-        num = setZetaDer(nu, dim, a, x, y, alpha);
+        num = epsteinZetaAniso(nu, dim, a, x, y, alpha);
         ref = refRead[0] + refRead[1] * I;
 
         errorAbs = errAbs(ref, num);
@@ -472,7 +481,7 @@ static int test_setZetaDer_odd(void) {
         } else {
             printf("\n\n");
             printf("Warning! ");
-            printf("setZetaDer: ");
+            printf("epsteinZetaAniso: ");
             printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
                    "%.16lf "
                    "%+.16lf I (reference implementation)\n",
@@ -507,6 +516,117 @@ static int test_setZetaDer_odd(void) {
     printf("\t    ");
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
            errSum / totalTests);
+    printf("\n");
+
+    return totalTests - testsPassed;
+}
+
+/*!
+ * @brief Tests the pole structure of epsteinZetaAniso.
+ *
+ * @return number of failed tests.
+ * */
+static int test_epsteinZetaAniso_poles(void) { // NOLINT
+    printf("%s ", __func__);
+
+    unsigned int dim = 2;
+    unsigned int maxPrints = 10;
+
+    double aUnit[] = {1., 0., 0., 1.};
+    double aHex[] = {1., 0.5, 0., 0.8660254037844386};
+    double aObl[] = {1., 0.3, 0., 1.};  // no z1 -> -z1 mirror symmetry
+    double aScal[] = {2., 0., 0., 1.5}; // det(A) = 3
+    double *lattice[] = {aUnit, aHex, aObl, aScal};
+
+    // x is irrelevant to the pole, y is not. Both stay in their elementary cell.
+    double x[][2] = {{0., 0.}, {0.3, 0.}, {0.3, 0.2}};
+    double y[][2] = {{0., 0.}, {0.1, 0.2}};
+
+    unsigned int alpha[][2] = {{0, 0}, {1, 0}, {0, 1}, {1, 1}, {2, 0},
+                               {0, 2}, {2, 1}, {3, 1}, {2, 2}, {4, 0}};
+    double nu[] = {1., 2., 2.5, 3., 4., 4.5, 5., 6., 7., 8.};
+
+    unsigned int lattices = sizeof(lattice) / sizeof(lattice[0]);
+    unsigned int xs = sizeof(x) / sizeof(x[0]);
+    unsigned int ys = sizeof(y) / sizeof(y[0]);
+    unsigned int alphas = sizeof(alpha) / sizeof(alpha[0]);
+    unsigned int nus = sizeof(nu) / sizeof(nu[0]);
+
+    int testsPassed = 0;
+    int totalTests = 0;
+    int polesFound = 0;
+    unsigned int printed = 0;
+
+    double complex num;
+    bool allEven;
+    bool yZero;
+    bool expectNan;
+    bool isNan;
+    unsigned int alphaAbs;
+
+    printf("\n\t ... ");
+    printf("sweeping %u lattices, %u x, %u y, %u multi-indices and %u exponents",
+           lattices, xs, ys, alphas, nus);
+    for (unsigned int iA = 0; iA < lattices; iA++) {
+        for (unsigned int iX = 0; iX < xs; iX++) {
+            for (unsigned int iY = 0; iY < ys; iY++) {
+                yZero = (y[iY][0] == 0.) && (y[iY][1] == 0.);
+                for (unsigned int iAlpha = 0; iAlpha < alphas; iAlpha++) {
+
+                    allEven = true;
+                    alphaAbs = 0;
+                    for (unsigned int j = 0; j < dim; j++) {
+                        alphaAbs += alpha[iAlpha][j];
+                        if (alpha[iAlpha][j] % 2 != 0) {
+                            allEven = false;
+                        }
+                    }
+
+                    for (unsigned int iNu = 0; iNu < nus; iNu++) {
+                        expectNan = allEven && yZero &&
+                                    (nu[iNu] == (double)(dim + alphaAbs));
+                        polesFound += expectNan ? 1 : 0;
+
+                        num = epsteinZetaAniso(nu[iNu], dim, lattice[iA], x[iX],
+                                               y[iY], alpha[iAlpha]);
+                        isNan = isnan(creal(num)) || isnan(cimag(num));
+
+                        if (isNan == expectNan) {
+                            testsPassed++;
+                        } else if (printed < maxPrints) {
+                            printed++;
+                            printf("\n\n");
+                            printf("Warning! ");
+                            printf("epsteinZetaAniso: ");
+                            printf(" %0*.16lf %+.16lf I (this implementation) "
+                                   "\n\t\t!= %s (expected)\n",
+                                   4, creal(num), cimag(num),
+                                   expectNan ? "NaN" : "a finite value");
+                            printf("\n");
+                            printf("nu:\t\t %.16lf\n", nu[iNu]);
+                            printMatrixUnitTest("a:", lattice[iA], dim);
+                            printVectorUnitTest("x:\t\t", x[iX], dim);
+                            printVectorUnitTest("y:\t\t", y[iY], dim);
+                            printMultiindexUnitTest("alpha:\t\t", alpha[iAlpha],
+                                                    dim);
+                            printf("\n");
+                        }
+                        totalTests++;
+                    }
+                }
+            }
+        }
+    }
+
+    if (printed == maxPrints) {
+        printf("\n\t ... ");
+        printf("further failures suppressed");
+    }
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed.", testsPassed, totalTests);
+    printf("\t\t\t\t    ");
+    printf("[ %d poles checked\t\t ]", polesFound);
     printf("\n");
 
     return totalTests - testsPassed;
@@ -844,7 +964,8 @@ int main() {
     failed += run_timed_test(test_setZetaDer_1D);
     failed += run_timed_test(test_setZetaDer_2D);
     failed += run_timed_test(test_setZetaDer_taylor);
-    failed += run_timed_test(test_setZetaDer_odd);
+    failed += run_timed_test(test_epsteinZetaAniso_odd);
+    failed += run_timed_test(test_epsteinZetaAniso_poles);
     failed += run_timed_test(test_setZetaDer_special_exponents);
     failed += run_timed_test(test_setZetaDer_poly_laplace);
 

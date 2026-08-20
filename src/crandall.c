@@ -304,7 +304,7 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z,
                         unsigned int n) {
     // Return function if there is no derivative
     if (!alphaAbs) {
-        return real_int_pow(M_PI * dot(dim, z, z), k);
+        return real_int_pow(M_PI * dot(dim, z, z), k) / tgamma((double)n + 1);
     }
 
     unsigned int betaMin[dim];
