@@ -954,6 +954,173 @@ static int test_setZetaDer_poly_laplace(void) { // NOLINT
 }
 
 /*!
+ * @brief Benchmarks epsteinZetaAniso for second-order anisotropy alpha = 2 e_1
+ * and all-equal vector arguments x = x 1, y = y 1 against the poly-Laplacian
+ * identity
+ *
+ *     Z_{Z^d,nu,2 e_j}(x 1, y 1) = Z_{Lambda,nu-2}(x 1, y 1) / d ,
+ *
+ * where the pole at nu = d + |alpha| = d + 2 for y = 0 is skipped.
+ *
+ * @return number of failed tests.
+ * */
+static int test_epsteinZetaAniso_allEqual(void) { // NOLINT
+    printf("%s ", __func__);
+
+    unsigned int maxDim = 4;
+    unsigned int maxPrints = 10;
+    double tol = pow(10, -12);
+
+    // nu = nuMin + i nuStep, x = i xStep, y = i yStep
+    double nuMin = -2.;
+    double nuStep = 1.; // hits nu = 2 exactly
+    unsigned int nus = 9;
+    double xStep = 0.2;
+    unsigned int xs = 3;
+    double yStep = 0.01; // starts at y = 0 exactly
+    unsigned int ys = 9;
+
+    double a[16];
+    double x[4];
+    double y[4];
+    unsigned int alpha[4];
+
+    double nu;
+    double xVal;
+    double yVal;
+    double errorAbs;
+    double errorRel;
+    double errorMaxAbsRel;
+    double complex num;
+    double complex ref;
+
+    int testsPassed = 0;
+    int totalTests = 0;
+    int polesSkipped = 0;
+    unsigned int printed = 0;
+
+    double errMin = NAN;
+    double errMax = NAN;
+    double errSum = 0.;
+
+    double errMaxDim;
+    double nuWorst;
+    double xWorst;
+    double yWorst;
+
+    printf("\n\t ... ");
+    printf("sweeping d = 1,...,%u, nu = %g,%g,...,%g, x in [0,%g], y in [0,%g]",
+           maxDim, nuMin, nuMin + nuStep, nuMin + ((nus - 1) * nuStep),
+           (xs - 1) * xStep, (ys - 1) * yStep);
+
+    for (unsigned int dim = 1; dim <= maxDim; dim++) {
+
+        for (unsigned int i = 0; i < dim * dim; i++) {
+            a[i] = (i % (dim + 1) == 0) ? 1. : 0.;
+        }
+        for (unsigned int i = 0; i < dim; i++) {
+            alpha[i] = 0;
+        }
+        alpha[0] = 2;
+
+        errMaxDim = 0.;
+        nuWorst = NAN;
+        xWorst = NAN;
+        yWorst = NAN;
+
+        for (unsigned int iNu = 0; iNu < nus; iNu++) {
+            nu = nuMin + (iNu * nuStep);
+
+            for (unsigned int iX = 0; iX < xs; iX++) {
+                xVal = iX * xStep;
+                for (unsigned int i = 0; i < dim; i++) {
+                    x[i] = xVal;
+                }
+
+                for (unsigned int iY = 0; iY < ys; iY++) {
+                    yVal = iY * yStep;
+                    for (unsigned int i = 0; i < dim; i++) {
+                        y[i] = yVal;
+                    }
+
+                    // pole of both sides
+                    if (yVal == 0. && nu == (double)(dim + 2)) {
+                        polesSkipped++;
+                        continue;
+                    }
+
+                    num = epsteinZetaAniso(nu, dim, a, x, y, alpha);
+                    ref = epsteinZeta(nu - 2., dim, a, x, y) / (double)dim;
+
+                    errorAbs = errAbs(ref, num);
+                    errorRel = errRel(ref, num);
+                    if (cabs(ref) == 0.) {
+                        errorRel = errorAbs;
+                    }
+
+                    errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+
+                    errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+                    errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+                    errSum += errorMaxAbsRel;
+
+                    if (!(errorMaxAbsRel < errMaxDim)) {
+                        errMaxDim = errorMaxAbsRel;
+                        nuWorst = nu;
+                        xWorst = xVal;
+                        yWorst = yVal;
+                    }
+
+                    if (errorMaxAbsRel < tol) {
+                        testsPassed++;
+                    } else if (printed < maxPrints) {
+                        printed++;
+                        printf("\n\n");
+                        printf("Warning! ");
+                        printf("epsteinZetaAniso: ");
+                        printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t    "
+                               "      != "
+                               "%.16lf %+.16lf I (shifted Epstein zeta / d)\n",
+                               4, creal(num), cimag(num), creal(ref), cimag(ref));
+                        printf(
+                            "Min(Eabs, Erel):             %E !< %E  (tolerance)\n",
+                            errorMaxAbsRel, tol);
+                        printf("\n");
+                        printf("dim:\t\t %u\n", dim);
+                        printf("nu:\t\t %.16lf\n", nu);
+                        printMatrixUnitTest("a:", a, dim);
+                        printVectorUnitTest("x:\t\t", x, dim);
+                        printVectorUnitTest("y:\t\t", y, dim);
+                        printMultiindexUnitTest("alpha:\t\t", alpha, dim);
+                        printf("\n");
+                    }
+                    totalTests++;
+                }
+            }
+        }
+
+        printf("\n\t ... ");
+        printf("d = %u: max error %E at nu = %g, x = %g, y = %g", dim, errMaxDim,
+               nuWorst, xWorst, yWorst);
+    }
+
+    if (printed == maxPrints) {
+        printf("\n\t ... ");
+        printf("further failures suppressed");
+    }
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
+           tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
+
+    return totalTests - testsPassed;
+}
+
+/*!
  * @brief Main function to run all set zeta derivatives function tests.
  *
  * @return number of failed tests.
@@ -968,6 +1135,7 @@ int main() {
     failed += run_timed_test(test_epsteinZetaAniso_poles);
     failed += run_timed_test(test_setZetaDer_special_exponents);
     failed += run_timed_test(test_setZetaDer_poly_laplace);
+    failed += run_timed_test(test_epsteinZetaAniso_allEqual);
 
     return failed;
 }
