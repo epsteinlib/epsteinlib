@@ -996,7 +996,6 @@ static int test_epsteinZetaAniso_allEqual(void) { // NOLINT
 
     int testsPassed = 0;
     int totalTests = 0;
-    int polesSkipped = 0;
     unsigned int printed = 0;
 
     double errMin = NAN;
@@ -1039,7 +1038,6 @@ static int test_epsteinZetaAniso_allEqual(void) { // NOLINT
 
                     // pole of both sides
                     if (yVal == 0. && nu == (double)(dim + 2)) {
-                        polesSkipped++;
                         continue;
                     }
 
