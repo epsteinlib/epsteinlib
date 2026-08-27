@@ -969,7 +969,7 @@ static int test_epsteinZetaAniso_allEqual(void) { // NOLINT
 
     unsigned int maxDim = 4;
     unsigned int maxPrints = 10;
-    double tol = pow(10, -12);
+    double tol = pow(10, -15);
 
     // nu = nuMin + i nuStep, x = i xStep, y = i yStep
     double nuMin = -2.;
@@ -1004,14 +1004,11 @@ static int test_epsteinZetaAniso_allEqual(void) { // NOLINT
     double errSum = 0.;
 
     double errMaxDim;
-    double nuWorst;
-    double xWorst;
-    double yWorst;
 
     printf("\n\t ... ");
-    printf("sweeping d = 1,...,%u, nu = %g,%g,...,%g, x in [0,%g], y in [0,%g]",
-           maxDim, nuMin, nuMin + nuStep, nuMin + ((nus - 1) * nuStep),
-           (xs - 1) * xStep, (ys - 1) * yStep);
+    printf("sweeping d ≤ %u,  nu = %g,%g,...,%g, |x| ≤ %g, |y| ≤ %g", maxDim, nuMin,
+           nuMin + nuStep, nuMin + ((nus - 1) * nuStep), (xs - 1) * xStep,
+           (ys - 1) * yStep);
 
     for (unsigned int dim = 1; dim <= maxDim; dim++) {
 
@@ -1024,9 +1021,6 @@ static int test_epsteinZetaAniso_allEqual(void) { // NOLINT
         alpha[0] = 2;
 
         errMaxDim = 0.;
-        nuWorst = NAN;
-        xWorst = NAN;
-        yWorst = NAN;
 
         for (unsigned int iNu = 0; iNu < nus; iNu++) {
             nu = nuMin + (iNu * nuStep);
@@ -1066,9 +1060,6 @@ static int test_epsteinZetaAniso_allEqual(void) { // NOLINT
 
                     if (!(errorMaxAbsRel < errMaxDim)) {
                         errMaxDim = errorMaxAbsRel;
-                        nuWorst = nu;
-                        xWorst = xVal;
-                        yWorst = yVal;
                     }
 
                     if (errorMaxAbsRel < tol) {
@@ -1098,10 +1089,6 @@ static int test_epsteinZetaAniso_allEqual(void) { // NOLINT
                 }
             }
         }
-
-        printf("\n\t ... ");
-        printf("d = %u: max error %E at nu = %g, x = %g, y = %g", dim, errMaxDim,
-               nuWorst, xWorst, yWorst);
     }
 
     if (printed == maxPrints) {
