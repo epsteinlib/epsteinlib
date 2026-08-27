@@ -39,12 +39,6 @@
  */
 #define EPS_ZERO_Y 1e-64
 
-/*!
- * @brief Epsilon to catch exact cancellation to zero in inner sum of the singular
- * sum in real space for the set Zeta derivatives.
- */
-#define EPS_CANCELLATION 4e-16
-
 /**
  * @brief Increments the integer lattice vector to the next lattice point.
  * @param[in] dim: dimension of the lattice.
