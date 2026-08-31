@@ -9,6 +9,12 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 # Changelog
 
+## [0.6.3] - unreleased
+
+### Fixed
+- up to five digits lost in `epsteinZetaAniso` and `epsteinZetaAnisoReg` due to cancellation error for `y` along a ray where `harmonic_h` must vanish, fixed by comparing intermediate values of the harmonic polynomial with `EPS_CANCELLATION`.
+- non-zero values of `epsteinZetaAniso` and `epsteinZetaAnisoReg` for high-order anisotropy when $\boldsymbol{x}=\boldsymbol{0}$ and $|\boldsymbol{\alpha}|$ is odd, fixed by reordering summands to enforce symmetric pairing.
+
 ## [0.6.2] - 2026-08-20
 
 ### Fixed
