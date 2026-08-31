@@ -24,7 +24,7 @@ test_crandall = executable('epsteinlib_test_crandall',
 )
 
 test_setZetaDer = executable('epsteinlib_test_setZetaDer',
-    ['wrappers.c','../src/tools.c','utils.c','test_setZetaDer.c'],
+    ['../src/tools.c','wrappers.c','../src/tools.c','utils.c','test_setZetaDer.c'],
     include_directories : incdir,
     dependencies: deps,
     install: false,

@@ -10,6 +10,11 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+/*!
+ * @brief Maximum number of failures reported per test, to keep logs readable.
+ */
+enum { MAX_REPORTS = 20 };
+
 /**
  * @brief Compute integer powers of the imaginary unit I.
  * Uses the fact that I^4 = 1, so only exp % 4 matters.
