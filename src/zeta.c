@@ -117,38 +117,22 @@ static inline double complex summand_real(double nu, unsigned int dim, double la
 static double complex sum_real(double nu, unsigned int dim, double lambda,
                                const double *m, const double *x, const double *y,
                                const int cutoffs[], double zArgBound, bool diag) {
-    int zv[dim];        // counting vector in Z^dim
-    double lv[dim];     // lattice vector
-    double lvReci[dim]; // lattice vector of (-zv)
-
+    int zv[dim];    // counting vector in Z^dim
+    double lv[dim]; // lattice vector
     // cuboid cutoffs
     long totalSummands = 1;
     for (int k = 0; k < dim; k++) {
         zv[k] = -cutoffs[k]; // lattice vector initialized
         totalSummands *= 2 * cutoffs[k] + 1;
     }
-    long zeroIndex = (totalSummands - 1) / 2;
-
     double complex sum = 0.0;
     double complex epsilon = 0.0;
 
-    // add zero summand
-    for (int i = 0; i < dim; i++) {
-        lv[i] = 0;
-    }
-    double complex summand = summand_real(nu, dim, lambda, lv, x, y, zArgBound);
-    kahan_add_c(&sum, &epsilon, summand);
-
     // Sum in real space
-    for (long n = 0; n < zeroIndex; n++) {
+    for (long n = 0; n < totalSummands; n++) {
         matrix_intVector(dim, m, zv, lv, diag);
-        for (int i = 0; i < dim; i++) {
-            lvReci[i] = -lv[i];
-        }
         double complex summand = summand_real(nu, dim, lambda, lv, x, y, zArgBound);
-        double complex summandReci =
-            summand_real(nu, dim, lambda, lvReci, x, y, zArgBound);
-        kahan_add_c(&sum, &epsilon, summand + summandReci);
+        kahan_add_c(&sum, &epsilon, summand);
         lattice_vector_increment(dim, cutoffs, zv);
     }
 
@@ -552,10 +536,8 @@ static double complex sum_fourier(double nu, unsigned int dim, double lambda,
                                   const double *m_invt, const double *x,
                                   const double *y, const int cutoffs[],
                                   double zArgBound, bool diag) {
-    int zv[dim];        // counting vector in Z^dim
-    double lv[dim];     // lattice vector
-    double lvReci[dim]; // lattice vector of (-zv)
-
+    int zv[dim];    // counting vector in Z^dim
+    double lv[dim]; // lattice vector
     // cuboid cutoffs
     long totalSummands = 1;
     for (int k = 0; k < dim; k++) {
@@ -563,24 +545,24 @@ static double complex sum_fourier(double nu, unsigned int dim, double lambda,
         totalSummands *= 2 * cutoffs[k] + 1;
     };
     long zeroIndex = (totalSummands - 1) / 2;
-
     double complex sum = 0.0;
     double complex epsilon = 0.0;
-
     // second sum (in fourier space)
     for (long n = 0; n < zeroIndex; n++) {
         matrix_intVector(dim, m_invt, zv, lv, diag);
-        for (int i = 0; i < dim; i++) {
-            lvReci[i] = -lv[i];
-        }
         double complex summand =
             summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
-        double complex summandReci =
-            summand_fourier(nu, dim, lambda, lvReci, x, y, zArgBound);
-        kahan_add_c(&sum, &epsilon, summand + summandReci);
+        kahan_add_c(&sum, &epsilon, summand);
         lattice_vector_increment(dim, cutoffs, zv);
     }
-
+    lattice_vector_increment(dim, cutoffs, zv); // skips zero
+    for (long n = zeroIndex + 1; n < totalSummands; n++) {
+        matrix_intVector(dim, m_invt, zv, lv, diag);
+        double complex summand =
+            summand_fourier(nu, dim, lambda, lv, x, y, zArgBound);
+        kahan_add_c(&sum, &epsilon, summand);
+        lattice_vector_increment(dim, cutoffs, zv);
+    }
     return sum;
 }
 
