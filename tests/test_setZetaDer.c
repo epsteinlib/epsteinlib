@@ -618,7 +618,7 @@ static int inversionZeroSweep(unsigned int dim, const double *m, // NOLINT
  *
  * @return number of failed tests.
  */
-static int test_epsteinZeta_inversionZeros(void) { // NOLINT
+static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
     printf("%s ", __func__);
 
     double tol = pow(10, -15);
@@ -1194,7 +1194,7 @@ int main() {
     failed += run_timed_test(test_setZetaDer_2D);
     failed += run_timed_test(test_setZetaDer_taylor);
     failed += run_timed_test(test_epsteinZetaAniso_poles);
-    failed += run_timed_test(test_epsteinZeta_inversionZeros);
+    failed += run_timed_test(test_epsteinZetaAniso_inversionZeros);
     failed += run_timed_test(test_setZetaDer_special_exponents);
     failed += run_timed_test(test_setZetaDer_poly_laplace);
     failed += run_timed_test(test_epsteinZetaAniso_allEqual);
