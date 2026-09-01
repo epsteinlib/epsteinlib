@@ -512,12 +512,18 @@ static int test_epsteinZetaAniso_poles(void) { // NOLINT
  *
  * Inversion: conj(Z_alpha(0, y)) = Z_alpha(0, -y) = (-1)^|alpha| Z_alpha(0, y).
  *
+ * Half reciprocal wavevector: for 2y in Lambda* the value is real by
+ * Lambda*-periodicity, so odd |alpha| vanishes there too. Only checked where
+ * checkHalfReci is set, since on lattices whose Fourier window is not symmetric
+ * about -y the vanishing holds only up to the truncation error.
+ *
  * Mirroring: epsteinZetaAniso vanishes whenever alpha_i is odd, the lattice is
  * mirror symmetric in the i'th component and x_i = y_i = 0.
  *
  * @param[in] mirror: mirror symmetry of the lattice, one flag per component.
  * @param[in] xs, ys, alphas: flat arrays with stride dim.
  * @param[in] checkMirror: also check the mirroring statement.
+ * @param[in] checkHalfReci: also check the half reciprocal wavevector statement.
  * @param[in,out] total: running number of checked components.
  * @param[in,out] reported: running number of printed failures.
  * @return number of failed tests.
@@ -526,8 +532,9 @@ static int inversionZeroSweep(unsigned int dim, const double *m, // NOLINT
                               const bool *mirror, const double *xs, int numX,
                               const double *ys, int numY, const unsigned int *alphas,
                               int numAlpha, const double *nus, int numNu,
-                              bool checkMirror, double tol, int *total,
-                              unsigned int *reported) {
+                              bool checkMirror, bool checkHalfReci, double tol,
+                              int *total, unsigned int *reported, double *errMin,
+                              double *errMax, double *errSum) {
     const char *partName[] = {"Real", "Imaginary"};
     int failed = 0;
 
@@ -535,6 +542,18 @@ static int inversionZeroSweep(unsigned int dim, const double *m, // NOLINT
         const double *x = xs + ((size_t)dim * itx);
         for (int ity = 0; ity < numY; ity++) {
             const double *y = ys + ((size_t)dim * ity);
+
+            // 2y in Lambda* <=> A^T (2y) in Z^d, so Z_alpha(0, -y) = Z_alpha(0, y)
+            // by Lambda*-periodicity and the value is real
+            bool yHalfReci = true;
+            for (unsigned int i = 0; i < dim; i++) {
+                double t = 0.;
+                for (unsigned int j = 0; j < dim; j++) {
+                    t += m[(j * dim) + i] * 2. * y[j];
+                }
+                yHalfReci = yHalfReci && (fabs(t - nearbyint(t)) < 1e-12);
+            }
+
             for (int ia = 0; ia < numAlpha; ia++) {
                 const unsigned int *alpha = alphas + ((size_t)dim * ia);
                 unsigned int alphaAbs = mult_abs(dim, alpha);
@@ -549,12 +568,15 @@ static int inversionZeroSweep(unsigned int dim, const double *m, // NOLINT
                         mirrorZero || (checkMirror && (alpha[i] % 2 != 0) &&
                                        mirror[i] && (x[i] == 0.) && (y[i] == 0.));
                 }
+
                 bool odd = (alphaAbs % 2) != 0;
 
                 // index 0 is the real part, index 1 the imaginary part
                 bool vanishes[2];
                 vanishes[0] = mirrorZero || (xZero && odd);
-                vanishes[1] = mirrorZero || (xZero && (!odd || yZero));
+                vanishes[1] =
+                    mirrorZero ||
+                    (xZero && (!odd || yZero || (checkHalfReci && yHalfReci)));
                 if (!vanishes[0] && !vanishes[1]) {
                     continue;
                 }
@@ -574,6 +596,9 @@ static int inversionZeroSweep(unsigned int dim, const double *m, // NOLINT
                             continue;
                         }
                         double err = fabs(part[c]);
+                        *errMin = (*errMin < err) ? *errMin : err;
+                        *errMax = (*errMax > err) ? *errMax : err;
+                        *errSum += err;
                         (*total)++;
 
                         if (err < tol) {
@@ -607,7 +632,6 @@ static int inversionZeroSweep(unsigned int dim, const double *m, // NOLINT
 
     return failed;
 }
-
 /*!
  * @brief Checks the components of Epstein zeta that vanish by inversion and by
  * mirroring, over a grid that reaches the strongly anisotropic regime where a
@@ -624,6 +648,9 @@ static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
     double tol = pow(10, -15);
     int failed = 0;
     int total = 0;
+    double errMin = NAN;
+    double errMax = NAN;
+    double errSum = 0.;
     unsigned int reported = 0;
 
     /* ------------------------------- 2D ------------------------------- */
@@ -644,8 +671,8 @@ static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
                       0.5,  0.,   // cell boundary
                       0.,   0.21, // zero in the first component only
                       0.1,  0.2}; // generic
-    unsigned int alphaInv2[] = {0, 0, 0, 1, 0, 1, 1,  1, 2,  0, 2,  1,
-                                3, 1, 5, 2, 7, 0, 12, 0, 21, 2, 31, 0};
+    unsigned int alphaInv2[] = {0, 0, 1, 0, 0,  1, 1,  1, 2,  0, 2,  1, 3,  1,
+                                5, 2, 7, 0, 12, 0, 21, 2, 31, 0, 41, 0, 51, 0};
     double nuInv2[] = {2.5, 4., 8., 18., 30.};
 
     // Mirroring: one component of x and y vanishes and the others do not. Both
@@ -661,12 +688,12 @@ static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
     double nuMir2[] = {2.5, 6., 8.};
 
     for (int im = 0; im < 5; im++) {
-        failed +=
-            inversionZeroSweep(2, a2[im], mirror2[im], xInv2, 1, yInv2, 5, alphaInv2,
-                               12, nuInv2, 5, false, tol, &total, &reported);
-        failed +=
-            inversionZeroSweep(2, a2[im], mirror2[im], xMir2, 3, yMir2, 3, alphaMir2,
-                               7, nuMir2, 3, true, tol, &total, &reported);
+        failed += inversionZeroSweep(2, a2[im], mirror2[im], xInv2, 1, yInv2, 5,
+                                     alphaInv2, 14, nuInv2, 5, false, false, tol,
+                                     &total, &reported, &errMin, &errMax, &errSum);
+        failed += inversionZeroSweep(2, a2[im], mirror2[im], xMir2, 3, yMir2, 3,
+                                     alphaMir2, 7, nuMir2, 3, true, false, tol,
+                                     &total, &reported, &errMin, &errMax, &errSum);
     }
 
     /* ------------------------------- 3D ------------------------------- */
@@ -689,13 +716,26 @@ static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
     double nuMir3[] = {2.5, 6., 8.};
 
     for (int im = 0; im < 3; im++) {
-        failed +=
-            inversionZeroSweep(3, a3[im], mirror3[im], xInv3, 1, yInv3, 3, alphaInv3,
-                               7, nuInv3, 3, false, tol, &total, &reported);
-        failed +=
-            inversionZeroSweep(3, a3[im], mirror3[im], xMir3, 1, yMir3, 2, alphaMir3,
-                               5, nuMir3, 3, true, tol, &total, &reported);
+        failed += inversionZeroSweep(3, a3[im], mirror3[im], xInv3, 1, yInv3, 3,
+                                     alphaInv3, 7, nuInv3, 3, false, false, tol,
+                                     &total, &reported, &errMin, &errMax, &errSum);
+        failed += inversionZeroSweep(3, a3[im], mirror3[im], xMir3, 1, yMir3, 2,
+                                     alphaMir3, 5, nuMir3, 3, true, false, tol,
+                                     &total, &reported, &errMin, &errMax, &errSum);
     }
+
+    /* -------------------- half reciprocal wavevector -------------------- */
+    // 2y in Lambda* makes the value real, so odd |alpha| vanishes there too.
+    // Only the identity lattice, and only outside the large exponent branch:
+    // elsewhere the Fourier window is not symmetric about -y and the vanishing
+    // holds only up to the truncation error.
+    double yHalf2[] = {0.5, 0.};
+    unsigned int alphaHalf2[] = {21, 0, 31, 0, 41, 0, 51, 0};
+    double nuHalf2[] = {2.5, 4., 8.};
+
+    failed += inversionZeroSweep(2, a2[0], mirror2[0], xInv2, 1, yHalf2, 1,
+                                 alphaHalf2, 4, nuHalf2, 3, false, true, tol, &total,
+                                 &reported, &errMin, &errMax, &errSum);
 
     if (reported >= MAX_REPORTS) {
         printf("\n\t ... ");
@@ -705,6 +745,9 @@ static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
     printf("\n\t ... ");
     printf("%d out of %d tests passed with tolerance %E.", total - failed, total,
            tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / total);
     printf("\n");
 
     return failed;
