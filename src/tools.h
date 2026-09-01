@@ -13,6 +13,7 @@
 #ifndef EPSTEIN_TOOLS
 #define EPSTEIN_TOOLS
 #include <complex.h>
+#include <math.h>
 #include <stdbool.h>
 
 /*!
@@ -20,6 +21,22 @@
  * sum in real space for the set Zeta derivatives.
  */
 #define EPS_CANCELLATION 4e-16
+
+/**
+ * @brief Evaluates exp(-2 pi i s) exactly if s is an integer or a half integer.
+ * @param[in] s: argument of the phase.
+ * @return exp(-2 pi i s).
+ */
+static inline double complex phase(double s) {
+    double r = s - nearbyint(s);
+    if (r == 0.) {
+        return 1.;
+    }
+    if (fabs(r) == 0.5) {
+        return -1.;
+    }
+    return cexp(-2 * M_PI * I * s);
+}
 
 /**
  * @brief Compute the integer power of a double by squaring.

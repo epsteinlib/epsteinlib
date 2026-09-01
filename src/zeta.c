@@ -90,7 +90,7 @@ static inline void lattice_vector_increment_norm(unsigned int dim,
 static inline double complex summand_real(double nu, unsigned int dim, double lambda,
                                           double lv[], const double *x,
                                           const double *y, double zArgBound) {
-    double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
+    double complex rot = phase(dot(dim, lv, y));
     for (int i = 0; i < dim; i++) {
         lv[i] -= x[i];
     }
@@ -165,7 +165,7 @@ static inline double complex summand_real_harmonic(
     const unsigned long long *chunk_offset, const unsigned long long *valid_count,
     const double *coeffs, const unsigned int *exponents) {
 
-    double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
+    double complex rot = phase(dot(dim, lv, y));
     for (int i = 0; i < dim; i++) {
         lv[i] -= x[i];
     }
@@ -278,7 +278,7 @@ static inline double complex summand_real_harmonic_large_exp(
     const unsigned long long *chunk_offset, const unsigned long long *valid_count,
     const double *coeffs, const unsigned int *exponents, bool nearOrigin) {
 
-    double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
+    double complex rot = phase(dot(dim, lv, y));
     for (int i = 0; i < dim; i++) {
         lv[i] -= x[i];
     }
@@ -403,7 +403,7 @@ static inline double complex summand_real_harmonic_large_exp_singularity_sum(
     const unsigned long long *valid_count, const double *coeffs,
     const unsigned int *exponents) {
 
-    double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
+    double complex rot = phase(dot(dim, lv, y));
     for (int i = 0; i < dim; i++) {
         lv[i] -= x[i];
     }
@@ -511,7 +511,7 @@ static inline double complex summand_fourier(double nu, unsigned int dim,
     for (int i = 0; i < dim; i++) {
         lv[i] += y[i];
     }
-    double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
+    double complex rot = phase(dot(dim, lv, x));
     return rot * crandall_g(dim, dim - nu, lv, lambda, zArgBound);
 }
 
@@ -594,7 +594,7 @@ static inline double complex summand_fourier_harmonic(
     for (int i = 0; i < dim; i++) {
         lv[i] += y[i];
     }
-    double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, x));
+    double complex rot = phase(dot(dim, lv, x));
     return rot *
            harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count, coeffs,
                       exponents) *
