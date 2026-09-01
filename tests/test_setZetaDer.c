@@ -508,6 +508,24 @@ static int test_epsteinZetaAniso_poles(void) { // NOLINT
 }
 
 /*!
+ * @brief Tests whether 2 x_i e_i is a lattice vector, for a diagonal lattice.
+ * Widens the mirroring statement from x_i = 0 to x_i a half square lattice point.
+ * @return true if 2 x_i e_i is in the lattice.
+ */
+static bool axisHalfLattice(unsigned int dim, const double *m, unsigned int i,
+                            double xi) {
+    for (unsigned int a = 0; a < dim; a++) {
+        for (unsigned int b = 0; b < dim; b++) {
+            if ((a != b) && (m[(a * dim) + b] != 0.)) {
+                return xi == 0.;
+            }
+        }
+    }
+    double t = 2. * xi / m[(i * dim) + i];
+    return t == nearbyint(t);
+}
+
+/*!
  * @brief Sweeps one lattice and checks the components that have to vanish.
  *
  * Inversion: conj(Z_alpha(0, y)) = Z_alpha(0, -y) = (-1)^|alpha| Z_alpha(0, y).
@@ -564,9 +582,9 @@ static int inversionZeroSweep(unsigned int dim, const double *m, // NOLINT
                 for (unsigned int i = 0; i < dim; i++) {
                     xZero = xZero && (x[i] == 0.);
                     yZero = yZero && (y[i] == 0.);
-                    mirrorZero =
-                        mirrorZero || (checkMirror && (alpha[i] % 2 != 0) &&
-                                       mirror[i] && (x[i] == 0.) && (y[i] == 0.));
+                    mirrorZero = mirrorZero ||
+                                 (checkMirror && (alpha[i] % 2 != 0) && mirror[i] &&
+                                  axisHalfLattice(dim, m, i, x[i]) && (y[i] == 0.));
                 }
 
                 bool odd = (alphaAbs % 2) != 0;
@@ -682,7 +700,8 @@ static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
     // the power -nu.
     double xMir2[] = {0.,        0.,        // origin
                       0.,        37. / 100, // zero in the first component only
-                      29. / 100, 0.};       // zero in the second component only
+                      29. / 100, 0.,        // zero in the second component only
+                      0.5,       0.};       // half lattice point
     double yMir2[] = {0., 0., 0., 21. / 100, 13. / 100, 0.};
     unsigned int alphaMir2[] = {1, 0, 0, 1, 1, 1, 3, 1, 5, 2, 9, 2, 11, 2};
     double nuMir2[] = {2.5, 6., 8.};
@@ -691,7 +710,7 @@ static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
         failed += inversionZeroSweep(2, a2[im], mirror2[im], xInv2, 1, yInv2, 5,
                                      alphaInv2, 14, nuInv2, 5, false, false, tol,
                                      &total, &reported, &errMin, &errMax, &errSum);
-        failed += inversionZeroSweep(2, a2[im], mirror2[im], xMir2, 3, yMir2, 3,
+        failed += inversionZeroSweep(2, a2[im], mirror2[im], xMir2, 4, yMir2, 3,
                                      alphaMir2, 7, nuMir2, 3, true, false, tol,
                                      &total, &reported, &errMin, &errMax, &errSum);
     }
