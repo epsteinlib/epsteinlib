@@ -1004,6 +1004,33 @@ summation_harmonic(double nu, unsigned int dim, unsigned int alphaAbs,
 }
 
 /**
+ * @brief Returns the length of the basis vector along e_j, zero if there is none.
+ *
+ * @param[in] mat: lattice matrix, columns are the basis vectors.
+ * @param[in] j: component.
+ * @return the j'th component of the axial basis vector, or 0 if there is none.
+ */
+static inline double axis_basis_length(unsigned int dim, const double *mat,
+                                       unsigned int j) {
+    double a = 0.;
+    for (unsigned int k = 0; k < dim; k++) {
+        if (mat[(j * dim) + k] == 0.) {
+            continue;
+        }
+        if (a != 0.) {
+            return 0.; // row j is not axial
+        }
+        for (unsigned int i = 0; i < dim; i++) {
+            if ((i != j) && (mat[(i * dim) + k] != 0.)) {
+                return 0.; // column k is not axial
+            }
+        }
+        a = mat[(j * dim) + k];
+    }
+    return a;
+}
+
+/**
  * @brief calculates the (regularized) Epstein zeta function as well as the
  * (regularized) anisotropic Epstein zeta function with a prefactor.
  * @param[in] nu: exponent.
@@ -1142,6 +1169,22 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
                 y_t2_squared < EPS_ZERO_Y) {
                 res = NAN;
             } else {
+                // check zeros from lattice symmetries
+                for (unsigned int j = 0; j < dim; j++) {
+                    if (alpha[j] % 2 == 0) {
+                        continue;
+                    }
+                    double a = axis_basis_length(dim, m_real, j);
+                    double b = axis_basis_length(dim, m_fourier, j);
+                    double tx = (a == 0.) ? 0.5 : 2. * x_t2[j] / a;
+                    double ty = (b == 0.) ? 0.5 : 2. * y_t2[j] / b;
+                    if (((y_t2[j] == 0.) && (tx == nearbyint(tx))) ||
+                        ((x_t2[j] == 0.) && (ty == nearbyint(ty)))) {
+                        free(x_t2);
+                        free(y_t2);
+                        return 0.;
+                    }
+                }
                 res = summation_harmonic(nu, dim, alphaAbs, alpha, lambda, ms,
                                          m_real, m_fourier, x_t1, x_t2, y_t2,
                                          cutoffsReal, cutoffsFourier, diag, xfactor);
