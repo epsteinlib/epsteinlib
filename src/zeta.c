@@ -1111,8 +1111,10 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
     double y_t2_squared = dot(dim, y_t2, y_t2);
     unsigned int alphaAbs = aniso ? mult_abs(dim, alpha) : 0;
     bool allEvenAlpha = true;
-    for (int i = 0; i < dim && allEvenAlpha; i++) {
-        allEvenAlpha = !(alpha[i] % 2);
+    if (aniso) {
+        for (int i = 0; i < dim && allEvenAlpha; i++) {
+            allEvenAlpha = !(alpha[i] % 2);
+        }
     }
     // handle special case of non-positive integer values nu for the non-aniso
     // variants
@@ -1168,10 +1170,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
                  rot * xfactor;
             xfactor = 1;
         } else if (!reg && aniso) {
-            bool allEvenAlpha = true;
-            for (int i = 0; i < dim && allEvenAlpha; i++) {
-                allEvenAlpha = !(alpha[i] % 2);
-            }
             // helpers for detecting zeros due to symmetries
             bool mirrorShift = false;
             bool mirrorWave = false;
