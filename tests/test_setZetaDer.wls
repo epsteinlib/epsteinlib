@@ -40,7 +40,7 @@ Protect[Power];
 ];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Auxiliary functions*)
 
 
@@ -450,7 +450,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_1D_ref.csv",zDerTab1D];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create set zeta 2D reference values*)
 
 
@@ -697,14 +697,14 @@ Export["csv/setZetaDer_special_exponents_ref.csv", zetaSpecialTab];
 
 
 (* ::Subsection:: *)
-(*Check badly conditioned anisotropic Epstien zeta values*)
+(*Check badly conditioned anisotropic Epstein zeta values*)
 
 
 (* ::Text:: *)
 (*Generate random reference values.*)
 
 
-epsStrip={2^-20,2^-26,2^-32,2^-38,2^-44,2^-50};
+epsStrip={2^-20,2^-26,2^-38,2^-50};
 SeedRandom[42];
 zAnisoStrip=Flatten[
 	ParallelTable[{
@@ -738,13 +738,13 @@ Export[NotebookDirectory[]<>"csv/epsteinZetaAniso_2D_strip_ref.csv",zAnisoStrip]
 
 zAnisoHighOrderTab=Flatten[
 	ParallelTable[{
-			Flatten@{N@{\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100}},{n,0},{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100},{n,0}]}}
-			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100}},{n,2},{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100},{n,2}]}}
-			,Flatten@{N@{\[Nu],AHex,{31/100,17/100},{13/100,29/100}},{n,0},{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],AHex,{31/100,17/100},{13/100,29/100},{n,0}]}}
-			,Flatten@{N@{\[Nu],AObl,{31/100,17/100},{13/100,29/100}},{n,0},{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],AObl,{31/100,17/100},{13/100,29/100},{n,0}]}}
+			Flatten@{N@{\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100}},{n,0},{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100},{n,0},InputPrecision->200]}}
+			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100}},{n,2},{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100},{n,2},InputPrecision->200]}}
+			,Flatten@{N@{\[Nu],AHex,{31/100,17/100},{13/100,29/100}},{n,0},{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],AHex,{31/100,17/100},{13/100,29/100},{n,0},InputPrecision->200]}}
+			,Flatten@{N@{\[Nu],AObl,{31/100,17/100},{13/100,29/100}},{n,0},{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],AObl,{31/100,17/100},{13/100,29/100},{n,0},InputPrecision->200]}}
 		}
 		,{\[Nu],{5/2,8,20}}
-		,{n,Range[1,31,5]}
+		,{n,0,30,3}
 	]
 ,2];
 

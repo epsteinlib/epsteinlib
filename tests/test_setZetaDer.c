@@ -353,7 +353,7 @@ static int test_epsteinZetaAniso_2D_strip(void) {
             printf("\n\n");
             printf("Warning! ");
             printf("epsteinZetaAniso: ");
-            printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
+            printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t         != "
                    "%.16lf "
                    "%+.16lf I (reference implementation)\n",
                    4, creal(num), cimag(num), creal(ref), cimag(ref));
@@ -481,7 +481,7 @@ static int test_epsteinZetaAniso_2D_highorder(void) {
             printf("\n\n");
             printf("Warning! ");
             printf("epsteinZetaAniso: ");
-            printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
+            printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t         != "
                    "%.16lf "
                    "%+.16lf I (reference implementation)\n",
                    4, creal(num), cimag(num), creal(ref), cimag(ref));
