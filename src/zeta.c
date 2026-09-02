@@ -701,7 +701,8 @@ static int harmonic_coeffs_alloc(unsigned int alphaAbs, unsigned int kMax,
 
     // overflow unreachable for |alpha| < 200 in 2D and |alpha| < 80 in 3D
     // rather, the hpdyad arithmetic is the bottleneck
-    *coeffs = malloc(coeffs_size * sizeof **coeffs);
+    // two doubles per coefficient: (hi, lo) limbs, see harmonic_h
+    *coeffs = malloc(2 * coeffs_size * sizeof **coeffs);
     *exponents = malloc(coeffs_size * dim * sizeof **exponents);
 
     if (!*coeffs || !*exponents) {

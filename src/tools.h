@@ -21,6 +21,15 @@
  */
 #define EPS_CANCELLATION 4e-16
 
+// Cancellation floor for sums accumulated in double-double arithmetic. The
+// residual at a structural zero is O(eps^2) relative to sum|term| rather than
+// O(eps), so the threshold that separates a true zero from a small nonzero
+// value drops by roughly eps. Kept well above the observed eps^2 floor and well
+// below the smallest genuine value the outer sum produces.
+#ifndef EPS_CANCELLATION_DD
+#define EPS_CANCELLATION_DD 1e-24
+#endif
+
 /**
  * @brief Compute the integer power of a double by squaring.
  * Uses switch for small exponents to avoid loop overhead.

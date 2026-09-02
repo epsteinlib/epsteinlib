@@ -71,11 +71,15 @@ void harmonic_h_inner_term_multi_hpdyad(unsigned int dim, const unsigned int *al
  * @param[in] alpha: upper multi-index.
  * @param[in] gamma: fixed multi-index gamma.
  * @param[in] alphaAbs: total of alpha.
- * @return h_inner(α,γ,k).
+ * @param[out] residual: if non-NULL, receives the exact remainder
+ * h_inner(α,γ,k) minus the returned double. The outer sum in harmonic_h is
+ * ill-conditioned, so this second limb is what keeps the result correctly
+ * rounded at high |alpha|.
+ * @return h_inner(α,γ,k), correctly rounded.
  */
 double harmonic_h_inner_sum(unsigned int k, unsigned int dim,
                             const unsigned int *alpha, const unsigned int *gamma,
-                            unsigned int alphaAbs);
+                            unsigned int alphaAbs, double *residual);
 
 /** @brief Computes chunk offsets and valid entry counts for precomputed
  * inner harmonic sums corresponding to k = 0, ..., floor(|alpha|/2).

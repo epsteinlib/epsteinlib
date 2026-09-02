@@ -12,6 +12,7 @@
 #include "stdbool.h"
 #include "tools.h"
 #include <math.h>
+#include <stddef.h>
 
 /** @brief Computes cₙ,ᵢ,ₖ＝ ∏_{j=i+1}^{⌊n/2⌋-k} (2n＋d−2−4k−2j).
  * @param[in] n: index (total of alpha).
@@ -170,9 +171,111 @@ void harmonic_h_inner_term_multi_hpdyad(unsigned int dim, const unsigned int *al
  */
 // fast paths for incremental multi-index enumeration increases nesting
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
+/** @brief Minimal double-double arithmetic used to evaluate the outer sum of
+ * harmonic_h. The outer sum is ill-conditioned: at |alpha| = 41 the ratio
+ * sum|term| / |sum| reaches 1e6, so each coefficient's stored rounding error of
+ * eps/2 is amplified to ~1e-10 relative. Carrying a residual limb for both the
+ * coefficients and the accumulator reduces that to eps^2 * cond, i.e. below the
+ * final rounding.
+ */
+typedef struct {
+    double hi;
+    double lo;
+} dd_t;
+
+/** @brief Exact sum of two doubles as a double-double (Knuth TwoSum). */
+static inline dd_t dd_two_sum(double a, double b) {
+    dd_t r;
+    double bb;
+    r.hi = a + b;
+    bb = r.hi - a;
+    r.lo = (a - (r.hi - bb)) + (b - bb);
+    return r;
+}
+
+/** @brief Exact product of two doubles as a double-double (TwoProduct via fma).
+ */
+static inline dd_t dd_two_prod(double a, double b) {
+    dd_t r;
+    r.hi = a * b;
+    r.lo = fma(a, b, -r.hi);
+    return r;
+}
+
+/** @brief Sum of two double-doubles, renormalized. */
+static inline dd_t dd_add(dd_t a, dd_t b) {
+    dd_t s = dd_two_sum(a.hi, b.hi);
+    s.lo += a.lo + b.lo;
+    return dd_two_sum(s.hi, s.lo);
+}
+
+/** @brief Product of two double-doubles, renormalized. */
+static inline dd_t dd_mul(dd_t a, dd_t b) {
+    dd_t p = dd_two_prod(a.hi, b.hi);
+    p.lo += (a.hi * b.lo) + (a.lo * b.hi);
+    return dd_two_sum(p.hi, p.lo);
+}
+
+/** @brief Represent a double exactly as an hpdyad_t.
+ * @param[out] a: receives the exact value of x.
+ * @param[in] x: finite double.
+ * @return void
+ */
+static void hpdyad_set_double_exact(hpdyad_t *a, double x) {
+    signed char sg;
+    int e;
+    double f;
+    unsigned long long m;
+
+    if (x == 0.) {
+        hpdyad_set_ull(a, 0, 1);
+        return;
+    }
+    sg = (x < 0.) ? -1 : 1;
+    f = frexp(fabs(x), &e);
+    m = (unsigned long long)ldexp(f, 53);
+    hpdyad_set_ull(a, m, sg);
+    a->exp2 += e - 53;
+}
+
+/** @brief Split an exact hpdyad value into the nearest double and the exact
+ * residual. The residual is exact because hpdyad_add takes the subtraction path
+ * on a sign mismatch.
+ * @param[in] v: exact value.
+ * @param[out] hi: correctly rounded double nearest to v.
+ * @param[out] lo: double nearest to v - hi.
+ * @return void
+ */
+static void hpdyad_split_double(const hpdyad_t *v, double *hi, double *lo) {
+    hpdyad_t h;
+    hpdyad_t neg;
+    hpdyad_t rest;
+
+    *hi = hpdyad_to_double(v);
+    hpdyad_set_double_exact(&h, *hi);
+    neg = h;
+    neg.sign = (signed char)(-neg.sign);
+    hpdyad_add(&rest, v, &neg);
+    *lo = hpdyad_to_double(&rest);
+}
+
+/** @brief Computes the inner sum h_inner(α,γ,k) using exact hpdyad arithmetic.
+ * @pre k ≤ ⌊alphaAbs/2⌋
+ * @param[in] k: specifies degree |alpha| - 2k.
+ * @param[in] dim: dimension of alpha, beta and gamma.
+ * @param[in] alpha: upper multi-index.
+ * @param[in] gamma: fixed multi-index gamma.
+ * @param[in] alphaAbs: total of alpha.
+ * @param[out] residual: if non-NULL, receives the exact remainder
+ * h_inner(α,γ,k) minus the returned double. The outer sum in harmonic_h is
+ * ill-conditioned, so this second limb is what keeps the result correctly
+ * rounded at high |alpha|.
+ * @return h_inner(α,γ,k), correctly rounded.
+ */
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 double harmonic_h_inner_sum(unsigned int k, unsigned int dim,
                             const unsigned int *alpha, const unsigned int *gamma,
-                            unsigned int alphaAbs) {
+                            unsigned int alphaAbs, double *residual) {
 
     unsigned int beta[dim];
     unsigned int theta1[dim];
@@ -259,8 +362,14 @@ double harmonic_h_inner_sum(unsigned int k, unsigned int dim,
         hpdyad_add(&sumInner, &sumInner, &term);
     }
 
-    // convert to double
-    double result = hpdyad_to_double(&sumInner);
+    // convert to double, keeping the residual so that the ill-conditioned outer
+    // sum in harmonic_h can be evaluated in double-double arithmetic
+    double result;
+    double lo;
+    hpdyad_split_double(&sumInner, &result, &lo);
+    if (residual != NULL) {
+        *residual = lo;
+    }
 
     return result;
 }
@@ -360,8 +469,12 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, unsigned int dim,
             }
 
             if (!skip) {
-                coeffs[chunk_offset[k] + n] =
-                    harmonic_h_inner_sum(k, dim, alpha, gamma, alphaAbs);
+                // coeffs holds interleaved (hi, lo) pairs: the exact inner sum
+                // does not fit a double, and the discarded limb dominates the
+                // error of the ill-conditioned outer sum in harmonic_h
+                coeffs[2 * (chunk_offset[k] + n)] =
+                    harmonic_h_inner_sum(k, dim, alpha, gamma, alphaAbs,
+                                         &coeffs[(2 * (chunk_offset[k] + n)) + 1]);
                 unsigned long long expIdx = (chunk_offset[k] + n) * dim;
                 for (unsigned int j = 0; j < dim; j++) {
                     exponents[expIdx + j] = (2 * gamma[j]) - alpha[j];
@@ -401,31 +514,59 @@ double harmonic_h(unsigned int k, unsigned int dim, const double *z,
                   const unsigned long long *valid_count, const double *coeffs,
                   const unsigned int *exponents) {
 
-    double zPow;
-    double sumOuter = 0.0;
-    double epsilonOuter = 0.0;
+    double sumOuter;
     double maxTerm = 0.0;
     unsigned long long n;
     unsigned long long count = valid_count[k];
     unsigned long long baseIdx = chunk_offset[k];
     unsigned long long expIdx;
     unsigned int i;
+    unsigned int e;
+    // exponents sum to |alpha| - 2k, so no single one exceeds that bound;
+    // sizing the table to alphaAbs would roughly double the setup cost
+    unsigned int maxExp = alphaAbs - (2 * k);
+    dd_t acc;
+    // z[i]^e for every exponent the chunk can contain. Tabulating costs one
+    // multiplication per entry and removes repeated squaring from the inner
+    // loop, so double-double evaluation stays close to the cost of the plain
+    // power chain it replaces.
+    dd_t zPowTab[dim][maxExp + 1];
+
+    for (i = 0; i < dim; i++) {
+        dd_t zi;
+        zi.hi = z[i];
+        zi.lo = 0.0;
+        zPowTab[i][0].hi = 1.0;
+        zPowTab[i][0].lo = 0.0;
+        for (e = 1; e <= maxExp; e++) {
+            zPowTab[i][e] = dd_mul(zPowTab[i][e - 1], zi);
+        }
+    }
+
+    acc.hi = 0.0;
+    acc.lo = 0.0;
 
     for (n = 0; n < count; n++) {
-        double sumInner = coeffs[baseIdx + n];
+        dd_t coeff;
+        dd_t zPow;
+        dd_t summand;
+        coeff.hi = coeffs[2 * (baseIdx + n)];
+        coeff.lo = coeffs[(2 * (baseIdx + n)) + 1];
         expIdx = (baseIdx + n) * dim;
-        zPow = 1.0;
-        for (i = 0; i < dim; i++) {
-            zPow *= real_int_pow(z[i], exponents[expIdx + i]);
+        zPow = zPowTab[0][exponents[expIdx]];
+        for (i = 1; i < dim; i++) {
+            zPow = dd_mul(zPow, zPowTab[i][exponents[expIdx + i]]);
         }
-        double summand = zPow * sumInner;
-        maxTerm = fmax(maxTerm, fabs(summand));
-        kahan_add_r(&sumOuter, &epsilonOuter, summand);
+        summand = dd_mul(zPow, coeff);
+        maxTerm = fmax(maxTerm, fabs(summand.hi));
+        acc = dd_add(acc, summand);
     }
+
+    sumOuter = acc.hi + acc.lo;
 
     // avoid accumulation error that is pure rounding noise to be amplified by
     // divergent Crandall factor upon return
-    if (fabs(sumOuter) <= EPS_CANCELLATION * (double)count * maxTerm) {
+    if (fabs(sumOuter) <= EPS_CANCELLATION_DD * (double)count * maxTerm) {
         return 0.0;
     }
 
