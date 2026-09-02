@@ -104,6 +104,15 @@ benchmark_aniso_timing = executable('epsteinlib_benchmark_aniso_timing',
     link_with : epsteinlib
 )
 
+benchmark_harmonics = executable('epsteinlib_benchmark_harmonics',
+    ['utils.c','../src/harmonics.c','benchmark_harmonics.c'],
+    include_directories : incdir,
+    dependencies: deps,
+    install: false,
+    override_options: override_options,
+    link_with : epsteinlib
+)
+
 # bigger timeout budget for debugging
 test_timeout = get_option('debug') ? 600 : 30
 
