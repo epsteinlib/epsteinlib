@@ -13,7 +13,7 @@
 /*!
  * @brief Maximum number of failures reported per test, to keep logs readable.
  */
-enum { MAX_REPORTS = 20 };
+enum { MAX_REPORTS = 10 };
 
 /**
  * @brief Compute integer powers of the imaginary unit I.
@@ -25,6 +25,16 @@ static inline double complex imaginary_int_pow(unsigned int exp) {
     static const double complex powers[4] = {1.0, I, -1.0, -I};
     return powers[exp & 3];
 }
+
+/**
+ * @brief Loud banner for a known-bad test whose error has dropped far below
+ * its baseline tolerance.
+ * @param[in] name: test name shown in the banner.
+ * @param[in] errMax: largest relative error observed in the test.
+ * @param[in] threshold: value below which the improvement counts as landed.
+ * @return void
+ */
+void reportImprovedUnitTest(const char *name, double errMax, double threshold);
 
 /*!
  * @brief absolute difference between to complex numbers.
