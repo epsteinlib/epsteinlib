@@ -31,7 +31,7 @@ Protect[Power];
 ];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Reference functions*)
 
 
@@ -99,7 +99,7 @@ Export["csv/coeffs_c_inner_ref.csv",cInnerTab];
 Export["csv/coeffs_c_outer_ref.csv",cOuterTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create references values for inner sum of harmonic polynomials*)
 
 
@@ -141,7 +141,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/harmonic_h_inner_ref.csv",hInnerTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create 1D harmonic h reference values*)
 
 
@@ -169,7 +169,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/harmonic_h_1D_ref.csv",h1DTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Create harmonic h reference values*)
 
 
@@ -234,3 +234,71 @@ h3DTabRandom=ParallelTable[
 
 
 Export[NotebookDirectory[]<>"csv/harmonic_h_3D_random_ref.csv",h3DTabRandom];
+
+
+(* ::Subsection::Closed:: *)
+(*Create harmonic h reference values for high condition numbers*)
+
+
+(* ::Text:: *)
+(*Search for high condition-number polynomials in 3D.*)
+
+
+hRules3D[k_,a_]:=hRules3D[k,a]=CoefficientRules[Expand[h[k][{zz1,zz2,zz3},a]],{zz1,zz2,zz3}]
+hCond[rules_,z_]:=Module[
+	{terms=(Last[#]Times@@(SetPrecision[z,30]^First[#]))&/@rules,s}
+	,s=Total[terms]
+	;If[Precision[s]>10,Total[Abs[terms]]/Abs[s],0]
+];
+zSearch[k_,a_,n_]:=Module[
+	{rules=hRules3D[k,a],best=None,bestc=0,z,c}
+	,Do[
+		z=Rationalize[N[2{randRational,randRational,randRational}],0]
+		;c=hCond[rules,z]
+		;If[c>bestc,bestc=c;best=z]
+		,{n}
+	]
+	;Do[
+		z=Rationalize[N[best(1+10^-m {randRational,randRational,randRational})],0]
+		;c=hCond[rules,z]
+		;If[c>bestc,bestc=c;best=z]
+		,{m,1,12},{n}
+	]
+	;{best,bestc}
+];
+
+
+(* ::Text:: *)
+(*Generate reference arguments with high condition numbers.*)
+
+
+range = Range[10];
+SeedRandom[40];
+j=1;
+While[j<=Last[range]
+	,\[Alpha]0[j]=RandomInteger[{8,16},3]
+	;k0[j]=RandomInteger[{0,2}]
+	;{z0[j],cond0[j]}=zSearch[k0[j],\[Alpha]0[j],40]
+	;If[cond0[j]<10^5,Continue[]]
+	;j++
+]
+Clear[j]
+
+
+(* ::Text:: *)
+(*Generate reference values.*)
+
+
+h3DTabIllCond=ParallelTable[
+	With[
+		{res=SetPrecision[h[k0[j]][z0[j],\[Alpha]0[j]],200]}
+		,Flatten@{k0[j],N@z0[j],\[Alpha]0[j],N@res,N@cond0[j]}]
+	,{j,range}
+];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+Export[NotebookDirectory[]<>"csv/harmonic_h_3D_illcond_ref.csv",h3DTabIllCond];
