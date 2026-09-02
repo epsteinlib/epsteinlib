@@ -1164,27 +1164,27 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
             for (int i = 0; i < dim && allEvenAlpha; i++) {
                 allEvenAlpha = !(alpha[i] % 2);
             }
-            // handle pole in dim = nu + |alpha| for all-even alpha
+            // helpers for detecting zeros due to symmetries
+            bool mirrorShift = false;
+            bool mirrorWave = false;
+            for (unsigned int j = 0; j < dim && !mirrorShift && !mirrorWave; j++) {
+                if (alpha[j] % 2 == 0) {
+                    continue;
+                }
+                double a = axis_basis_length(dim, m_real, j);
+                double b = axis_basis_length(dim, m_fourier, j);
+                double tx = (a == 0.) ? 0.5 : 2. * x_t2[j] / a;
+                double ty = (b == 0.) ? 0.5 : 2. * y_t2[j] / b;
+                mirrorShift = (y_t2[j] == 0.) && (tx == nearbyint(tx));
+                mirrorWave = (x_t2[j] == 0.) && (ty == nearbyint(ty));
+            }
             if (allEvenAlpha && fabs(nu - dim - alphaAbs) < EPS &&
+                // handle pole in dim = nu + |alpha| for all-even alpha
                 y_t2_squared < EPS_ZERO_Y) {
                 res = NAN;
+            } else if (mirrorShift || mirrorWave) {
+                res = 0.;
             } else {
-                // check zeros from lattice symmetries
-                for (unsigned int j = 0; j < dim; j++) {
-                    if (alpha[j] % 2 == 0) {
-                        continue;
-                    }
-                    double a = axis_basis_length(dim, m_real, j);
-                    double b = axis_basis_length(dim, m_fourier, j);
-                    double tx = (a == 0.) ? 0.5 : 2. * x_t2[j] / a;
-                    double ty = (b == 0.) ? 0.5 : 2. * y_t2[j] / b;
-                    if (((y_t2[j] == 0.) && (tx == nearbyint(tx))) ||
-                        ((x_t2[j] == 0.) && (ty == nearbyint(ty)))) {
-                        free(x_t2);
-                        free(y_t2);
-                        return 0.;
-                    }
-                }
                 res = summation_harmonic(nu, dim, alphaAbs, alpha, lambda, ms,
                                          m_real, m_fourier, x_t1, x_t2, y_t2,
                                          cutoffsReal, cutoffsFourier, diag, xfactor);
@@ -1194,7 +1194,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
                                          m_real, m_fourier, x_t1, x_t2, y_t1, y_t2,
                                          cutoffsReal, cutoffsFourier, diag, xfactor);
         }
-
         // In the harmonic method, the res is already set as there is no global
         // nu-dependent coefficient there
         if (!aniso) {
