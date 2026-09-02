@@ -18,6 +18,37 @@
 #define BASE_PATH "csv"
 #endif
 
+/**
+ * @brief Loud banner for a known-bad test whose error has dropped far below
+ * its baseline tolerance.
+ * @param[in] name: test name shown in the banner.
+ * @param[in] errMax: largest relative error observed in the test.
+ * @param[in] threshold: value below which the improvement counts as landed.
+ * @return void
+ */
+void reportImprovedUnitTest(const char *name, double errMax, double threshold) {
+    if (errMax >= threshold) {
+        return;
+    }
+    (void)fprintf(
+        stderr,
+        "\n"
+        "\t#####################################################################\n"
+        "\t#####################################################################\n"
+        "\t###                                                               ###\n"
+        "\t###         ERROR SIGNIFICANTLY IMPROVED  --  FIX LANDED          ###\n"
+        "\t###              >>>  TIGHTEN THE TOLERANCE  <<<                  ###\n"
+        "\t###                                                               ###\n"
+        "\t###   test         : %-44.44s ###\n"
+        "\t###   observed max : %-44.6E ###\n"
+        "\t###   threshold    : %-44.6E ###\n"
+        "\t###                                                               ###\n"
+        "\t#####################################################################\n"
+        "\t#####################################################################"
+        "\n\n",
+        name, errMax, threshold);
+}
+
 /*!
  * @brief absolute difference between to complex numbers.
  * @param[in] ref: reference value.

@@ -26,6 +26,16 @@ static inline double complex imaginary_int_pow(unsigned int exp) {
     return powers[exp & 3];
 }
 
+/**
+ * @brief Loud banner for a known-bad test whose error has dropped far below
+ * its baseline tolerance.
+ * @param[in] name: test name shown in the banner.
+ * @param[in] errMax: largest relative error observed in the test.
+ * @param[in] threshold: value below which the improvement counts as landed.
+ * @return void
+ */
+void reportImprovedUnitTest(const char *name, double errMax, double threshold);
+
 /*!
  * @brief absolute difference between to complex numbers.
  * @param[in] ref: reference value.

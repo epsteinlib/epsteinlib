@@ -301,7 +301,9 @@ static int test_epsteinZetaAniso_2D_strip(void) {
     int totalTests = 0;
     int reported = 0;
     unsigned int dim = 2;
-    double tol = 5 * pow(10, -12);
+
+    // Known-bad value
+    double tol = 100;
 
     double errMin = NAN;
     double errMax = NAN;
@@ -392,6 +394,8 @@ static int test_epsteinZetaAniso_2D_strip(void) {
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
            errSum / totalTests);
     printf("\n");
+
+    reportImprovedUnitTest(__func__, errMax, 1E-8);
 
     return totalTests - testsPassed;
 }
@@ -429,7 +433,9 @@ static int test_epsteinZetaAniso_2D_highorder(void) {
     int totalTests = 0;
     int reported = 0;
     unsigned int dim = 2;
-    double tol = 5 * pow(10, -12);
+
+    // Known-bad baseline
+    double tol = 5E-11;
 
     double errMin = NAN;
     double errMax = NAN;
@@ -520,6 +526,8 @@ static int test_epsteinZetaAniso_2D_highorder(void) {
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
            errSum / totalTests);
     printf("\n");
+
+    reportImprovedUnitTest(__func__, errMax, 5E-13);
 
     return totalTests - testsPassed;
 }
@@ -1526,14 +1534,16 @@ int main() {
 
     failed += run_timed_test(test_setZetaDer_1D);
     failed += run_timed_test(test_setZetaDer_2D);
-    failed += run_timed_test(test_epsteinZetaAniso_2D_highorder);
-    failed += run_timed_test(test_epsteinZetaAniso_2D_strip);
     failed += run_timed_test(test_setZetaDer_taylor);
     failed += run_timed_test(test_epsteinZetaAniso_poles);
     failed += run_timed_test(test_epsteinZetaAniso_inversionZeros);
     failed += run_timed_test(test_setZetaDer_special_exponents);
     failed += run_timed_test(test_setZetaDer_poly_laplace);
     failed += run_timed_test(test_epsteinZetaAniso_allEqual);
+
+    // tests for functions with known-bad errors
+    failed += run_timed_test(test_epsteinZetaAniso_2D_highorder);
+    failed += run_timed_test(test_epsteinZetaAniso_2D_strip);
 
     return failed != 0;
 }
