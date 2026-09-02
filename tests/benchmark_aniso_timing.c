@@ -42,6 +42,8 @@ static int benchmark_epsteinZetaAniso_timing() { // NOLINT
     double elapsedTime;
     double elapsedTimeMax;
     int iterations = 10;
+    int nmaxlow = 20;
+    int nmaxhigh = 10;
     clock_t timeStart;
     clock_t timeEnd;
 
@@ -81,7 +83,9 @@ static int benchmark_epsteinZetaAniso_timing() { // NOLINT
         printf("\n");
         printf("d: %u, t: ", dim);
 
-        for (int j = 0; j < 10 + 1; j++) {
+        int nmax = (dim < 4) ? nmaxlow : nmaxhigh;
+
+        for (int j = 0; j <= nmax; j++) {
 
             elapsedTimeMax = 0.;
 
