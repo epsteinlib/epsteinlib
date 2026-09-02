@@ -269,6 +269,134 @@ static int test_setZetaDer_2D(void) {
 }
 
 /*!
+ * @brief Benchmarks 2D epsteinZetaAniso function by comparing to high-precision
+ * values from mathematica prototype over a range of random parameters.
+ *
+ * @return number of failed tests.
+ * */
+static int test_epsteinZetaAniso_2D_highorder(void) {
+    printf("%s ", __func__);
+    char path[MAX_PATH_LENGTH];
+    int result = snprintf(path, sizeof(path),
+                          "%s/epsteinZetaAniso_2D_highorder_ref.csv", // NOLINT
+                          BASE_PATH);
+    if (result < 0 || result >= sizeof(path)) {
+        return fprintf(stderr, "Error creating file path\n");
+    }
+    FILE *data = fopen(path, "r");
+    if (data == NULL) {
+        return fprintf(stderr, "Error opening file: %s\n", path);
+    }
+
+    double nu;
+    double errorAbs;
+    double errorRel;
+    double errorMaxAbsRel;
+    double complex num;
+    double complex ref;
+    int scanResult;
+    char line[256];
+
+    int testsPassed = 0;
+    int totalTests = 0;
+    int reported = 0;
+    unsigned int dim = 2;
+    double tol = 5 * pow(10, -12);
+
+    double errMin = NAN;
+    double errMax = NAN;
+    double errSum = 0.;
+
+    double *nuRef = malloc(sizeof(double));
+    double *a = malloc((unsigned long)dim * (unsigned long)dim * sizeof(double));
+    double *x = malloc(dim * sizeof(double));
+    double *y = malloc(dim * sizeof(double));
+    unsigned int *alpha = malloc(dim * sizeof(unsigned int));
+    double *refRead = malloc(2 * sizeof(double));
+
+    printf("\n\t ... ");
+    printf("processing %s ", path);
+    while (fgets(line, sizeof(line), data) != NULL) {
+        // Scan: nu, {a11, a12, a21, a22}, {x1, x2}, {y1, y2}, {alpha1, alpha2},
+        // {Re[result], Im[result]}
+        scanResult = sscanf( // NOLINT
+            line, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%u,%u,%lf,%lf", nuRef, a,
+            a + 1, a + 2, a + 3, x, x + 1, y, y + 1, alpha, alpha + 1, refRead,
+            refRead + 1);
+
+        if (scanResult != 13) {
+            printf("\n\t ");
+            printf("Error reading line: %s", line);
+            printf("\t ");
+            printf("Scanned %d values instead of 13", scanResult);
+            continue;
+        }
+
+        nu = nuRef[0];
+
+        num = epsteinZetaAniso(nu, dim, a, x, y, alpha);
+        ref = refRead[0] + refRead[1] * I;
+
+        errorAbs = errAbs(ref, num);
+        errorRel = errRel(ref, num);
+
+        errorMaxAbsRel = (errorAbs < errorRel) ? errorAbs : errorRel;
+
+        errMin = (errMin < errorMaxAbsRel) ? errMin : errorMaxAbsRel;
+        errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
+        errSum += errorMaxAbsRel;
+
+        if (errorMaxAbsRel < tol) {
+            testsPassed++;
+        } else if (reported < MAX_REPORTS) {
+            reported++;
+            printf("\n\n");
+            printf("Warning! ");
+            printf("epsteinZetaAniso: ");
+            printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
+                   "%.16lf "
+                   "%+.16lf I (reference implementation)\n",
+                   4, creal(num), cimag(num), creal(ref), cimag(ref));
+            printf("Min(Emax, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
+                   tol);
+            printf("\n");
+            printf("nu:\t\t %.16lf\n", nu);
+            printMatrixUnitTest("a:", a, dim);
+            printVectorUnitTest("x:\t\t", x, dim);
+            printVectorUnitTest("y:\t\t", y, dim);
+            printMultiindexUnitTest("alpha:\t\t", alpha, dim);
+            printf("\n");
+            if (reported == MAX_REPORTS) {
+                printf("\n\t ... ");
+                printf("further failures suppressed");
+            }
+        }
+        totalTests++;
+    }
+
+    free(nuRef);
+    free(a);
+    free(x);
+    free(y);
+    free(alpha);
+    free(refRead);
+
+    if (fclose(data) != 0) {
+        return fprintf(stderr, "Error closing file: %d", errno);
+    }
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
+           tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
+
+    return totalTests - testsPassed;
+}
+
+/*!
  * @brief Benchmarks 2D set zeta derivatives by computing its taylor series.
  *
  * @return number of failed tests.
@@ -1270,6 +1398,7 @@ int main() {
 
     failed += run_timed_test(test_setZetaDer_1D);
     failed += run_timed_test(test_setZetaDer_2D);
+    failed += run_timed_test(test_epsteinZetaAniso_2D_highorder);
     failed += run_timed_test(test_setZetaDer_taylor);
     failed += run_timed_test(test_epsteinZetaAniso_poles);
     failed += run_timed_test(test_epsteinZetaAniso_inversionZeros);
@@ -1277,5 +1406,5 @@ int main() {
     failed += run_timed_test(test_setZetaDer_poly_laplace);
     failed += run_timed_test(test_epsteinZetaAniso_allEqual);
 
-    return failed;
+    return failed != 0;
 }

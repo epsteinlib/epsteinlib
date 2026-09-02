@@ -6,7 +6,7 @@
 
 
 (* ::Section:: *)
-(*Unit tests for epsteinZetaDer in epsteinZeta.c*)
+(*Unit tests for setZetaDer and epsteinZetaAniso*)
 
 
 (* ::Subsection::Closed:: *)
@@ -40,7 +40,7 @@ Protect[Power];
 ];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Auxiliary functions*)
 
 
@@ -72,6 +72,20 @@ AHex={{1,1/2},{0,Sqrt@3/2}};
 
 
 BMat[a_] = 1/Sqrt[a + 1]*DiagonalMatrix[{Sqrt[a], 1, 1}] . {{1, 1, 0}, {1, 0, 1}, {0, 1, 1}};
+
+
+(* ::Text:: *)
+(*Oblique lattice matrix.*)
+
+
+AObl={{1,.3},{0,1}}
+
+
+(* ::Text:: *)
+(*Shear lattice matrix.*)
+
+
+A3Shear={{1,3/10,0},{0,1,0},{0,0,1}};
 
 
 (* ::Subsection::Closed:: *)
@@ -149,6 +163,56 @@ setZetaDer[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Module[
 		,sumReal=SetPrecision[SumRealDer[\[Nu]N,AN,xN,yN,\[Alpha],sumLim],prec]
 		;sumReci=SetPrecision[SumFourierDer[\[Nu]N,AN,xN,yN,\[Alpha],sumLim],prec]
 		;res=SetPrecision[\[Mu]^(Total[\[Alpha]]-\[Nu]N)\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci),prec]
+	]
+	;Return[res]
+]
+
+
+(* ::Text:: *)
+(*Sums in real and reciprocal space for anisotropic Epstein zeta function.*)
+
+
+SumRealDerAniso[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[
+	Apply[Times, z^\[Alpha]]GUpper[\[Nu],z]Exp[-2Pi I y . (z+x)]
+	,{z,(A . #-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}
+]
+SumFourierDerAniso[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[
+	GUpperDer[Length[\[Alpha]]-\[Nu],k,\[Alpha]]Exp[-2Pi I x . k]
+	,{k,(Inverse[Transpose[A]] . #+y)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}
+]
+
+
+(* ::Text:: *)
+(*Mathematica anisotropic Epstein zeta function implementation.*)
+
+
+Options[epsteinZetaAniso]={InputPrecision->100,SumLim->6};
+epsteinZetaAniso[\[Nu]Ext_?NumericQ,AExt_/;MatrixQ[AExt,NumericQ],xExt_/;VectorQ[xExt,NumericQ],yExt_/;VectorQ[yExt,NumericQ],\[Alpha]_/;VectorQ[\[Alpha],IntegerQ],OptionsPattern[]]:=Module[
+	{EPS,prec,sumLim,\[Nu]N,d,AN,xN,yN,\[Mu],sumReal,sumReci,res}
+	,EPS=10^-50
+	;prec=OptionValue[InputPrecision]
+	;sumLim=OptionValue[SumLim]
+	;d=Length[\[Alpha]]
+	;\[Nu]N=N[\[Nu]Ext,prec]
+	;AN=N[AExt,prec]
+	;\[Mu]=Abs[Det[AN]]^(1/Length[AN])
+	;AN=1/\[Mu] AN
+	;xN=1/\[Mu] N[xExt,prec]
+	;yN=\[Mu] N[yExt,prec]
+	;Do[
+	If[
+	AExt==IdentityMatrix[d]
+	&&OddQ[\[Alpha][[i]]]
+	&&(PossibleZeroQ[xN[[i]]]&&PossibleZeroQ[yN[[i]]])
+	,Return[0]
+	]
+	,{i,Length[\[Alpha]]}
+	]
+	;If[Abs[\[Nu]N]<EPS&&Total[\[Alpha]]>0
+		,res = 0
+		,sumReal=SetPrecision[SumRealDerAniso[\[Nu]N,AN,xN,yN,\[Alpha],sumLim],prec]
+		;sumReci=SetPrecision[SumFourierDerAniso[\[Nu]N,AN,xN,yN,\[Alpha],sumLim],prec]
+		;res=SetPrecision[\[Mu]^(Total[\[Alpha]]-\[Nu]N)\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+N[-2 Pi I]^(-Total[\[Alpha]])/Abs[Det[AN]]sumReci),prec]
 	]
 	;Return[res]
 ]
@@ -386,7 +450,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_1D_ref.csv",zDerTab1D];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Create set zeta 2D reference values*)
 
 
@@ -630,3 +694,63 @@ zetaSpecialTab = Join[zetaSpecialNuBiggerDim,zetaSpecialNuEqualsDimMinus2k];
 
 SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_special_exponents_ref.csv", zetaSpecialTab];
+
+
+(* ::Subsection:: *)
+(*Check badly conditioned anisotropic Epstien zeta values*)
+
+
+(* ::Text:: *)
+(*Generate random reference values.*)
+
+
+epsStrip={2^-20,2^-26,2^-32,2^-38,2^-44,2^-50};
+SeedRandom[42];
+zAnisoStrip=Flatten[
+	ParallelTable[{
+			Flatten@{N@{\[Nu],{{1,0},{0,1}},{1/2+\[Epsilon],0},{0,0}},\[Alpha],{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{1/2+\[Epsilon],0},{0,0},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0,0},{1/2+\[Epsilon],0}},\[Alpha],{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{0,0},{1/2+\[Epsilon],0},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{1/2+\[Epsilon],37/100},{0,21/100}},\[Alpha],{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{1/2+\[Epsilon],37/100},{0,21/100},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],{{1/2,0},{0,2}},{1/4+\[Epsilon],0},{0,0}},\[Alpha],{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],{{1/2,0},{0,2}},{1/4+\[Epsilon],0},{0,0},\[Alpha]]}}
+			,Flatten@{N@{\[Nu],{{0,1},{1,0}},{1/2+\[Epsilon],0},{0,0}},\[Alpha],{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],{{0,1},{1,0}},{1/2+\[Epsilon],0},{0,0},\[Alpha]]}}
+		}
+		,{\[Nu],{5/2,8,20}}
+		,{\[Alpha],{{11,0},{21,0},{41,0},{21,2}}}
+		,{\[Epsilon],epsStrip}
+	]
+,3];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+Export[NotebookDirectory[]<>"csv/epsteinZetaAniso_2D_strip_ref.csv",zAnisoStrip];
+
+
+(* ::Subsection:: *)
+(*Check high-order anisotropic Epstein zeta function values*)
+
+
+(* ::Text:: *)
+(*Add  reference  values  for  high  anisotropy  order.*)
+
+
+zAnisoHighOrderTab=Flatten[
+	ParallelTable[{
+			Flatten@{N@{\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100}},{n,0},{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100},{n,0}]}}
+			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100}},{n,2},{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100},{n,2}]}}
+			,Flatten@{N@{\[Nu],AHex,{31/100,17/100},{13/100,29/100}},{n,0},{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],AHex,{31/100,17/100},{13/100,29/100},{n,0}]}}
+			,Flatten@{N@{\[Nu],AObl,{31/100,17/100},{13/100,29/100}},{n,0},{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],AObl,{31/100,17/100},{13/100,29/100},{n,0}]}}
+		}
+		,{\[Nu],{5/2,8,20}}
+		,{n,Range[1,31,5]}
+	]
+,2];
+
+
+(* ::Text:: *)
+(*Save reference values to file.*)
+
+
+Export[NotebookDirectory[]<>"csv/epsteinZetaAniso_2D_highorder_ref.csv",zAnisoHighOrderTab];

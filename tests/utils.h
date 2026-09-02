@@ -13,7 +13,7 @@
 /*!
  * @brief Maximum number of failures reported per test, to keep logs readable.
  */
-enum { MAX_REPORTS = 20 };
+enum { MAX_REPORTS = 10 };
 
 /**
  * @brief Compute integer powers of the imaginary unit I.
