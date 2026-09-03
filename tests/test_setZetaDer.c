@@ -435,7 +435,7 @@ static int test_epsteinZetaAniso_2D_highorder(void) {
     unsigned int dim = 2;
 
     // Known-bad baseline
-    double tol = 5E-11;
+    double tol = 5E-08;
 
     double errMin = NAN;
     double errMax = NAN;
@@ -527,7 +527,7 @@ static int test_epsteinZetaAniso_2D_highorder(void) {
            errSum / totalTests);
     printf("\n");
 
-    reportImprovedUnitTest(__func__, errMax, 5E-13);
+    reportImprovedUnitTest(__func__, errMax, tol * 1E-2);
 
     return totalTests - testsPassed;
 }

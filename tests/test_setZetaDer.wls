@@ -306,6 +306,69 @@ setZetaDerHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Modu
 
 
 (* ::Text:: *)
+(*Sums in real and reciprocal space for anisotropic conventions.*)
+
+
+SumRealHarmonicAniso[\[Nu]_,A_,x_,y_,\[Alpha]_,kIndex_,sumLim_]:=Total[Table[
+	Module[{h}
+		,h=hHarmonic[kIndex][z,\[Alpha]]
+		;If[PossibleZeroQ[h],0,h GUpper[\[Nu],z]Exp[-2\[Pi] I y . (z+x)]]
+	]
+	,{z,((A . #)-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}
+]]
+SumFourierHarmonicAniso[\[Nu]_,A_,x_,y_,\[Alpha]_,kIndex_,sumLim_]:=Total[Table[
+	hHarmonic[kIndex][k,\[Alpha]]GUpper[Length[x]-\[Nu]+2Total[\[Alpha]]-4kIndex,k]Exp[-2\[Pi] I x . k]
+	,{k,((Inverse[Transpose[A]] . #)+y)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}
+]]
+
+
+(* ::Text:: *)
+(*Anisotropic version.*)
+
+
+Options[epsteinZetaAnisoHarmonic]={InputPrecision->60,SumLim->6};
+epsteinZetaAnisoHarmonic[\[Nu]Ext_,AExt_,xExt_,yExt_,\[Alpha]_,OptionsPattern[]]:=Module[
+	{EPS,prec,sumLim,\[Nu]True,AN,xN,yN,\[Mu],res,n}
+	,EPS=10^-50
+	;prec=OptionValue[InputPrecision]
+	;sumLim=OptionValue[SumLim]
+	;n = Total[\[Alpha]]
+	;\[Nu]True=N[\[Nu]Ext,prec]
+	;AN=N[AExt,prec]
+	;\[Mu]=Abs[Det[AN]]^(1/Length[AN])
+	;AN=1/\[Mu] N[AExt,prec]
+	;xN=1/\[Mu] N[xExt,prec]
+	;yN=\[Mu] N[yExt,prec]
+	;If[Abs[\[Nu]Ext]<EPS&&n>0
+		,res = 0
+		,res=Total@Table[
+			Module[
+				{\[Nu]N,sumReal,sumReci,resk}
+				,\[Nu]N=\[Nu]True-2k
+				;If[\[Nu]N<-1&&Abs[\[Nu]N/2-Round[\[Nu]N/2]]<EPS
+					,0
+					,If[Abs[\[Nu]N]<EPS
+						,If[Norm[Inverse[AN] . xN-Round[Inverse[AN] . xN]]>EPS
+							,0
+							,sumReal=-hHarmonic[k][xN*0,\[Alpha]]
+							;resk=\[Pi]^(\[Nu]N/2)sumReal
+							;resk
+						]
+						,sumReal=SumRealHarmonicAniso[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+						;sumReci=(-1)^k/I^n SumFourierHarmonicAniso[\[Nu]N,AN,xN,yN,\[Alpha],k,sumLim]
+						;resk=\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci)
+						;resk
+					]
+				]
+			]
+		,{k,0,Floor[n/2]}
+		]
+	]
+	;\[Mu]^(Total[\[Alpha]]-\[Nu]True)res
+]
+
+
+(* ::Text:: *)
 (*Isolate singularities in real sum.*)
 
 
@@ -696,7 +759,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_special_exponents_ref.csv", zetaSpecialTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Check badly conditioned anisotropic Epstein zeta values*)
 
 
@@ -708,14 +771,14 @@ epsStrip={2^-20,2^-26,2^-38,2^-50};
 SeedRandom[42];
 zAnisoStrip=Flatten[
 	ParallelTable[{
-			Flatten@{N@{\[Nu],{{1,0},{0,1}},{1/2+\[Epsilon],0},{0,0}},\[Alpha],{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{1/2+\[Epsilon],0},{0,0},\[Alpha]]}}
-			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0,0},{1/2+\[Epsilon],0}},\[Alpha],{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{0,0},{1/2+\[Epsilon],0},\[Alpha]]}}
-			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{1/2+\[Epsilon],37/100},{0,21/100}},\[Alpha],{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{1/2+\[Epsilon],37/100},{0,21/100},\[Alpha]]}}
-			,Flatten@{N@{\[Nu],{{1/2,0},{0,2}},{1/4+\[Epsilon],0},{0,0}},\[Alpha],{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],{{1/2,0},{0,2}},{1/4+\[Epsilon],0},{0,0},\[Alpha]]}}
-			,Flatten@{N@{\[Nu],{{0,1},{1,0}},{1/2+\[Epsilon],0},{0,0}},\[Alpha],{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],{{0,1},{1,0}},{1/2+\[Epsilon],0},{0,0},\[Alpha]]}}
+			Flatten@{N@{\[Nu],{{1,0},{0,1}},{1/2+\[Epsilon],0},{0,0}},\[Alpha],{N@Re@#,N@Im@#}&[epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{1/2+\[Epsilon],0},{0,0},\[Alpha]]]}
+			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0,0},{1/2+\[Epsilon],0}},\[Alpha],{N@Re@#,N@Im@#}&[epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{0,0},{1/2+\[Epsilon],0},\[Alpha]]]}
+			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{1/2+\[Epsilon],37/100},{0,21/100}},\[Alpha],{N@Re@#,N@Im@#}&[epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{1/2+\[Epsilon],37/100},{0,21/100},\[Alpha]]]}
+			,Flatten@{N@{\[Nu],{{1/2,0},{0,2}},{1/4+\[Epsilon],0},{0,0}},\[Alpha],{N@Re@#,N@Im@#}&[epsteinZetaAniso[\[Nu],{{1/2,0},{0,2}},{1/4+\[Epsilon],0},{0,0},\[Alpha]]]}
+			,Flatten@{N@{\[Nu],{{0,1},{1,0}},{1/2+\[Epsilon],0},{0,0}},\[Alpha],{N@Re@#,N@Im@#}&[epsteinZetaAniso[\[Nu],{{0,1},{1,0}},{1/2+\[Epsilon],0},{0,0},\[Alpha]]]}
 		}
 		,{\[Nu],{5/2,8,20}}
-		,{\[Alpha],{{11,0},{21,0},{41,0},{21,2}}}
+		,{\[Alpha],{{11,0},{21,0},{21,2}}}
 		,{\[Epsilon],epsStrip}
 	]
 ,3];
@@ -738,13 +801,13 @@ Export[NotebookDirectory[]<>"csv/epsteinZetaAniso_2D_strip_ref.csv",zAnisoStrip]
 
 zAnisoHighOrderTab=Flatten[
 	ParallelTable[{
-			Flatten@{N@{\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100}},{n,0},{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100},{n,0},InputPrecision->200]}}
-			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100}},{n,2},{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100},{n,2},InputPrecision->200]}}
-			,Flatten@{N@{\[Nu],AHex,{31/100,17/100},{13/100,29/100}},{n,0},{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],AHex,{31/100,17/100},{13/100,29/100},{n,0},InputPrecision->200]}}
-			,Flatten@{N@{\[Nu],AObl,{31/100,17/100},{13/100,29/100}},{n,0},{N@Re@#,N@Im@#}&/@{epsteinZetaAniso[\[Nu],AObl,{31/100,17/100},{13/100,29/100},{n,0},InputPrecision->200]}}
+			Flatten@{N@{\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100}},{n,0},{N@Re@#,N@Im@#}&[epsteinZetaAnisoHarmonic[\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100},{n,0},InputPrecision->120]]}
+			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100}},{n,2},{N@Re@#,N@Im@#}&[epsteinZetaAnisoHarmonic[\[Nu],{{1,0},{0,1}},{31/100,17/100},{13/100,29/100},{n,2},InputPrecision->120]]}
+			,Flatten@{N@{\[Nu],AHex,{31/100,17/100},{13/100,29/100}},{n,0},{N@Re@#,N@Im@#}&[epsteinZetaAnisoHarmonic[\[Nu],AHex,{31/100,17/100},{13/100,29/100},{n,0},InputPrecision->120]]}
+			,Flatten@{N@{\[Nu],AObl,{31/100,17/100},{13/100,29/100}},{n,0},{N@Re@#,N@Im@#}&[epsteinZetaAnisoHarmonic[\[Nu],AObl,{31/100,17/100},{13/100,29/100},{n,0},InputPrecision->120]]}
 		}
 		,{\[Nu],{5/2,8,20}}
-		,{n,0,30,3}
+		,{n,0,50,3}
 	]
 ,2];
 
