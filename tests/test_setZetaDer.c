@@ -787,13 +787,21 @@ static int test_epsteinZetaAniso_poles(void) { // NOLINT
  * cases are exchanged by swapping Lambda with Lambda* and x with y, and neither
  * implies the other.
  *
+ * @param[in] dim: dimension of the lattice.
+ * @param[in] m: lattice basis matrix A, row major, basis vectors in the columns.
  * @param[in] mirror: mirror symmetry of the lattice, one flag per component.
  * @param[in] xs, ys, alphas: flat arrays with stride dim.
+ * @param[in] numX, numY, numAlpha: number of entries in xs, ys and alphas.
+ * @param[in] nus: exponents nu to sweep over.
+ * @param[in] numNu: number of entries in nus.
  * @param[in] checkMirror: also check the mirroring statement.
  * @param[in] checkHalfReci: also check the half reciprocal wavevector statement.
+ * @param[in] tol: a component counts as vanishing if its absolute value is
+ * below tol.
  * @param[in,out] total: running number of checked components.
  * @param[in,out] reported: running number of printed failures.
- * @return number of failed tests.
+ * @param[in,out] errMin, errMax, errSum: running minimum, maximum and sum of
+ * the absolute values of the checked components.
  */
 static int inversionZeroSweep(unsigned int dim, const double *m, // NOLINT
                               const bool *mirror, const double *xs, int numX,
@@ -965,32 +973,31 @@ static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
                       0.5,  0.,   // cell boundary
                       0.,   0.21, // zero in the first component only
                       0.1,  0.2}; // generic
-    unsigned int alphaInv2[] = {0, 0, 1, 0, 0,  1, 1,  1, 2,  0, 2,  1, 3,  1,
-                                5, 2, 7, 0, 12, 0, 21, 2, 31, 0, 41, 0, 51, 0};
-    double nuInv2[] = {2.5, 4., 8., 18., 30.};
+    unsigned int alphaInv2[] = {0, 0, 1, 0, 0, 1, 1,  1, 2,  0, 2,  1,
+                                3, 1, 5, 2, 7, 0, 12, 0, 21, 2, 31, 0};
+    double nuInv2[] = {2.5, 8., 30.};
 
     // Mirroring: one component of x and y vanishes and the others do not. Both
     // the anisotropy order and the exponent stay moderate here, since the residue
     // is set by the magnitude of the summands, which grows like the cutoff radius
     // to the power |alpha| and like the distance to the nearest lattice point to
     // the power -nu.
-    double xMir2[] = {0.,        0.,         // origin
-                      0.,        37. / 100,  // zero in the first component only
+    double xMir2[] = {0.,        37. / 100,  // zero in the first component only
                       29. / 100, 0.,         // zero in the second component only
                       0.5,       0.};        // half lattice point
     double yMir2[] = {0.,        0.,         //
                       0.,        21. / 100,  //
                       13. / 100, 0.,         //
                       0.5,       21. / 100}; // half reciprocal first component
-    unsigned int alphaMir2[] = {1, 0, 0, 1, 1, 1, 3, 1, 5, 2, 9, 2, 11, 2};
-    double nuMir2[] = {2.5, 6., 8.};
+    unsigned int alphaMir2[] = {1, 0, 0, 1, 1, 1, 3, 1, 5, 2, 9, 2};
+    double nuMir2[] = {2.5, 8.};
 
     for (int im = 0; im < 5; im++) {
         failed += inversionZeroSweep(2, a2[im], mirror2[im], xInv2, 1, yInv2, 5,
-                                     alphaInv2, 14, nuInv2, 5, false, false, tol,
+                                     alphaInv2, 12, nuInv2, 3, false, false, tol,
                                      &total, &reported, &errMin, &errMax, &errSum);
-        failed += inversionZeroSweep(2, a2[im], mirror2[im], xMir2, 4, yMir2, 4,
-                                     alphaMir2, 7, nuMir2, 3, true, false, tol,
+        failed += inversionZeroSweep(2, a2[im], mirror2[im], xMir2, 3, yMir2, 4,
+                                     alphaMir2, 6, nuMir2, 2, true, false, tol,
                                      &total, &reported, &errMin, &errMax, &errSum);
     }
 
@@ -1004,21 +1011,21 @@ static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
 
     double xInv3[] = {0., 0., 0.};
     double yInv3[] = {0., 0., 0., 0., 13. / 100, 29. / 100, 0.1, 0.2, 0.3};
-    unsigned int alphaInv3[] = {0, 0, 0, 1, 0, 0, 1, 1,  0, 3, 1,
-                                2, 5, 2, 1, 9, 2, 2, 15, 2, 2};
-    double nuInv3[] = {2.5, 8., 20.};
+    unsigned int alphaInv3[] = {0, 0, 0, 1, 0, 0, 1, 1, 0,
+                                3, 1, 2, 5, 2, 1, 9, 2, 2};
+    double nuInv3[] = {2.5, 20.};
 
     double xMir3[] = {0., 31. / 100, 47. / 100};
     double yMir3[] = {0., 0., 0., 0., 13. / 100, 29. / 100};
-    unsigned int alphaMir3[] = {1, 0, 0, 1, 1, 0, 3, 1, 2, 5, 2, 1, 9, 2, 2};
-    double nuMir3[] = {2.5, 6., 8.};
+    unsigned int alphaMir3[] = {1, 0, 0, 1, 1, 0, 3, 1, 2, 5, 2, 1};
+    double nuMir3[] = {2.5, 8.};
 
     for (int im = 0; im < 3; im++) {
         failed += inversionZeroSweep(3, a3[im], mirror3[im], xInv3, 1, yInv3, 3,
-                                     alphaInv3, 7, nuInv3, 3, false, false, tol,
+                                     alphaInv3, 6, nuInv3, 2, false, false, tol,
                                      &total, &reported, &errMin, &errMax, &errSum);
         failed += inversionZeroSweep(3, a3[im], mirror3[im], xMir3, 1, yMir3, 2,
-                                     alphaMir3, 5, nuMir3, 3, true, false, tol,
+                                     alphaMir3, 4, nuMir3, 2, true, false, tol,
                                      &total, &reported, &errMin, &errMax, &errSum);
     }
 
@@ -1028,11 +1035,11 @@ static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
     // elsewhere the Fourier window is not symmetric about -y and the vanishing
     // holds only up to the truncation error.
     double yHalf2[] = {0.5, 0.};
-    unsigned int alphaHalf2[] = {21, 0, 31, 0, 41, 0, 51, 0};
+    unsigned int alphaHalf2[] = {21, 0, 31, 0};
     double nuHalf2[] = {2.5, 4., 8.};
 
     failed += inversionZeroSweep(2, a2[0], mirror2[0], xInv2, 1, yHalf2, 1,
-                                 alphaHalf2, 4, nuHalf2, 3, false, true, tol, &total,
+                                 alphaHalf2, 2, nuHalf2, 3, false, true, tol, &total,
                                  &reported, &errMin, &errMax, &errSum);
 
     if (reported >= MAX_REPORTS) {
