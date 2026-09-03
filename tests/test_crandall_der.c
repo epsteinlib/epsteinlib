@@ -138,6 +138,8 @@ static int test_polynomial_y_der(void) {
            errSum / totalTests);
     printf("\n");
 
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
+
     return totalTests - testsPassed;
 }
 
@@ -252,6 +254,8 @@ static int test_polynomial_y_der_harmonic(void) {
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
            errSum / totalTests);
     printf("\n");
+
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
 
     return totalTests - testsPassed;
 }
@@ -370,6 +374,8 @@ static int test_singularity_s_der(void) {
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
            errSum / totalTests);
     printf("\n");
+
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
 
     return totalTests - testsPassed;
 }
@@ -491,6 +497,8 @@ static int test_singularity_s_der_harmonic(void) {
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
            errSum / totalTests);
     printf("\n");
+
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
 
     return totalTests - testsPassed;
 }
@@ -637,6 +645,8 @@ static int test_crandall_gReg_harmonic(void) { // NOLINT
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
            errSum / totalTests);
     printf("\n");
+
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
 
     return totalTests - testsPassed;
 }

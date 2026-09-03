@@ -57,7 +57,7 @@ static int test_coeffs_c_inner(void) {
 
     int testsPassed = 0;
     int totalTests = 0;
-    double tol = pow(10, -16);
+    double tol = 0.;
 
     unsigned int *n = malloc(sizeof(unsigned int));
     unsigned int *i = malloc(sizeof(unsigned int));
@@ -92,7 +92,7 @@ static int test_coeffs_c_inner(void) {
         errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
         errSum += errorMaxAbsRel;
 
-        if (errorMaxAbsRel < tol) {
+        if (errorMaxAbsRel <= tol) {
             testsPassed++;
         } else {
             printf("\n\n");
@@ -101,7 +101,7 @@ static int test_coeffs_c_inner(void) {
             printf(" %0*.16lf (this implementation) \n\t\t    ≠ "
                    "%.16lf (reference implementation)\n",
                    4, num, ref);
-            printf("Min(Emax, Erel):      %E ≮ %E  (tolerance)\n", errorMaxAbsRel,
+            printf("Min(Emax, Erel):      %E ≰ %E  (tolerance)\n", errorMaxAbsRel,
                    tol);
             printf("n: %u,  i: %u,  k: %u,  d: %u", *n, *i, *k, *dim);
             printf("\n");
@@ -126,6 +126,8 @@ static int test_coeffs_c_inner(void) {
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
            errSum / totalTests);
     printf("\n");
+
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
 
     return totalTests - testsPassed;
 }
@@ -163,7 +165,7 @@ static int test_harmonic_h_inner(void) {
 
     int testsPassed = 0;
     int totalTests = 0;
-    double tol = pow(10, -16);
+    double tol = 0.;
 
     unsigned int n;
     unsigned int i;
@@ -217,7 +219,7 @@ static int test_harmonic_h_inner(void) {
         errMax = (errMax > errorMaxAbsRel) ? errMax : errorMaxAbsRel;
         errSum += errorMaxAbsRel;
 
-        if (errorMaxAbsRel < tol) {
+        if (errorMaxAbsRel <= tol) {
             testsPassed++;
         } else {
             printf("\n\n");
@@ -226,7 +228,7 @@ static int test_harmonic_h_inner(void) {
             printf(" %0*.16lf (this implementation) \n\t\t\t ≠ "
                    "%.16lf (reference implementation)\n",
                    4, num, ref);
-            printf("Min(Emax, Erel):           %E ≮ %E  (tolerance)\n",
+            printf("Min(Emax, Erel):           %E ≰ %E  (tolerance)\n",
                    errorMaxAbsRel, tol);
             printMultiindexUnitTest("alpha:\t\t", alpha, dim);
             printMultiindexUnitTest("beta:\t\t", beta, dim);
@@ -359,6 +361,9 @@ static int test_harmonic_h_1D(void) {
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
            errSum / totalTests);
     printf("\n");
+
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
+
     return totalTests - testsPassed;
 }
 
@@ -491,6 +496,8 @@ static int test_harmonic_h_3D_unity(void) {
            errSum / totalTests);
     printf("\n");
 
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
+
     return totalTests - testsPassed;
 }
 
@@ -621,6 +628,8 @@ static int test_harmonic_h_3D_random(void) {
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
            errSum / totalTests);
     printf("\n");
+
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
 
     return totalTests - testsPassed;
 }

@@ -137,6 +137,8 @@ static int test_setZetaDer_1D(void) {
            errSum / totalTests);
     printf("\n");
 
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
+
     return totalTests - testsPassed;
 }
 
@@ -264,6 +266,8 @@ static int test_setZetaDer_2D(void) {
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
            errSum / totalTests);
     printf("\n");
+
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
 
     return totalTests - testsPassed;
 }
@@ -527,7 +531,7 @@ static int test_epsteinZetaAniso_2D_highorder(void) {
            errSum / totalTests);
     printf("\n");
 
-    reportImprovedUnitTest(__func__, errMax, tol * 1E-2);
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
 
     return totalTests - testsPassed;
 }
@@ -656,6 +660,8 @@ static int test_setZetaDer_taylor(void) { // NOLINT
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
            errSum / totalTests);
     printf("\n");
+
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
 
     return totalTests - testsPassed;
 }
@@ -1055,6 +1061,8 @@ static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
            errSum / total);
     printf("\n");
 
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
+
     return failed;
 }
 
@@ -1223,6 +1231,8 @@ static int test_setZetaDer_special_exponents(void) { // NOLINT
            errSum / totalTests);
     printf("\n");
 
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
+
     return totalTests - testsPassed;
 }
 
@@ -1376,6 +1386,8 @@ static int test_setZetaDer_poly_laplace(void) { // NOLINT
            errSum / totalTests);
     printf("\n");
 
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
+
     return totalTests - testsPassed;
 }
 
@@ -1527,6 +1539,8 @@ static int test_epsteinZetaAniso_allEqual(void) { // NOLINT
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
            errSum / totalTests);
     printf("\n");
+
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
 
     return totalTests - testsPassed;
 }

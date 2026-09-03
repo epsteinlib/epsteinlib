@@ -27,11 +27,6 @@
 #endif
 
 /*!
- * @brief Maximum number of failures reported per test, to keep logs readable.
- */
-enum { ANISO_MAX_REPORTS = 20 };
-
-/*!
  * @brief Running statistics for the anisotropic reduction sweeps.
  */
 typedef struct {
@@ -262,7 +257,7 @@ static void anisoReductionSweep(unsigned int dim, const double *a, // NOLINT
                 st->total++;
                 if (err < tol) {
                     st->passed++;
-                } else if (st->reported < ANISO_MAX_REPORTS) {
+                } else if (st->reported < MAX_REPORTS) {
                     reportAnisoError(dim, a, nu, x, y, base, aniso, err, tol, reg);
                     st->reported++;
                 }
@@ -355,7 +350,7 @@ static int anisoReductionAllLattices(bool reg) { // NOLINT
                             (int)(sizeof(nu3) / sizeof(nu3[0])), reg, tol, &st);
     }
 
-    if (st.reported >= ANISO_MAX_REPORTS) {
+    if (st.reported >= MAX_REPORTS) {
         printf("\n\t ... further failures suppressed.\n");
     }
     printf("\n\t ... ");
@@ -364,6 +359,8 @@ static int anisoReductionAllLattices(bool reg) { // NOLINT
     printf("[ Error →  min: %E | max: %E | avg: %E ]", st.errMin, st.errMax,
            st.errSum / st.total);
     printf("\n");
+
+    reportImprovedUnitTest(__func__, st.errMax, tol * REP_IMPR_THRES);
 
     return (st.total - st.passed) + dataErrors;
 }
@@ -493,6 +490,8 @@ static int test_epsteinZeta() { // NOLINT
            errSum / totalTests);
     printf("\n");
 
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
+
     return totalTests - testsPassed;
 }
 
@@ -602,6 +601,8 @@ static int test_epsteinZetaReg() { // NOLINT
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
            errSum / totalTests);
     printf("\n");
+
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
 
     return totalTests - testsPassed;
 }
@@ -758,6 +759,8 @@ static int test_epsteinZeta_random_matrices(void) { // NOLINT
            errSum / totalTests);
     printf("\n");
 
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
+
     return totalTests - testsPassed;
 }
 
@@ -913,6 +916,8 @@ static int test_epsteinZetaReg_random_matrices(void) { // NOLINT
            errSum / totalTests);
     printf("\n");
 
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
+
     return totalTests - testsPassed;
 }
 
@@ -1056,6 +1061,8 @@ static int test_epsteinZeta_epsteinZetaReg_reduction() { // NOLINT
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
            errSum / totalTests);
     printf("\n");
+
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
 
     return totalTests - testsPassed;
 }
