@@ -1173,16 +1173,19 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
             // helpers for detecting zeros due to symmetries
             bool mirrorShift = false;
             bool mirrorWave = false;
-            for (unsigned int j = 0; j < dim && !mirrorShift && !mirrorWave; j++) {
-                if (alpha[j] % 2 == 0) {
-                    continue;
+            if (!allEvenAlpha) {
+                for (unsigned int j = 0; j < dim && !mirrorShift && !mirrorWave;
+                     j++) {
+                    if (alpha[j] % 2 == 0) {
+                        continue;
+                    }
+                    double a = axis_basis_length(dim, m_real, j);
+                    double b = axis_basis_length(dim, m_fourier, j);
+                    double tx = (a == 0.) ? 0.5 : 2. * x_t2[j] / a;
+                    double ty = (b == 0.) ? 0.5 : 2. * y_t2[j] / b;
+                    mirrorShift = (y_t2[j] == 0.) && (tx == nearbyint(tx));
+                    mirrorWave = (x_t2[j] == 0.) && (ty == nearbyint(ty));
                 }
-                double a = axis_basis_length(dim, m_real, j);
-                double b = axis_basis_length(dim, m_fourier, j);
-                double tx = (a == 0.) ? 0.5 : 2. * x_t2[j] / a;
-                double ty = (b == 0.) ? 0.5 : 2. * y_t2[j] / b;
-                mirrorShift = (y_t2[j] == 0.) && (tx == nearbyint(tx));
-                mirrorWave = (x_t2[j] == 0.) && (ty == nearbyint(ty));
             }
             if (allEvenAlpha && fabs(nu - dim - alphaAbs) < EPS &&
                 // handle pole in dim = nu + |alpha| for all-even alpha
