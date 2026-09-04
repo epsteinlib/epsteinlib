@@ -759,7 +759,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_special_exponents_ref.csv", zetaSpecialTab];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Check badly conditioned anisotropic Epstein zeta values*)
 
 
@@ -790,7 +790,7 @@ zAnisoStrip=Flatten[
 Export[NotebookDirectory[]<>"csv/epsteinZetaAniso_2D_strip_ref.csv",zAnisoStrip];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Check high-order anisotropic Epstein zeta function values*)
 
 
