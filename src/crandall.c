@@ -54,6 +54,62 @@ double assignzArgBound(double nu) {
 }
 
 /**
+ * @brief Inflates a truncation radius so that it also absorbs a polynomial
+ * factor r^n, by solving pi r^2 - n log(r) = pi r0^2 with Newton's method.
+ *
+ * The bounds in assignzArgBound and the lattice cutoffs are calibrated on a
+ * summand decaying like exp(-pi r^2). In the harmonic method every summand
+ * carries an extra factor h_{alpha,k}(z) of degree n = |alpha| - 2k, which at
+ * the truncation radius is many orders of magnitude larger than one, so the
+ * radius has to grow accordingly.
+ * @param[in] r0: radius calibrated for the isotropic summand.
+ * @param[in] n: degree of the polynomial factor.
+ * @return inflated radius, never smaller than r0.
+ */
+double inflate_radius(double r0, double n) {
+    if (n <= 0 || r0 <= 0) {
+        return r0;
+    }
+    double target = M_PI * r0 * r0;
+    double r = r0;
+    for (int it = 0; it < 40; it++) {
+        double f = (M_PI * r * r) - (n * log(r)) - target;
+        double fp = (2 * M_PI * r) - (n / r);
+        if (fp <= 0) {
+            r *= 1.5;
+            continue;
+        }
+        double step = f / fp;
+        r -= step;
+        if (r < r0) {
+            r = r0;
+        }
+        if (fabs(step) < 1e-12 * r) {
+            break;
+        }
+    }
+    return r;
+}
+
+/**
+ * @brief Degree aware variant of assignzArgBound for the harmonic method.
+ * @param[in] nu: exponent of the regularized Epstein zeta function.
+ * @param[in] n: degree |alpha| - 2k of the harmonic polynomial multiplying the
+ * Crandall function in the summand.
+ * @return minimum value of z for the asymptotic expansion, chosen such that the
+ * truncation error of the expansion stays below machine precision after
+ * multiplication by the harmonic polynomial.
+ */
+double assignzArgBoundHarmonic(double nu, double n) {
+    double b = assignzArgBound(nu);
+    if (n <= 0 || b == DBL_MAX) {
+        return b;
+    }
+    double r = inflate_radius(sqrt(b / M_PI), n);
+    return M_PI * r * r;
+}
+
+/**
  * @brief Calculates the upper Crandall function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] nu: exponent of the regularized Epstein zeta function.

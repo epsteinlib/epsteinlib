@@ -26,7 +26,7 @@
    @brief Smallest value z such that G(nu, z) is negligible for
    nu < 10.
 */
-#define G_BOUND 3.2
+#define G_BOUND 4.2
 
 /*!
  * @brief epsilon for the cutoff around nu = dimension.
@@ -779,7 +779,8 @@ static double complex summation_harmonic_reg(
     for (unsigned int k = 0; k <= kMax; k++) {
 
         double nuIt = nu - (2 * k);
-        double zArgBoundIt = assignzArgBound(nuIt);
+        double zArgBoundIt =
+            assignzArgBoundHarmonic(nuIt, (double)alphaAbs - (2. * k));
 
         // skip iterartions where nuIt is a negative even integer, as
         // 1/gamma(nIt) = 0
@@ -805,7 +806,8 @@ static double complex summation_harmonic_reg(
             double complex nc = 0.;
 
             double nuReci = nuIt - (2 * alphaAbs) + (4 * k);
-            double zArgBoundReci = assignzArgBound(dim - nuReci);
+            double zArgBoundReci =
+                assignzArgBoundHarmonic(dim - nuReci, (double)alphaAbs - (2. * k));
 
             // skip zero summand if harmonic polynomial vanishes
             double h = harmonic_h(k, dim, y_t1, alphaAbs, chunk_offset, valid_count,
@@ -925,7 +927,8 @@ static double complex summation_harmonic(
     for (unsigned int k = 0; k <= kMax; k++) {
 
         double nuIt = nu - (2 * k);
-        double zArgBoundIt = assignzArgBound(nuIt);
+        double zArgBoundIt =
+            assignzArgBoundHarmonic(nuIt, (double)alphaAbs - (2. * k));
 
         // skip iterartions where nuIt is a negative even integer, as
         // 1/gamma(nIt) = 0
@@ -950,7 +953,8 @@ static double complex summation_harmonic(
             double complex nc = 0.;
 
             double nuReci = nuIt - (2 * alphaAbs) + (4 * k);
-            double zArgBoundReci = assignzArgBound(dim - nuReci);
+            double zArgBoundReci =
+                assignzArgBoundHarmonic(dim - nuReci, (double)alphaAbs - (2. * k));
 
             // skip zero summand if harmonic polynomial vanishes
             double h = harmonic_h(k, dim, y_t2, alphaAbs, chunk_offset, valid_count,
@@ -1092,6 +1096,11 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
     int cutoffsReal[dim];
     int cutoffsFourier[dim];
     double cutoff_id = G_BOUND + 0.5;
+    // the harmonic method multiplies every summand by a polynomial of degree
+    // up to |alpha|, which the isotropic cutoff does not account for
+    if (aniso) {
+        cutoff_id = inflate_radius(cutoff_id, (double)mult_abs(dim, alpha));
+    }
     if (diag) {
         // Chose absolute diag. entries for cutoff
         for (int k = 0; k < dim; k++) {

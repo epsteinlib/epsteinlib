@@ -26,6 +26,22 @@
 double assignzArgBound(double nu);
 
 /**
+ * @brief Inflates a truncation radius to absorb a polynomial factor r^n.
+ * @param[in] r0: radius calibrated for the isotropic summand.
+ * @param[in] n: degree of the polynomial factor.
+ * @return inflated radius, never smaller than r0.
+ */
+double inflate_radius(double r0, double n);
+
+/**
+ * @brief Degree aware variant of assignzArgBound for the harmonic method.
+ * @param[in] nu: exponent of the regularized Epstein zeta function.
+ * @param[in] n: degree |alpha| - 2k of the harmonic polynomial in the summand.
+ * @return minimum value of z, when to use the asymptotic expansion.
+ */
+double assignzArgBoundHarmonic(double nu, double n);
+
+/**
  * @brief Calculates the upper Crandall function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] nu: exponent of the regularized Epstein zeta function.
