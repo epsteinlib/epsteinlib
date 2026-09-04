@@ -439,7 +439,7 @@ static int test_epsteinZetaAniso_2D_highorder(void) {
     unsigned int dim = 2;
 
     // Known-bad baseline
-    double tol = 5E-08;
+    double tol = 5E-09;
 
     double errMin = NAN;
     double errMax = NAN;

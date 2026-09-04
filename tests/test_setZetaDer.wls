@@ -759,7 +759,7 @@ SetDirectory[NotebookDirectory[]];
 Export["csv/setZetaDer_special_exponents_ref.csv", zetaSpecialTab];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Check badly conditioned anisotropic Epstein zeta values*)
 
 
@@ -774,7 +774,6 @@ zAnisoStrip=Flatten[
 			Flatten@{N@{\[Nu],{{1,0},{0,1}},{1/2+\[Epsilon],0},{0,0}},\[Alpha],{N@Re@#,N@Im@#}&[epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{1/2+\[Epsilon],0},{0,0},\[Alpha]]]}
 			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{0,0},{1/2+\[Epsilon],0}},\[Alpha],{N@Re@#,N@Im@#}&[epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{0,0},{1/2+\[Epsilon],0},\[Alpha]]]}
 			,Flatten@{N@{\[Nu],{{1,0},{0,1}},{1/2+\[Epsilon],37/100},{0,21/100}},\[Alpha],{N@Re@#,N@Im@#}&[epsteinZetaAniso[\[Nu],{{1,0},{0,1}},{1/2+\[Epsilon],37/100},{0,21/100},\[Alpha]]]}
-			,Flatten@{N@{\[Nu],{{1/2,0},{0,2}},{1/4+\[Epsilon],0},{0,0}},\[Alpha],{N@Re@#,N@Im@#}&[epsteinZetaAniso[\[Nu],{{1/2,0},{0,2}},{1/4+\[Epsilon],0},{0,0},\[Alpha]]]}
 			,Flatten@{N@{\[Nu],{{0,1},{1,0}},{1/2+\[Epsilon],0},{0,0}},\[Alpha],{N@Re@#,N@Im@#}&[epsteinZetaAniso[\[Nu],{{0,1},{1,0}},{1/2+\[Epsilon],0},{0,0},\[Alpha]]]}
 		}
 		,{\[Nu],{5/2,8,20}}
@@ -806,8 +805,8 @@ zAnisoHighOrderTab=Flatten[
 			,Flatten@{N@{\[Nu],AHex,{31/100,17/100},{13/100,29/100}},{n,0},{N@Re@#,N@Im@#}&[epsteinZetaAnisoHarmonic[\[Nu],AHex,{31/100,17/100},{13/100,29/100},{n,0},InputPrecision->120]]}
 			,Flatten@{N@{\[Nu],AObl,{31/100,17/100},{13/100,29/100}},{n,0},{N@Re@#,N@Im@#}&[epsteinZetaAnisoHarmonic[\[Nu],AObl,{31/100,17/100},{13/100,29/100},{n,0},InputPrecision->120]]}
 		}
-		,{\[Nu],{5/2,8,20}}
 		,{n,0,50,3}
+		,{\[Nu],{5/2,8}}
 	]
 ,2];
 

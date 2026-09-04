@@ -19,7 +19,7 @@ enum { MAX_REPORTS = 10 };
  * @brief threshold so loud banner notifies of improved error if reported error is
  * smaller than REP_IMPR_THRES * tol
  */
-#define REP_IMPR_THRES 1E-2
+#define REP_IMPR_THRES 1E-1
 
 /**
  * @brief Compute integer powers of the imaginary unit I.
