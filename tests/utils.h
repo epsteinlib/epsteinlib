@@ -15,6 +15,12 @@
  */
 enum { MAX_REPORTS = 10 };
 
+/*!
+ * @brief threshold so loud banner notifies of improved error if reported error is
+ * smaller than REP_IMPR_THRES * tol
+ */
+#define REP_IMPR_THRES 1E-2
+
 /**
  * @brief Compute integer powers of the imaginary unit I.
  * Uses the fact that I^4 = 1, so only exp % 4 matters.
