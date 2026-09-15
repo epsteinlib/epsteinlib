@@ -65,7 +65,7 @@ SetOptions[MaTeX,"Preamble"->{"\\usepackage{xcolor}","\\usepackage{bm}","\\usepa
 SetOptions[MaTeX,FontSize->18];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Define Functions*)
 
 
@@ -120,8 +120,8 @@ GaussianDerivatives2D[{y1_,y2_},\[Sigma]_,\[Alpha]_]:=Gaussian2D[{y1,y2},\[Sigma
 
 SEM2D[{x1_,x2_},\[Nu]_,\[Sigma]_,n_:0] := Integral2D[{x1,x2},\[Nu],\[Sigma]]+Total[Table[
 	Apply[Times,1/\[Beta]!] Re@EpsteinZetaAnisoReg[\[Nu],IdentityMatrix[2],ConstantArray[0,2],ConstantArray[0,2],\[Beta]]GaussianDerivatives2D[{x1,x2},\[Sigma],\[Beta]]
-		,{\[Beta],Tuples[Range[0,n,2],2]}
-	]]
+	,{\[Beta],Select[Tuples[Range[0,n],2],Total[#]<=n&]}
+]]
 
 
 (* ::Subsection::Closed:: *)
