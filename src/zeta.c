@@ -12,6 +12,7 @@
  */
 
 #include <complex.h>
+#include <float.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -1194,10 +1195,14 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
             }
             for (unsigned int i = 0; i < dim && inversionZero; i++) {
                 double t = 0.;
+                double scale = 0.;
                 for (unsigned int a = 0; a < dim; a++) {
-                    t += m_real[(a * dim) + i] * 2. * y_t2[a];
+                    double term = m_real[(a * dim) + i] * 2. * y_t2[a];
+                    t += term;
+                    scale += fabs(term);
                 }
-                inversionZero = t == nearbyint(t);
+                // t is an integer up to the rounding of its own evaluation
+                inversionZero = fabs(t - nearbyint(t)) <= 8. * DBL_EPSILON * scale;
             }
             if (allEvenAlpha && fabs(nu - dim - alphaAbs) < EPS &&
                 // handle pole in dim = nu + |alpha| for all-even alpha
