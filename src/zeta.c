@@ -1170,12 +1170,12 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
                  rot * xfactor;
             xfactor = 1;
         } else if (!reg && aniso) {
-            // helpers for detecting zeros due to symmetries
-            bool mirrorShift = false;
-            bool mirrorWave = false;
+            // zeros due to mirror symmetries of the lattice
+            bool mirrorShiftZero = false;
+            bool mirrorWaveZero = false;
             if (!allEvenAlpha) {
-                for (unsigned int j = 0; j < dim && !mirrorShift && !mirrorWave;
-                     j++) {
+                for (unsigned int j = 0;
+                     j < dim && !mirrorShiftZero && !mirrorWaveZero; j++) {
                     if (alpha[j] % 2 == 0) {
                         continue;
                     }
@@ -1183,15 +1183,27 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
                     double b = axis_basis_length(dim, m_fourier, j);
                     double tx = (a == 0.) ? 0.5 : 2. * x_t2[j] / a;
                     double ty = (b == 0.) ? 0.5 : 2. * y_t2[j] / b;
-                    mirrorShift = (y_t2[j] == 0.) && (tx == nearbyint(tx));
-                    mirrorWave = (x_t2[j] == 0.) && (ty == nearbyint(ty));
+                    mirrorShiftZero = (y_t2[j] == 0.) && (tx == nearbyint(tx));
+                    mirrorWaveZero = (x_t2[j] == 0.) && (ty == nearbyint(ty));
                 }
+            }
+            // zeros due to inversion, x in Lambda and 2y in Lambda*, |alpha| odd
+            bool inversionZero = (alphaAbs % 2) != 0;
+            for (unsigned int i = 0; i < dim && inversionZero; i++) {
+                inversionZero = x_t2[i] == 0.;
+            }
+            for (unsigned int i = 0; i < dim && inversionZero; i++) {
+                double t = 0.;
+                for (unsigned int a = 0; a < dim; a++) {
+                    t += m_real[(a * dim) + i] * 2. * y_t2[a];
+                }
+                inversionZero = t == nearbyint(t);
             }
             if (allEvenAlpha && fabs(nu - dim - alphaAbs) < EPS &&
                 // handle pole in dim = nu + |alpha| for all-even alpha
                 y_t2_squared < EPS_ZERO_Y) {
                 res = NAN;
-            } else if (mirrorShift || mirrorWave) {
+            } else if (inversionZero || mirrorShiftZero || mirrorWaveZero) {
                 res = 0.;
             } else {
                 res = summation_harmonic(nu, dim, alphaAbs, allEvenAlpha, alpha,
