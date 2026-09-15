@@ -188,7 +188,7 @@ double polynomial_y_der_harmonic_wrapper(int ell, unsigned int dim,
         malloc((kMax + 1) * sizeof(unsigned long long));
     unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
         alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
-    double *coeffs = malloc(coeffs_size * sizeof(double));
+    double *coeffs = malloc(2 * coeffs_size * sizeof(double));
     unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
     precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                     exponents);
@@ -308,7 +308,7 @@ double singularity_s_der_harmonic_wrapper(double nu, unsigned int dim,
         malloc((kMax + 1) * sizeof(unsigned long long));
     unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
         alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
-    double *coeffs = malloc(coeffs_size * sizeof(double));
+    double *coeffs = malloc(2 * coeffs_size * sizeof(double));
     unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
     precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                     exponents);

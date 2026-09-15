@@ -24,7 +24,7 @@ test_crandall = executable('epsteinlib_test_crandall',
 )
 
 test_setZetaDer = executable('epsteinlib_test_setZetaDer',
-    ['wrappers.c','../src/tools.c','utils.c','test_setZetaDer.c'],
+    ['../src/tools.c','wrappers.c','../src/tools.c','utils.c','test_setZetaDer.c'],
     include_directories : incdir,
     dependencies: deps,
     install: false,
@@ -97,6 +97,15 @@ benchmark_gamma = executable('epsteinlib_benchmark_gamma',
 
 benchmark_aniso_timing = executable('epsteinlib_benchmark_aniso_timing',
     ['wrappers.c','utils.c','benchmark_aniso_timing.c'],
+    include_directories : incdir,
+    dependencies: deps,
+    install: false,
+    override_options: override_options,
+    link_with : epsteinlib
+)
+
+benchmark_harmonics = executable('epsteinlib_benchmark_harmonics',
+    ['utils.c','../src/harmonics.c','benchmark_harmonics.c'],
     include_directories : incdir,
     dependencies: deps,
     install: false,

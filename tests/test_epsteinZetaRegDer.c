@@ -136,6 +136,8 @@ static int test_epsteinZetaRegDer_1D(void) {
            errSum / totalTests);
     printf("\n");
 
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
+
     return totalTests - testsPassed;
 }
 
@@ -258,6 +260,8 @@ static int test_epsteinZetaRegDer_prototype(void) {
            errSum / totalTests);
     printf("\n");
 
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
+
     return totalTests - testsPassed;
 }
 
@@ -294,7 +298,7 @@ static int test_epsteinZetaRegDer_d2k_prototype(void) {
     int testsPassed = 0;
     int totalTests = 0;
     unsigned int dim = 2;
-    double tol = pow(10, -11);
+    double tol = 5 * pow(10, -13);
 
     double errMin = NAN;
     double errMax = NAN;
@@ -381,6 +385,8 @@ static int test_epsteinZetaRegDer_d2k_prototype(void) {
            errSum / totalTests);
     printf("\n");
 
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
+
     return totalTests - testsPassed;
 }
 
@@ -417,7 +423,7 @@ static int test_epsteinZetaRegDer_bain_prototype(void) {
     int testsPassed = 0;
     int totalTests = 0;
     unsigned int dim = 3;
-    double tol = 5 * pow(10, -8);
+    double tol = 5 * pow(10, -9);
 
     double errMin = NAN;
     double errMax = NAN;
@@ -507,6 +513,8 @@ static int test_epsteinZetaRegDer_bain_prototype(void) {
            errSum / totalTests);
     printf("\n");
 
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
+
     return totalTests - testsPassed;
 }
 
@@ -523,7 +531,7 @@ static int test_epsteinZetaRegDer_taylor(void) { // NOLINT
     double complex valRef;
     double complex valTaylor;
 
-    double tol = 5 * pow(10, -15);
+    double tol = pow(10, -15);
     unsigned int dim = 2;
     unsigned int order = 12;
 
@@ -634,6 +642,8 @@ static int test_epsteinZetaRegDer_taylor(void) { // NOLINT
     printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
            errSum / totalTests);
     printf("\n");
+
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
 
     return totalTests - testsPassed;
 }

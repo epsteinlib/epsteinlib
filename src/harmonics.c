@@ -404,6 +404,7 @@ double harmonic_h(unsigned int k, unsigned int dim, const double *z,
     double zPow;
     double sumOuter = 0.0;
     double epsilonOuter = 0.0;
+    double maxTerm = 0.0;
     unsigned long long n;
     unsigned long long count = valid_count[k];
     unsigned long long baseIdx = chunk_offset[k];
@@ -418,7 +419,14 @@ double harmonic_h(unsigned int k, unsigned int dim, const double *z,
             zPow *= real_int_pow(z[i], exponents[expIdx + i]);
         }
         double summand = zPow * sumInner;
+        maxTerm = fmax(maxTerm, fabs(summand));
         kahan_add_r(&sumOuter, &epsilonOuter, summand);
+    }
+
+    // avoid accumulation error that is pure rounding noise to be amplified by
+    // divergent Crandall factor upon return
+    if (fabs(sumOuter) <= EPS_CANCELLATION * (double)count * maxTerm) {
+        return 0.0;
     }
 
     sumOuter *= coeffs_c_outer(alphaAbs, k, dim);

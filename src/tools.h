@@ -15,6 +15,12 @@
 #include <complex.h>
 #include <stdbool.h>
 
+/*!
+ * @brief Epsilon to catch exact cancellation to zero in inner sum of the singular
+ * sum in real space for the set Zeta derivatives.
+ */
+#define EPS_CANCELLATION 4e-16
+
 /**
  * @brief Compute the integer power of a double by squaring.
  * Uses switch for small exponents to avoid loop overhead.

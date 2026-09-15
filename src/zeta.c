@@ -12,6 +12,7 @@
  */
 
 #include <complex.h>
+#include <float.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -38,12 +39,6 @@
  * It holds that M_PI * EPS_ZERO_Y = EPS_ZERO_PIY
  */
 #define EPS_ZERO_Y 1e-64
-
-/*!
- * @brief Epsilon to catch exact cancellation to zero in inner sum of the singular
- * sum in real space for the set Zeta derivatives.
- */
-#define EPS_CANCELLATION 4e-16
 
 /**
  * @brief Increments the integer lattice vector to the next lattice point.
@@ -213,24 +208,44 @@ static double complex sum_real_harmonic(
 
     double lambda = 1.; // parameter that decides the weight of each sum
 
-    int zv[dim];    // counting vector in Z^dim
-    double lv[dim]; // lattice vector
+    int zv[dim];        // counting vector in Z^dim
+    double lv[dim];     // lattice vector
+    double lvReci[dim]; // lattice vector of (-zv)
+
     // cuboid cutoffs
     long totalSummands = 1;
     for (int k = 0; k < dim; k++) {
         zv[k] = -cutoffs[k]; // lattice vector initialized
         totalSummands *= 2 * cutoffs[k] + 1;
     }
+
     double complex sum = 0.0;
     double complex epsilon = 0.0;
 
+    long zeroIndex = (totalSummands - 1) / 2;
+
+    // add zero summand
+    for (int i = 0; i < dim; i++) {
+        lv[i] = 0;
+    }
+    double complex summand =
+        summand_real_harmonic(nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs,
+                              chunk_offset, valid_count, coeffs, exponents);
+    kahan_add_c(&sum, &epsilon, summand);
+
     // First Sum (in real space)
-    for (long n = 0; n < totalSummands; n++) {
+    for (long n = 0; n < zeroIndex; n++) {
         matrix_intVector(dim, m, zv, lv, diag);
+        for (int i = 0; i < dim; i++) {
+            lvReci[i] = -lv[i];
+        }
         double complex summand = summand_real_harmonic(
             nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
             valid_count, coeffs, exponents);
-        kahan_add_c(&sum, &epsilon, summand);
+        double complex summandReci = summand_real_harmonic(
+            nu, kIndex, dim, lambda, lvReci, x, y, zArgBound, alphaAbs, chunk_offset,
+            valid_count, coeffs, exponents);
+        kahan_add_c(&sum, &epsilon, summand + summandReci);
         lattice_vector_increment(dim, cutoffs, zv);
     }
 
@@ -320,8 +335,10 @@ static double complex sum_real_harmonic_large_exp(
 
     double lambda = 1.; // parameter that decides the weight of each sum
 
-    int zv[dim];    // counting vector in Z^dim
-    double lv[dim]; // lattice vector
+    int zv[dim];        // counting vector in Z^dim
+    double lv[dim];     // lattice vector
+    double lvReci[dim]; // lattice vector of (-zv)
+
     // cuboid cutoffs
     long totalSummands = 1;
     unsigned int zv_1_norm = 0;
@@ -330,16 +347,34 @@ static double complex sum_real_harmonic_large_exp(
         zv_1_norm += cutoffs[k];
         totalSummands *= 2 * cutoffs[k] + 1;
     }
+    long zeroIndex = (totalSummands - 1) / 2;
+
     double complex sum = 0.0;
     double complex epsilon = 0.0;
 
-    for (long n = 0; n < totalSummands; n++) {
+    // add zero summand
+    for (int i = 0; i < dim; i++) {
+        lv[i] = 0;
+    }
+    bool nearOrigin = true;
+    double complex summand = summand_real_harmonic_large_exp(
+        nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
+        valid_count, coeffs, exponents, nearOrigin);
+    kahan_add_c(&sum, &epsilon, summand);
+
+    for (long n = 0; n < zeroIndex; n++) {
         bool nearOrigin = (zv_1_norm <= 1);
         matrix_intVector(dim, m, zv, lv, diag);
+        for (int i = 0; i < dim; i++) {
+            lvReci[i] = -lv[i];
+        }
         double complex summand = summand_real_harmonic_large_exp(
             nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
             valid_count, coeffs, exponents, nearOrigin);
-        kahan_add_c(&sum, &epsilon, summand);
+        double complex summandReci = summand_real_harmonic_large_exp(
+            nu, kIndex, dim, lambda, lvReci, x, y, zArgBound, alphaAbs, chunk_offset,
+            valid_count, coeffs, exponents, nearOrigin);
+        kahan_add_c(&sum, &epsilon, summand + summandReci);
         lattice_vector_increment_norm(dim, cutoffs, zv, &zv_1_norm);
     }
 
@@ -597,35 +632,34 @@ static double complex sum_fourier_harmonic(
     const unsigned int *exponents) {
     double lambda = 1.; // parameter that decides the weight of each sum
 
-    int zv[dim];    // counting vector in Z^dim
-    double lv[dim]; // lattice vector
+    int zv[dim];        // counting vector in Z^dim
+    double lv[dim];     // lattice vector
+    double lvReci[dim]; // lattice vector of (-zv)
+
     // cuboid cutoffs
     long totalSummands = 1;
     for (int k = 0; k < dim; k++) {
         zv[k] = -cutoffs[k]; // lattice vector initialized
         totalSummands *= 2 * cutoffs[k] + 1;
     }
+    long zeroIndex = (totalSummands - 1) / 2;
+
     double complex sum = 0.0;
     double complex epsilon = 0.0;
-
-    long zeroIndex = (totalSummands - 1) / 2;
 
     // second sum (in fourier space)
     for (long n = 0; n < zeroIndex; n++) {
         matrix_intVector(dim, m_invt, zv, lv, diag);
+        for (int i = 0; i < dim; i++) {
+            lvReci[i] = -lv[i];
+        }
         double complex summand = summand_fourier_harmonic(
             nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
             valid_count, coeffs, exponents);
-        kahan_add_c(&sum, &epsilon, summand);
-        lattice_vector_increment(dim, cutoffs, zv);
-    }
-    lattice_vector_increment(dim, cutoffs, zv); // skips zero
-    for (long n = zeroIndex + 1; n < totalSummands; n++) {
-        matrix_intVector(dim, m_invt, zv, lv, diag);
-        double complex summand = summand_fourier_harmonic(
-            nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
+        double complex summandReci = summand_fourier_harmonic(
+            nu, kIndex, dim, lambda, lvReci, x, y, zArgBound, alphaAbs, chunk_offset,
             valid_count, coeffs, exponents);
-        kahan_add_c(&sum, &epsilon, summand);
+        kahan_add_c(&sum, &epsilon, summand + summandReci);
         lattice_vector_increment(dim, cutoffs, zv);
     }
 
@@ -698,6 +732,8 @@ static int harmonic_coeffs_alloc(unsigned int alphaAbs, unsigned int kMax,
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] alphaAbs: total |α| of the multi-index.
+ * @param[in] allEvenAlpha: true if all components of alpha are even, false
+ * otherwise.
  * @param[in] alpha: multi-index α (length dim).
  * @param[in] lambda: splitting parameter.
  * @param[in] ms: lattice scaling factor, pow(vol, -1./dim).
@@ -716,11 +752,11 @@ static int harmonic_coeffs_alloc(unsigned int alphaAbs, unsigned int kMax,
  * terms.
  */
 static double complex summation_harmonic_reg(
-    double nu, unsigned int dim, unsigned int alphaAbs, const unsigned int *alpha,
-    double lambda, double ms, const double *m_real, const double *m_fourier,
-    const double *x_t1, const double *x_t2, const double *y_t1, const double *y_t2,
-    const int cutoffsReal[], const int cutoffsFourier[], bool diag,
-    double complex xfactor) {
+    double nu, unsigned int dim, unsigned int alphaAbs, bool allEvenAlpha,
+    const unsigned int *alpha, double lambda, double ms, const double *m_real,
+    const double *m_fourier, const double *x_t1, const double *x_t2,
+    const double *y_t1, const double *y_t2, const int cutoffsReal[],
+    const int cutoffsFourier[], bool diag, double complex xfactor) {
 
     // Precompute coefficients for harmonic polynomials once
     unsigned int kMax = alphaAbs / 2;
@@ -751,14 +787,14 @@ static double complex summation_harmonic_reg(
             continue;
         }
 
-        double complex resIt;
+        double complex resIt = 0.;
 
         // if nu = 0, everything except the zero summand in the real sum
         // vanishes
         if (fabs(nuIt / 2) < EPS) {
-            if (dot(dim, x_t2, x_t2) > EPS_ZERO_Y) {
-                resIt = 0.;
-            } else {
+
+            if (dot(dim, x_t2, x_t2) < EPS_ZERO_Y && allEvenAlpha &&
+                2 * k == alphaAbs) {
                 resIt = -harmonic_h(k, dim, x_t2, alphaAbs, chunk_offset,
                                     valid_count, coeffs, exponents);
             }
@@ -845,6 +881,8 @@ static double complex summation_harmonic_reg(
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
  * @param[in] alphaAbs: total |α| of the multi-index.
+ * @param[in] allEvenAlpha: true if all components of alpha are even, false
+ * otherwise.
  * @param[in] alpha: multi-index α (length dim).
  * @param[in] lambda: splitting parameter.
  * @param[in] ms: lattice scaling factor, pow(vol, -1./dim).
@@ -861,12 +899,12 @@ static double complex summation_harmonic_reg(
  * @param[in] xfactor: precomputed prefactor for the real sum.
  * @return updated res after adding the general harmonic contribution.
  */
-static double complex
-summation_harmonic(double nu, unsigned int dim, unsigned int alphaAbs,
-                   const unsigned int *alpha, double lambda, double ms,
-                   const double *m_real, const double *m_fourier, const double *x_t1,
-                   const double *x_t2, const double *y_t2, const int cutoffsReal[],
-                   const int cutoffsFourier[], bool diag, double complex xfactor) {
+static double complex summation_harmonic(
+    double nu, unsigned int dim, unsigned int alphaAbs, bool allEvenAlpha,
+    const unsigned int *alpha, double lambda, double ms, const double *m_real,
+    const double *m_fourier, const double *x_t1, const double *x_t2,
+    const double *y_t2, const int cutoffsReal[], const int cutoffsFourier[],
+    bool diag, double complex xfactor) {
 
     unsigned int kMax = alphaAbs / 2;
     unsigned long long *chunk_offset;
@@ -895,14 +933,13 @@ summation_harmonic(double nu, unsigned int dim, unsigned int alphaAbs,
             continue;
         }
 
-        double complex resIt;
+        double complex resIt = 0.;
 
         // if nu = 0, everything except the zero summand in the real sum
         // vanishes
         if (fabs(nuIt / 2) < EPS) {
-            if (dot(dim, x_t2, x_t2) > EPS_ZERO_Y) {
-                resIt = 0.;
-            } else {
+            if (dot(dim, x_t2, x_t2) < EPS_ZERO_Y && allEvenAlpha &&
+                2 * k == alphaAbs) {
                 resIt = -xfactor * harmonic_h(k, dim, x_t2, alphaAbs, chunk_offset,
                                               valid_count, coeffs, exponents);
             }
@@ -968,6 +1005,33 @@ summation_harmonic(double nu, unsigned int dim, unsigned int alphaAbs,
     free(exponents);
 
     return res;
+}
+
+/**
+ * @brief Returns the length of the basis vector along e_j, zero if there is none.
+ *
+ * @param[in] mat: lattice matrix, columns are the basis vectors.
+ * @param[in] j: component.
+ * @return the j'th component of the axial basis vector, or 0 if there is none.
+ */
+static inline double axis_basis_length(unsigned int dim, const double *mat,
+                                       unsigned int j) {
+    double a = 0.;
+    for (unsigned int k = 0; k < dim; k++) {
+        if (mat[(j * dim) + k] == 0.) {
+            continue;
+        }
+        if (a != 0.) {
+            return 0.; // row j is not axial
+        }
+        for (unsigned int i = 0; i < dim; i++) {
+            if ((i != j) && (mat[(i * dim) + k] != 0.)) {
+                return 0.; // column k is not axial
+            }
+        }
+        a = mat[(j * dim) + k];
+    }
+    return a;
 }
 
 /**
@@ -1043,11 +1107,18 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
             cutoffsFourier[k] = floor(cutoff_id * ev_abs_max);
         }
     }
-    // handle special case of non-positive integer values nu.
     double complex res = NAN;
     double x_t2_squared = dot(dim, x_t2, x_t2);
     double y_t2_squared = dot(dim, y_t2, y_t2);
     unsigned int alphaAbs = aniso ? mult_abs(dim, alpha) : 0;
+    bool allEvenAlpha = true;
+    if (aniso) {
+        for (int i = 0; i < dim && allEvenAlpha; i++) {
+            allEvenAlpha = !(alpha[i] % 2);
+        }
+    }
+    // handle special case of non-positive integer values nu for the non-aniso
+    // variants
     if (!aniso && nu < 1 && fabs((nu / 2.) - nearbyint(nu / 2.)) < EPS) {
         if (x_t2_squared < EPS_ZERO_Y && nu == 0) {
             if (reg) {
@@ -1100,25 +1171,57 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
                  rot * xfactor;
             xfactor = 1;
         } else if (!reg && aniso) {
-            bool allEvenAlpha = true;
-            for (int i = 0; i < dim && allEvenAlpha; i++) {
-                allEvenAlpha = !(alpha[i] % 2);
+            // zeros due to mirror symmetries of the lattice
+            bool mirrorShiftZero = false;
+            bool mirrorWaveZero = false;
+            if (!allEvenAlpha) {
+                for (unsigned int j = 0;
+                     j < dim && !mirrorShiftZero && !mirrorWaveZero; j++) {
+                    if (alpha[j] % 2 == 0) {
+                        continue;
+                    }
+                    double a = axis_basis_length(dim, m_real, j);
+                    double b = axis_basis_length(dim, m_fourier, j);
+                    double tx = (a == 0.) ? 0.5 : 2. * x_t2[j] / a;
+                    double ty = (b == 0.) ? 0.5 : 2. * y_t2[j] / b;
+                    mirrorShiftZero = (y_t2[j] == 0.) && (tx == nearbyint(tx));
+                    mirrorWaveZero = (x_t2[j] == 0.) && (ty == nearbyint(ty));
+                }
             }
-            // handle pole in dim = nu + |alpha| for all-even alpha
+            // zeros due to inversion, x in Lambda and 2y in Lambda*, |alpha| odd
+            bool inversionZero = (alphaAbs % 2) != 0;
+            for (unsigned int i = 0; i < dim && inversionZero; i++) {
+                inversionZero = x_t2[i] == 0.;
+            }
+            for (unsigned int i = 0; i < dim && inversionZero; i++) {
+                double t = 0.;
+                double scale = 0.;
+                for (unsigned int a = 0; a < dim; a++) {
+                    double term = m_real[(a * dim) + i] * 2. * y_t2[a];
+                    t += term;
+                    scale += fabs(term);
+                }
+                // t is an integer up to the rounding of its own evaluation
+                inversionZero = fabs(t - nearbyint(t)) <= 8. * DBL_EPSILON * scale;
+            }
             if (allEvenAlpha && fabs(nu - dim - alphaAbs) < EPS &&
+                // handle pole in dim = nu + |alpha| for all-even alpha
                 y_t2_squared < EPS_ZERO_Y) {
                 res = NAN;
+            } else if (inversionZero || mirrorShiftZero || mirrorWaveZero) {
+                res = 0.;
             } else {
-                res = summation_harmonic(nu, dim, alphaAbs, alpha, lambda, ms,
-                                         m_real, m_fourier, x_t1, x_t2, y_t2,
-                                         cutoffsReal, cutoffsFourier, diag, xfactor);
+                res = summation_harmonic(nu, dim, alphaAbs, allEvenAlpha, alpha,
+                                         lambda, ms, m_real, m_fourier, x_t1, x_t2,
+                                         y_t2, cutoffsReal, cutoffsFourier, diag,
+                                         xfactor);
             }
         } else if (reg && aniso) {
-            res = summation_harmonic_reg(nu, dim, alphaAbs, alpha, lambda, ms,
-                                         m_real, m_fourier, x_t1, x_t2, y_t1, y_t2,
-                                         cutoffsReal, cutoffsFourier, diag, xfactor);
+            res = summation_harmonic_reg(nu, dim, alphaAbs, allEvenAlpha, alpha,
+                                         lambda, ms, m_real, m_fourier, x_t1, x_t2,
+                                         y_t1, y_t2, cutoffsReal, cutoffsFourier,
+                                         diag, xfactor);
         }
-
         // In the harmonic method, the res is already set as there is no global
         // nu-dependent coefficient there
         if (!aniso) {
