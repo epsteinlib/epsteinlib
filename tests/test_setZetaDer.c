@@ -1048,6 +1048,14 @@ static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
                                  alphaHalf2, 2, nuHalf2, 3, false, true, tol, &total,
                                  &reported, &errMin, &errMax, &errSum);
 
+    // 2y = (1, -1/sqrt(3)) is a reciprocal basis vector of the hexagonal lattice,
+    // so the value is real and odd |alpha| vanishes, while no single component of
+    // 2y spans e_j: the mirror cases cannot catch this one.
+    double yHalfHex2[] = {0.5, -0.5 / sqrt(3.)};
+    failed += inversionZeroSweep(2, a2[2], mirror2[2], xInv2, 1, yHalfHex2, 1,
+                                 alphaHalf2, 2, nuHalf2, 3, false, true, tol, &total,
+                                 &reported, &errMin, &errMax, &errSum);
+
     if (reported >= MAX_REPORTS) {
         printf("\n\t ... ");
         printf("further failures suppressed");
