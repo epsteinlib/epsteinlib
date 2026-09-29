@@ -953,7 +953,7 @@ static int inversionZeroSweep(unsigned int dim, const double *m, // NOLINT
 static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
     printf("%s ", __func__);
 
-    double tol = pow(10, -15);
+    double tol = pow(10, -16);
     int failed = 0;
     int total = 0;
     double errMin = NAN;
