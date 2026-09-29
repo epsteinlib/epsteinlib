@@ -13,6 +13,7 @@
 #ifndef EPSTEIN_TOOLS
 #define EPSTEIN_TOOLS
 #include <complex.h>
+#include <float.h>
 #include <math.h>
 #include <stdbool.h>
 
@@ -21,6 +22,33 @@
  * sum in real space for the set Zeta derivatives.
  */
 #define EPS_CANCELLATION 4e-16
+
+/**
+ * @brief Checks whether t is an integer up to the rounding of its evaluation.
+ *
+ * @param[in] t: value to check.
+ * @param[in] scale: magnitude of the terms t was evaluated from.
+ * @return true if t is within 8 ulp of scale of the nearest integer.
+ */
+static inline bool is_near_int(double t, double scale) {
+    return fabs(t - nearbyint(t)) <= 8. * DBL_EPSILON * scale;
+}
+
+/**
+ * @brief Greatest common divisor of two nonnegative integers.
+ *
+ * @param[in] a: first integer.
+ * @param[in] b: second integer.
+ * @return gcd(a, b), gcd(0, 0) = 0.
+ */
+static inline long long gcd_ll(long long a, long long b) {
+    while (b != 0) {
+        long long t = a % b;
+        a = b;
+        b = t;
+    }
+    return a;
+}
 
 /**
  * @brief Compute the integer power of a double by squaring.

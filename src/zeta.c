@@ -12,7 +12,6 @@
  */
 
 #include <complex.h>
-#include <float.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -1008,30 +1007,53 @@ static double complex summation_harmonic(
 }
 
 /**
- * @brief Returns the length of the basis vector along e_j, zero if there is none.
+ * @brief Decides whether the anisotropic Epstein zeta function vanishes by shift
+ * vector mirroring in the j'th component.
  *
- * @param[in] mat: lattice matrix, columns are the basis vectors.
+ * @param[in] dim: dimension of the lattice.
+ * @param[in] m: lattice matrix A, basis vectors in the columns.
+ * @param[in] m_invt: reciprocal lattice matrix A^{-T}.
+ * @param[in] x: shift vector.
+ * @param[in] y: wave vector.
  * @param[in] j: component.
- * @return the j'th component of the axial basis vector, or 0 if there is none.
+ * @return true if the function vanishes by shift vector mirroring in component j.
  */
-static inline double axis_basis_length(unsigned int dim, const double *mat,
-                                       unsigned int j) {
-    double a = 0.;
-    for (unsigned int k = 0; k < dim; k++) {
-        if (mat[(j * dim) + k] == 0.) {
-            continue;
-        }
-        if (a != 0.) {
-            return 0.; // row j is not axial
-        }
-        for (unsigned int i = 0; i < dim; i++) {
-            if ((i != j) && (mat[(i * dim) + k] != 0.)) {
-                return 0.; // column k is not axial
+static bool mirror_shift_zero(unsigned int dim, const double *m,
+                              const double *m_invt, const double *x, const double *y,
+                              unsigned int j) {
+    const double *r = m + ((size_t)j * dim);
+    const double *v = m_invt + ((size_t)j * dim);
+
+    // mirror symmetry: N = 2 v r^T integer; the entry of r of largest modulus
+    // selects the column for the projection of Lambda*
+    long long n[dim * dim];
+    unsigned int bMax = 0;
+    for (unsigned int a = 0; a < dim; a++) {
+        bMax = (fabs(r[a]) > fabs(r[bMax])) ? a : bMax;
+        for (unsigned int b = 0; b < dim; b++) {
+            double t = 2. * v[a] * r[b];
+            if (!is_near_int(t, fabs(t))) {
+                return false;
             }
+            n[(a * dim) + b] = llround(t);
         }
-        a = mat[(j * dim) + k];
     }
-    return a;
+
+    // 2 x_j e_j in Lambda
+    for (unsigned int i = 0; i < dim; i++) {
+        double t = 2. * x[j] * v[i];
+        if (!is_near_int(t, fabs(t))) {
+            return false;
+        }
+    }
+
+    // y_j in the projection of Lambda* to the j'th component
+    long long g = 0;
+    for (unsigned int a = 0; a < dim; a++) {
+        g = gcd_ll(g, llabs(n[(a * dim) + bMax]));
+    }
+    double t = y[j] * 2. * fabs(r[bMax]) / (double)g;
+    return is_near_int(t, fabs(t));
 }
 
 /**
@@ -1179,21 +1201,13 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
             xfactor = 1;
         } else if (!reg && aniso) {
             // zeros due to mirror symmetries of the lattice
-            bool mirrorShiftZero = false;
-            bool mirrorWaveZero = false;
-            if (!allEvenAlpha) {
-                for (unsigned int j = 0;
-                     j < dim && !mirrorShiftZero && !mirrorWaveZero; j++) {
-                    if (alpha[j] % 2 == 0) {
-                        continue;
-                    }
-                    double a = axis_basis_length(dim, m_real, j);
-                    double b = axis_basis_length(dim, m_fourier, j);
-                    double tx = (a == 0.) ? 0.5 : 2. * x_t2[j] / a;
-                    double ty = (b == 0.) ? 0.5 : 2. * y_t2[j] / b;
-                    mirrorShiftZero = (y_t2[j] == 0.) && (tx == nearbyint(tx));
-                    mirrorWaveZero = (x_t2[j] == 0.) && (ty == nearbyint(ty));
-                }
+            bool mirrorZero = false;
+            for (unsigned int j = 0; j < dim && !allEvenAlpha && !mirrorZero; j++) {
+                // shift vector mirroring, and wave vector mirroring as its dual
+                mirrorZero =
+                    (alpha[j] % 2 != 0) &&
+                    (mirror_shift_zero(dim, m_real, m_fourier, x_t2, y_t2, j) ||
+                     mirror_shift_zero(dim, m_fourier, m_real, y_t2, x_t2, j));
             }
             // zeros due to inversion, x in Lambda and 2y in Lambda*, |alpha| odd
             bool inversionZero = (alphaAbs % 2) != 0;
@@ -1209,13 +1223,13 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
                     scale += fabs(term);
                 }
                 // t is an integer up to the rounding of its own evaluation
-                inversionZero = fabs(t - nearbyint(t)) <= 8. * DBL_EPSILON * scale;
+                inversionZero = is_near_int(t, scale);
             }
             if (allEvenAlpha && fabs(nu - dim - alphaAbs) < EPS &&
                 // handle pole in dim = nu + |alpha| for all-even alpha
                 y_t2_squared < EPS_ZERO_Y) {
                 res = NAN;
-            } else if (inversionZero || mirrorShiftZero || mirrorWaveZero) {
+            } else if (inversionZero || mirrorZero) {
                 res = 0.;
             } else {
                 res = summation_harmonic(nu, dim, alphaAbs, allEvenAlpha, alpha,
