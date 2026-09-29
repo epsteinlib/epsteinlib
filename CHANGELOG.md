@@ -15,6 +15,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 - up to five digits lost in `epsteinZetaAniso` and `epsteinZetaAnisoReg` due to cancellation error for `y` along a ray where `harmonic_h` must vanish, fixed by comparing intermediate values of the harmonic polynomial with `EPS_CANCELLATION`.
 - non-zero values of `epsteinZetaAniso` and `epsteinZetaAnisoReg` for high-order anisotropy when $\boldsymbol{x}=\boldsymbol{0}$ and $|\boldsymbol{\alpha}|$ is odd, fixed by reordering summands to enforce symmetric pairing.
 - up to five digits lost in all Epstein zeta variants for $\boldsymbol x$ (or $\boldsymbol y$) outside the (reciprocal) elementary lattice cell and close to (reciprocal) lattice points, fixed by error-free projection to the (reciprocal) elementary lattice cell before rescaling.
+- non-zero values of `epsteinZetaAniso` at mirror-symmetry related zeros for some non-diagonal lattice matrices (e.g. hexagonal), fixed by a basis-independent early-return criterion.
 
 ## [0.6.2] - 2026-08-20
 
