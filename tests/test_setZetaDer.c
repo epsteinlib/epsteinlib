@@ -549,7 +549,7 @@ static int test_setZetaDer_taylor(void) { // NOLINT
     double complex valRef;
     double complex valTaylor;
 
-    double tol = 5 * pow(10, -15);
+    double tol = pow(10, -15);
     unsigned int dim = 2;
     unsigned int order = 12;
 
