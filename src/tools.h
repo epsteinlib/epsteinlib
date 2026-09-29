@@ -13,6 +13,7 @@
 #ifndef EPSTEIN_TOOLS
 #define EPSTEIN_TOOLS
 #include <complex.h>
+#include <math.h>
 #include <stdbool.h>
 
 /*!
@@ -142,6 +143,33 @@ static inline void kahan_add_r(double *restrict sum, double *restrict epsilon,
 }
 
 /**
+ * @brief Error-free sum of two doubles (Knuth two-sum).
+ * @param[in] a: first summand.
+ * @param[in] b: second summand.
+ * @param[out] err: rounding error, a + b = fl(a + b) + *err exactly.
+ * @return fl(a + b).
+ */
+static inline double two_sum(double a, double b, double *err) {
+    double s = a + b;
+    double bb = s - a;
+    *err = (a - (s - bb)) + (b - bb);
+    return s;
+}
+
+/**
+ * @brief Error-free product of two doubles (fma two-product).
+ * @param[in] a: first factor.
+ * @param[in] b: second factor.
+ * @param[out] err: rounding error, a * b = fl(a * b) + *err exactly.
+ * @return fl(a * b).
+ */
+static inline double two_prod(double a, double b, double *err) {
+    double p = a * b;
+    *err = fma(a, b, -p);
+    return p;
+}
+
+/**
  * @brief euclidean dot product.
  * @param[in] dim: dimension of the input vectors
  * @param[in] v1: first vector.
@@ -214,9 +242,11 @@ double inf_norm(unsigned int dim, const double *m);
 
 /**
  * @brief calculate projection of vector to elementary lattice cell.
+ * The projection is evaluated with error-free products and sums, so it keeps
+ * full relative accuracy when v lies close to a lattice point.
  * @param[in] dim: dimension of the input vectors
  * @param[in] m: matrix that transforms the lattice in the function.
- * @param[in] m_invt: inverse of m.
+ * @param[in] m_invt: inverse transpose of m.
  * @param[in] v: vector for which the projection to the elementary lattice cell
  * is needet.
  * @return projection of v to the elementary lattice cell.

@@ -1077,17 +1077,24 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
     transpose(dim, m_fourier);
     vol = fabs(vol);
     double ms = pow(vol, -1. / dim);
+    // 2. transform: get x and y in their respective elementary cells. Done on
+    // the unscaled lattice, where x and y are exact: scaling first would round
+    // them by eps * |x| and eps * |y|, which is no longer small relative to the
+    // projection when x or y lie close to a lattice point.
+    double *x_t2 = vectorProj(dim, m, m_fourier, x);
+    double *y_t2 = vectorProj(dim, m_fourier, m, y);
     for (int i = 0; i < dim * dim; i++) {
         m_real[i] *= ms;
         m_fourier[i] /= ms;
     }
+    // scale exactly like x_t1 and y_t1, so that x_t2 == x_t1 and y_t2 == y_t1
+    // whenever no projection was needed
     for (int i = 0; i < dim; i++) {
         x_t1[i] = x[i] * ms;
         y_t1[i] = y[i] / ms;
+        x_t2[i] *= ms;
+        y_t2[i] /= ms;
     }
-    // 2. transform: get x and y in their respective elementary cells
-    double *x_t2 = vectorProj(dim, m_real, m_fourier, x_t1);
-    double *y_t2 = vectorProj(dim, m_fourier, m_real, y_t1);
     // set cutoffs
     int cutoffsReal[dim];
     int cutoffsFourier[dim];

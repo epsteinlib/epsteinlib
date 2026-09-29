@@ -173,9 +173,13 @@ unsigned long long binom(unsigned long long n, unsigned long long k) {
 
 /**
  * @brief calculate projection of vector to elementary lattice cell.
+ * The lattice point n = round(m⁻¹ v) is only used to select the cell, the
+ * projection v - m n is then evaluated with error-free products and sums
+ * (fma two-product, Knuth two-sum), so it keeps full relative accuracy also
+ * when v lies close to a lattice point and |v - m n| ≪ |v|.
  * @param[in] dim: dimension of the input vectors
  * @param[in] m: matrix that transforms the lattice in the function.
- * @param[in] m_invt: inverse of m.
+ * @param[in] m_invt: inverse transpose of m.
  * @param[in] v: vector for which the projection to the elementary lattice cell
  * is needet.
  * @return projection of v to the elementary lattice cell.
@@ -195,15 +199,23 @@ double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
         todo = todo || (vt[i] <= -0.5 || vt[i] >= 0.5);
     }
     if (todo) {
+        // integer lattice coordinates of the nearest lattice point
         for (int i = 0; i < dim; i++) {
-            vt[i] = remainder(vt[i], 1);
+            vt[i] -= remainder(vt[i], 1);
         }
         double *vres = malloc(dim * sizeof(double));
         for (int i = 0; i < dim; i++) {
-            vres[i] = 0;
+            // vres[i] = v[i] - sum_j m[i][j] vt[j], carried exactly as sum + err
+            double sum = v[i];
+            double err = 0;
             for (int j = 0; j < dim; j++) {
-                vres[i] += m[(dim * i) + j] * vt[j];
+                double prodErr = NAN;
+                double sumErr = NAN;
+                double prod = two_prod(m[(dim * i) + j], vt[j], &prodErr);
+                sum = two_sum(sum, -prod, &sumErr);
+                err += sumErr - prodErr;
             }
+            vres[i] = sum + err;
         }
         free(vt);
         return vres;
