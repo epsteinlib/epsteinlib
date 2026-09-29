@@ -173,10 +173,6 @@ unsigned long long binom(unsigned long long n, unsigned long long k) {
 
 /**
  * @brief calculate projection of vector to elementary lattice cell.
- * The lattice point n = round(m⁻¹ v) is only used to select the cell, the
- * projection v - m n is then evaluated with error-free products and sums
- * (fma two-product, Knuth two-sum), so it keeps full relative accuracy also
- * when v lies close to a lattice point and |v - m n| ≪ |v|.
  * @param[in] dim: dimension of the input vectors
  * @param[in] m: matrix that transforms the lattice in the function.
  * @param[in] m_invt: inverse transpose of m.
