@@ -701,7 +701,7 @@ static int harmonic_coeffs_alloc(unsigned int alphaAbs, unsigned int kMax,
 
     // overflow unreachable for |alpha| < 200 in 2D and |alpha| < 80 in 3D
     // rather, the hpdyad arithmetic is the bottleneck
-    *coeffs = malloc(coeffs_size * sizeof **coeffs);
+    *coeffs = malloc(HARMONIC_COEFF_STRIDE * coeffs_size * sizeof **coeffs);
     *exponents = malloc(coeffs_size * dim * sizeof **exponents);
 
     if (!*coeffs || !*exponents) {
@@ -778,7 +778,7 @@ static double complex summation_harmonic_reg(
     for (unsigned int k = 0; k <= kMax; k++) {
 
         double nuIt = nu - (2 * k);
-        double zArgBoundIt = assignzArgBound(nuIt);
+        double zArgBoundIt = assignzArgBoundHarmonic(nuIt, alphaAbs, k);
 
         // skip iterartions where nuIt is a negative even integer, as
         // 1/gamma(nIt) = 0
@@ -804,7 +804,8 @@ static double complex summation_harmonic_reg(
             double complex nc = 0.;
 
             double nuReci = nuIt - (2 * alphaAbs) + (4 * k);
-            double zArgBoundReci = assignzArgBound(dim - nuReci);
+            double zArgBoundReci =
+                assignzArgBoundHarmonic(dim - nuReci, alphaAbs, k);
 
             // skip zero summand if harmonic polynomial vanishes
             double h = harmonic_h(k, dim, y_t1, alphaAbs, chunk_offset, valid_count,
@@ -924,7 +925,7 @@ static double complex summation_harmonic(
     for (unsigned int k = 0; k <= kMax; k++) {
 
         double nuIt = nu - (2 * k);
-        double zArgBoundIt = assignzArgBound(nuIt);
+        double zArgBoundIt = assignzArgBoundHarmonic(nuIt, alphaAbs, k);
 
         // skip iterartions where nuIt is a negative even integer, as
         // 1/gamma(nIt) = 0
@@ -949,7 +950,8 @@ static double complex summation_harmonic(
             double complex nc = 0.;
 
             double nuReci = nuIt - (2 * alphaAbs) + (4 * k);
-            double zArgBoundReci = assignzArgBound(dim - nuReci);
+            double zArgBoundReci =
+                assignzArgBoundHarmonic(dim - nuReci, alphaAbs, k);
 
             // skip zero summand if harmonic polynomial vanishes
             double h = harmonic_h(k, dim, y_t2, alphaAbs, chunk_offset, valid_count,
@@ -1117,10 +1119,15 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
         x_t2[i] *= ms;
         y_t2[i] /= ms;
     }
-    // set cutoffs
+    // set cutoffs, above ALPHA_ABS_HIGH_ORDER widened by the degree of the
+    // harmonic polynomial
+    unsigned int alphaAbs = aniso ? mult_abs(dim, alpha) : 0;
     int cutoffsReal[dim];
     int cutoffsFourier[dim];
     double cutoff_id = G_BOUND + 0.5;
+    if (alphaAbs > ALPHA_ABS_HIGH_ORDER) {
+        cutoff_id = inflate_radius(cutoff_id, alphaAbs);
+    }
     if (diag) {
         // Chose absolute diag. entries for cutoff
         for (int k = 0; k < dim; k++) {
@@ -1139,7 +1146,6 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
     double complex res = NAN;
     double x_t2_squared = dot(dim, x_t2, x_t2);
     double y_t2_squared = dot(dim, y_t2, y_t2);
-    unsigned int alphaAbs = aniso ? mult_abs(dim, alpha) : 0;
     bool allEvenAlpha = true;
     if (aniso) {
         for (int i = 0; i < dim && allEvenAlpha; i++) {

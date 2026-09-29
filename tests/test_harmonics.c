@@ -315,7 +315,8 @@ static int test_harmonic_h_1D(void) {
             malloc((kMax + 1) * sizeof(unsigned long long));
         unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
             alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
-        double *coeffs = malloc(2 * coeffs_size * sizeof(double));
+        double *coeffs =
+            malloc(HARMONIC_COEFF_STRIDE * coeffs_size * sizeof(double));
         unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
         precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                         exponents);
@@ -439,7 +440,8 @@ static int test_harmonic_h_3D_unity(void) {
             malloc((kMax + 1) * sizeof(unsigned long long));
         unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
             alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
-        double *coeffs = malloc(2 * coeffs_size * sizeof(double));
+        double *coeffs =
+            malloc(HARMONIC_COEFF_STRIDE * coeffs_size * sizeof(double));
         unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
         precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                         exponents);
@@ -572,7 +574,8 @@ static int test_harmonic_h_3D_random(void) {
             malloc((kMax + 1) * sizeof(unsigned long long));
         unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
             alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
-        double *coeffs = malloc(2 * coeffs_size * sizeof(double));
+        double *coeffs =
+            malloc(HARMONIC_COEFF_STRIDE * coeffs_size * sizeof(double));
         unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
         precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                         exponents);
@@ -705,7 +708,8 @@ static int test_harmonic_h_3D_illcond(void) {
             malloc((kMax + 1) * sizeof(unsigned long long));
         unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
             alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
-        double *coeffs = malloc(2 * coeffs_size * sizeof(double));
+        double *coeffs =
+            malloc(HARMONIC_COEFF_STRIDE * coeffs_size * sizeof(double));
         unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
         precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                         exponents);

@@ -12,6 +12,17 @@
 #ifndef EPSTEIN_HARMONICS
 #define EPSTEIN_HARMONICS
 
+/** @brief Largest |alpha| evaluated in plain double precision. Above it, the
+ * harmonic polynomial grows the far lattice summands and the outer sum of
+ * harmonic_h cancels by more than the 53 bits of a double, so the anisotropic
+ * path evaluates harmonic_h in double-double arithmetic and widens its
+ * truncation bounds, at a higher cost. */
+#define ALPHA_ABS_HIGH_ORDER 10
+
+/** @brief Number of doubles stored per precomputed inner harmonic sum, as an
+ * unevaluated (hi, lo) pair; lo is only filled above ALPHA_ABS_HIGH_ORDER. */
+#define HARMONIC_COEFF_STRIDE 2
+
 /** @brief Computes cₙ,ᵢ,ₖ＝ ∏_{j=i+1}^{⌊n/2⌋-k} (2n＋d−2−4k−2j).
  * @param[in] n: index (total of alpha).
  * @param[in] start: lower bound of product (exclusive).
@@ -71,11 +82,13 @@ void harmonic_h_inner_term_multi_hpdyad(unsigned int dim, const unsigned int *al
  * @param[in] alpha: upper multi-index.
  * @param[in] gamma: fixed multi-index gamma.
  * @param[in] alphaAbs: total of alpha.
+ * @param[out] residual: if non-NULL, receives h_inner(α,γ,k) minus the returned
+ * double, rounded to double.
  * @return h_inner(α,γ,k).
  */
 double harmonic_h_inner_sum(unsigned int k, unsigned int dim,
                             const unsigned int *alpha, const unsigned int *gamma,
-                            unsigned int alphaAbs);
+                            unsigned int alphaAbs, double *residual);
 
 /** @brief Computes chunk offsets and valid entry counts for precomputed
  * inner harmonic sums corresponding to k = 0, ..., floor(|alpha|/2).
@@ -107,7 +120,8 @@ precompute_harmonic_h_inner_chunk_size(unsigned int alphaAbs, unsigned int kMax,
  * @param[in] dim: dimension of alpha and gamma.
  * @param[in] alpha: upper multi-index.
  * @param[in] chunk_offset: starting offsets for each k.
- * @param[out] coeffs: array storing precomputed inner harmonic sums.
+ * @param[out] coeffs: array storing precomputed inner harmonic sums as
+ * HARMONIC_COEFF_STRIDE doubles per entry.
  * @param[out] exponents: array storing precomputed exponents (2γ-α), size =
  * totalSize * dim.
  */
@@ -126,7 +140,8 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, unsigned int dim,
  * @param[in] alphaAbs: total of alpha.
  * @param[in] chunk_offset: starting offsets for each k.
  * @param[in] valid_count: number of valid entries for each k.
- * @param[in] coeffs: array storing precomputed inner harmonic sums.
+ * @param[in] coeffs: array storing precomputed inner harmonic sums as
+ * HARMONIC_COEFF_STRIDE doubles per entry.
  * @param[in] exponents: array storing precomputed exponents (2γ-α).
  * @return h₍α,k₎(z).
  */

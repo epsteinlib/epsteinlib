@@ -86,6 +86,42 @@ void hpdyad_set_ull(hpdyad_t *a, unsigned long long x, signed char sign) {
     a->sign = sign;
 }
 
+/** @brief Initialize hpdyad from a finite double, exactly.
+ * @param[out] a: destination hpdyad
+ * @param[in] x: finite double value
+ */
+void hpdyad_set_double(hpdyad_t *a, double x) {
+    int exp;
+    double frac;
+
+    if (x == 0.0 || !isfinite(x)) {
+        hpdyad_set_ull(a, 0, 1);
+        return;
+    }
+
+    // x = frac * 2^exp with 0.5 <= |frac| < 1, so |frac| * 2^53 is an integer
+    frac = frexp(x, &exp);
+    hpdyad_set_ull(a, (unsigned long long)ldexp(fabs(frac), DBL_MANT_DIG),
+                   (x < 0.0) ? -1 : 1);
+    a->exp2 += exp - DBL_MANT_DIG;
+}
+
+/** @brief Split an hpdyad into the nearest double and the rounded residual.
+ * @param[in] v: value to split.
+ * @param[out] hi: double nearest to v.
+ * @param[out] lo: double nearest to v - hi.
+ */
+void hpdyad_split_double(const hpdyad_t *v, double *hi, double *lo) {
+    hpdyad_t negHi;
+    hpdyad_t rest;
+
+    *hi = hpdyad_to_double(v);
+    hpdyad_set_double(&negHi, *hi);
+    negHi.sign = (signed char)-negHi.sign;
+    hpdyad_add(&rest, v, &negHi);
+    *lo = hpdyad_to_double(&rest);
+}
+
 /** @brief Normalize hpdyad: trim leading zeros and left-shift mantissa so MSB of top
  * limb is 1
  * @param[in,out] a: pointer to hpdyad to normalize

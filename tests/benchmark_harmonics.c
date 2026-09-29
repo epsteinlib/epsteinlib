@@ -146,7 +146,7 @@ static int benchmark_harmonic(unsigned int dim) { // NOLINT
     unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
         ALPHA_ABS, K_MAX, dim, alpha, chunk_offset, valid_count);
 
-    double *coeffs = malloc(coeffs_size * sizeof(double));
+    double *coeffs = malloc(HARMONIC_COEFF_STRIDE * coeffs_size * sizeof(double));
     unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
     if (coeffs == NULL || exponents == NULL) {
         (void)fprintf(stderr, "Error: allocation failed\n");
@@ -301,7 +301,8 @@ static int benchmark_harmonic_stab_2D(void) { // NOLINT
         unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
             alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
 
-        double *coeffs = malloc(coeffs_size * sizeof(double));
+        double *coeffs =
+            malloc(HARMONIC_COEFF_STRIDE * coeffs_size * sizeof(double));
         unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
         if (coeffs == NULL || exponents == NULL) {
             (void)fprintf(stderr, "Error: allocation failed\n");

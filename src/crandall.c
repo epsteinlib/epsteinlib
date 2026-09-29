@@ -13,6 +13,7 @@
 
 #include "crandall.h"
 #include "gamma.h"
+#include "harmonics.h"
 #include "stdbool.h"
 #include "tools.h"
 #include <complex.h>
@@ -29,6 +30,11 @@
  * zero.
  */
 #define EPS_ZERO_PIY (M_PI * 1e-64)
+
+/*!
+ * @brief maximum number of Newton steps in inflate_radius.
+ */
+#define INFLATE_RADIUS_STEPS 40
 
 /**
  * @brief Calculates bounds on when to use asymptotic expansion of the
@@ -54,16 +60,59 @@ double assignzArgBound(double nu) {
 }
 
 /**
- * @brief Calculates the upper Crandall function.
- * @param[in] dim: dimension of the input vectors.
- * @param[in] nu: exponent of the regularized Epstein zeta function.
- * @param[in] z: input vector of the function.
- * @param[in] prefactor: prefactor of the vector, e. g. lambda or 1/lambda in
- *      Crandall's formula
- * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
- * expansion in the calculation of the Crandall function.
- * @return upperGamma(nu / 2,pi prefactor * z**2) / (pi * prefactor z**2)^(nu / 2) if
- * |z| > 0 and - 2 / nu otherwise.
+ * @brief Inflates a truncation radius so that it also absorbs a polynomial
+ * factor r^n, by solving pi r^2 - n log(r) = pi r0^2 with Newton's method.
+ *
+ * @param[in] r0: radius calibrated for the isotropic summand.
+ * @param[in] n: degree of the polynomial factor.
+ * @return inflated radius, never smaller than r0.
+ */
+double inflate_radius(double r0, double n) {
+    if (n <= 0 || r0 <= 0) {
+        return r0;
+    }
+    double target = M_PI * r0 * r0;
+    double r = r0;
+    for (int it = 0; it < INFLATE_RADIUS_STEPS; it++) {
+        double f = (M_PI * r * r) - (n * log(r)) - target;
+        double fp = (2 * M_PI * r) - (n / r);
+        // left of the minimum of f, where Newton would walk away from the root
+        if (fp <= 0) {
+            r *= 1.5;
+            continue;
+        }
+        double step = f / fp;
+        r = fmax(r - step, r0);
+        if (fabs(step) < 1e-12 * r) {
+            break;
+        }
+    }
+    return r;
+}
+
+/**
+ * @brief Inflates a truncation radius to absorb a polynomial factor r^n.
+ * @param[in] r0: radius calibrated for the isotropic summand.
+ * @param[in] n: degree of the polynomial factor.
+ * @return inflated radius, never smaller than r0.
+ */
+double assignzArgBoundHarmonic(double nu, unsigned int alphaAbs, unsigned int k) {
+    double b = assignzArgBound(nu);
+    double n = (double)alphaAbs - (2. * k);
+    if (alphaAbs <= ALPHA_ABS_HIGH_ORDER || n <= 0 || b == DBL_MAX) {
+        return b;
+    }
+    double r = inflate_radius(sqrt(b / M_PI), n);
+    return M_PI * r * r;
+}
+
+/**
+ * @brief Degree aware variant of assignzArgBound for the harmonic method,
+ * widened by the degree |alpha| - 2k above ALPHA_ABS_HIGH_ORDER.
+ * @param[in] nu: order of the Crandall function in the summand.
+ * @param[in] alphaAbs: total of alpha.
+ * @param[in] k: specifies degree |alpha| - 2k of the harmonic polynomial.
+ * @return minimum value of pi z^2 for the asymptotic expansion.
  */
 double complex crandall_g(unsigned int dim, double nu, const double *z,
                           double prefactor, double zArgBound) {
@@ -402,4 +451,5 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z,
 }
 
 #undef EPS
+#undef INFLATE_RADIUS_STEPS
 #undef G_CUTOFF

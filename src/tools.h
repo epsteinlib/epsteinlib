@@ -23,6 +23,13 @@
  */
 #define EPS_CANCELLATION 4e-16
 
+/*!
+ * @brief Epsilon to catch exact cancellation to zero in sums accumulated in
+ * double-double arithmetic, where the residual at a structural zero is of order
+ * eps^2 relative to the largest summand instead of eps.
+ */
+#define EPS_CANCELLATION_DD 1e-24
+
 /**
  * @brief Checks whether t is an integer up to the rounding of its evaluation.
  *
