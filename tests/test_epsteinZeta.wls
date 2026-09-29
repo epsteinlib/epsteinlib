@@ -192,8 +192,8 @@ Export["csv/epsteinZeta_ref.csv",epsteinZetaRef];
 Export["csv/epsteinZetaReg_ref.csv",epsteinZetaRegRef];
 
 
-(* ::Subsection::Closed:: *)
-(*Test random matrices*)
+(* ::Subsection:: *)
+(*Test varied matrices*)
 
 
 (* ::Text:: *)
@@ -275,11 +275,33 @@ epsteinZetaRandomMatricesRef=ParallelTable[
 
 
 (* ::Text:: *)
+(*Check near-lattice points.*)
+
+
+epsteinZetaNearLatticeRef=Flatten[Table[
+    Module[{x,y,zeta}
+	    ,x=a . {5,-3}+{3,-1}/2^11
+	    ;y={1/8,-3/16}
+	    ;zeta=epsteinZeta[\[Nu],a,x,y]
+	    ;Flatten[Join[{2},N@{\[Nu],a,x,y,Re[zeta],Im[zeta]}]]
+    ]
+    ,{a,{{{3/2,0},{0,1}},{{1,1/2},{0,7/8}},{{5/4,-1/4},{3/8,1}}}}
+    ,{\[Nu],{17/2,51/4,20}}
+],1];            
+
+
+(* ::Text:: *)
+(*Combine reference values.*)
+
+
+epsteinZetaVariedMatricesRef=Join[epsteinZetaRandomMatricesRef,epsteinZetaNearLatticeRef];
+
+
+(* ::Text:: *)
 (*Save reference values to file*)
 
 
-SetDirectory[NotebookDirectory[]];
-Export["csv/epsteinZeta_random_matrices_ref.csv",epsteinZetaRandomMatricesRef];
+Export[NotebookDirectory[]<>"csv/epsteinZeta_varied_matrices_ref.csv",epsteinZetaVariedMatricesRef];
 
 
 (* ::Text:: *)
