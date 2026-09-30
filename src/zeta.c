@@ -15,6 +15,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "crandall.h"
 #include "harmonics.h"
@@ -222,9 +223,11 @@ static double complex sum_real_harmonic(
 
     double lambda = 1.; // parameter that decides the weight of each sum
 
-    int zv[dim];        // counting vector in Z^dim
-    double lv[dim];     // lattice vector
-    double lvReci[dim]; // lattice vector of (-zv)
+    int zv[dim];              // counting vector in Z^dim
+    double lv[dim];           // lattice vector
+    memset(lv, 0, sizeof lv); // to silence [-Wmaybe-uninitialized]
+                              //
+    double lvReci[dim];       // lattice vector of (-zv)
 
     // cuboid cutoffs
     long totalSummands = 1;
@@ -358,9 +361,10 @@ static double complex sum_real_harmonic_large_exp(
 
     double lambda = 1.; // parameter that decides the weight of each sum
 
-    int zv[dim];        // counting vector in Z^dim
-    double lv[dim];     // lattice vector
-    double lvReci[dim]; // lattice vector of (-zv)
+    int zv[dim];              // counting vector in Z^dim
+    double lv[dim];           // lattice vector
+    memset(lv, 0, sizeof lv); // to silence [-Wmaybe-uninitialized]
+    double lvReci[dim];       // lattice vector of (-zv)
 
     // cuboid cutoffs
     long totalSummands = 1;
