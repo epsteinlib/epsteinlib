@@ -1083,22 +1083,28 @@ static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
  */
 static int test_epsteinZetaAniso_mirrorZeros(void) { // NOLINT
     printf("%s ", __func__);
-    enum { dim = 2, numCases = 7, numAlpha = 3, numNu = 2 };
+    enum { dim = 2, numCases = 10, numAlpha = 3, numNu = 2 };
     const double sqrt3 = sqrt(3.);
     const double zsq[dim * dim] = {1., 1., 0., 1.}; // Z^2, basis not split
     const double hex[dim * dim] = {1., 0.5, 0., 0.8660254037844386};
     const double obl[dim * dim] = {1., 0.3, 0., 1.}; // no mirror symmetry
-    const double *lattices[numCases] = {zsq, zsq, hex, hex, hex, obl, obl};
-    const unsigned int js[numCases] = {0, 0, 0, 1, 0, 0, 0};
-    // the last two cases are inversion zeros with 2x in Lambda, 2y in Lambda*:
+    const double *lattices[numCases] = {zsq, zsq, hex, hex, hex,
+                                        obl, obl, obl, obl, obl};
+    const unsigned int js[numCases] = {0, 0, 0, 1, 0, 0, 0, 0, 0, 0};
+    // cases 5 and 6 are inversion zeros with 2x in Lambda, 2y in Lambda*:
     // they vanish for 2x.y integer and not for 2x.y = 1/2
-    const double xs[numCases][dim] = {{0.5, 0.37},        {0., 0.37},   {0.5, 0.37},
-                                      {0.37, sqrt3 / 2.}, {0.25, 0.37}, {0.5, 0.},
-                                      {0.5, 0.}};
-    const double ys[numCases][dim] = {{0., 0.21},         {0.5, 0.21}, {0., 0.21},
-                                      {0.21, 1. / sqrt3}, {0., 0.21},  {0., 0.5},
-                                      {0.5, -0.15}};
-    const bool zero[numCases] = {true, true, true, true, false, true, false};
+    // cases 7 to 9 are regularized: Z^reg is not Lambda*-periodic in y, so the
+    // inversion zero needs y = 0 and 2x in Lambda (case 9 has Z = 0, Z^reg != 0)
+    const double xs[numCases][dim] = {
+        {0.5, 0.37}, {0., 0.37}, {0.5, 0.37}, {0.37, sqrt3 / 2.}, {0.25, 0.37},
+        {0.5, 0.},   {0.5, 0.},  {0.5, 0.},   {0.25, 0.},         {0.5, 0.}};
+    const double ys[numCases][dim] = {
+        {0., 0.21}, {0.5, 0.21},  {0., 0.21}, {0.21, 1. / sqrt3}, {0., 0.21},
+        {0., 0.5},  {0.5, -0.15}, {0., 0.},   {0., 0.},           {0., 0.5}};
+    const bool zero[numCases] = {true, true,  true, true,  false,
+                                 true, false, true, false, false};
+    const bool reg[numCases] = {false, false, false, false, false,
+                                false, false, true,  true,  true};
     const double nus[numNu] = {2.5, 8.};
 
     // the early return gives exact zeros; raising tol turns the test into an
@@ -1123,8 +1129,11 @@ static int test_epsteinZetaAniso_mirrorZeros(void) { // NOLINT
         alphas[2][j] = 31;
         for (int ia = 0; ia < numAlpha; ia++) {
             for (int in = 0; in < numNu; in++) {
-                double complex val = epsteinZetaAniso(nus[in], dim, lattices[ic],
-                                                      xs[ic], ys[ic], alphas[ia]);
+                double complex val =
+                    reg[ic] ? epsteinZetaAnisoReg(nus[in], dim, lattices[ic], xs[ic],
+                                                  ys[ic], alphas[ia])
+                            : epsteinZetaAniso(nus[in], dim, lattices[ic], xs[ic],
+                                               ys[ic], alphas[ia]);
                 double err = cabs(val);
                 bool passed = zero[ic] ? (err <= tol) : (err > 0.);
                 if (zero[ic]) {
@@ -1140,7 +1149,7 @@ static int test_epsteinZetaAniso_mirrorZeros(void) { // NOLINT
                 failed++;
                 printf("\n\n");
                 printf("Warning! ");
-                printf("epsteinZetaAniso: ");
+                printf(reg[ic] ? "epsteinZetaAnisoReg: " : "epsteinZetaAniso: ");
                 printf(" %0*.16lf %+.16lf I\n", 4, creal(val), cimag(val));
                 if (zero[ic]) {
                     printf("|value|:                     %E ≰  %E  (tolerance)\n",
