@@ -321,7 +321,7 @@ static int test_harmonic_h_1D(void) {
         precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                         exponents);
         num = harmonic_h(*k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
-                         exponents);
+                         exponents, 0.);
         free(chunk_offset);
         free(valid_count);
         free(coeffs);
@@ -446,7 +446,7 @@ static int test_harmonic_h_3D_unity(void) {
         precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                         exponents);
         num = harmonic_h(*k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
-                         exponents);
+                         exponents, 0.);
         free(chunk_offset);
         free(coeffs);
         free(valid_count);
@@ -580,7 +580,7 @@ static int test_harmonic_h_3D_random(void) {
         precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                         exponents);
         num = harmonic_h(*k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
-                         exponents);
+                         exponents, 0.);
         free(chunk_offset);
         free(coeffs);
         free(valid_count);
@@ -714,7 +714,7 @@ static int test_harmonic_h_3D_illcond(void) {
         precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                         exponents);
         num = harmonic_h(*k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
-                         exponents);
+                         exponents, 0.);
         free(chunk_offset);
         free(coeffs);
         free(valid_count);

@@ -206,7 +206,7 @@ static int benchmark_harmonic(unsigned int dim) { // NOLINT
                     t0 = clock();
                     for (int r = 0; r < TIMING_ITERATIONS[dim - 1]; r++) {
                         sink += harmonic_h(k, dim, z, ALPHA_ABS, chunk_offset,
-                                           valid_count, coeffs, exponents);
+                                           valid_count, coeffs, exponents, 0.);
                     }
                     t1 = clock();
                     elapsedTimes[s] = ((double)(t1 - t0)) / CLOCKS_PER_SEC /
@@ -217,7 +217,7 @@ static int benchmark_harmonic(unsigned int dim) { // NOLINT
             }
 
             result = harmonic_h(k, dim, z, ALPHA_ABS, chunk_offset, valid_count,
-                                coeffs, exponents);
+                                coeffs, exponents, 0.);
 
             (void)fprintf(file, "%u,%u", dim, k);
             for (unsigned int i = 0; i < dim; i++) {
@@ -370,7 +370,7 @@ static int benchmark_harmonic_stab_2D(void) { // NOLINT
                         t0 = clock();
                         for (int r = 0; r < TIMING_ITERATIONS_STAB; r++) {
                             sink += harmonic_h(k, dim, z, alphaAbs, chunk_offset,
-                                               valid_count, coeffs, exponents);
+                                               valid_count, coeffs, exponents, 0.);
                         }
                         t1 = clock();
                         elapsedTimes[s] = ((double)(t1 - t0)) / CLOCKS_PER_SEC /
@@ -382,7 +382,7 @@ static int benchmark_harmonic_stab_2D(void) { // NOLINT
                 }
 
                 result = harmonic_h(k, dim, z, alphaAbs, chunk_offset, valid_count,
-                                    coeffs, exponents);
+                                    coeffs, exponents, 0.);
 
                 (void)fprintf(file, "%u,%u", dim, k);
                 for (unsigned int i = 0; i < dim; i++) {

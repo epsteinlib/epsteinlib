@@ -207,9 +207,8 @@ void harmonic_h_inner_term_multi_hpdyad(unsigned int dim, const unsigned int *al
  * @param[in] gamma: fixed multi-index gamma.
  * @param[in] alphaAbs: total of alpha.
  * @param[out] residual: if non-NULL, receives h_inner(α,γ,k) minus the returned
- * double, rounded to double; the double-double evaluation of harmonic_h needs
- * this second part of the coefficient.
- * @return h_inner(α,γ,k), correctly rounded.
+ * double, rounded to double.
+ * @return h_inner(α,γ,k).
  */
 // fast paths for incremental multi-index enumeration increases nesting
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
@@ -408,13 +407,12 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, unsigned int dim,
             }
 
             if (!skip) {
-                // (hi, lo) pairs, lo only read above ALPHA_ABS_HIGH_ORDER
+                // (hi, lo) pair
                 double *coeff =
                     coeffs + (HARMONIC_COEFF_STRIDE * (chunk_offset[k] + n));
                 coeff[1] = 0.;
-                coeff[0] = harmonic_h_inner_sum(
-                    k, dim, alpha, gamma, alphaAbs,
-                    (alphaAbs > ALPHA_ABS_HIGH_ORDER) ? &coeff[1] : NULL);
+                coeff[0] =
+                    harmonic_h_inner_sum(k, dim, alpha, gamma, alphaAbs, &coeff[1]);
                 unsigned long long expIdx = (chunk_offset[k] + n) * dim;
                 for (unsigned int j = 0; j < dim; j++) {
                     exponents[expIdx + j] = (2 * gamma[j]) - alpha[j];
@@ -435,55 +433,47 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, unsigned int dim,
     }
 }
 
-/** @brief Evaluates h₍α,k₎(z) in double precision from the leading double of
- * each coefficient, see harmonic_h.
+/** @brief Computes the outer sum of h₍α,k₎(z) without c_{|α|,k} in double precision.
  * @param[in] k: specifies degree |alpha| - 2k.
  * @param[in] dim: dimension of alpha, gamma and y.
  * @param[in] z: vector of the polynomial.
- * @param[in] alphaAbs: total of alpha.
  * @param[in] chunk_offset: starting offsets for each k.
  * @param[in] valid_count: number of valid entries for each k.
  * @param[in] coeffs: precomputed inner harmonic sums as (hi, lo) pairs.
- * @param[in] exponents: array storing precomputed exponents (2γ-α).
- * @return h₍α,k₎(z).
+ * @param[in] exponents: precomputed exponents (2γ-α).
+ * @param[out] termMass: ∑|terms| of the outer sum.
+ * @return h₍α,k₎(z) / c_{|α|,k}.
  */
-static double harmonic_h_double(unsigned int k, unsigned int dim, const double *z,
-                                unsigned int alphaAbs,
-                                const unsigned long long *chunk_offset,
-                                const unsigned long long *valid_count,
-                                const double *coeffs,
-                                const unsigned int *exponents) {
+static double
+harmonic_h_outer_double(unsigned int k, unsigned int dim, const double *z,
+                        const unsigned long long *chunk_offset,
+                        const unsigned long long *valid_count, const double *coeffs,
+                        const unsigned int *exponents, double *termMass) {
 
-    double zPow;
     double sumOuter = 0.0;
     double epsilonOuter = 0.0;
     double maxTerm = 0.0;
-    unsigned long long n;
+    double absSum = 0.0;
     unsigned long long count = valid_count[k];
     unsigned long long baseIdx = chunk_offset[k];
-    unsigned long long expIdx;
-    unsigned int i;
 
-    for (n = 0; n < count; n++) {
-        double sumInner = coeffs[HARMONIC_COEFF_STRIDE * (baseIdx + n)];
-        expIdx = (baseIdx + n) * dim;
-        zPow = 1.0;
-        for (i = 0; i < dim; i++) {
-            zPow *= real_int_pow(z[i], exponents[expIdx + i]);
+    for (unsigned long long n = 0; n < count; n++) {
+        const unsigned int *exps = exponents + ((baseIdx + n) * dim);
+        double summand = coeffs[HARMONIC_COEFF_STRIDE * (baseIdx + n)];
+        for (unsigned int i = 0; i < dim; i++) {
+            summand *= real_int_pow(z[i], exps[i]);
         }
-        double summand = zPow * sumInner;
         maxTerm = fmax(maxTerm, fabs(summand));
+        absSum += fabs(summand);
         kahan_add_r(&sumOuter, &epsilonOuter, summand);
     }
+    *termMass = absSum;
 
     // avoid accumulation error that is pure rounding noise to be amplified by
     // divergent Crandall factor upon return
     if (fabs(sumOuter) <= EPS_CANCELLATION * (double)count * maxTerm) {
         return 0.0;
     }
-
-    sumOuter *= coeffs_c_outer(alphaAbs, k, dim);
-
     return sumOuter;
 }
 
@@ -542,29 +532,38 @@ static double harmonic_h_dd(unsigned int k, unsigned int dim, const double *z,
     return sumOuter.hi * coeffs_c_outer(alphaAbs, k, dim);
 }
 
-/** @brief Calculates the homogeneous harmonic polynomial h₍α,k₎
- * of degree |α|−2k such that y^α = ∑ₖ (y·y)^k h₍α,k₎(y);
- * explicitly, h₍α,k₎(y)=c_{|α|,k} ∑{|γ|=|α|−k} y^{2γ−α} h_inner(α,γ,k).
- * Uses precomputed coefficients and exponents to avoid multi-index iteration.
- * Above ALPHA_ABS_HIGH_ORDER the evaluation is in double-double arithmetic.
+/** @brief Computes h₍α,k₎(z) with y^α = ∑ₖ (y·y)^k h₍α,k₎(y), in double precision
+ * if ∑|terms| ≤ HARMONIC_DD_COND |h₍α,k₎(z)| + tol, else in double-double.
  * @param[in] k: specifies degree |alpha| - 2k.
  * @param[in] dim: dimension of alpha, gamma and y.
  * @param[in] z: vector of the polynomial.
  * @param[in] alphaAbs: total of alpha.
  * @param[in] chunk_offset: starting offsets for each k.
  * @param[in] valid_count: number of valid entries for each k.
- * @param[in] coeffs: array storing precomputed inner harmonic sums.
- * @param[in] exponents: array storing precomputed exponents (2γ-α).
+ * @param[in] coeffs: precomputed inner harmonic sums as (hi, lo) pairs.
+ * @param[in] exponents: precomputed exponents (2γ-α).
+ * @param[in] tol: absolute tolerance on ∑|terms|.
  * @return h₍α,k₎(z).
  */
 double harmonic_h(unsigned int k, unsigned int dim, const double *z,
                   unsigned int alphaAbs, const unsigned long long *chunk_offset,
                   const unsigned long long *valid_count, const double *coeffs,
-                  const unsigned int *exponents) {
-    if (alphaAbs > ALPHA_ABS_HIGH_ORDER) {
-        return harmonic_h_dd(k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
-                             exponents);
+                  const unsigned int *exponents, double tol) {
+    double termMass = 0.;
+    double outer = harmonic_h_outer_double(k, dim, z, chunk_offset, valid_count,
+                                           coeffs, exponents, &termMass);
+    // relative criterion, c_{|α|,k} cancels
+    if (termMass <= HARMONIC_DD_COND * fabs(outer)) {
+        return (termMass == 0.) ? 0. : outer * coeffs_c_outer(alphaAbs, k, dim);
     }
-    return harmonic_h_double(k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
-                             exponents);
+    // absolute criterion
+    if (tol > 0.) {
+        double cOuter = coeffs_c_outer(alphaAbs, k, dim);
+        if (termMass * fabs(cOuter) <=
+            (HARMONIC_DD_COND * fabs(outer * cOuter)) + tol) {
+            return outer * cOuter;
+        }
+    }
+    return harmonic_h_dd(k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
+                         exponents);
 }
