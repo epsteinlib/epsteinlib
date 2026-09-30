@@ -1103,9 +1103,9 @@ static bool aniso_symmetry_zero(unsigned int dim, const unsigned int *alpha,
                                 const double *m_real, const double *m_fourier,
                                 const double *x, const double *y, bool reg) {
     // zeros due to mirror symmetries of the lattice
-    for (unsigned int j = 0; j < dim && !reg && !allEvenAlpha; j++) {
+    for (unsigned int j = 0; j < dim && !allEvenAlpha; j++) {
         // shift vector mirroring, and wave vector mirroring as its dual
-        if ((alpha[j] % 2 != 0) &&
+        if ((alpha[j] % 2 != 0) && (!reg || y[j] == 0.) &&
             (mirror_shift_zero(dim, m_real, m_fourier, x, y, j) ||
              mirror_shift_zero(dim, m_fourier, m_real, y, x, j))) {
             return true;
