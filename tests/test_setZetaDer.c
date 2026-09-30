@@ -1088,17 +1088,22 @@ static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
  */
 static int test_epsteinZetaAniso_mirrorZeros(void) { // NOLINT
     printf("%s ", __func__);
-    enum { dim = 2, numCases = 5, numAlpha = 3, numNu = 2 };
+    enum { dim = 2, numCases = 7, numAlpha = 3, numNu = 2 };
     const double sqrt3 = sqrt(3.);
     const double zsq[dim * dim] = {1., 1., 0., 1.}; // Z^2, basis not split
     const double hex[dim * dim] = {1., 0.5, 0., 0.8660254037844386};
-    const double *lattices[numCases] = {zsq, zsq, hex, hex, hex};
-    const unsigned int js[numCases] = {0, 0, 0, 1, 0};
-    const double xs[numCases][dim] = {
-        {0.5, 0.37}, {0., 0.37}, {0.5, 0.37}, {0.37, sqrt3 / 2.}, {0.25, 0.37}};
-    const double ys[numCases][dim] = {
-        {0., 0.21}, {0.5, 0.21}, {0., 0.21}, {0.21, 1. / sqrt3}, {0., 0.21}};
-    const bool zero[numCases] = {true, true, true, true, false};
+    const double obl[dim * dim] = {1., 0.3, 0., 1.}; // no mirror symmetry
+    const double *lattices[numCases] = {zsq, zsq, hex, hex, hex, obl, obl};
+    const unsigned int js[numCases] = {0, 0, 0, 1, 0, 0, 0};
+    // the last two cases are inversion zeros with 2x in Lambda, 2y in Lambda*:
+    // they vanish for 2x.y integer and not for 2x.y = 1/2
+    const double xs[numCases][dim] = {{0.5, 0.37},        {0., 0.37},   {0.5, 0.37},
+                                      {0.37, sqrt3 / 2.}, {0.25, 0.37}, {0.5, 0.},
+                                      {0.5, 0.}};
+    const double ys[numCases][dim] = {{0., 0.21},         {0.5, 0.21}, {0., 0.21},
+                                      {0.21, 1. / sqrt3}, {0., 0.21},  {0., 0.5},
+                                      {0.5, -0.15}};
+    const bool zero[numCases] = {true, true, true, true, false, true, false};
     const double nus[numNu] = {2.5, 8.};
 
     // the early return gives exact zeros; raising tol turns the test into an
