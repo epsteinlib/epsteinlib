@@ -549,7 +549,7 @@ static int test_setZetaDer_taylor(void) { // NOLINT
     double complex valRef;
     double complex valTaylor;
 
-    double tol = 5 * pow(10, -15);
+    double tol = pow(10, -15);
     unsigned int dim = 2;
     unsigned int order = 12;
 
@@ -953,7 +953,7 @@ static int inversionZeroSweep(unsigned int dim, const double *m, // NOLINT
 static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
     printf("%s ", __func__);
 
-    double tol = pow(10, -15);
+    double tol = pow(10, -16);
     int failed = 0;
     int total = 0;
     double errMin = NAN;
@@ -1071,6 +1071,113 @@ static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
 
     reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
 
+    return failed;
+}
+
+/*!
+ * @brief Checks the early return of the mirror symmetry zeros for lattices whose
+ * basis does not split along e_j and for wave vectors whose j'th component is
+ * a nonzero element of the projection of the reciprocal lattice.
+ *
+ * @return number of failed tests.
+ */
+static int test_epsteinZetaAniso_mirrorZeros(void) { // NOLINT
+    printf("%s ", __func__);
+    enum { dim = 2, numCases = 13, numAlpha = 3, numNu = 2 };
+    const double sqrt3 = sqrt(3.);
+    const double zsq[dim * dim] = {1., 1., 0., 1.}; // Z^2, basis not split
+    const double hex[dim * dim] = {1., 0.5, 0., 0.8660254037844386};
+    const double obl[dim * dim] = {1., 0.3, 0., 1.}; // no mirror symmetry
+    const double *lattices[numCases] = {zsq, zsq, hex, hex, hex, obl, obl,
+                                        obl, obl, obl, zsq, hex, zsq};
+    const unsigned int js[numCases] = {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0};
+    // cases 5 and 6 are inversion zeros with 2x in Lambda, 2y in Lambda*:
+    // they vanish for 2x.y integer and not for 2x.y = 1/2
+    // cases 7 to 12 are regularized: Z^reg is not Lambda*-periodic in y, so the
+    // inversion zero needs y = 0 and the mirror zero y_j = 0; cases 9 and 12
+    // have Z = 0 but Z^reg != 0
+    const double xs[numCases][dim] = {
+        {0.5, 0.37},  {0., 0.37}, {0.5, 0.37}, {0.37, sqrt3 / 2.},
+        {0.25, 0.37}, {0.5, 0.},  {0.5, 0.},   {0.5, 0.},
+        {0.25, 0.},   {0.5, 0.},  {0.5, 0.37}, {0.37, sqrt3 / 2.},
+        {0.5, 0.37}};
+    const double ys[numCases][dim] = {
+        {0., 0.21}, {0.5, 0.21},  {0., 0.21}, {0.21, 1. / sqrt3}, {0., 0.21},
+        {0., 0.5},  {0.5, -0.15}, {0., 0.},   {0., 0.},           {0., 0.5},
+        {0., 0.21}, {0.21, 0.},   {1., 0.21}};
+    const bool zero[numCases] = {true, true,  true,  true, false, true, false,
+                                 true, false, false, true, true,  false};
+    const bool reg[numCases] = {false, false, false, false, false, false, false,
+                                true,  true,  true,  true,  true,  true};
+    const double nus[numNu] = {2.5, 8.};
+
+    // the early return gives exact zeros; raising tol turns the test into an
+    // error bound for the summation at the symmetry zeros
+    const double tol = 0.;
+    int failed = 0;
+    int total = 0;
+    double errMin = NAN;
+    double errMax = NAN;
+    double errSum = 0.;
+    int totalZero = 0;
+
+    for (int ic = 0; ic < numCases; ic++) {
+        unsigned int j = js[ic];
+        // alpha_j odd, the other component even, |alpha| odd: only the mirror
+        // zero in component j applies. At |alpha| = 33 the summation leaves a
+        // residue up to 1e2, rounding noise relative to the size of the function
+        // next to the zero, but visibly not the exact zero.
+        unsigned int alphas[numAlpha][dim] = {{0, 0}, {2, 2}, {2, 2}};
+        alphas[0][j] = 1;
+        alphas[1][j] = 3;
+        alphas[2][j] = 31;
+        for (int ia = 0; ia < numAlpha; ia++) {
+            for (int in = 0; in < numNu; in++) {
+                double complex val =
+                    reg[ic] ? epsteinZetaAnisoReg(nus[in], dim, lattices[ic], xs[ic],
+                                                  ys[ic], alphas[ia])
+                            : epsteinZetaAniso(nus[in], dim, lattices[ic], xs[ic],
+                                               ys[ic], alphas[ia]);
+                double err = cabs(val);
+                bool passed = zero[ic] ? (err <= tol) : (err > 0.);
+                if (zero[ic]) {
+                    errMin = (errMin < err) ? errMin : err;
+                    errMax = (errMax > err) ? errMax : err;
+                    errSum += err;
+                    totalZero++;
+                }
+                total++;
+                if (passed) {
+                    continue;
+                }
+                failed++;
+                printf("\n\n");
+                printf("Warning! ");
+                printf(reg[ic] ? "epsteinZetaAnisoReg: " : "epsteinZetaAniso: ");
+                printf(" %0*.16lf %+.16lf I\n", 4, creal(val), cimag(val));
+                if (zero[ic]) {
+                    printf("|value|:                     %E ≰  %E  (tolerance)\n",
+                           err, tol);
+                } else {
+                    printf("\t\t\t    should not vanish\n");
+                }
+                printf("\n");
+                printf("nu:\t\t %.16lf\n", nus[in]);
+                printMatrixUnitTest("a:", lattices[ic], dim);
+                printVectorUnitTest("x:\t\t", xs[ic], dim);
+                printVectorUnitTest("y:\t\t", ys[ic], dim);
+                printMultiindexUnitTest("alpha:\t\t", alphas[ia], dim);
+            }
+        }
+    }
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.", total - failed, total,
+           tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalZero);
+    printf("\n");
     return failed;
 }
 
@@ -1566,6 +1673,7 @@ int main() {
     failed += run_timed_test(test_setZetaDer_taylor);
     failed += run_timed_test(test_epsteinZetaAniso_poles);
     failed += run_timed_test(test_epsteinZetaAniso_inversionZeros);
+    failed += run_timed_test(test_epsteinZetaAniso_mirrorZeros);
     failed += run_timed_test(test_setZetaDer_special_exponents);
     failed += run_timed_test(test_setZetaDer_poly_laplace);
     failed += run_timed_test(test_epsteinZetaAniso_allEqual);

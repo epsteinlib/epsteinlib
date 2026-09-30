@@ -78,7 +78,7 @@ BMat[a_] = 1/Sqrt[a + 1]*DiagonalMatrix[{Sqrt[a], 1, 1}] . {{1, 1, 0}, {1, 0, 1}
 (*Oblique lattice matrix.*)
 
 
-AObl={{1,.3},{0,1}}
+AObl={{1,3/10},{0,1}};
 
 
 (* ::Text:: *)
@@ -530,8 +530,6 @@ randomElemLatticeVector[a_]:=a . Table[RandomInteger[{-10^(16)/2,10^(16)/2}]/10^
 
 range = Range[186];
 SeedRandom[42];
-AHex={{1,1/2},{0,Sqrt[3]/2}};
-AObl={{1,3/10},{0,1}};
 Do[
 	\[Nu]0[i]=10 randRational
 	;a0[i]=AHex
@@ -676,7 +674,6 @@ Export["csv/setZetaDer_laplace_ref.csv",zLaplaceTab];
 
 
 smallVal = 10^-200;
-AObl={{1,3/10},{0,1}};
 zetaSpecialNuBiggerDim = {
 	(* 1D: nu = 1 + Total[alpha] + 2Total[alpha] even => nu odd *)
 	Flatten@{1,5.,N@{{1}},{0.},{0.},{2},{N@Re@#,N@Im@#}  &/@ {setZetaDer[5,{{1}},{0},{0},{2}]}}
