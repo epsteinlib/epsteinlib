@@ -60,22 +60,27 @@ double assignzArgBound(double nu) {
 }
 
 /**
- * @brief Inflates a truncation radius so that it also absorbs a polynomial
- * factor r^n, by solving pi r^2 - n log(r) = pi r0^2 with Newton's method.
- *
+ * @brief Inflates a truncation radius so that it also absorbs the harmonic
+ * polynomial of degree m multiplying the Gaussian decay of a summand.
  * @param[in] r0: radius calibrated for the isotropic summand.
- * @param[in] n: degree of the polynomial factor.
+ * @param[in] dim: dimension of the lattice.
+ * @param[in] m: degree of the harmonic polynomial.
  * @return inflated radius, never smaller than r0.
  */
-double inflate_radius(double r0, double n) {
-    if (n <= 0 || r0 <= 0) {
+double inflate_radius(double r0, unsigned int dim, double m) {
+    if (m <= 0 || r0 <= 0) {
         return r0;
     }
-    double target = M_PI * r0 * r0;
+    // compute log(C) = log(binom(m + dim - 1, dim - 1)) / 2
+    double logC = 0.;
+    for (unsigned int i = 1; i < dim; i++) {
+        logC += 0.5 * log((m + i) / i);
+    }
+    double target = (M_PI * r0 * r0) + logC;
     double r = r0;
     for (int it = 0; it < INFLATE_RADIUS_STEPS; it++) {
-        double f = (M_PI * r * r) - (n * log(r)) - target;
-        double fp = (2 * M_PI * r) - (n / r);
+        double f = (M_PI * r * r) - (m * log(r)) - target;
+        double fp = (2 * M_PI * r) - (m / r);
         // left of the minimum of f, where Newton would walk away from the root
         if (fp <= 0) {
             r *= 1.5;
@@ -91,18 +96,23 @@ double inflate_radius(double r0, double n) {
 }
 
 /**
- * @brief Inflates a truncation radius to absorb a polynomial factor r^n.
- * @param[in] r0: radius calibrated for the isotropic summand.
- * @param[in] n: degree of the polynomial factor.
- * @return inflated radius, never smaller than r0.
+ * @brief Bound on pi z^2 above which crandall_g uses its asymptotic expansion,
+ * for a summand of the harmonic method, inflated for the harmonic polynomial
+ * of degree |alpha| - 2k above ALPHA_ABS_HIGH_ORDER.
+ * @param[in] nu: order of the Crandall function in the summand.
+ * @param[in] dim: dimension of the lattice.
+ * @param[in] alphaAbs: total |alpha| of the multi-index.
+ * @param[in] k: specifies the degree |alpha| - 2k of the harmonic polynomial.
+ * @return minimum value of pi z^2 for the asymptotic expansion in crandall_g.
  */
-double assignzArgBoundHarmonic(double nu, unsigned int alphaAbs, unsigned int k) {
-    double b = assignzArgBound(nu);
-    double n = (double)alphaAbs - (2. * k);
-    if (alphaAbs <= ALPHA_ABS_HIGH_ORDER || n <= 0 || b == DBL_MAX) {
-        return b;
+double assignzArgBoundHarmonic(double nu, unsigned int dim, unsigned int alphaAbs,
+                               unsigned int k) {
+    double bound = assignzArgBound(nu);
+    double m = (double)alphaAbs - (2. * k);
+    if (alphaAbs <= ALPHA_ABS_HIGH_ORDER || m <= 0 || bound == DBL_MAX) {
+        return bound;
     }
-    double r = inflate_radius(sqrt(b / M_PI), n);
+    double r = inflate_radius(sqrt(bound / M_PI), dim, m);
     return M_PI * r * r;
 }
 

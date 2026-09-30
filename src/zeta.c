@@ -778,7 +778,7 @@ static double complex summation_harmonic_reg(
     for (unsigned int k = 0; k <= kMax; k++) {
 
         double nuIt = nu - (2 * k);
-        double zArgBoundIt = assignzArgBoundHarmonic(nuIt, alphaAbs, k);
+        double zArgBoundIt = assignzArgBoundHarmonic(nuIt, dim, alphaAbs, k);
 
         // skip iterartions where nuIt is a negative even integer, as
         // 1/gamma(nIt) = 0
@@ -805,7 +805,7 @@ static double complex summation_harmonic_reg(
 
             double nuReci = nuIt - (2 * alphaAbs) + (4 * k);
             double zArgBoundReci =
-                assignzArgBoundHarmonic(dim - nuReci, alphaAbs, k);
+                assignzArgBoundHarmonic(dim - nuReci, dim, alphaAbs, k);
 
             // skip zero summand if harmonic polynomial vanishes
             double h = harmonic_h(k, dim, y_t1, alphaAbs, chunk_offset, valid_count,
@@ -925,7 +925,7 @@ static double complex summation_harmonic(
     for (unsigned int k = 0; k <= kMax; k++) {
 
         double nuIt = nu - (2 * k);
-        double zArgBoundIt = assignzArgBoundHarmonic(nuIt, alphaAbs, k);
+        double zArgBoundIt = assignzArgBoundHarmonic(nuIt, dim, alphaAbs, k);
 
         // skip iterartions where nuIt is a negative even integer, as
         // 1/gamma(nIt) = 0
@@ -951,7 +951,7 @@ static double complex summation_harmonic(
 
             double nuReci = nuIt - (2 * alphaAbs) + (4 * k);
             double zArgBoundReci =
-                assignzArgBoundHarmonic(dim - nuReci, alphaAbs, k);
+                assignzArgBoundHarmonic(dim - nuReci, dim, alphaAbs, k);
 
             // skip zero summand if harmonic polynomial vanishes
             double h = harmonic_h(k, dim, y_t2, alphaAbs, chunk_offset, valid_count,
@@ -1126,7 +1126,7 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
     int cutoffsFourier[dim];
     double cutoff_id = G_BOUND + 0.5;
     if (alphaAbs > ALPHA_ABS_HIGH_ORDER) {
-        cutoff_id = inflate_radius(cutoff_id, alphaAbs);
+        cutoff_id = inflate_radius(cutoff_id, dim, alphaAbs);
     }
     if (diag) {
         // Chose absolute diag. entries for cutoff

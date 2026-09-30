@@ -26,22 +26,27 @@
 double assignzArgBound(double nu);
 
 /**
- * @brief Inflates a truncation radius to absorb a polynomial factor r^n.
+ * @brief Inflates a truncation radius so that it also absorbs the harmonic
+ * polynomial of degree m multiplying the Gaussian decay of a summand.
  * @param[in] r0: radius calibrated for the isotropic summand.
- * @param[in] n: degree of the polynomial factor.
+ * @param[in] dim: dimension of the lattice.
+ * @param[in] m: degree of the harmonic polynomial.
  * @return inflated radius, never smaller than r0.
  */
-double inflate_radius(double r0, double n);
+double inflate_radius(double r0, unsigned int dim, double m);
 
 /**
- * @brief Degree aware variant of assignzArgBound for the harmonic method,
- * widened by the degree |alpha| - 2k above ALPHA_ABS_HIGH_ORDER.
+ * @brief Bound on pi z^2 above which crandall_g uses its asymptotic expansion,
+ * for a summand of the harmonic method, inflated for the harmonic polynomial
+ * of degree |alpha| - 2k above ALPHA_ABS_HIGH_ORDER.
  * @param[in] nu: order of the Crandall function in the summand.
- * @param[in] alphaAbs: total of alpha.
- * @param[in] k: specifies degree |alpha| - 2k of the harmonic polynomial.
- * @return minimum value of pi z^2 for the asymptotic expansion.
+ * @param[in] dim: dimension of the lattice.
+ * @param[in] alphaAbs: total |alpha| of the multi-index.
+ * @param[in] k: specifies the degree |alpha| - 2k of the harmonic polynomial.
+ * @return minimum value of pi z^2 for the asymptotic expansion in crandall_g.
  */
-double assignzArgBoundHarmonic(double nu, unsigned int alphaAbs, unsigned int k);
+double assignzArgBoundHarmonic(double nu, unsigned int dim, unsigned int alphaAbs,
+                               unsigned int k);
 
 /**
  * @brief Calculates the upper Crandall function.
