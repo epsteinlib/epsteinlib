@@ -1007,6 +1007,30 @@ static double complex summation_harmonic(
 }
 
 /**
+ * @brief Checks whether 2 v lies in the lattice with reciprocal matrix m_invt.
+ * @param[in] dim: dimension of the lattice.
+ * @param[in] m_invt: reciprocal lattice matrix, A^{-T} for the lattice A.
+ * @param[in] v: vector.
+ * @return true if 2 v is a lattice vector up to rounding.
+ */
+static bool twice_in_lattice(unsigned int dim, const double *m_invt,
+                             const double *v) {
+    for (unsigned int i = 0; i < dim; i++) {
+        double t = 0.;
+        double scale = 0.;
+        for (unsigned int a = 0; a < dim; a++) {
+            double term = m_invt[(a * dim) + i] * 2. * v[a];
+            t += term;
+            scale += fabs(term);
+        }
+        if (!is_near_int(t, scale)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
  * @brief Decides whether the anisotropic Epstein zeta function vanishes by shift
  * vector mirroring in the j'th component.
  *
@@ -1209,20 +1233,16 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
                     (mirror_shift_zero(dim, m_real, m_fourier, x_t2, y_t2, j) ||
                      mirror_shift_zero(dim, m_fourier, m_real, y_t2, x_t2, j));
             }
-            // zeros due to inversion, x in Lambda and 2y in Lambda*, |alpha| odd
-            bool inversionZero = (alphaAbs % 2) != 0;
-            for (unsigned int i = 0; i < dim && inversionZero; i++) {
-                inversionZero = x_t2[i] == 0.;
-            }
-            for (unsigned int i = 0; i < dim && inversionZero; i++) {
-                double t = 0.;
+            // inversoin-zeros at |α| odd, 2 x in Λ, 2 y in Λ* and 2 x ⋅y integer
+            bool inversionZero = ((alphaAbs % 2) != 0) &&
+                                 twice_in_lattice(dim, m_fourier, x_t2) &&
+                                 twice_in_lattice(dim, m_real, y_t2);
+            if (inversionZero) {
+                double t = 2. * dot(dim, x_t2, y_t2);
                 double scale = 0.;
-                for (unsigned int a = 0; a < dim; a++) {
-                    double term = m_real[(a * dim) + i] * 2. * y_t2[a];
-                    t += term;
-                    scale += fabs(term);
+                for (unsigned int i = 0; i < dim; i++) {
+                    scale += fabs(2. * x_t2[i] * y_t2[i]);
                 }
-                // t is an integer up to the rounding of its own evaluation
                 inversionZero = is_near_int(t, scale);
             }
             if (allEvenAlpha && fabs(nu - dim - alphaAbs) < EPS &&

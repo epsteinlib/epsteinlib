@@ -1079,11 +1079,6 @@ static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
  * basis does not split along e_j and for wave vectors whose j'th component is
  * a nonzero element of the projection of the reciprocal lattice.
  *
- * Each case satisfies the shift or wave vector mirroring condition of the
- * symmetry zeros for exactly one j with alpha_j odd, so epsteinZetaAniso has to
- * return exactly 0. The last case violates the condition, the value there must
- * not be exactly 0. Needs no reference values.
- *
  * @return number of failed tests.
  */
 static int test_epsteinZetaAniso_mirrorZeros(void) { // NOLINT
