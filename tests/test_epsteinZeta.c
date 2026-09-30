@@ -613,11 +613,11 @@ static int test_epsteinZetaReg() { // NOLINT
  *
  * @return number of failed tests.
  */
-static int test_epsteinZeta_random_matrices(void) { // NOLINT
+static int test_epsteinZeta_varied_matrices(void) { // NOLINT
     printf("%s ", __func__);
     char path[MAX_PATH_LENGTH];
     int result = snprintf(path, sizeof(path),
-                          "%s/epsteinZeta_random_matrices_ref.csv", BASE_PATH);
+                          "%s/epsteinZeta_varied_matrices_ref.csv", BASE_PATH);
     if (result < 0 || result >= sizeof(path)) {
         return fprintf(stderr, "Error creating file path\n");
     }
@@ -1236,7 +1236,7 @@ int main() {
     int failed = 0;
     failed += run_timed_test(test_epsteinZeta);
     failed += run_timed_test(test_epsteinZetaReg);
-    failed += run_timed_test(test_epsteinZeta_random_matrices);
+    failed += run_timed_test(test_epsteinZeta_varied_matrices);
     failed += run_timed_test(test_epsteinZetaReg_random_matrices);
     failed += run_timed_test(test_epsteinZeta_epsteinZetaReg_reduction);
     failed += run_timed_test(test_epsteinZeta_cutoff);

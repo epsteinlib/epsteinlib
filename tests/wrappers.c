@@ -145,8 +145,8 @@ static double polynomial_y_der_harmonic(int ell, unsigned int dim,
     double res = 0;
 
     for (int k = 0; k <= n / 2; k++) {
-        double h =
-            harmonic_h(k, dim, z, n, chunk_offset, valid_count, coeffs, exponents);
+        double h = harmonic_h(k, dim, z, n, chunk_offset, valid_count, coeffs,
+                              exponents, 0.);
 
         // falling pochhammer symbol (ell)_(n-k)(ell + dim/2 -1)_k
         double poch = 1;
@@ -188,7 +188,7 @@ double polynomial_y_der_harmonic_wrapper(int ell, unsigned int dim,
         malloc((kMax + 1) * sizeof(unsigned long long));
     unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
         alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
-    double *coeffs = malloc(2 * coeffs_size * sizeof(double));
+    double *coeffs = malloc(HARMONIC_COEFF_STRIDE * coeffs_size * sizeof(double));
     unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
     precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                     exponents);
@@ -237,7 +237,7 @@ static double singularity_s_der_harmonic(double nu, unsigned int dim,
     for (int k = 0; k <= alphaAbs / 2; k++) {
 
         double h = harmonic_h(k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
-                              exponents);
+                              exponents, 0.);
 
         int ell = (int)nearbyint((nu - (double)dim) / 2.);
         if (h) {
@@ -308,7 +308,7 @@ double singularity_s_der_harmonic_wrapper(double nu, unsigned int dim,
         malloc((kMax + 1) * sizeof(unsigned long long));
     unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
         alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
-    double *coeffs = malloc(2 * coeffs_size * sizeof(double));
+    double *coeffs = malloc(HARMONIC_COEFF_STRIDE * coeffs_size * sizeof(double));
     unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
     precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                     exponents);

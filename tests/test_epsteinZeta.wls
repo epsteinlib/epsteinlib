@@ -14,6 +14,24 @@
 
 
 (* ::Text:: *)
+(*Set 0^0 in every kernel.*)
+
+
+Unprotect[Power];
+Power[0|0.|0*I|0.*I,0|0.|0*I|0.*I]:=1;
+Power[z_,0]/;Abs[z]==0:=1;
+Protect[Power];
+
+
+ParallelEvaluate[
+Unprotect[Power];
+Power[0|0.|0*I|0.*I,0|0.|0*I|0.*I]:=1;
+Power[z_,0]/;Abs[z]==0:=1;
+Protect[Power];
+];
+
+
+(* ::Text:: *)
 (*Condition number of an invertible matrix.*)
 
 
@@ -33,9 +51,13 @@ ConditionNumber[a_]:=Module[
 (*Crandall function and sums in real and reciprocal space.*)
 
 
-g[\[Nu]_,z_]:=If[PossibleZeroQ@Norm[z],-2/\[Nu],ExpIntegralE[1-\[Nu]/2,Pi z . z]];
-SumReal[\[Nu]_,A_,x_,y_,L_:10]:=Total[g[\[Nu],#-x]Exp[-2 Pi I*y . #]&/@(A . # & /@Tuples[Range[-L,L],Length@A])]
-SumFourier[\[Nu]_,A_,x_,y_,L_:10]:=Total[g[Length@A-\[Nu],#]Exp[-2 Pi I x . #]&/@(Transpose[Inverse[A]] . #+y&/@Tuples[Range[-L,L],Length@A])];
+GUpper[\[Nu]_,y_]=Piecewise[{
+	{-2/\[Nu],Norm[y]<10^(-64)}
+	,{ExpIntegralE[1-\[Nu]/2,Pi y . y],Norm[y]<4}
+	},0
+];
+SumReal[\[Nu]_,A_,x_,y_,L_:10]:=Total[GUpper[\[Nu],#-x]Exp[-2 Pi I*y . #]&/@(A . # & /@Tuples[Range[-L,L],Length@A])]
+SumFourier[\[Nu]_,A_,x_,y_,L_:10]:=Total[GUpper[Length@A-\[Nu],#]Exp[-2 Pi I x . #]&/@(Transpose[Inverse[A]] . #+y&/@Tuples[Range[-L,L],Length@A])];
 
 
 (* ::Text:: *)
@@ -60,7 +82,7 @@ epsteinZeta[\[Nu]Ext_,AExt_,xExt_,yExt_,OptionsPattern[]]:=Module[
 		;sumReci=SetPrecision[SumFourier[\[Nu]N,AN,xN,yN,sumLim],prec]
 		;res=SetPrecision[\[Mu]^(-\[Nu]N)\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+1/Abs[Det[AN]]sumReci),prec]
 	]
-	;Return[res]
+	;res
 ]
 
 
@@ -170,8 +192,15 @@ Export["csv/epsteinZeta_ref.csv",epsteinZetaRef];
 Export["csv/epsteinZetaReg_ref.csv",epsteinZetaRegRef];
 
 
-(* ::Subsection::Closed:: *)
-(*Test random matrices*)
+(* ::Subsection:: *)
+(*Test varied matrices*)
+
+
+(* ::Text:: *)
+(*Setup seed an precision.*)
+
+
+SeedRandom[42];
 
 
 (* ::Text:: *)
@@ -229,36 +258,77 @@ matrixTestData=Join[matrixTestData2D,matrixTestData3D];
 
 
 epsteinZetaRandomMatricesRef=ParallelTable[
-	Module[{d,\[Nu],x,y,zeta}
-	,d=Length[a]
-	;\[Nu]=RandomInteger[{-10^(16), 10^(16)}]/10^16
-	;x=a . RandomInteger[{-10^(16), 10^(16)},{d}]/10^16/2
-	;y=Inverse[Transpose[a]] . RandomInteger[{-10^(16), 10^(16)},{d}]/10^16/2
-	;zeta=epsteinZeta[\[Nu],a,x,y]
-	;Flatten[Join[{d},N@{\[Nu],a,x,y,Re[zeta],Im[zeta]}]]
+	BlockRandom[
+		SeedRandom[i]
+		;Module[{d,\[Nu],a,x,y,zeta}
+			,a=matrixTestData[[i]]
+			;d=Length[a]
+			;\[Nu]=RandomInteger[{-10^(16), 10^(16)}]/10^16
+			;x=a . RandomInteger[{-10^(16), 10^(16)},{d}]/10^16/2
+			;y=Inverse[Transpose[a]] . RandomInteger[{-10^(16), 10^(16)},{d}]/10^16/2
+			;zeta=epsteinZeta[\[Nu],a,x,y]
+			;Flatten[Join[{d},N@{\[Nu],a,x,y,Re[zeta],Im[zeta]}]]
+		]
 	]
-	,{a,matrixTestData}
+	,{i,Length@matrixTestData}
 ];
+
+
+(* ::Text:: *)
+(*Check near-lattice points.*)
+
+
+epsteinZetaNearLatticeRef=Flatten[Table[
+    Module[{x,y,zeta}
+	    ,x=a . {5,-3}+{3,-1}/2^11
+	    ;y={1/8,-3/16}
+	    ;zeta=epsteinZeta[\[Nu],a,x,y]
+	    ;Flatten[Join[{2},N@{\[Nu],a,x,y,Re[zeta],Im[zeta]}]]
+    ]
+    ,{a,{{{3/2,0},{0,1}},{{1,1/2},{0,7/8}},{{5/4,-1/4},{3/8,1}}}}
+    ,{\[Nu],{17/2,51/4,20}}
+],1];
+
+
+(* ::Text:: *)
+(*Combine reference values.*)
+
+
+epsteinZetaVariedMatricesRef=Join[epsteinZetaRandomMatricesRef,epsteinZetaNearLatticeRef];
 
 
 (* ::Text:: *)
 (*Save reference values to file*)
 
 
-SetDirectory[NotebookDirectory[]];
-Export["csv/epsteinZeta_random_matrices_ref.csv",epsteinZetaRandomMatricesRef];
+Export[NotebookDirectory[]<>"csv/epsteinZeta_varied_matrices_ref.csv",epsteinZetaVariedMatricesRef];
 
 
-epsteinZetaRegRandomMatricesRef=Table[
-	Module[{d,\[Nu],x,y,zeta}
-	,d=Length[a]
-	;\[Nu]=RandomInteger[{-10^(16), 10^(16)}]/10^16
-	;x=a . RandomInteger[{-10^(16), 10^(16)},{d}]/10^16/2
-	;y=Inverse[Transpose[a]] . RandomInteger[{-10^(16), 10^(16)},{d}]/10^16/2
-	;zeta=epsteinZetaReg[\[Nu],a,x,y]
-	;Flatten[Join[{d},N@{\[Nu],a,x,y,Re[zeta],Im[zeta]}]]
+(* ::Text:: *)
+(*Increase precision in parallel table for high-precision singularity subtraction.*)
+
+
+ParallelEvaluate[$MaxExtraPrecision=1000];
+
+
+(* ::Text:: *)
+(*Generate regularized reference values.*)
+
+
+epsteinZetaRegRandomMatricesRef=ParallelTable[
+	BlockRandom[
+		SeedRandom[i]
+		;Module[{d,\[Nu],a,x,y,zeta}
+			,a=matrixTestData[[i]]
+			;d=Length[a]
+			;\[Nu]=RandomInteger[{-10^(16), 10^(16)}]/10^16
+			;x=a . RandomInteger[{-10^(16), 10^(16)},{d}]/10^16/2
+			;y=Inverse[Transpose[a]] . RandomInteger[{-10^(16), 10^(16)},{d}]/10^16/2
+			;zeta=epsteinZetaReg[\[Nu],a,x,y]
+			;Flatten[Join[{d},N@{\[Nu],a,x,y,Re[zeta],Im[zeta]}]]
+		]
 	]
-	,{a,matrixTestData}
+	,{i,Length@matrixTestData}
 ];
 
 

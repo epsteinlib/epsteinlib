@@ -12,6 +12,15 @@
 #ifndef EPSTEIN_HARMONICS
 #define EPSTEIN_HARMONICS
 
+/** @brief Largest |alpha| with the unwidened truncation bounds. */
+#define ALPHA_ABS_HIGH_ORDER 10
+
+/** @brief Largest ∑|terms| / |h₍α,k₎(z)| accepted from the double evaluation. */
+#define HARMONIC_DD_COND 8.
+
+/** @brief Number of doubles per precomputed inner harmonic sum, a (hi, lo) pair. */
+#define HARMONIC_COEFF_STRIDE 2
+
 /** @brief Computes cₙ,ᵢ,ₖ＝ ∏_{j=i+1}^{⌊n/2⌋-k} (2n＋d−2−4k−2j).
  * @param[in] n: index (total of alpha).
  * @param[in] start: lower bound of product (exclusive).
@@ -71,11 +80,13 @@ void harmonic_h_inner_term_multi_hpdyad(unsigned int dim, const unsigned int *al
  * @param[in] alpha: upper multi-index.
  * @param[in] gamma: fixed multi-index gamma.
  * @param[in] alphaAbs: total of alpha.
+ * @param[out] residual: if non-NULL, receives h_inner(α,γ,k) minus the returned
+ * double, rounded to double.
  * @return h_inner(α,γ,k).
  */
 double harmonic_h_inner_sum(unsigned int k, unsigned int dim,
                             const unsigned int *alpha, const unsigned int *gamma,
-                            unsigned int alphaAbs);
+                            unsigned int alphaAbs, double *residual);
 
 /** @brief Computes chunk offsets and valid entry counts for precomputed
  * inner harmonic sums corresponding to k = 0, ..., floor(|alpha|/2).
@@ -107,7 +118,8 @@ precompute_harmonic_h_inner_chunk_size(unsigned int alphaAbs, unsigned int kMax,
  * @param[in] dim: dimension of alpha and gamma.
  * @param[in] alpha: upper multi-index.
  * @param[in] chunk_offset: starting offsets for each k.
- * @param[out] coeffs: array storing precomputed inner harmonic sums.
+ * @param[out] coeffs: array storing precomputed inner harmonic sums as
+ * HARMONIC_COEFF_STRIDE doubles per entry.
  * @param[out] exponents: array storing precomputed exponents (2γ-α), size =
  * totalSize * dim.
  */
@@ -116,23 +128,22 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, unsigned int dim,
                                      const unsigned long long *chunk_offset,
                                      double *coeffs, unsigned int *exponents);
 
-/** @brief Calculates the homogeneous harmonic polynomial h₍α,k₎
- * of degree |α|−2k such that y^α = ∑ₖ (y·y)^k h₍α,k₎(y);
- * explicitly, h₍α,k₎(y)=c_{|α|,k} ∑{|γ|=|α|−k} y^{2γ−α} h_inner(α,γ,k).
- * Uses precomputed coefficients and exponents to avoid multi-index iteration.
+/** @brief Computes h₍α,k₎(z) with y^α = ∑ₖ (y·y)^k h₍α,k₎(y), in double precision
+ * if ∑|terms| ≤ HARMONIC_DD_COND |h₍α,k₎(z)| + tol, else in double-double.
  * @param[in] k: specifies degree |alpha| - 2k.
  * @param[in] dim: dimension of alpha, gamma and y.
  * @param[in] z: vector of the polynomial.
  * @param[in] alphaAbs: total of alpha.
  * @param[in] chunk_offset: starting offsets for each k.
  * @param[in] valid_count: number of valid entries for each k.
- * @param[in] coeffs: array storing precomputed inner harmonic sums.
- * @param[in] exponents: array storing precomputed exponents (2γ-α).
+ * @param[in] coeffs: precomputed inner harmonic sums as (hi, lo) pairs.
+ * @param[in] exponents: precomputed exponents (2γ-α).
+ * @param[in] tol: absolute tolerance on ∑|terms|.
  * @return h₍α,k₎(z).
  */
 double harmonic_h(unsigned int k, unsigned int dim, const double *z,
                   unsigned int alphaAbs, const unsigned long long *chunk_offset,
                   const unsigned long long *valid_count, const double *coeffs,
-                  const unsigned int *exponents);
+                  const unsigned int *exponents, double tol);
 
 #endif

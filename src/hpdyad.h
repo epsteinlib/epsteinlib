@@ -50,6 +50,19 @@ int msb32(unsigned int x);
  */
 void hpdyad_set_ull(hpdyad_t *a, unsigned long long x, signed char sign);
 
+/** @brief Initialize hpdyad from a finite double, exactly.
+ * @param[out] a: destination hpdyad
+ * @param[in] x: finite double value
+ */
+void hpdyad_set_double(hpdyad_t *a, double x);
+
+/** @brief Split an hpdyad into the nearest double and the rounded residual.
+ * @param[in] v: value to split.
+ * @param[out] hi: double nearest to v.
+ * @param[out] lo: double nearest to v - hi.
+ */
+void hpdyad_split_double(const hpdyad_t *v, double *hi, double *lo);
+
 /** @brief Normalize hpdyad: trim leading zeros and left-shift mantissa so MSB of top
  * limb is 1
  * @param[in,out] a: pointer to hpdyad to normalize
