@@ -1,7 +1,7 @@
 <!--
 SPDX-FileCopyrightText: 2025 Andreas Buchheit <buchheit@num.uni-sb.de>
 SPDX-FileCopyrightText: 2025 Jan Schmitz <schmitz@num.uni-sb.de>
-SPDX-FileCopyrightText: 2025-2026 Jonathan Busse <jonathan@jbusse.de>
+SPDX-FileCopyrightText: 2025-2026 Jonathan K. Hartlaub <contact@jkhartlaub.com>
 SPDX-FileCopyrightText: 2025 Ruben Gutendorf <ruben.gutendorf@uni-saarland.de>
 
 SPDX-License-Identifier: AGPL-3.0-only
@@ -19,7 +19,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 # EpsteinLib
 
-Authors: Andreas A. Buchheit, Jonathan K. Busse, Ruben Gutendorf, DevOps: Jan Schmitz
+Authors: Andreas A. Buchheit, Jonathan K. Hartlaub, Ruben Gutendorf, DevOps: Jan Schmitz
 
 Contact: buchheit@num.uni-sb.de
 
@@ -345,7 +345,7 @@ In the `examples/python/` folder, you can find two more Python examples:
 
 ### in Julia
 
-The Julia wrapper `EpsteinLib.jl` by [David Gómez-Castro](https://github.com/dgomezcastro) and [Jonathan K. Busse](https://github.com/JoKaBus) can be used independently of our build system. A minimal example computing the Madelung constant is available in `examples/julia/lattice_sum.jl`, and installation instructions can be found in the [repository](https://github.com/epsteinlib/EpsteinLib.jl).
+The Julia wrapper `EpsteinLib.jl` by [David Gómez-Castro](https://github.com/dgomezcastro) and [Jonathan K. Hartlaub](https://github.com/jkhartlaub) can be used independently of our build system. A minimal example computing the Madelung constant is available in `examples/julia/lattice_sum.jl`, and installation instructions can be found in the [repository](https://github.com/epsteinlib/EpsteinLib.jl).
 
 ### in Mathematica
 

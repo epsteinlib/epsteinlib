@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
+// SPDX-FileCopyrightText: 2025 Jonathan K. Hartlaub <contact@jkhartlaub.com>
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
