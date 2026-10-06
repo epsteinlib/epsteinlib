@@ -1079,26 +1079,36 @@ static int test_epsteinZetaAniso_inversionZeros(void) { // NOLINT
  * basis does not split along e_j and for wave vectors whose j'th component is
  * a nonzero element of the projection of the reciprocal lattice.
  *
- * Each case satisfies the shift or wave vector mirroring condition of the
- * symmetry zeros for exactly one j with alpha_j odd, so epsteinZetaAniso has to
- * return exactly 0. The last case violates the condition, the value there must
- * not be exactly 0. Needs no reference values.
- *
  * @return number of failed tests.
  */
 static int test_epsteinZetaAniso_mirrorZeros(void) { // NOLINT
     printf("%s ", __func__);
-    enum { dim = 2, numCases = 5, numAlpha = 3, numNu = 2 };
+    enum { dim = 2, numCases = 13, numAlpha = 3, numNu = 2 };
     const double sqrt3 = sqrt(3.);
     const double zsq[dim * dim] = {1., 1., 0., 1.}; // Z^2, basis not split
     const double hex[dim * dim] = {1., 0.5, 0., 0.8660254037844386};
-    const double *lattices[numCases] = {zsq, zsq, hex, hex, hex};
-    const unsigned int js[numCases] = {0, 0, 0, 1, 0};
+    const double obl[dim * dim] = {1., 0.3, 0., 1.}; // no mirror symmetry
+    const double *lattices[numCases] = {zsq, zsq, hex, hex, hex, obl, obl,
+                                        obl, obl, obl, zsq, hex, zsq};
+    const unsigned int js[numCases] = {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0};
+    // cases 5 and 6 are inversion zeros with 2x in Lambda, 2y in Lambda*:
+    // they vanish for 2x.y integer and not for 2x.y = 1/2
+    // cases 7 to 12 are regularized: Z^reg is not Lambda*-periodic in y, so the
+    // inversion zero needs y = 0 and the mirror zero y_j = 0; cases 9 and 12
+    // have Z = 0 but Z^reg != 0
     const double xs[numCases][dim] = {
-        {0.5, 0.37}, {0., 0.37}, {0.5, 0.37}, {0.37, sqrt3 / 2.}, {0.25, 0.37}};
+        {0.5, 0.37},  {0., 0.37}, {0.5, 0.37}, {0.37, sqrt3 / 2.},
+        {0.25, 0.37}, {0.5, 0.},  {0.5, 0.},   {0.5, 0.},
+        {0.25, 0.},   {0.5, 0.},  {0.5, 0.37}, {0.37, sqrt3 / 2.},
+        {0.5, 0.37}};
     const double ys[numCases][dim] = {
-        {0., 0.21}, {0.5, 0.21}, {0., 0.21}, {0.21, 1. / sqrt3}, {0., 0.21}};
-    const bool zero[numCases] = {true, true, true, true, false};
+        {0., 0.21}, {0.5, 0.21},  {0., 0.21}, {0.21, 1. / sqrt3}, {0., 0.21},
+        {0., 0.5},  {0.5, -0.15}, {0., 0.},   {0., 0.},           {0., 0.5},
+        {0., 0.21}, {0.21, 0.},   {1., 0.21}};
+    const bool zero[numCases] = {true, true,  true,  true, false, true, false,
+                                 true, false, false, true, true,  false};
+    const bool reg[numCases] = {false, false, false, false, false, false, false,
+                                true,  true,  true,  true,  true,  true};
     const double nus[numNu] = {2.5, 8.};
 
     // the early return gives exact zeros; raising tol turns the test into an
@@ -1123,8 +1133,11 @@ static int test_epsteinZetaAniso_mirrorZeros(void) { // NOLINT
         alphas[2][j] = 31;
         for (int ia = 0; ia < numAlpha; ia++) {
             for (int in = 0; in < numNu; in++) {
-                double complex val = epsteinZetaAniso(nus[in], dim, lattices[ic],
-                                                      xs[ic], ys[ic], alphas[ia]);
+                double complex val =
+                    reg[ic] ? epsteinZetaAnisoReg(nus[in], dim, lattices[ic], xs[ic],
+                                                  ys[ic], alphas[ia])
+                            : epsteinZetaAniso(nus[in], dim, lattices[ic], xs[ic],
+                                               ys[ic], alphas[ia]);
                 double err = cabs(val);
                 bool passed = zero[ic] ? (err <= tol) : (err > 0.);
                 if (zero[ic]) {
@@ -1140,7 +1153,7 @@ static int test_epsteinZetaAniso_mirrorZeros(void) { // NOLINT
                 failed++;
                 printf("\n\n");
                 printf("Warning! ");
-                printf("epsteinZetaAniso: ");
+                printf(reg[ic] ? "epsteinZetaAnisoReg: " : "epsteinZetaAniso: ");
                 printf(" %0*.16lf %+.16lf I\n", 4, creal(val), cimag(val));
                 if (zero[ic]) {
                     printf("|value|:                     %E ≰  %E  (tolerance)\n",
