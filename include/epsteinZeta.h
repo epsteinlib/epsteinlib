@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
+// SPDX-FileCopyrightText: 2024 Jonathan K. Hartlaub <contact@jkhartlaub.com>
 // SPDX-FileCopyrightText: 2024 Andreas Buchheit <buchheit@num.uni-sb.de>
 // SPDX-FileCopyrightText: 2024 Ruben Gutendorf
 // <ruben.gutendorf@uni-saarland.de>
@@ -9,10 +9,10 @@
  * @file epsteinZeta.h
  * @brief Calculates the (regularized) Epstein zeta function.
  * Main header file to include when using epsteinZeta library.
- * @author Andreas Buchheit, Jonathan Busse and Ruben Gutendorf.
+ * @author Andreas Buchheit, Jonathan K. Hartlaub and Ruben Gutendorf.
  * @see Crandall, R., Unified algorithms for polylogarithm, L-series, and zeta
  * variants. Algorithmic Reflections: Selected Works. PSIpress (2012).
- * @author Andreas Buchheit, Jonathan Busse and Ruben Gutendorf.
+ * @author Andreas Buchheit, Jonathan K. Hartlaub and Ruben Gutendorf.
  * @date 06/13/2024
  */
 

@@ -1,10 +1,10 @@
-// SPDX-FileCopyrightText: 2026 Jonathan Busse <jonathan.busse@dlr.de>
+// SPDX-FileCopyrightText: 2026 Jonathan K. Hartlaub <contact@jkhartlaub.com>
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /**
  * @file benchmark_harmonic.c
- * @author Jonathan Busse
+ * @author Jonathan K. Hartlaub
  * @date 06/06/2024
  * @section Description: Benchmark harmonic_h in 1D–4D over a tensor-product
  * y-grid for all k = 0, ..., floor(|alpha|/2). One CSV file per dimension.

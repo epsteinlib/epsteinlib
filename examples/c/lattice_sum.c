@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2024 Andreas Buchheit <buchheit@num.uni-sb.de>
-// SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
+// SPDX-FileCopyrightText: 2024 Jonathan K. Hartlaub <contact@jkhartlaub.com>
 // SPDX-FileCopyrightText: 2024 Ruben Gutendorf
 // <ruben.gutendorf@uni-saarland.de>
 //
@@ -14,7 +14,7 @@
  * -lm -lepsteinZeta` If the library is not installed, compile with `gcc -o
  * lattice_sum lattice_sum.c -lm -L/path/to/library -lepsteinZeta
  * -I/path/to/include`
- * @author Andreas Buchheit, Jonathan Busse and Ruben Gutendorf.
+ * @author Andreas Buchheit, Jonathan K. Hartlaub and Ruben Gutendorf.
  * @date 06/06/2024
  */
 

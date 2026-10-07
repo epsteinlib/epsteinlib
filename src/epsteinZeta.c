@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2024 Andreas Buchheit <buchheit@num.uni-sb.de>
-// SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
+// SPDX-FileCopyrightText: 2024 Jonathan K. Hartlaub <contact@jkhartlaub.com>
 // SPDX-FileCopyrightText: 2024 Ruben Gutendorf
 // <ruben.gutendorf@uni-saarland.de>
 //
@@ -9,11 +9,11 @@
  * @file epsteinZeta.c
  * @brief Calculates the (regularized) Epstein zeta function and the (regularized)
  * anisotropic Epstein zeta function.
- * @author Andreas Buchheit, Jonathan Busse and Ruben Gutendorf.
+ * @author Andreas Buchheit, Jonathan K. Hartlaub and Ruben Gutendorf.
  * @see Buchheit, A. A., Busse, J. K., & Gutendorf, R. (2026). "Computation and
  * properties of the Epstein zeta function with applications to quantum systems." IMA
  * Journal of Numerical Analysis, drag057. DOI: 10.1093/imanum/drag057 *
- * @author Andreas Buchheit, Jonathan Busse and Ruben Gutendorf.
+ * @author Andreas Buchheit, Jonathan K. Hartlaub and Ruben Gutendorf.
  * @date 06/13/2024
  */
 
