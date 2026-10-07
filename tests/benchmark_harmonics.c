@@ -115,6 +115,10 @@ enum { TIMING_ITERATIONS_STAB = 100 };
  */
 enum { TIMING_REPEATS = 10 };
 
+/** @brief Duration of the busy loop that raises the CPU frequency before the first
+ * timing. */
+#define WARMUP_SECONDS 1.
+
 /**
  * @brief Elapsed wall time in seconds between two timespec_get readings.
  *
@@ -124,6 +128,22 @@ enum { TIMING_REPEATS = 10 };
 static double elapsed_seconds(const struct timespec *t0, const struct timespec *t1) {
     return (double)(t1->tv_sec - t0->tv_sec) +
            ((double)(t1->tv_nsec - t0->tv_nsec) * 1e-9);
+}
+
+/** @brief Busy-waits WARMUP_SECONDS so that the first timed calls do not run at idle
+ * CPU frequency. */
+static void warm_up(void) {
+    struct timespec t0;
+    struct timespec t1;
+    volatile double sink = 0.;
+    (void)timespec_get(&t0, TIME_UTC);
+    do {
+        for (int i = 0; i < 1000; i++) {
+            sink += sqrt((double)i);
+        }
+        (void)timespec_get(&t1, TIME_UTC);
+    } while (elapsed_seconds(&t0, &t1) < WARMUP_SECONDS);
+    (void)sink;
 }
 
 /**
@@ -434,6 +454,7 @@ static int benchmark_harmonic_stab_2D(void) {
  * @return Number of failed benchmark executions.
  */
 int main(void) {
+    warm_up();
     int failed = benchmark_harmonic_stab_2D();
     for (unsigned int dim = 1; dim <= DIM_MAX; dim++) {
         failed += benchmark_harmonic(dim);
