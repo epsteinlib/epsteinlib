@@ -28,7 +28,7 @@
  * double-double arithmetic, where the residual at a structural zero is of order
  * eps^2 relative to the largest summand instead of eps.
  */
-#define EPS_CANCELLATION_DD 1e-24
+#define EPS_CANCELLATION_DD 8e-31
 
 /**
  * @brief Checks whether t is an integer up to the rounding of its evaluation.
