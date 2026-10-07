@@ -173,7 +173,7 @@ static int test_setZetaDer_2D(void) {
     int testsPassed = 0;
     int totalTests = 0;
     unsigned int dim = 2;
-    double tol = 5 * pow(10, -12);
+    double tol = 5 * pow(10, -13);
 
     double errMin = NAN;
     double errMax = NAN;
@@ -439,7 +439,7 @@ static int test_epsteinZetaAniso_2D_highorder(void) {
     unsigned int dim = 2;
 
     // Known-bad baseline
-    double tol = 5E-09;
+    double tol = 5e-12;
 
     double errMin = NAN;
     double errMax = NAN;
@@ -1366,7 +1366,7 @@ static int test_setZetaDer_poly_laplace(void) { // NOLINT
     double errorMaxAbsRel;
     double complex num;
     double complex ref;
-    double tol = pow(10, -13);
+    double tol = pow(10, -14);
 
     int testsPassed = 0;
     int totalTests = 0;
