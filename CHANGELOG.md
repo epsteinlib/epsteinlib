@@ -1,7 +1,7 @@
 <!--
 SPDX-FileCopyrightText: 2026 Andreas Buchheit <buchheit@num.uni-sb.de>
 SPDX-FileCopyrightText: 2026 Jan Schmitz <schmitz@num.uni-sb.de>
-SPDX-FileCopyrightText: 2026 Jonathan Busse <jonathan@jbusse.de>
+SPDX-FileCopyrightText: 2026 Jonathan K. Hartlaub <contact@jkhartlaub.com>
 SPDX-FileCopyrightText: 2026 Ruben Gutendorf <ruben.gutendorf@uni-saarland.de>
 
 SPDX-License-Identifier: AGPL-3.0-only

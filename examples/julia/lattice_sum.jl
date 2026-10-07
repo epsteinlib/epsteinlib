@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Jonathan K. Busse <jonathan@jbusse.de>
+# SPDX-FileCopyrightText: 2025 Jonathan K. Hartlaub <contact@jkhartlaub.com>
 # SPDX-FileCopyrightText: 2025 David Gómez-Castro <david.gomezcastro@uam.es>
 # SPDX-License-Identifier: AGPL-3.0-only
 

@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2025 Jan Schmitz <schmitz@num.uni-sb.de>
-# SPDX-FileCopyrightText: 2025 Jonathan Busse <jonathan@jbusse.de>
-# SPDX-FileCopyrightText: 2025-2026 Jonathan Busse <jonathan@jbusse.de>
+# SPDX-FileCopyrightText: 2025 Jonathan K. Hartlaub <contact@jkhartlaub.com>
+# SPDX-FileCopyrightText: 2025-2026 Jonathan K. Hartlaub <contact@jkhartlaub.com>
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 # SPDX-License-Identifier: CC0-1.0

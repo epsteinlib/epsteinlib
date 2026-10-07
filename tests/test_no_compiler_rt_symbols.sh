@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# SPDX-FileCopyrightText: 2026 Jonathan Busse <jonathan@jbusse.de>
+# SPDX-FileCopyrightText: 2026 Jonathan K. Hartlaub <contact@jkhartlaub.com>
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
