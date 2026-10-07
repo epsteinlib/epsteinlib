@@ -18,7 +18,6 @@ SPDX-License-Identifier: AGPL-3.0-only
 - non-zero values of `epsteinZetaAniso` at mirror-symmetry related zeros for some non-diagonal lattice matrices (e.g. hexagonal), fixed by a basis-independent early-return criterion.
 - up to seven digits lost in `epsteinZetaAniso` and `epsteinZetaAnisoReg` for high-order anisotropy and generic non-zero vector arguments, fixed by evaluating a harmonic polynomial in double-double precision whenever the product of its condition number with the remaining factors exceeds a tolerance, and by widening the summation cutoffs and the asymptotic expansion bounds.
 
-
 ## [0.6.2] - 2026-08-20
 
 ### Fixed
