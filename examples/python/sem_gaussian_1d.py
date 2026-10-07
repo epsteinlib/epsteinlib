@@ -42,7 +42,7 @@ The script generates plots comparing the different approximations and their
 errors for the specified ν value.
 """
 
-# SPDX-FileCopyrightText: 2025-2026 Jonathan Busse <jonathan@jbusse.de>
+# SPDX-FileCopyrightText: 2025-2026 Jonathan K. Hartlaub <contact@jkhartlaub.com>
 # SPDX-License-Identifier: AGPL-3.0-only
 
 

@@ -1,10 +1,10 @@
-// SPDX-FileCopyrightText: 2024 Jonathan Busse <jonathan@jbusse.de>
+// SPDX-FileCopyrightText: 2024 Jonathan K. Hartlaub <contact@jkhartlaub.com>
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /**
  * @file benchmark.c
- * @author Jonathan Busse
+ * @author Jonathan K. Hartlaub
  * @date 06/06/2024
  * @section Description: Generate epsteinZeta(Reg) reference values
  */
