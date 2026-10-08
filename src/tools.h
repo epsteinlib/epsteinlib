@@ -13,6 +13,8 @@
 #ifndef EPSTEIN_TOOLS
 #define EPSTEIN_TOOLS
 #include <complex.h>
+#include <float.h>
+#include <math.h>
 #include <stdbool.h>
 
 /*!
@@ -20,6 +22,40 @@
  * sum in real space for the set Zeta derivatives.
  */
 #define EPS_CANCELLATION 4e-16
+
+/*!
+ * @brief Epsilon to catch exact cancellation to zero in sums accumulated in
+ * double-double arithmetic, where the residual at a structural zero is of order
+ * eps^2 relative to the largest summand instead of eps.
+ */
+#define EPS_CANCELLATION_DD 8e-31
+
+/**
+ * @brief Checks whether t is an integer up to the rounding of its evaluation.
+ *
+ * @param[in] t: value to check.
+ * @param[in] scale: magnitude of the terms t was evaluated from.
+ * @return true if t is within 8 ulp of scale of the nearest integer.
+ */
+static inline bool is_near_int(double t, double scale) {
+    return fabs(t - nearbyint(t)) <= 8. * DBL_EPSILON * scale;
+}
+
+/**
+ * @brief Greatest common divisor of two nonnegative integers.
+ *
+ * @param[in] a: first integer.
+ * @param[in] b: second integer.
+ * @return gcd(a, b), gcd(0, 0) = 0.
+ */
+static inline long long gcd_ll(long long a, long long b) {
+    while (b != 0) {
+        long long t = a % b;
+        a = b;
+        b = t;
+    }
+    return a;
+}
 
 /**
  * @brief Compute the integer power of a double by squaring.
@@ -142,6 +178,33 @@ static inline void kahan_add_r(double *restrict sum, double *restrict epsilon,
 }
 
 /**
+ * @brief Error-free sum of two doubles (Knuth two-sum).
+ * @param[in] a: first summand.
+ * @param[in] b: second summand.
+ * @param[out] err: rounding error, a + b = fl(a + b) + *err exactly.
+ * @return fl(a + b).
+ */
+static inline double two_sum(double a, double b, double *err) {
+    double s = a + b;
+    double bb = s - a;
+    *err = (a - (s - bb)) + (b - bb);
+    return s;
+}
+
+/**
+ * @brief Error-free product of two doubles (fma two-product).
+ * @param[in] a: first factor.
+ * @param[in] b: second factor.
+ * @param[out] err: rounding error, a * b = fl(a * b) + *err exactly.
+ * @return fl(a * b).
+ */
+static inline double two_prod(double a, double b, double *err) {
+    double p = a * b;
+    *err = fma(a, b, -p);
+    return p;
+}
+
+/**
  * @brief euclidean dot product.
  * @param[in] dim: dimension of the input vectors
  * @param[in] v1: first vector.
@@ -214,9 +277,11 @@ double inf_norm(unsigned int dim, const double *m);
 
 /**
  * @brief calculate projection of vector to elementary lattice cell.
+ * The projection is evaluated with error-free products and sums, so it keeps
+ * full relative accuracy when v lies close to a lattice point.
  * @param[in] dim: dimension of the input vectors
  * @param[in] m: matrix that transforms the lattice in the function.
- * @param[in] m_invt: inverse of m.
+ * @param[in] m_invt: inverse transpose of m.
  * @param[in] v: vector for which the projection to the elementary lattice cell
  * is needet.
  * @return projection of v to the elementary lattice cell.

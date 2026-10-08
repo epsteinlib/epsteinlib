@@ -13,6 +13,7 @@
 
 #include "crandall.h"
 #include "gamma.h"
+#include "harmonics.h"
 #include "stdbool.h"
 #include "tools.h"
 #include <complex.h>
@@ -29,6 +30,11 @@
  * zero.
  */
 #define EPS_ZERO_PIY (M_PI * 1e-64)
+
+/*!
+ * @brief maximum number of Newton steps in inflate_radius.
+ */
+#define INFLATE_RADIUS_STEPS 40
 
 /**
  * @brief Calculates bounds on when to use asymptotic expansion of the
@@ -54,16 +60,69 @@ double assignzArgBound(double nu) {
 }
 
 /**
- * @brief Calculates the upper Crandall function.
- * @param[in] dim: dimension of the input vectors.
- * @param[in] nu: exponent of the regularized Epstein zeta function.
- * @param[in] z: input vector of the function.
- * @param[in] prefactor: prefactor of the vector, e. g. lambda or 1/lambda in
- *      Crandall's formula
- * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
- * expansion in the calculation of the Crandall function.
- * @return upperGamma(nu / 2,pi prefactor * z**2) / (pi * prefactor z**2)^(nu / 2) if
- * |z| > 0 and - 2 / nu otherwise.
+ * @brief Inflates a truncation radius so that it also absorbs the harmonic
+ * polynomial of degree m multiplying the Gaussian decay of a summand.
+ * @param[in] r0: radius calibrated for the isotropic summand.
+ * @param[in] dim: dimension of the lattice.
+ * @param[in] m: degree of the harmonic polynomial.
+ * @return inflated radius, never smaller than r0.
+ */
+double inflate_radius(double r0, unsigned int dim, double m) {
+    if (m <= 0 || r0 <= 0) {
+        return r0;
+    }
+    // compute log(C) = log(binom(m + dim - 1, dim - 1)) / 2
+    double logC = 0.;
+    for (unsigned int i = 1; i < dim; i++) {
+        logC += 0.5 * log((m + i) / i);
+    }
+    double target = (M_PI * r0 * r0) + logC;
+    double r = r0;
+    for (int it = 0; it < INFLATE_RADIUS_STEPS; it++) {
+        double f = (M_PI * r * r) - (m * log(r)) - target;
+        double fp = (2 * M_PI * r) - (m / r);
+        // left of the minimum of f, where Newton would walk away from the root
+        if (fp <= 0) {
+            r *= 1.5;
+            continue;
+        }
+        double step = f / fp;
+        r = fmax(r - step, r0);
+        if (fabs(step) < 1e-12 * r) {
+            break;
+        }
+    }
+    return r;
+}
+
+/**
+ * @brief Bound on pi z^2 above which crandall_g uses its asymptotic expansion,
+ * for a summand of the harmonic method, inflated for the harmonic polynomial
+ * of degree |alpha| - 2k above ALPHA_ABS_HIGH_ORDER.
+ * @param[in] nu: order of the Crandall function in the summand.
+ * @param[in] dim: dimension of the lattice.
+ * @param[in] alphaAbs: total |alpha| of the multi-index.
+ * @param[in] k: specifies the degree |alpha| - 2k of the harmonic polynomial.
+ * @return minimum value of pi z^2 for the asymptotic expansion in crandall_g.
+ */
+double assignzArgBoundHarmonic(double nu, unsigned int dim, unsigned int alphaAbs,
+                               unsigned int k) {
+    double bound = assignzArgBound(nu);
+    double m = (double)alphaAbs - (2. * k);
+    if (alphaAbs <= ALPHA_ABS_HIGH_ORDER || m <= 0 || bound == DBL_MAX) {
+        return bound;
+    }
+    double r = inflate_radius(sqrt(bound / M_PI), dim, m);
+    return M_PI * r * r;
+}
+
+/**
+ * @brief Degree aware variant of assignzArgBound for the harmonic method,
+ * widened by the degree |alpha| - 2k above ALPHA_ABS_HIGH_ORDER.
+ * @param[in] nu: order of the Crandall function in the summand.
+ * @param[in] alphaAbs: total of alpha.
+ * @param[in] k: specifies degree |alpha| - 2k of the harmonic polynomial.
+ * @return minimum value of pi z^2 for the asymptotic expansion.
  */
 double complex crandall_g(unsigned int dim, double nu, const double *z,
                           double prefactor, double zArgBound) {
@@ -402,4 +461,5 @@ double polynomial_y_der(unsigned int k, unsigned int dim, const double *z,
 }
 
 #undef EPS
+#undef INFLATE_RADIUS_STEPS
 #undef G_CUTOFF

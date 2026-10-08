@@ -14,6 +14,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 ### Fixed
 - up to five digits lost in `epsteinZetaAniso` and `epsteinZetaAnisoReg` due to cancellation error for `y` along a ray where `harmonic_h` must vanish, fixed by comparing intermediate values of the harmonic polynomial with `EPS_CANCELLATION`.
 - non-zero values of `epsteinZetaAniso` and `epsteinZetaAnisoReg` for high-order anisotropy when $\boldsymbol{x}=\boldsymbol{0}$ and $|\boldsymbol{\alpha}|$ is odd, fixed by reordering summands to enforce symmetric pairing.
+- up to five digits lost in all Epstein zeta variants for $\boldsymbol x$ (or $\boldsymbol y$) outside the (reciprocal) elementary lattice cell and close to (reciprocal) lattice points, fixed by error-free projection to the (reciprocal) elementary lattice cell before rescaling.
+- non-zero values of `epsteinZetaAniso` at mirror-symmetry related zeros for some non-diagonal lattice matrices (e.g. hexagonal), fixed by a basis-independent early-return criterion.
+- up to seven digits lost in `epsteinZetaAniso` and `epsteinZetaAnisoReg` for high-order anisotropy and generic non-zero vector arguments, fixed by evaluating a harmonic polynomial in double-double precision whenever the product of its condition number with the remaining factors exceeds a tolerance, and by widening the summation cutoffs and the asymptotic expansion bounds.
 
 ## [0.6.2] - 2026-08-20
 
@@ -60,7 +63,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 ### Fixed
 - Switched pivot search direction and corrected forward-substitution in `invert`, eliminating errors in matrix inversion
 - Introduced variable `zArgBoundReci` analogous to `zArgBound` for arguments `dim - NU` instead of `NU` in reciprocal sums in `zeta.c`
-- Bounds for asymptotic expansion changed to guarantee precision of $10^{-18}$ instead of $10^{-16}$
+- Bounds for asymptotic expansion changed to guarantee accuracy of $10^{-18}$ instead of $10^{-16}$
 
 ## [0.5.0] - 2025-07-10
 

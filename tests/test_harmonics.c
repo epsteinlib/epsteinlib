@@ -315,12 +315,13 @@ static int test_harmonic_h_1D(void) {
             malloc((kMax + 1) * sizeof(unsigned long long));
         unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
             alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
-        double *coeffs = malloc(2 * coeffs_size * sizeof(double));
+        double *coeffs =
+            malloc(HARMONIC_COEFF_STRIDE * coeffs_size * sizeof(double));
         unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
         precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                         exponents);
         num = harmonic_h(*k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
-                         exponents);
+                         exponents, 0.);
         free(chunk_offset);
         free(valid_count);
         free(coeffs);
@@ -401,7 +402,7 @@ static int test_harmonic_h_3D_unity(void) {
 
     int testsPassed = 0;
     int totalTests = 0;
-    double tol = pow(10, -15);
+    double tol = 1e-16;
 
     unsigned int alphaAbs;
 
@@ -439,12 +440,13 @@ static int test_harmonic_h_3D_unity(void) {
             malloc((kMax + 1) * sizeof(unsigned long long));
         unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
             alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
-        double *coeffs = malloc(2 * coeffs_size * sizeof(double));
+        double *coeffs =
+            malloc(HARMONIC_COEFF_STRIDE * coeffs_size * sizeof(double));
         unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
         precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                         exponents);
         num = harmonic_h(*k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
-                         exponents);
+                         exponents, 0.);
         free(chunk_offset);
         free(coeffs);
         free(valid_count);
@@ -534,7 +536,7 @@ static int test_harmonic_h_3D_random(void) {
 
     int testsPassed = 0;
     int totalTests = 0;
-    double tol = 5 * pow(10, -13);
+    double tol = 5e-14;
 
     unsigned int alphaAbs;
 
@@ -572,12 +574,13 @@ static int test_harmonic_h_3D_random(void) {
             malloc((kMax + 1) * sizeof(unsigned long long));
         unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
             alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
-        double *coeffs = malloc(2 * coeffs_size * sizeof(double));
+        double *coeffs =
+            malloc(HARMONIC_COEFF_STRIDE * coeffs_size * sizeof(double));
         unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
         precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                         exponents);
         num = harmonic_h(*k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
-                         exponents);
+                         exponents, 0.);
         free(chunk_offset);
         free(coeffs);
         free(valid_count);
@@ -667,7 +670,7 @@ static int test_harmonic_h_3D_illcond(void) {
 
     int testsPassed = 0;
     int totalTests = 0;
-    double tol = 1E-8;
+    double tol = 1e-11;
 
     unsigned int alphaAbs;
 
@@ -705,12 +708,13 @@ static int test_harmonic_h_3D_illcond(void) {
             malloc((kMax + 1) * sizeof(unsigned long long));
         unsigned long long coeffs_size = precompute_harmonic_h_inner_chunk_size(
             alphaAbs, kMax, dim, alpha, chunk_offset, valid_count);
-        double *coeffs = malloc(2 * coeffs_size * sizeof(double));
+        double *coeffs =
+            malloc(HARMONIC_COEFF_STRIDE * coeffs_size * sizeof(double));
         unsigned int *exponents = malloc(coeffs_size * dim * sizeof(unsigned int));
         precompute_harmonic_h_inner_sum(alphaAbs, dim, alpha, chunk_offset, coeffs,
                                         exponents);
         num = harmonic_h(*k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
-                         exponents);
+                         exponents, 0.);
         free(chunk_offset);
         free(coeffs);
         free(valid_count);
@@ -762,7 +766,7 @@ static int test_harmonic_h_3D_illcond(void) {
            errSum / totalTests);
     printf("\n");
 
-    reportImprovedUnitTest(__func__, errMax, 5E-12);
+    reportImprovedUnitTest(__func__, errMax, tol * REP_IMPR_THRES);
 
     return totalTests - testsPassed;
 }

@@ -155,6 +155,97 @@ static int test_matrix_transpose_inverse(void) { // NOLINT
 }
 
 /*!
+ * @brief Tests vectorProj near lattice points against exact reference values.
+ * Lattice entries, integer coordinates n and offsets delta are dyadic
+ * rationals with few bits, so v = m n + delta is an exact double and the
+ * exact projection is delta itself.
+ *
+ * @return number of failed tests.
+ */
+static int test_vectorProj_near_lattice(void) { // NOLINT
+    printf("%s ", __func__);
+    enum { maxDim = 2, numLattices = 3 };
+    const unsigned int dims[numLattices] = {1, 2, 2};
+    const double lattices[numLattices][maxDim * maxDim] = {
+        {1.5}, {1., 0.5, 0., 0.875}, {1.25, -0.25, 0.375, 1.}};
+    const double delta[maxDim] = {0x3p-11, -0x1p-11};
+    const int nMax = 6;
+    const double tol = 1e-15;
+    int testsPassed = 0;
+    int totalTests = 0;
+    double errMin = NAN;
+    double errMax = NAN;
+    double errSum = 0.;
+
+    for (unsigned int l = 0; l < numLattices; l++) {
+        unsigned int dim = dims[l];
+        const double *m = lattices[l];
+        double m_copy[maxDim * maxDim];
+        double m_invt[maxDim * maxDim];
+        int p[maxDim];
+        for (unsigned int i = 0; i < dim * dim; i++) {
+            m_copy[i] = m[i];
+        }
+        invert(dim, m_copy, p, m_invt);
+        transpose(dim, m_invt);
+
+        // all n in [-nMax, nMax]^dim, enumerated by a mixed radix counter
+        unsigned int numN = 1;
+        for (unsigned int i = 0; i < dim; i++) {
+            numN *= (2 * nMax) + 1;
+        }
+        for (unsigned int c = 0; c < numN; c++) {
+            int n[maxDim];
+            unsigned int rest = c;
+            for (unsigned int i = 0; i < dim; i++) {
+                n[i] = (int)(rest % ((2 * nMax) + 1)) - nMax;
+                rest /= (2 * nMax) + 1;
+            }
+            double v[maxDim];
+            for (unsigned int i = 0; i < dim; i++) {
+                v[i] = delta[i];
+                for (unsigned int j = 0; j < dim; j++) {
+                    v[i] += m[(dim * i) + j] * n[j];
+                }
+            }
+
+            double *proj = vectorProj(dim, m, m_invt, v);
+            double err = 0.;
+            for (unsigned int i = 0; i < dim; i++) {
+                err = fmax(err, fabs(proj[i] - delta[i]) / fabs(delta[i]));
+            }
+
+            errMin = (errMin < err) ? errMin : err;
+            errMax = (errMax > err) ? errMax : err;
+            errSum += err;
+
+            if (err < tol) {
+                testsPassed++;
+            } else {
+                printf("\n");
+                printf("Warning! vectorProj (dim=%u):\n", dim);
+                printf("Erel:      %E !< %E  (tolerance)\n", err, tol);
+                printMatrixUnitTest("m:", m, dim);
+                printVectorUnitTest("v:", v, dim);
+                printVectorUnitTest("proj:", proj, dim);
+                printVectorUnitTest("ref:", delta, dim);
+            }
+            totalTests++;
+            free(proj);
+        }
+    }
+
+    printf("\n\t ... ");
+    printf("%d out of %d tests passed with tolerance %E.", testsPassed, totalTests,
+           tol);
+    printf("\t    ");
+    printf("[ Error →  min: %E | max: %E | avg: %E ]", errMin, errMax,
+           errSum / totalTests);
+    printf("\n");
+    return totalTests - testsPassed;
+}
+
+/*!
  * @brief Main function to run all set zeta derivatives function tests.
  *
  * @return number of failed tests.
@@ -162,5 +253,6 @@ static int test_matrix_transpose_inverse(void) { // NOLINT
 int main() {
     int failed = 0;
     failed += run_timed_test(test_matrix_transpose_inverse);
+    failed += run_timed_test(test_vectorProj_near_lattice);
     return failed;
 }
