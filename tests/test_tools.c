@@ -247,7 +247,7 @@ static int test_vectorProj_near_lattice(void) { // NOLINT
 
 /*!
  * @brief Tests the projection of the wave vector y to the reciprocal elementary
- * lattice cell, as done in zeta.c, near reciprocal lattice points against exact
+ * lattice cell with vectorProjReci, near reciprocal lattice points against exact
  * reference values. The lattice entries are dyadic rationals with few bits, m_invt
  * is not. Each v is m_invt (n + delta) rounded to a 2^-30 grid, so the
  * fractional coordinates t = m^T v - n are exact doubles and the exact projection
@@ -317,7 +317,7 @@ static int test_vectorProj_reciprocal_near_lattice(void) { // NOLINT
                 ref[1] = ((m[0] * t[1]) - (m[1] * t[0])) / det;
             }
 
-            double *proj = vectorProj(dim, m_invt, m, v);
+            double *proj = vectorProjReci(dim, m, m_invt, v);
             double err = 0.;
             for (unsigned int i = 0; i < dim; i++) {
                 err = fmax(err, fabs(proj[i] - ref[i]) / fabs(ref[i]));
@@ -331,7 +331,7 @@ static int test_vectorProj_reciprocal_near_lattice(void) { // NOLINT
                 testsPassed++;
             } else {
                 printf("\n");
-                printf("Warning! reciprocal vectorProj (dim=%u):\n", dim);
+                printf("Warning! vectorProjReci (dim=%u):\n", dim);
                 printf("Erel:\t\t %E !< %E  (tolerance)\n", err, tol);
                 printMatrixUnitTest("m:", m, dim);
                 printVectorUnitTest("v:\t\t ", v, dim);

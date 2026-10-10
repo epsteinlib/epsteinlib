@@ -221,4 +221,58 @@ double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
     }
     return vt;
 }
+/**
+ * @brief calculate projection of vector to the reciprocal elementary lattice cell.
+ * @param[in] dim: dimension of the input vectors
+ * @param[in] m: matrix that transforms the lattice in the function.
+ * @param[in] m_invt: inverse transpose of m, generating the reciprocal lattice.
+ * @param[in] v: vector for which the projection to the reciprocal elementary
+ * lattice cell is needed.
+ * @return projection of v to the reciprocal elementary lattice cell.
+ */
+double *vectorProjReci(unsigned int dim, const double *m, const double *m_invt,
+                       const double *v) {
+    bool todo = false;
+    double *vt = malloc(dim * sizeof(double));
+    double vtErr[dim];
+    // reciprocal lattice coordinates m^T v, carried exactly as sum + err
+    for (int i = 0; i < dim; i++) {
+        double sum = 0;
+        double err = 0;
+        for (int j = 0; j < dim; j++) {
+            double prodErr = NAN;
+            double sumErr = NAN;
+            double prod = two_prod(m[(dim * j) + i], v[j], &prodErr);
+            sum = two_sum(sum, prod, &sumErr);
+            err += sumErr + prodErr;
+        }
+        vt[i] = sum;
+        vtErr[i] = err;
+    }
+    // check if projection is needed, else copy
+    for (int i = 0; i < dim && !todo; i++) {
+        todo = todo || (vt[i] <= -0.5 || vt[i] >= 0.5);
+    }
+    if (todo) {
+        // fractional coordinates m^T v - n, exact up to the error of the
+        // compensated sum, so that only the final product with the rounded
+        // m_invt costs relative accuracy
+        for (int i = 0; i < dim; i++) {
+            vt[i] = remainder(vt[i], 1) + vtErr[i];
+        }
+        double *vres = malloc(dim * sizeof(double));
+        for (int i = 0; i < dim; i++) {
+            vres[i] = 0;
+            for (int j = 0; j < dim; j++) {
+                vres[i] += m_invt[(dim * i) + j] * vt[j];
+            }
+        }
+        free(vt);
+        return vres;
+    }
+    for (int i = 0; i < dim; i++) {
+        vt[i] = v[i];
+    }
+    return vt;
+}
 #undef EPS
