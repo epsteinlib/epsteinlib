@@ -291,10 +291,26 @@ epsteinZetaNearLatticeRef=Flatten[Table[
 
 
 (* ::Text:: *)
+(*Check near-reciprocal-lattice points .*)
+
+
+epsteinZetaNearReciLatticeRef=Flatten[Table[
+    Module[{x,y,zeta}
+	    ,x={1/8,-3/16}
+	    ;y=Round[(Inverse[Transpose[a]] . {5,-3}+{3,-1}/2^11)*2^11]/2^11
+	    ;zeta=epsteinZeta[\[Nu],a,x,y]
+	    ;Flatten[Join[{2},N@{\[Nu],a,x,y,Re[zeta],Im[zeta]}]]
+    ]
+    ,{a,{{{3/2,0},{0,1}},{{1,1/2},{0,7/8}},{{5/4,-1/4},{3/8,1}}}}
+    ,{\[Nu],{-3/2,1/2,5/4}}
+],1];
+
+
+(* ::Text:: *)
 (*Combine reference values.*)
 
 
-epsteinZetaVariedMatricesRef=Join[epsteinZetaRandomMatricesRef,epsteinZetaNearLatticeRef];
+epsteinZetaVariedMatricesRef=Join[epsteinZetaRandomMatricesRef,epsteinZetaNearLatticeRef,epsteinZetaNearReciLatticeRef];
 
 
 (* ::Text:: *)

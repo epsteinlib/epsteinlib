@@ -732,7 +732,7 @@ static int test_epsteinZeta_varied_matrices(void) { // NOLINT
             printf("\n\n");
             printf("Warning! ");
             printf("epsteinZeta: ");
-            printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t!= "
+            printf(" %0*.16lf %+.16lf I (this implementation) \n\t\t    != "
                    "%.16lf %+.16lf I (reference implementation)\n",
                    4, creal(num), cimag(num), creal(ref), cimag(ref));
             printf("Min(Eabs, Erel):      %E !< %E  (tolerance)\n", errorMaxAbsRel,
