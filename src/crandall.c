@@ -117,12 +117,16 @@ double assignzArgBoundHarmonic(double nu, unsigned int dim, unsigned int alphaAb
 }
 
 /**
- * @brief Degree aware variant of assignzArgBound for the harmonic method,
- * widened by the degree |alpha| - 2k above ALPHA_ABS_HIGH_ORDER.
- * @param[in] nu: order of the Crandall function in the summand.
- * @param[in] alphaAbs: total of alpha.
- * @param[in] k: specifies degree |alpha| - 2k of the harmonic polynomial.
- * @return minimum value of pi z^2 for the asymptotic expansion.
+ * @brief Calculates the upper Crandall function.
+ * @param[in] dim: dimension of the input vectors.
+ * @param[in] nu: exponent of the regularized Epstein zeta function.
+ * @param[in] z: input vector of the function.
+ * @param[in] prefactor: prefactor of the vector, e. g. lambda or 1/lambda in
+ *      Crandall's formula
+ * @param[in] zArgBound: minimum value of pi * z**2, when to use the fast asymptotic
+ * expansion in the calculation of the Crandall function.
+ * @return upperGamma(nu / 2,pi prefactor * z**2) / (pi * prefactor z**2)^(nu / 2) if
+ |z| > 0 and - 2 / nu otherwise.
  */
 double complex crandall_g(unsigned int dim, double nu, const double *z,
                           double prefactor, double zArgBound) {

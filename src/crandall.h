@@ -59,7 +59,6 @@ double assignzArgBoundHarmonic(double nu, unsigned int dim, unsigned int alphaAb
  * expansion in the calculation of the Crandall function.
  * @return upperGamma(nu / 2,pi prefactor * z**2) / (pi * prefactor z**2)^(nu / 2) if
  |z| > 0 and - 2 / nu otherwise.
-
  */
 double complex crandall_g(unsigned int dim, double nu, const double *z,
                           double prefactor, double zArgBound);
