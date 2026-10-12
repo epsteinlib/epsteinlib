@@ -192,7 +192,7 @@ double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
     }
     // check if projection is needed, else copy
     for (int i = 0; i < dim && !todo; i++) {
-        todo = todo || (vt[i] <= -0.5 || vt[i] >= 0.5);
+        todo = todo || fabs(vt[i]) > 0.5;
     }
     if (todo) {
         // integer lattice coordinates of the nearest lattice point
@@ -251,7 +251,7 @@ double *vectorProjReci(unsigned int dim, const double *m, const double *m_invt,
     }
     // check if projection is needed, else copy
     for (int i = 0; i < dim && !todo; i++) {
-        todo = todo || (vt[i] <= -0.5 || vt[i] >= 0.5);
+        todo = todo || fabs(vt[i]) > 0.5;
     }
     if (todo) {
         // fractional coordinates m^T v - n, exact up to the error of the
