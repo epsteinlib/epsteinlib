@@ -16,7 +16,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 - non-zero values of `epsteinZetaAniso` and `epsteinZetaAnisoReg` for high-order anisotropy when $\boldsymbol{x}=\boldsymbol{0}$ and $|\boldsymbol{\alpha}|$ is odd, fixed by reordering summands to enforce symmetric pairing.
 - up to five digits lost in all Epstein zeta variants for $\boldsymbol x$ (or $\boldsymbol y$) outside the (reciprocal) elementary lattice cell and close to (reciprocal) lattice points, fixed by error-free projection to the (reciprocal) elementary lattice cell before rescaling.
 - non-zero values of `epsteinZetaAniso` at mirror-symmetry related zeros for some non-diagonal lattice matrices (e.g. hexagonal), fixed by a basis-independent early-return criterion.
-- up to seven digits lost in `epsteinZetaAniso` and `epsteinZetaAnisoReg` for high-order anisotropy and generic non-zero vector arguments, fixed by evaluating a harmonic polynomial in double-double precision whenever the product of its condition number with the remaining factors exceeds a tolerance, and by widening the summation cutoffs and the asymptotic expansion bounds.
+- up to seven digits lost in `epsteinZetaAniso` and `epsteinZetaAnisoReg` for high-order anisotropy and generic non-zero vector arguments, reduced to near machine-precision for most arguments by evaluating a harmonic polynomial in double-double precision whenever the product of its condition number with the remaining factors exceeds a tolerance, and by widening the summation cutoffs and the asymptotic expansion bounds.
 
 ## [0.6.2] - 2026-08-20
 
