@@ -288,4 +288,20 @@ double inf_norm(unsigned int dim, const double *m);
  */
 double *vectorProj(unsigned int dim, const double *m, const double *m_invt,
                    const double *v);
+
+/**
+ * @brief calculate projection of vector to the reciprocal elementary lattice cell.
+ * Unlike vectorProj(dim, m_invt, m, v), the fractional coordinates m^T v - n are
+ * evaluated with error-free products and sums before multiplying with the
+ * rounded m_invt, so the projection keeps relative accuracy of about
+ * u * cond(m) when v lies close to a reciprocal lattice point.
+ * @param[in] dim: dimension of the input vectors
+ * @param[in] m: matrix that transforms the lattice in the function.
+ * @param[in] m_invt: inverse transpose of m, generating the reciprocal lattice.
+ * @param[in] v: vector for which the projection to the reciprocal elementary
+ * lattice cell is needed.
+ * @return projection of v to the reciprocal elementary lattice cell.
+ */
+double *vectorProjReci(unsigned int dim, const double *m, const double *m_invt,
+                       const double *v);
 #endif
