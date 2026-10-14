@@ -10,7 +10,7 @@
 
 
 (* ::Text:: *)
-(*This script generates the results for all numerical experiments presented in the arXiv preprint "Computation of anisotropic singular sums from high-order derivatives of Epstein zeta functions", arXiv:2609.28282, 2026. Evaluation of this script takes less than a minute on a standard laptop equipped with 12 cores.*)
+(*This script generates the results for all numerical experiments presented in the arXiv preprint "Computation of anisotropic singular sums from high-order derivatives of Epstein zeta functions", arXiv:2609.28282, 2026. The grids are coarser than in the manuscript so that the evaluation of this script takes less than a minute on a standard laptop equipped with 12 cores.*)
 
 
 (* ::Subsection::Closed:: *)
@@ -62,7 +62,7 @@ SetOptions[MaTeX,FontSize->18];
 
 
 Error[true_,est_]:=Module[{errAbs,errRel}
-	,errAbs=Abs[true-SetPrecision[est,200]]
+	,errAbs=Abs[true-SetPrecision[est,100]]
 	;errRel=If[PossibleZeroQ[true]
 	,If[PossibleZeroQ[est],0,Infinity]
 	,errAbs/Abs[true]
@@ -220,8 +220,8 @@ errs=Table[
 tbl=TableForm[
 	Map[ScientificForm[#,3]&,errs,{2}]
 	,TableHeadings->{
-		("d="<>ToString[#])&/@{3,2,1}
-		,("n="<>ToString[#])&/@Range[6]
+		MaTeX["d="<>ToString[#]]&/@{3,2,1}
+		,MaTeX["n="<>ToString[#]]&/@Range[6]
 	}
 ]
 
@@ -235,6 +235,142 @@ tbl=TableForm[
 
 
 tbl
+
+
+(* ::Section:: *)
+(*Table 2*)
+
+
+(* ::Subsection::Closed:: *)
+(*Prepare*)
+
+
+(* ::Text:: *)
+(*Set the reference for non-mixed second-order derivatives for the square lattice and all-equal vector arguments.*)
+
+
+EpsteinZetaAnisoAnalytic[
+	\[Nu]_
+	,a_/;PossibleZeroQ[Norm[a-IdentityMatrix[Length[a]]]]
+	,x_/;PossibleZeroQ[Norm[x-ConstantArray[First[x],Length[x]]]]
+	,y_/;PossibleZeroQ[Norm[y-ConstantArray[First[y],Length[y]]]]
+	,\[Alpha]_/;AllTrue[\[Alpha],EvenQ]&&PossibleZeroQ[2-Total[\[Alpha]]]
+]:=EpsteinZeta[\[Nu]-Total[\[Alpha]],a,x,y]/Length[a]
+
+
+(* ::Text:: *)
+(*Generate test values.*)
+
+
+stepsize=1/2; (* set to 1/100 to match the resolution of the manuscript *)
+errs=Table[
+	{Median[#],Max[#]}&[Flatten[ParallelTable[
+		Table[
+			Error[
+				EpsteinZetaAnisoAnalytic[\[Nu],IdentityMatrix@d,ConstantArray[x,d],ConstantArray[y,d],2UnitVector[d,1]]
+				,EpsteinZetaAniso[\[Nu],IdentityMatrix@d,ConstantArray[x,d],ConstantArray[y,d],2UnitVector[d,1]]
+			]
+			,{y,Select[Range[0,1/2,stepsize],Not[PossibleZeroQ[#]&&\[Nu]==d+2 ]&]}
+		]
+		,{\[Nu],-10,10,1/10}
+		,{x,0,1/2,stepsize}
+		,{a,{IdentityMatrix[d]}}
+	]]]
+	,{d,Reverse@Range[6]}
+]
+
+
+(* ::Subsection::Closed:: *)
+(*Compose*)
+
+
+tbl=TableForm[
+	Map[ScientificForm[#,3]&,Transpose[errs],{2}]
+	,TableHeadings->{
+		{MaTeX["E^{\\rm med}"],MaTeX["E^{\\rm max}"]}
+		,MaTeX["d="<>ToString[#]]&/@Reverse@Range[6]
+	}
+]
+
+
+(* ::Subsection:: *)
+(*Display*)
+
+
+(* ::Text:: *)
+(*Median and maximum error of anisotropic Epstein zeta functions corresponding to non-mixed second-order derivatives for the square lattice and all-equal vector arguments over a grid of values in \[Nu], x and y.*)
+
+
+tbl
+
+
+(* ::Section:: *)
+(*Figure 2*)
+
+
+(* ::Subsection::Closed:: *)
+(*Prepare*)
+
+
+(* ::Text:: *)
+(*Set the reference in terms of the Ramanujan tau L-function with exact trivial zeros.*)
+
+
+EpsteinZetaAnisoAnalytic[
+	\[Nu]_
+	,IdentityMatrix[8]
+	,ConstantArray[-1/2,8]
+	,ConstantArray[1/2,8]
+	,ConstantArray[1,8]
+]:=If[IntegerQ[\[Nu]/2]&&\[Nu]<=0
+	,0
+	,2^(-\[Nu]/2) RamanujanTauL[\[Nu]/2]
+];
+
+
+(* ::Text:: *)
+(*Generate test values.*)
+
+
+stepsize = 1/2; (* set to 1/20 to match the resolution of the manuscript *)
+errs=ParallelTable[
+	{
+		\[Nu]
+		,N@Error[
+			EpsteinZetaAnisoAnalytic[\[Nu],IdentityMatrix[8],ConstantArray[-1/2,8],ConstantArray[1/2,8],ConstantArray[1,8]]
+			,EpsteinZetaAniso[\[Nu],IdentityMatrix[8],ConstantArray[-1/2,8],ConstantArray[1/2,8],ConstantArray[1,8]]
+		]
+	}
+	,{\[Nu],-10-1/5,10+1/5,stepsize}
+]
+
+
+(* ::Subsection::Closed:: *)
+(*Compose*)
+
+
+plt=ListLogPlot[
+	errs
+	,PlotTheme->"Scientific"
+	,PlotLabel->MaTeX["Z_{\\mathbb Z^8,\\nu,\\bm 1}(-\\bm 1/2,\\bm 1/2)"]
+	,FrameLabel->{MaTeX["\\nu"],MaTeX["E"]}
+	,PlotStyle->{PointSize[0.015],RGBColor[0.365248, 0.427802, 0.758297]}
+	,PlotRange->{{-11-1/3,11+1/3},{2 10^(-20),5 10^(-13)}}
+	,GridLines->{Range[-10,10,5],10^Range[-21,-12,2]}
+	,AspectRatio->.5
+	,ImageSize->400
+]
+
+
+(* ::Subsection:: *)
+(*Display*)
+
+
+(* ::Text:: *)
+(*Error for a special case of the eight-dimensional anisotropic Epstein zeta function for the square lattice and all-one anisotropy in which case it is given by the Ramanujan tau L-function.*)
+
+
+plt
 
 
 (* ::Section:: *)
