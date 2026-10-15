@@ -167,36 +167,29 @@ void harmonic_h_inner_term_multi_hpdyad(unsigned int dim, const unsigned int *al
                                         const unsigned int *beta,
                                         const unsigned int *theta1,
                                         const unsigned int *theta2, hpdyad_t *out) {
-    hpdyad_set_ull(out, 1, 1);
+    hpdyad_prod_t p;
+    hpdyad_prod_init(&p);
 
     // prod_j binom(betaAbsDim, beta[j])
     unsigned long long betaAbsDim = 0;
     for (unsigned int j = 0; j < dim; j++) {
         betaAbsDim += beta[j];
-        unsigned long long b = binom((long long)betaAbsDim, (long long)beta[j]);
-        hpdyad_t tmp;
-        hpdyad_set_ull(&tmp, b, 1);
-        hpdyad_mul(out, out, &tmp);
+        hpdyad_prod_mul(&p, binom((long long)betaAbsDim, (long long)beta[j]));
     }
 
     // prod_j binom(alpha[j], theta1[j])
     for (unsigned int j = 0; j < dim; j++) {
-        unsigned long long b = binom((long long)alpha[j], (long long)theta1[j]);
-        hpdyad_t tmp;
-        hpdyad_set_ull(&tmp, b, 1);
-        hpdyad_mul(out, out, &tmp);
+        hpdyad_prod_mul(&p, binom((long long)alpha[j], (long long)theta1[j]));
     }
 
     // prod_j falling factorial: theta2[j]! / (theta2[j] - theta1[j])!
     for (unsigned int j = 0; j < dim; j++) {
         for (unsigned int l = theta2[j] - theta1[j] + 1; l <= theta2[j]; l++) {
-            hpdyad_t tmp;
-            hpdyad_set_ull(&tmp, (unsigned long long)l, 1);
-            hpdyad_mul(out, out, &tmp);
+            hpdyad_prod_mul(&p, (unsigned long long)l);
         }
     }
 
-    hpdyad_normalize(out);
+    hpdyad_prod_result(&p, out);
 }
 
 /** @brief Computes the inner sum h_inner(α,γ,k) using exact hpdyad arithmetic.
