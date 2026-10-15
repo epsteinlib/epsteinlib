@@ -73,3 +73,6 @@ subdir('examples/c')
 if build_python
     subdir('python')
 endif
+if get_option('profiling')
+    subdir('profiling')
+endif

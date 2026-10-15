@@ -160,9 +160,13 @@
             inputsFrom = [
               epstein
             ];
-            packages = [
-              config.pre-commit.settings.enabledPackages
-            ];
+
+            packages =
+              [config.pre-commit.settings.enabledPackages]
+              ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
+                pkgs.valgrind
+                pkgs.kdePackages.kcachegrind
+              ];
           };
           default = epstein_devshell;
         };
