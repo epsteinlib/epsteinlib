@@ -192,13 +192,34 @@ void harmonic_h_inner_term_multi_hpdyad(unsigned int dim, const unsigned int *al
     hpdyad_prod_result(&p, out);
 }
 
-/** @brief Computes the inner sum h_inner(α,γ,k) using exact hpdyad arithmetic.
+/** @brief Computes the scalar coefficients (-2)**(-i) · c_{n,i,k} · binom(i+k,k)
+ * of the inner sum for i = 0, ..., ⌊alphaAbs/2⌋ - k as hpdyad.
+ * @param[in] k: specifies degree |alpha| - 2k.
+ * @param[in] dim: dimension.
+ * @param[in] alphaAbs: total of alpha.
+ * @param[out] scalar_coeffs: array of length ⌊alphaAbs/2⌋ - k + 1.
+ */
+void harmonic_h_inner_scalar_coeffs(unsigned int k, unsigned int dim,
+                                    unsigned int alphaAbs, hpdyad_t *scalar_coeffs) {
+    unsigned int lastScalarIndex = (alphaAbs / 2) - k;
+    for (unsigned int i = 0; i <= lastScalarIndex; i++) {
+        harmonic_h_inner_term_scalar_hpdyad(alphaAbs, i, k, dim, &scalar_coeffs[i]);
+    }
+}
+
+/** @brief Computes the inner sum h_inner(α,γ,k) using exact hpdyad arithmetic,
+ * h_inner(α,γ,k) = ∑_{i=0}^{⌊|α|/2⌋−k} (−1/2)^i c_{|α|,i,k} binom(i+k,k)
+ * ∑_{β ∈ ℕᵈ, |β| = i} i!/∏ⱼβⱼ! ∏ⱼ binom(αⱼ, αⱼ+βⱼ−γⱼ) (γⱼ−βⱼ)!/(2γⱼ−αⱼ−2βⱼ)!,
+ * with c_{n,i,k} from coeffs_c_inner and β restricted to max(0, γ−α) ≤ β ≤ γ−⌈α/2⌉,
+ * where all factors are defined. Then h₍α,k₎(z) = c_{|α|,k} ∑_γ h_inner(α,γ,k)
+ * z^{2γ−α} over |γ| = |α|−k, 2γ ≥ α, with c_{|α|,k} from coeffs_c_outer.
  * @pre k ≤ ⌊alphaAbs/2⌋
  * @param[in] k: specifies degree |alpha| - 2k.
  * @param[in] dim: dimension of alpha, beta and gamma.
  * @param[in] alpha: upper multi-index.
  * @param[in] gamma: fixed multi-index gamma.
  * @param[in] alphaAbs: total of alpha.
+ * @param[in] scalar_coeffs: see harmonic_h_inner_scalar_coeffs.
  * @param[out] residual: if non-NULL, receives h_inner(α,γ,k) minus the returned
  * double, rounded to double.
  * @return h_inner(α,γ,k).
@@ -207,7 +228,8 @@ void harmonic_h_inner_term_multi_hpdyad(unsigned int dim, const unsigned int *al
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 double harmonic_h_inner_sum(unsigned int k, unsigned int dim,
                             const unsigned int *alpha, const unsigned int *gamma,
-                            unsigned int alphaAbs, double *residual) {
+                            unsigned int alphaAbs, const hpdyad_t *scalar_coeffs,
+                            double *residual) {
 
     unsigned int beta[dim];
     unsigned int theta1[dim];
@@ -227,12 +249,6 @@ double harmonic_h_inner_sum(unsigned int k, unsigned int dim,
     }
 
     unsigned int lastScalarIndex = (alphaAbs / 2) - k;
-
-    // scalar coefficients as hpdyad
-    hpdyad_t scalar_coeffs[lastScalarIndex + 1];
-    for (unsigned int i = 0; i <= lastScalarIndex; i++) {
-        harmonic_h_inner_term_scalar_hpdyad(alphaAbs, i, k, dim, &scalar_coeffs[i]);
-    }
 
     // multi-index coefficients as hpdyad (accumulated via hpdyad_add)
     hpdyad_t multi_coeffs[lastScalarIndex + 1];
@@ -373,6 +389,9 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, unsigned int dim,
 
     for (unsigned int k = 0; k <= kMax; k++) {
 
+        hpdyad_t scalar_coeffs[kMax - k + 1];
+        harmonic_h_inner_scalar_coeffs(k, dim, alphaAbs, scalar_coeffs);
+
         unsigned int gamma[dim];
         for (unsigned int j = 0; j < dim; j++) {
             gamma[j] = 0;
@@ -404,8 +423,8 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, unsigned int dim,
                 double *coeff =
                     coeffs + (HARMONIC_COEFF_STRIDE * (chunk_offset[k] + n));
                 coeff[1] = 0.;
-                coeff[0] =
-                    harmonic_h_inner_sum(k, dim, alpha, gamma, alphaAbs, &coeff[1]);
+                coeff[0] = harmonic_h_inner_sum(k, dim, alpha, gamma, alphaAbs,
+                                                scalar_coeffs, &coeff[1]);
                 unsigned long long expIdx = (chunk_offset[k] + n) * dim;
                 for (unsigned int j = 0; j < dim; j++) {
                     exponents[expIdx + j] = (2 * gamma[j]) - alpha[j];
