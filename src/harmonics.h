@@ -128,6 +128,26 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, unsigned int dim,
                                      const unsigned long long *chunk_offset,
                                      double *coeffs, unsigned int *exponents);
 
+/** @brief Computes h₍α,k₎(z) like harmonic_h, with c_{|α|,k} given.
+ * @param[in] k: specifies degree |alpha| - 2k.
+ * @param[in] dim: dimension of alpha, gamma and y.
+ * @param[in] z: vector of the polynomial.
+ * @param[in] alphaAbs: total of alpha.
+ * @param[in] chunk_offset: starting offsets for each k.
+ * @param[in] valid_count: number of valid entries for each k.
+ * @param[in] coeffs: precomputed inner harmonic sums as (hi, lo) pairs.
+ * @param[in] exponents: precomputed exponents (2γ-α).
+ * @param[in] cOuter: c_{|α|,k}, see coeffs_c_outer.
+ * @param[in] tol: absolute tolerance on ∑|terms|.
+ * @return h₍α,k₎(z).
+ */
+double harmonic_h_c_outer(unsigned int k, unsigned int dim, const double *z,
+                          unsigned int alphaAbs,
+                          const unsigned long long *chunk_offset,
+                          const unsigned long long *valid_count,
+                          const double *coeffs, const unsigned int *exponents,
+                          double cOuter, double tol);
+
 /** @brief Computes h₍α,k₎(z) with y^α = ∑ₖ (y·y)^k h₍α,k₎(y), in double precision
  * if ∑|terms| ≤ HARMONIC_DD_COND |h₍α,k₎(z)| + tol, else in double-double.
  * @param[in] k: specifies degree |alpha| - 2k.
