@@ -362,61 +362,63 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, unsigned int dim,
                                      const unsigned long long *chunk_offset,
                                      double *coeffs, unsigned int *exponents) {
     unsigned int kMax = alphaAbs / 2;
+    if (dim == 0) {
+        return;
+    }
+
+    // γ = ⌈α/2⌉ + δ
+    unsigned int ceilHalfAlphaAbs = 0;
+    for (unsigned int j = 0; j < dim; j++) {
+        ceilHalfAlphaAbs += (alpha[j] + 1) / 2;
+    }
 
     for (unsigned int k = 0; k <= kMax; k++) {
+        // |δ| = |α| - k - |⌈α/2⌉|
+        if (alphaAbs - k < ceilHalfAlphaAbs) {
+            continue;
+        }
+        unsigned int deltaAbs = alphaAbs - k - ceilHalfAlphaAbs;
 
         hpdyad_t scalar_coeffs[kMax - k + 1];
         harmonic_h_inner_scalar_coeffs(k, dim, alphaAbs, scalar_coeffs);
 
+        // first δ in graded lexicographic order: (|δ|, 0, ..., 0)
+        unsigned int delta[dim];
         unsigned int gamma[dim];
         for (unsigned int j = 0; j < dim; j++) {
-            gamma[j] = 0;
+            delta[j] = 0;
         }
-        unsigned int gammaAbs = 0;
-        unsigned int maxAbs = alphaAbs - k;
-
-        // totalCount = (maxAbs + 1)^dim
-        unsigned long long totalCount = 1;
-        for (unsigned int j = 0; j < dim; j++) {
-            totalCount *= maxAbs + 1;
-        }
+        delta[0] = deltaAbs;
 
         unsigned long long n = 0;
-        for (unsigned long long i = 0; i < totalCount; i++) {
-
-            bool skip = (gammaAbs != maxAbs);
-            if (!skip) {
-                for (unsigned int j = 0; j < dim; j++) {
-                    if (2 * gamma[j] < alpha[j]) {
-                        skip = true;
-                        break;
-                    }
-                }
+        while (true) {
+            for (unsigned int j = 0; j < dim; j++) {
+                gamma[j] = ((alpha[j] + 1) / 2) + delta[j];
             }
-
-            if (!skip) {
-                // (hi, lo) pair
-                double *coeff =
-                    coeffs + (HARMONIC_COEFF_STRIDE * (chunk_offset[k] + n));
-                coeff[1] = 0.;
-                coeff[0] = harmonic_h_inner_sum(k, dim, alpha, gamma, alphaAbs,
-                                                scalar_coeffs, &coeff[1]);
-                unsigned long long expIdx = (chunk_offset[k] + n) * dim;
-                for (unsigned int j = 0; j < dim; j++) {
-                    exponents[expIdx + j] = (2 * gamma[j]) - alpha[j];
-                }
-                n++;
+            // (hi, lo) pair
+            double *coeff = coeffs + (HARMONIC_COEFF_STRIDE * (chunk_offset[k] + n));
+            coeff[1] = 0.;
+            coeff[0] = harmonic_h_inner_sum(k, dim, alpha, gamma, alphaAbs,
+                                            scalar_coeffs, &coeff[1]);
+            unsigned long long expIdx = (chunk_offset[k] + n) * dim;
+            for (unsigned int j = 0; j < dim; j++) {
+                exponents[expIdx + j] = (2 * gamma[j]) - alpha[j];
             }
+            n++;
 
-            for (unsigned int idx = 0; idx < dim; idx++) {
-                if (gamma[idx] + 1 <= maxAbs) {
-                    gamma[idx]++;
-                    gammaAbs++;
-                    break;
-                }
-                gammaAbs -= gamma[idx];
-                gamma[idx] = 0;
+            // next δ with the same total: move one unit from the first nonzero
+            // entry i to entry i + 1, the rest of entry i back to entry 0
+            unsigned int i = 0;
+            while (i < dim && delta[i] == 0) {
+                i++;
             }
+            if (i + 1 >= dim) {
+                break;
+            }
+            unsigned int t = delta[i];
+            delta[i] = 0;
+            delta[i + 1]++;
+            delta[0] = t - 1;
         }
     }
 }
