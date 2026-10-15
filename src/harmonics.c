@@ -463,8 +463,9 @@ harmonic_h_outer_double(unsigned int k, unsigned int dim, const double *z,
         for (unsigned int i = 0; i < dim; i++) {
             summand *= real_int_pow(z[i], exps[i]);
         }
-        maxTerm = fmax(maxTerm, fabs(summand));
-        absSum += fabs(summand);
+        double absSummand = fabs(summand);
+        maxTerm = (absSummand > maxTerm) ? absSummand : maxTerm;
+        absSum += absSummand;
         kahan_add_r(&sumOuter, &epsilonOuter, summand);
     }
     *termMass = absSum;
@@ -519,7 +520,8 @@ static double harmonic_h_dd(unsigned int k, unsigned int dim, const double *z,
         for (unsigned int i = 0; i < dim; i++) {
             summand = dd_mul(summand, zPowTab[i][exps[i]]);
         }
-        maxTerm = fmax(maxTerm, fabs(summand.hi));
+        double absSummand = fabs(summand.hi);
+        maxTerm = (absSummand > maxTerm) ? absSummand : maxTerm;
         sumOuter = dd_add(sumOuter, summand);
     }
 
