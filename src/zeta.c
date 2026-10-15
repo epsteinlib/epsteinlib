@@ -186,9 +186,8 @@ static inline double complex summand_real_harmonic(
     if (crandallAbs == 0.) {
         return 0.;
     }
-    double h =
-        harmonic_h_c_outer(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
-                           coeffs, exponents, cOuter, tol / crandallAbs);
+    double h = harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
+                          coeffs, exponents, cOuter, tol / crandallAbs);
 
     return rot * h * crandall;
 }
@@ -326,9 +325,8 @@ static inline double complex summand_real_harmonic_large_exp(
     if (crandallAbs == 0.) {
         return 0.;
     }
-    double h =
-        harmonic_h_c_outer(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
-                           coeffs, exponents, cOuter, tol / crandallAbs);
+    double h = harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
+                          coeffs, exponents, cOuter, tol / crandallAbs);
 
     return rot * h * crandall;
 }
@@ -465,8 +463,9 @@ static inline double complex summand_real_harmonic_large_exp_singularity_sum(
             continue;
         }
 
-        double h = harmonic_h(k, dim, lv, alphaAbs, chunk_offset, valid_count,
-                              coeffs, exponents, 0.);
+        double h =
+            harmonic_h(k, dim, lv, alphaAbs, chunk_offset, valid_count, coeffs,
+                       exponents, coeffs_c_outer(alphaAbs, k, dim), 0.);
 
         if (h && lvSquared > EPS_ZERO_Y) {
             double summand = h * real_int_pow(lvSquared, k);
@@ -644,9 +643,8 @@ static inline double complex summand_fourier_harmonic(
     if (crandallAbs == 0.) {
         return 0.;
     }
-    double h =
-        harmonic_h_c_outer(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
-                           coeffs, exponents, cOuter, tol / crandallAbs);
+    double h = harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
+                          coeffs, exponents, cOuter, tol / crandallAbs);
     return rot * h * crandall;
 }
 
@@ -852,7 +850,7 @@ static double complex summation_harmonic_reg(
             if (dot(dim, x_t2, x_t2) < EPS_ZERO_Y && allEvenAlpha &&
                 2 * k == alphaAbs) {
                 resIt = -harmonic_h(k, dim, x_t2, alphaAbs, chunk_offset,
-                                    valid_count, coeffs, exponents, 0.);
+                                    valid_count, coeffs, exponents, cOuter, 0.);
             }
         } else {
 
@@ -866,7 +864,7 @@ static double complex summation_harmonic_reg(
 
             // skip zero summand if harmonic polynomial vanishes
             double h = harmonic_h(k, dim, y_t1, alphaAbs, chunk_offset, valid_count,
-                                  coeffs, exponents, 0.);
+                                  coeffs, exponents, cOuter, 0.);
 
             // guards 0 * inf where correct value is h(y) g(y) -> 0 for y -> 0
             // note that h(0) = 0 exactly without cancellation
@@ -883,11 +881,11 @@ static double complex summation_harmonic_reg(
             // correct wrong zero summand in regularized fourier sum.
             if (!equals(dim, y_t1, y_t2)) {
                 s2 += harmonic_h(k, dim, y_t2, alphaAbs, chunk_offset, valid_count,
-                                 coeffs, exponents, 0.) *
+                                 coeffs, exponents, cOuter, 0.) *
                       crandall_g(dim, dim - nuReci, y_t2, lambda, zArgBoundReci) *
                       cexp(-2 * M_PI * I * dot(dim, x_t1, y_t2));
                 s2 -= harmonic_h(k, dim, y_t1, alphaAbs, chunk_offset, valid_count,
-                                 coeffs, exponents, 0.) *
+                                 coeffs, exponents, cOuter, 0.) *
                       crandall_g(dim, dim - nuReci, y_t1, lambda, zArgBoundReci) *
                       cexp(-2 * M_PI * I * dot(dim, x_t1, y_t1));
             }
@@ -1000,7 +998,8 @@ static double complex summation_harmonic(
             if (dot(dim, x_t2, x_t2) < EPS_ZERO_Y && allEvenAlpha &&
                 2 * k == alphaAbs) {
                 resIt = -xfactor * harmonic_h(k, dim, x_t2, alphaAbs, chunk_offset,
-                                              valid_count, coeffs, exponents, 0.);
+                                              valid_count, coeffs, exponents, cOuter,
+                                              0.);
             }
         } else {
 
@@ -1014,7 +1013,7 @@ static double complex summation_harmonic(
 
             // skip zero summand if harmonic polynomial vanishes
             double h = harmonic_h(k, dim, y_t2, alphaAbs, chunk_offset, valid_count,
-                                  coeffs, exponents, 0.);
+                                  coeffs, exponents, cOuter, 0.);
 
             // guards 0 * inf where correct value is h(y) g(y) -> 0 for y -> 0
             // note that h(0) = 0 exactly without cancellation
