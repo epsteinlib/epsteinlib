@@ -224,28 +224,26 @@ void harmonic_h_inner_scalar_coeffs(unsigned int k, unsigned int dim,
  * double, rounded to double.
  * @return h_inner(α,γ,k).
  */
-// fast paths for incremental multi-index enumeration increases nesting
-// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 double harmonic_h_inner_sum(unsigned int k, unsigned int dim,
                             const unsigned int *alpha, const unsigned int *gamma,
                             unsigned int alphaAbs, const hpdyad_t *scalar_coeffs,
                             double *residual) {
 
     unsigned int beta[dim];
+    unsigned int betaMin[dim];
+    unsigned int betaMax[dim];
     unsigned int theta1[dim];
     unsigned int theta2[dim];
-    for (unsigned int j = 0; j < dim; j++) {
-        beta[j] = 0;
-        theta1[j] = alpha[j] + beta[j] - gamma[j];
-        theta2[j] = gamma[j] - beta[j];
-    }
 
-    bool redotheta1 = false;
+    // max(0, γ-α) ≤ β ≤ γ - ⌈α/2⌉
     unsigned int betaAbs = 0;
-
     unsigned long long totalCount = 1;
     for (unsigned int j = 0; j < dim; j++) {
-        totalCount *= gamma[j] - (alpha[j] + 1) / 2 + 1;
+        betaMin[j] = (gamma[j] > alpha[j]) ? gamma[j] - alpha[j] : 0;
+        betaMax[j] = gamma[j] - ((alpha[j] + 1) / 2);
+        beta[j] = betaMin[j];
+        betaAbs += beta[j];
+        totalCount *= betaMax[j] - betaMin[j] + 1;
     }
 
     unsigned int lastScalarIndex = (alphaAbs / 2) - k;
@@ -258,45 +256,23 @@ double harmonic_h_inner_sum(unsigned int k, unsigned int dim,
 
     // loop over beta multi-indices
     for (unsigned long long i = 0; i < totalCount; i++) {
-
-        bool skip = false;
         for (unsigned int j = 0; j < dim; j++) {
-            if (gamma[j] > alpha[j] && gamma[j] - alpha[j] > beta[j]) {
-                skip = true;
-                break;
-            }
+            theta1[j] = alpha[j] + beta[j] - gamma[j];
+            theta2[j] = gamma[j] - beta[j];
         }
 
-        if (!skip) {
-
-            if (redotheta1) {
-                for (unsigned int j = 0; j < dim; j++) {
-                    theta1[j] = alpha[j] + beta[j] - gamma[j];
-                }
-            }
-            redotheta1 = false;
-
-            // unconditionally update theta2
-            for (unsigned int j = 0; j < dim; j++) {
-                theta2[j] = gamma[j] - beta[j];
-            }
-
-            hpdyad_t term;
-            harmonic_h_inner_term_multi_hpdyad(dim, alpha, beta, theta1, theta2,
-                                               &term);
-            hpdyad_add(&multi_coeffs[betaAbs], &multi_coeffs[betaAbs], &term);
-        }
+        hpdyad_t term;
+        harmonic_h_inner_term_multi_hpdyad(dim, alpha, beta, theta1, theta2, &term);
+        hpdyad_add(&multi_coeffs[betaAbs], &multi_coeffs[betaAbs], &term);
 
         for (unsigned int idx = 0; idx < dim; idx++) {
-            if (2 * beta[idx] + 2 <= 2 * gamma[idx] - alpha[idx]) {
+            if (beta[idx] < betaMax[idx]) {
                 beta[idx]++;
-                theta1[idx]++;
                 betaAbs++;
                 break;
             }
-            betaAbs -= beta[idx];
-            beta[idx] = 0;
-            redotheta1 = true;
+            betaAbs -= beta[idx] - betaMin[idx];
+            beta[idx] = betaMin[idx];
         }
     }
 
