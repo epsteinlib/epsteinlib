@@ -166,8 +166,9 @@ static double time_harmonic_h(unsigned int k, unsigned int dim, const double *z,
             return NAN;
         }
         for (int r = 0; r < iterations; r++) {
-            sink += harmonic_h(k, dim, z, alphaAbs, chunk_offset, valid_count,
-                               coeffs, exponents, tol);
+            sink +=
+                harmonic_h(k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
+                           exponents, coeffs_c_outer(alphaAbs, k, dim), tol);
         }
         if (timespec_get(&t1, TIME_UTC) != TIME_UTC) {
             return NAN;
@@ -249,8 +250,9 @@ static double sweep_grid(FILE *file, unsigned int dim, const unsigned int *alpha
                 time_harmonic_h(k, dim, z, alphaAbs, chunk_offset, valid_count,
                                 coeffs, exponents, tol, iterations);
             elapsedMax = (elapsed > elapsedMax) ? elapsed : elapsedMax;
-            double result = harmonic_h(k, dim, z, alphaAbs, chunk_offset,
-                                       valid_count, coeffs, exponents, tol);
+            double result =
+                harmonic_h(k, dim, z, alphaAbs, chunk_offset, valid_count, coeffs,
+                           exponents, coeffs_c_outer(alphaAbs, k, dim), tol);
 
             (void)fprintf(file, "%u,%u", dim, k);
             for (unsigned int i = 0; i < dim; i++) {

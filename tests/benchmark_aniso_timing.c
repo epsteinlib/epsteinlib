@@ -41,7 +41,8 @@ static int benchmark_epsteinZetaAniso_timing() { // NOLINT
     double complex res;
     double elapsedTime;
     double elapsedTimeMax;
-    int iterations = 10;
+    int itlow = 10;
+    int ithigh = 100;
     int nmaxlow = 20;
     int nmaxhigh = 10;
     clock_t timeStart;
@@ -66,6 +67,10 @@ static int benchmark_epsteinZetaAniso_timing() { // NOLINT
             printf("%s\n", strerror(errno)); // NOLINT
             return 1;
         }
+
+        int nmax = (dim < 4) ? nmaxlow : nmaxhigh;
+        int iterations = (dim < 4) ? itlow : ithigh;
+
         elapsedTimes = malloc(iterations * sizeof(double));
         a = malloc((unsigned long)dim * (unsigned long)dim * sizeof(double));
         x = malloc(dim * sizeof(double));
@@ -82,8 +87,6 @@ static int benchmark_epsteinZetaAniso_timing() { // NOLINT
 
         printf("\n");
         printf("d: %u, t: ", dim);
-
-        int nmax = (dim < 4) ? nmaxlow : nmaxhigh;
 
         for (int j = 0; j <= nmax; j++) {
 
