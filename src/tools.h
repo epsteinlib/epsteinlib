@@ -220,6 +220,27 @@ static inline double dot(unsigned int dim, const double *v1, const double *v2) {
 }
 
 /**
+ * @brief Checks whether v + w or v - w lies in the ball of squared radius radiusSq.
+ * @param[in] dim: dimension of the vectors.
+ * @param[in] v: vector.
+ * @param[in] w: shift vector.
+ * @param[in] radiusSq: squared radius of the ball.
+ * @return true if min(|v + w|^2, |v - w|^2) <= radiusSq.
+ */
+static inline bool pair_in_ball(unsigned int dim, const double *v, const double *w,
+                                double radiusSq) {
+    double plusSq = 0.;
+    double minusSq = 0.;
+    for (unsigned int i = 0; i < dim; i++) {
+        double plus = v[i] + w[i];
+        double minus = v[i] - w[i];
+        plusSq += plus * plus;
+        minusSq += minus * minus;
+    }
+    return plusSq <= radiusSq || minusSq <= radiusSq;
+}
+
+/**
  * @brief matrix - (integer) vector multiplication.
  * @param[in] dim: dimension of the square matrix and the integer vector.
  * @param[in] m: square matrix.
