@@ -234,6 +234,7 @@ static inline double complex summand_real_harmonic(
  * @param[in] x: shift vector.
  * @param[in] y: wave vector.
  * @param[in] cutoffs: how many summands in each direction are considered.
+ * @param[in] radiusSq: squared truncation radius around the shifted lattice points.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
  * @param[in] diag: true, if the lattice matrix is diagonal.
@@ -249,10 +250,10 @@ static inline double complex summand_real_harmonic(
  */
 static double complex sum_real_harmonic(
     double nu, unsigned int kIndex, unsigned int dim, const double *m,
-    const double *x, const double *y, const int cutoffs[], double zArgBound,
-    bool diag, unsigned int alphaAbs, const unsigned long long *chunk_offset,
-    const unsigned long long *valid_count, const double *coeffs,
-    const unsigned int *exponents, double cOuter) {
+    const double *x, const double *y, const int cutoffs[], double radiusSq,
+    double zArgBound, bool diag, unsigned int alphaAbs,
+    const unsigned long long *chunk_offset, const unsigned long long *valid_count,
+    const double *coeffs, const unsigned int *exponents, double cOuter) {
 
     double lambda = 1.; // parameter that decides the weight of each sum
 
@@ -294,16 +295,19 @@ static double complex sum_real_harmonic(
         for (int i = 0; i < dim; i++) {
             lvReci[i] = -lv[i];
         }
-        // tolerance on the double evaluation of h
-        double tol = tolFactor * mass;
-        double complex summand = summand_real_harmonic(
-            nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
-            valid_count, coeffs, exponents, cOuter, tol);
-        double complex summandReci = summand_real_harmonic(
-            nu, kIndex, dim, lambda, lvReci, x, y, zArgBound, alphaAbs, chunk_offset,
-            valid_count, coeffs, exponents, cOuter, tol);
-        kahan_add_c(&sum, &epsilon, summand + summandReci);
-        mass += abs1(summand) + abs1(summandReci);
+        // skip the pair if both lv - x and -lv - x lie outside the ball
+        if (pair_in_ball(dim, lv, x, radiusSq)) {
+            // tolerance on the double evaluation of h
+            double tol = tolFactor * mass;
+            double complex summand = summand_real_harmonic(
+                nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
+                valid_count, coeffs, exponents, cOuter, tol);
+            double complex summandReci = summand_real_harmonic(
+                nu, kIndex, dim, lambda, lvReci, x, y, zArgBound, alphaAbs,
+                chunk_offset, valid_count, coeffs, exponents, cOuter, tol);
+            kahan_add_c(&sum, &epsilon, summand + summandReci);
+            mass += abs1(summand) + abs1(summandReci);
+        }
         lattice_vector_increment(dim, cutoffs, zv);
     }
 
@@ -374,6 +378,7 @@ static inline double complex summand_real_harmonic_large_exp(
  * @param[in] x: shift vector.
  * @param[in] y: wave vector.
  * @param[in] cutoffs: how many summands in each direction are considered.
+ * @param[in] radiusSq: squared truncation radius around the shifted lattice points.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
  * @param[in] diag: true, if the lattice matrix is diagonal.
@@ -389,10 +394,10 @@ static inline double complex summand_real_harmonic_large_exp(
  */
 static double complex sum_real_harmonic_large_exp(
     double nu, unsigned int kIndex, unsigned int dim, const double *m,
-    const double *x, const double *y, const int cutoffs[], double zArgBound,
-    bool diag, unsigned int alphaAbs, const unsigned long long *chunk_offset,
-    const unsigned long long *valid_count, const double *coeffs,
-    const unsigned int *exponents, double cOuter) {
+    const double *x, const double *y, const int cutoffs[], double radiusSq,
+    double zArgBound, bool diag, unsigned int alphaAbs,
+    const unsigned long long *chunk_offset, const unsigned long long *valid_count,
+    const double *coeffs, const unsigned int *exponents, double cOuter) {
 
     double lambda = 1.; // parameter that decides the weight of each sum
 
@@ -435,16 +440,21 @@ static double complex sum_real_harmonic_large_exp(
         for (int i = 0; i < dim; i++) {
             lvReci[i] = -lv[i];
         }
-        // tolerance on the double evaluation of h
-        double tol = tolFactor * mass;
-        double complex summand = summand_real_harmonic_large_exp(
-            nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
-            valid_count, coeffs, exponents, nearOrigin, cOuter, tol);
-        double complex summandReci = summand_real_harmonic_large_exp(
-            nu, kIndex, dim, lambda, lvReci, x, y, zArgBound, alphaAbs, chunk_offset,
-            valid_count, coeffs, exponents, nearOrigin, cOuter, tol);
-        kahan_add_c(&sum, &epsilon, summand + summandReci);
-        mass += abs1(summand) + abs1(summandReci);
+        // skip the pair if both lv - x and -lv - x lie outside the ball, keep the
+        // origin and its nearest neighbors, they complete the singularity sum
+        if (nearOrigin || pair_in_ball(dim, lv, x, radiusSq)) {
+            // tolerance on the double evaluation of h
+            double tol = tolFactor * mass;
+            double complex summand = summand_real_harmonic_large_exp(
+                nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
+                valid_count, coeffs, exponents, nearOrigin, cOuter, tol);
+            double complex summandReci = summand_real_harmonic_large_exp(
+                nu, kIndex, dim, lambda, lvReci, x, y, zArgBound, alphaAbs,
+                chunk_offset, valid_count, coeffs, exponents, nearOrigin, cOuter,
+                tol);
+            kahan_add_c(&sum, &epsilon, summand + summandReci);
+            mass += abs1(summand) + abs1(summandReci);
+        }
         lattice_vector_increment_norm(dim, cutoffs, zv, &zv_1_norm);
     }
 
@@ -689,6 +699,7 @@ static inline double complex summand_fourier_harmonic(
  * @param[in] x: shift vector.
  * @param[in] y: wave vector.
  * @param[in] cutoffs: how many summands in each direction are considered.
+ * @param[in] radiusSq: squared truncation radius around the shifted lattice points.
  * @param[in] zArgBound: global bound on when to use the asymptotic expansion in
  * the incomplete gamma evaluation.
  * @param[in] diag: true, if the lattice matrix is diagonal.
@@ -705,10 +716,11 @@ static inline double complex summand_fourier_harmonic(
  */
 static double complex sum_fourier_harmonic(
     double nu, unsigned int kIndex, unsigned int dim, const double *m_invt,
-    const double *x, const double *y, const int cutoffs[], double zArgBound,
-    bool diag, unsigned int alphaAbs, const unsigned long long *chunk_offset,
-    const unsigned long long *valid_count, const double *coeffs,
-    const unsigned int *exponents, double cOuter, double mass) {
+    const double *x, const double *y, const int cutoffs[], double radiusSq,
+    double zArgBound, bool diag, unsigned int alphaAbs,
+    const unsigned long long *chunk_offset, const unsigned long long *valid_count,
+    const double *coeffs, const unsigned int *exponents, double cOuter,
+    double mass) {
     double lambda = 1.; // parameter that decides the weight of each sum
 
     int zv[dim];        // counting vector in Z^dim
@@ -734,16 +746,19 @@ static double complex sum_fourier_harmonic(
         for (int i = 0; i < dim; i++) {
             lvReci[i] = -lv[i];
         }
-        // tolerance on the double evaluation of h
-        double tol = tolFactor * mass;
-        double complex summand = summand_fourier_harmonic(
-            nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
-            valid_count, coeffs, exponents, cOuter, tol);
-        double complex summandReci = summand_fourier_harmonic(
-            nu, kIndex, dim, lambda, lvReci, x, y, zArgBound, alphaAbs, chunk_offset,
-            valid_count, coeffs, exponents, cOuter, tol);
-        kahan_add_c(&sum, &epsilon, summand + summandReci);
-        mass += abs1(summand) + abs1(summandReci);
+        // skip the pair if both lv + y and -lv + y lie outside the ball
+        if (pair_in_ball(dim, lv, y, radiusSq)) {
+            // tolerance on the double evaluation of h
+            double tol = tolFactor * mass;
+            double complex summand = summand_fourier_harmonic(
+                nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
+                valid_count, coeffs, exponents, cOuter, tol);
+            double complex summandReci = summand_fourier_harmonic(
+                nu, kIndex, dim, lambda, lvReci, x, y, zArgBound, alphaAbs,
+                chunk_offset, valid_count, coeffs, exponents, cOuter, tol);
+            kahan_add_c(&sum, &epsilon, summand + summandReci);
+            mass += abs1(summand) + abs1(summandReci);
+        }
         lattice_vector_increment(dim, cutoffs, zv);
     }
 
@@ -915,9 +930,9 @@ static double complex summation_harmonic_reg(
             }
 
             s2 = sum_fourier_harmonic(nuReci, k, dim, m_fourier, x_t1, y_t2,
-                                      cutoffsFourier, zArgBoundReci, diag, alphaAbs,
-                                      chunk_offset, valid_count, coeffs, exponents,
-                                      cOuter, abs1(nc));
+                                      cutoffsFourier, radius * radius, zArgBoundReci,
+                                      diag, alphaAbs, chunk_offset, valid_count,
+                                      coeffs, exponents, cOuter, abs1(nc));
 
             // correct wrong zero summand in regularized fourier sum.
             if (!equals(dim, y_t1, y_t2)) {
@@ -935,15 +950,16 @@ static double complex summation_harmonic_reg(
                  (rot * s2 + nc);
 
             if (largeExp) {
-                s1 = sum_real_harmonic_large_exp(nuIt, k, dim, m_real, x_t2, y_t2,
-                                                 cutoffsReal, zArgBoundIt, diag,
-                                                 alphaAbs, chunk_offset, valid_count,
-                                                 coeffs, exponents, cOuter) *
+                s1 = sum_real_harmonic_large_exp(
+                         nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal,
+                         radius * radius, zArgBoundIt, diag, alphaAbs, chunk_offset,
+                         valid_count, coeffs, exponents, cOuter) *
                      rot * xfactor;
             } else {
                 s1 = sum_real_harmonic(nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal,
-                                       zArgBoundIt, diag, alphaAbs, chunk_offset,
-                                       valid_count, coeffs, exponents, cOuter) *
+                                       radius * radius, zArgBoundIt, diag, alphaAbs,
+                                       chunk_offset, valid_count, coeffs, exponents,
+                                       cOuter) *
                      rot * xfactor;
             }
 
@@ -1073,22 +1089,23 @@ static double complex summation_harmonic(
             }
 
             s2 = sum_fourier_harmonic(nuReci, k, dim, m_fourier, x_t1, y_t2,
-                                      cutoffsFourier, zArgBoundReci, diag, alphaAbs,
-                                      chunk_offset, valid_count, coeffs, exponents,
-                                      cOuter, abs1(nc));
+                                      cutoffsFourier, radius * radius, zArgBoundReci,
+                                      diag, alphaAbs, chunk_offset, valid_count,
+                                      coeffs, exponents, cOuter, abs1(nc));
             s2 = negative_one_pow(k) * inverse_imaginary_int_pow(alphaAbs) *
                  (s2 + nc);
 
             if (largeExp) {
-                s1 = sum_real_harmonic_large_exp(nuIt, k, dim, m_real, x_t2, y_t2,
-                                                 cutoffsReal, zArgBoundIt, diag,
-                                                 alphaAbs, chunk_offset, valid_count,
-                                                 coeffs, exponents, cOuter) *
+                s1 = sum_real_harmonic_large_exp(
+                         nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal,
+                         radius * radius, zArgBoundIt, diag, alphaAbs, chunk_offset,
+                         valid_count, coeffs, exponents, cOuter) *
                      xfactor;
             } else {
                 s1 = sum_real_harmonic(nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal,
-                                       zArgBoundIt, diag, alphaAbs, chunk_offset,
-                                       valid_count, coeffs, exponents, cOuter) *
+                                       radius * radius, zArgBoundIt, diag, alphaAbs,
+                                       chunk_offset, valid_count, coeffs, exponents,
+                                       cOuter) *
                      xfactor;
             }
 
