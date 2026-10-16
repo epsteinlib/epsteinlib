@@ -73,20 +73,37 @@ void harmonic_h_inner_term_multi_hpdyad(unsigned int dim, const unsigned int *al
                                         const unsigned int *theta1,
                                         const unsigned int *theta2, hpdyad_t *out);
 
-/** @brief Computes the inner sum h_inner(α,γ,k) using exact hpdyad arithmetic.
+/** @brief Computes the scalar coefficients (-2)**(-i) · c_{n,i,k} · binom(i+k,k)
+ * of the inner sum for i = 0, ..., ⌊alphaAbs/2⌋ - k as hpdyad.
+ * @param[in] k: specifies degree |alpha| - 2k.
+ * @param[in] dim: dimension.
+ * @param[in] alphaAbs: total of alpha.
+ * @param[out] scalar_coeffs: array of length ⌊alphaAbs/2⌋ - k + 1.
+ */
+void harmonic_h_inner_scalar_coeffs(unsigned int k, unsigned int dim,
+                                    unsigned int alphaAbs, hpdyad_t *scalar_coeffs);
+
+/** @brief Computes the inner sum h_inner(α,γ,k) using exact hpdyad arithmetic,
+ * h_inner(α,γ,k) = ∑_{i=0}^{⌊|α|/2⌋−k} (−1/2)^i c_{|α|,i,k} binom(i+k,k)
+ * ∑_{β ∈ ℕᵈ, |β| = i} i!/∏ⱼβⱼ! ∏ⱼ binom(αⱼ, αⱼ+βⱼ−γⱼ) (γⱼ−βⱼ)!/(2γⱼ−αⱼ−2βⱼ)!,
+ * with c_{n,i,k} from coeffs_c_inner and β restricted to max(0, γ−α) ≤ β ≤ γ−⌈α/2⌉,
+ * where all factors are defined. Then h₍α,k₎(z) = c_{|α|,k} ∑_γ h_inner(α,γ,k)
+ * z^{2γ−α} over |γ| = |α|−k, 2γ ≥ α, with c_{|α|,k} from coeffs_c_outer.
  * @pre k ≤ ⌊alphaAbs/2⌋
  * @param[in] k: specifies degree |alpha| - 2k.
  * @param[in] dim: dimension of alpha, beta and gamma.
  * @param[in] alpha: upper multi-index.
  * @param[in] gamma: fixed multi-index gamma.
  * @param[in] alphaAbs: total of alpha.
+ * @param[in] scalar_coeffs: see harmonic_h_inner_scalar_coeffs.
  * @param[out] residual: if non-NULL, receives h_inner(α,γ,k) minus the returned
  * double, rounded to double.
  * @return h_inner(α,γ,k).
  */
 double harmonic_h_inner_sum(unsigned int k, unsigned int dim,
                             const unsigned int *alpha, const unsigned int *gamma,
-                            unsigned int alphaAbs, double *residual);
+                            unsigned int alphaAbs, const hpdyad_t *scalar_coeffs,
+                            double *residual);
 
 /** @brief Computes chunk offsets and valid entry counts for precomputed
  * inner harmonic sums corresponding to k = 0, ..., floor(|alpha|/2).
@@ -138,12 +155,13 @@ void precompute_harmonic_h_inner_sum(unsigned int alphaAbs, unsigned int dim,
  * @param[in] valid_count: number of valid entries for each k.
  * @param[in] coeffs: precomputed inner harmonic sums as (hi, lo) pairs.
  * @param[in] exponents: precomputed exponents (2γ-α).
+ * @param[in] cOuter: c_{|α|,k}, see coeffs_c_outer.
  * @param[in] tol: absolute tolerance on ∑|terms|.
  * @return h₍α,k₎(z).
  */
 double harmonic_h(unsigned int k, unsigned int dim, const double *z,
                   unsigned int alphaAbs, const unsigned long long *chunk_offset,
                   const unsigned long long *valid_count, const double *coeffs,
-                  const unsigned int *exponents, double tol);
+                  const unsigned int *exponents, double cOuter, double tol);
 
 #endif
