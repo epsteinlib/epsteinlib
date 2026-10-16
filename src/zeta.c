@@ -86,6 +86,37 @@ static inline void lattice_vector_increment_norm(unsigned int dim,
 }
 
 /**
+ * @brief Computes the cuboid cutoffs for a truncation radius in real and Fourier
+ * space.
+ * @param[in] dim: dimension of the lattice.
+ * @param[in] diag: true, if the lattice matrix is diagonal.
+ * @param[in] m_real: matrix that transforms the lattice (real sum).
+ * @param[in] m_fourier: matrix that transforms the lattice (Fourier sum).
+ * @param[in] radius: truncation radius.
+ * @param[out] cutoffsReal: how many summands in each direction (real sum).
+ * @param[out] cutoffsFourier: how many summands in each direction (Fourier sum).
+ */
+static void lattice_cutoffs(unsigned int dim, bool diag, const double *m_real,
+                            const double *m_fourier, double radius, int *cutoffsReal,
+                            int *cutoffsFourier) {
+    if (diag) {
+        // Chose absolute diag. entries for cutoff
+        for (int k = 0; k < dim; k++) {
+            cutoffsReal[k] = floor(radius / fabs(m_real[(dim * k) + k]));
+            cutoffsFourier[k] = floor(radius * fabs(m_real[(dim * k) + k]));
+        }
+    } else {
+        // choose cutoff depending on smallest and biggest abs eigenvalue
+        double ev_abs_max = inf_norm(dim, m_real);
+        double ev_abs_min_r = inf_norm(dim, m_fourier);
+        for (int k = 0; k < dim; k++) {
+            cutoffsReal[k] = floor(radius * ev_abs_min_r);
+            cutoffsFourier[k] = floor(radius * ev_abs_max);
+        }
+    }
+}
+
+/**
  * @brief Computes one summand of the first sum in Crandall's formula.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
@@ -796,20 +827,20 @@ static int harmonic_coeffs_alloc(unsigned int alphaAbs, unsigned int kMax,
  * @param[in] x_t2: projection of shift vector to the elementary lattice cell.
  * @param[in] y_t1: rescaled wave vector.
  * @param[in] y_t2: projection of wave vector to reciprocal elementary lattice cell.
- * @param[in] cutoffsReal: how many summands in each direction (real sum).
- * @param[in] cutoffsFourier: how many summands in each direction (Fourier sum).
+ * @param[in] radius0: truncation radius before widening.
  * @param[in] diag: true, if the lattice matrix is diagonal.
  * the incomplete gamma evaluation.
  * @param[in] xfactor: precomputed prefactor for the real sum.
  * @return regularized anisotropic Epstein zeta function value without correction
  * terms.
  */
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 static double complex summation_harmonic_reg(
     double nu, unsigned int dim, unsigned int alphaAbs, bool allEvenAlpha,
     const unsigned int *alpha, double lambda, double ms, const double *m_real,
     const double *m_fourier, const double *x_t1, const double *x_t2,
-    const double *y_t1, const double *y_t2, const int cutoffsReal[],
-    const int cutoffsFourier[], bool diag, double complex xfactor) {
+    const double *y_t1, const double *y_t2, double radius0, bool diag,
+    double complex xfactor) {
 
     // Precompute coefficients for harmonic polynomials once
     unsigned int kMax = alphaAbs / 2;
@@ -834,6 +865,16 @@ static double complex summation_harmonic_reg(
         double nuIt = nu - (2 * k);
         double zArgBoundIt = assignzArgBoundHarmonic(nuIt, dim, alphaAbs, k);
         double cOuter = coeffs_c_outer(alphaAbs, k, dim);
+
+        // above ALPHA_ABS_HIGH_ORDER widened by the degree |alpha| - 2k
+        double radius = radius0;
+        if (alphaAbs > ALPHA_ABS_HIGH_ORDER) {
+            radius = inflate_radius(radius0, dim, alphaAbs - (2. * k));
+        }
+        int cutoffsReal[dim];
+        int cutoffsFourier[dim];
+        lattice_cutoffs(dim, diag, m_real, m_fourier, radius, cutoffsReal,
+                        cutoffsFourier);
 
         // skip iterartions where nuIt is a negative even integer, as
         // 1/gamma(nIt) = 0
@@ -948,8 +989,7 @@ static double complex summation_harmonic_reg(
  * @param[in] x_t2: projection of shift vector to the elementary lattice cell.
  * @param[in] y_t1: rescaled wave vector.
  * @param[in] y_t2: projection of wave vector to reciprocal elementary lattice cell.
- * @param[in] cutoffsReal: how many summands in each direction (real sum).
- * @param[in] cutoffsFourier: how many summands in each direction (Fourier sum).
+ * @param[in] radius0: truncation radius before widening.
  * @param[in] diag: true, if the lattice matrix is diagonal.
  * the incomplete gamma evaluation.
  * @param[in] xfactor: precomputed prefactor for the real sum.
@@ -959,8 +999,7 @@ static double complex summation_harmonic(
     double nu, unsigned int dim, unsigned int alphaAbs, bool allEvenAlpha,
     const unsigned int *alpha, double lambda, double ms, const double *m_real,
     const double *m_fourier, const double *x_t1, const double *x_t2,
-    const double *y_t2, const int cutoffsReal[], const int cutoffsFourier[],
-    bool diag, double complex xfactor) {
+    const double *y_t2, double radius0, bool diag, double complex xfactor) {
 
     unsigned int kMax = alphaAbs / 2;
     unsigned long long *chunk_offset;
@@ -983,6 +1022,16 @@ static double complex summation_harmonic(
         double nuIt = nu - (2 * k);
         double zArgBoundIt = assignzArgBoundHarmonic(nuIt, dim, alphaAbs, k);
         double cOuter = coeffs_c_outer(alphaAbs, k, dim);
+
+        // above ALPHA_ABS_HIGH_ORDER widened by the degree |alpha| - 2k
+        double radius = radius0;
+        if (alphaAbs > ALPHA_ABS_HIGH_ORDER) {
+            radius = inflate_radius(radius0, dim, alphaAbs - (2. * k));
+        }
+        int cutoffsReal[dim];
+        int cutoffsFourier[dim];
+        lattice_cutoffs(dim, diag, m_real, m_fourier, radius, cutoffsReal,
+                        cutoffsFourier);
 
         // skip iterartions where nuIt is a negative even integer, as
         // 1/gamma(nIt) = 0
@@ -1242,30 +1291,13 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
         x_t2[i] *= ms;
         y_t2[i] /= ms;
     }
-    // set cutoffs
+    // set cutoffs, the harmonic method widens them per k
     unsigned int alphaAbs = aniso ? mult_abs(dim, alpha) : 0;
     int cutoffsReal[dim];
     int cutoffsFourier[dim];
     double cutoff_id = G_BOUND + 0.5;
-    // above ALPHA_ABS_HIGH_ORDER widened by the degree of the harmonic polynomial
-    if (alphaAbs > ALPHA_ABS_HIGH_ORDER) {
-        cutoff_id = inflate_radius(cutoff_id, dim, alphaAbs);
-    }
-    if (diag) {
-        // Chose absolute diag. entries for cutoff
-        for (int k = 0; k < dim; k++) {
-            cutoffsReal[k] = floor(cutoff_id / fabs(m_real[(dim * k) + k]));
-            cutoffsFourier[k] = floor(cutoff_id * fabs(m_real[(dim * k) + k]));
-        }
-    } else {
-        // choose cutoff depending on smallest and biggest abs eigenvalue
-        double ev_abs_max = inf_norm(dim, m_real);
-        double ev_abs_min_r = inf_norm(dim, m_fourier);
-        for (int k = 0; k < dim; k++) {
-            cutoffsReal[k] = floor(cutoff_id * ev_abs_min_r);
-            cutoffsFourier[k] = floor(cutoff_id * ev_abs_max);
-        }
-    }
+    lattice_cutoffs(dim, diag, m_real, m_fourier, cutoff_id, cutoffsReal,
+                    cutoffsFourier);
     double complex res = NAN;
     double x_t2_squared = dot(dim, x_t2, x_t2);
     double y_t2_squared = dot(dim, y_t2, y_t2);
@@ -1339,18 +1371,16 @@ double complex epsteinZetaInternal(double nu, unsigned int dim, const double *m,
             } else {
                 res = summation_harmonic(nu, dim, alphaAbs, allEvenAlpha, alpha,
                                          lambda, ms, m_real, m_fourier, x_t1, x_t2,
-                                         y_t2, cutoffsReal, cutoffsFourier, diag,
-                                         xfactor);
+                                         y_t2, cutoff_id, diag, xfactor);
             }
         } else if (reg && aniso) {
             if (aniso_symmetry_zero(dim, alpha, alphaAbs, allEvenAlpha, m_real,
                                     m_fourier, x_t2, y_t1, true)) {
                 res = 0.;
             } else {
-                res = summation_harmonic_reg(nu, dim, alphaAbs, allEvenAlpha, alpha,
-                                             lambda, ms, m_real, m_fourier, x_t1,
-                                             x_t2, y_t1, y_t2, cutoffsReal,
-                                             cutoffsFourier, diag, xfactor);
+                res = summation_harmonic_reg(
+                    nu, dim, alphaAbs, allEvenAlpha, alpha, lambda, ms, m_real,
+                    m_fourier, x_t1, x_t2, y_t1, y_t2, cutoff_id, diag, xfactor);
             }
         }
         // In the harmonic method, the res is already set as there is no global
