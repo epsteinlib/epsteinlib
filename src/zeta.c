@@ -117,6 +117,40 @@ static void lattice_cutoffs(unsigned int dim, bool diag, const double *m_real,
 }
 
 /**
+ * @brief Computes the cuboid cutoffs of the harmonic method: for a non-diagonal
+ * lattice the smallest cuboid containing the ball of the given radius around any
+ * shift in the elementary cell, |n_k| <= radius |row_k(A^-1)| + 1/2 (real) and
+ * |n_k| <= radius |col_k(A)| + 1/2 (Fourier), else as lattice_cutoffs.
+ * @param[in] dim: dimension of the lattice.
+ * @param[in] diag: true, if the lattice matrix is diagonal.
+ * @param[in] m_real: matrix that transforms the lattice (real sum).
+ * @param[in] m_fourier: matrix that transforms the lattice (Fourier sum).
+ * @param[in] radius: truncation radius.
+ * @param[out] cutoffsReal: how many summands in each direction (real sum).
+ * @param[out] cutoffsFourier: how many summands in each direction (Fourier sum).
+ */
+static void harmonic_cutoffs(unsigned int dim, bool diag, const double *m_real,
+                             const double *m_fourier, double radius,
+                             int *cutoffsReal, int *cutoffsFourier) {
+    if (diag) {
+        lattice_cutoffs(dim, diag, m_real, m_fourier, radius, cutoffsReal,
+                        cutoffsFourier);
+        return;
+    }
+    // row_k(A^-1) is column k of m_fourier = A^-T
+    for (unsigned int k = 0; k < dim; k++) {
+        double normReal = 0.;
+        double normFourier = 0.;
+        for (unsigned int i = 0; i < dim; i++) {
+            normReal += m_fourier[(dim * i) + k] * m_fourier[(dim * i) + k];
+            normFourier += m_real[(dim * i) + k] * m_real[(dim * i) + k];
+        }
+        cutoffsReal[k] = floor((radius * sqrt(normReal)) + 0.5);
+        cutoffsFourier[k] = floor((radius * sqrt(normFourier)) + 0.5);
+    }
+}
+
+/**
  * @brief Computes one summand of the first sum in Crandall's formula.
  * @param[in] nu: exponent for the Epstein zeta function.
  * @param[in] dim: dimension of the input vectors.
@@ -888,8 +922,8 @@ static double complex summation_harmonic_reg(
         }
         int cutoffsReal[dim];
         int cutoffsFourier[dim];
-        lattice_cutoffs(dim, diag, m_real, m_fourier, radius, cutoffsReal,
-                        cutoffsFourier);
+        harmonic_cutoffs(dim, diag, m_real, m_fourier, radius, cutoffsReal,
+                         cutoffsFourier);
 
         // skip iterartions where nuIt is a negative even integer, as
         // 1/gamma(nIt) = 0
@@ -1046,8 +1080,8 @@ static double complex summation_harmonic(
         }
         int cutoffsReal[dim];
         int cutoffsFourier[dim];
-        lattice_cutoffs(dim, diag, m_real, m_fourier, radius, cutoffsReal,
-                        cutoffsFourier);
+        harmonic_cutoffs(dim, diag, m_real, m_fourier, radius, cutoffsReal,
+                         cutoffsFourier);
 
         // skip iterartions where nuIt is a negative even integer, as
         // 1/gamma(nIt) = 0
