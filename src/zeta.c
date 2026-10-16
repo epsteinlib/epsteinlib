@@ -166,6 +166,7 @@ static double complex sum_real(double nu, unsigned int dim, double lambda,
  * @param[in] valid_count: number of valid gamma entries for each k.
  * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
  * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
+ * @param[in] cOuter: c_{|α|,kIndex}, see coeffs_c_outer.
  * @param[in] tol: absolute tolerance on ∑|terms| times the Crandall factor.
  * @return h₍α,kIndex₎(y) * G_{nu}(z - x) * exp(-2 * PI * I * (z * y), the real space
  * summand of the harmonic method.
@@ -174,7 +175,7 @@ static inline double complex summand_real_harmonic(
     double nu, unsigned int kIndex, unsigned int dim, double lambda, double lv[],
     const double *x, const double *y, double zArgBound, unsigned int alphaAbs,
     const unsigned long long *chunk_offset, const unsigned long long *valid_count,
-    const double *coeffs, const unsigned int *exponents, double tol) {
+    const double *coeffs, const unsigned int *exponents, double cOuter, double tol) {
 
     double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
     for (int i = 0; i < dim; i++) {
@@ -186,7 +187,7 @@ static inline double complex summand_real_harmonic(
         return 0.;
     }
     double h = harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
-                          coeffs, exponents, tol / crandallAbs);
+                          coeffs, exponents, cOuter, tol / crandallAbs);
 
     return rot * h * crandall;
 }
@@ -210,6 +211,7 @@ static inline double complex summand_real_harmonic(
  * @param[in] valid_count: number of valid gamma entries for each k.
  * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
  * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
+ * @param[in] cOuter: c_{|α|,kIndex}, see coeffs_c_outer.
  * @return helper function for the first sum in crandalls formula. Calculates
  * sum_{z in m whole_numbers ** dim} h₍α,kIndex₎(y) * G_{nu}(z - x) *
  * exp(-2 * PI * I * (z * y)
@@ -219,7 +221,7 @@ static double complex sum_real_harmonic(
     const double *x, const double *y, const int cutoffs[], double zArgBound,
     bool diag, unsigned int alphaAbs, const unsigned long long *chunk_offset,
     const unsigned long long *valid_count, const double *coeffs,
-    const unsigned int *exponents) {
+    const unsigned int *exponents, double cOuter) {
 
     double lambda = 1.; // parameter that decides the weight of each sum
 
@@ -249,9 +251,9 @@ static double complex sum_real_harmonic(
     for (int i = 0; i < dim; i++) {
         lv[i] = 0;
     }
-    double complex summand =
-        summand_real_harmonic(nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs,
-                              chunk_offset, valid_count, coeffs, exponents, 0.);
+    double complex summand = summand_real_harmonic(
+        nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
+        valid_count, coeffs, exponents, cOuter, 0.);
     kahan_add_c(&sum, &epsilon, summand);
     mass += abs1(summand);
 
@@ -265,10 +267,10 @@ static double complex sum_real_harmonic(
         double tol = tolFactor * mass;
         double complex summand = summand_real_harmonic(
             nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
-            valid_count, coeffs, exponents, tol);
+            valid_count, coeffs, exponents, cOuter, tol);
         double complex summandReci = summand_real_harmonic(
             nu, kIndex, dim, lambda, lvReci, x, y, zArgBound, alphaAbs, chunk_offset,
-            valid_count, coeffs, exponents, tol);
+            valid_count, coeffs, exponents, cOuter, tol);
         kahan_add_c(&sum, &epsilon, summand + summandReci);
         mass += abs1(summand) + abs1(summandReci);
         lattice_vector_increment(dim, cutoffs, zv);
@@ -295,6 +297,7 @@ static double complex sum_real_harmonic(
  * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
  * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
  * @param[in] nearOrigin: true if zv is zero or a nearest neighbor.
+ * @param[in] cOuter: c_{|α|,kIndex}, see coeffs_c_outer.
  * @param[in] tol: absolute tolerance on ∑|terms| times the Crandall factor.
  * @return I ** (|α| - 2k) h₍α,kIndex₎(y) * G_{nu}(z - x) * exp(-2 * PI * I * (z *
  * y).
@@ -304,7 +307,7 @@ static inline double complex summand_real_harmonic_large_exp(
     const double *x, const double *y, double zArgBound, unsigned int alphaAbs,
     const unsigned long long *chunk_offset, const unsigned long long *valid_count,
     const double *coeffs, const unsigned int *exponents, bool nearOrigin,
-    double tol) {
+    double cOuter, double tol) {
 
     double complex rot = cexp(-2 * M_PI * I * dot(dim, lv, y));
     for (int i = 0; i < dim; i++) {
@@ -323,7 +326,7 @@ static inline double complex summand_real_harmonic_large_exp(
         return 0.;
     }
     double h = harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
-                          coeffs, exponents, tol / crandallAbs);
+                          coeffs, exponents, cOuter, tol / crandallAbs);
 
     return rot * h * crandall;
 }
@@ -348,6 +351,7 @@ static inline double complex summand_real_harmonic_large_exp(
  * @param[in] valid_count: number of valid gamma entries for each k.
  * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
  * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
+ * @param[in] cOuter: c_{|α|,kIndex}, see coeffs_c_outer.
  * @return helper function for the first sum in crandalls formula. Calculates
  * sum_{z in m whole_numbers ** dim} I ** (|α| - 2k) h₍α,kIndex₎(y) * G_{nu}(z - x) *
  * exp(-2 * PI * I * (z * y)
@@ -357,7 +361,7 @@ static double complex sum_real_harmonic_large_exp(
     const double *x, const double *y, const int cutoffs[], double zArgBound,
     bool diag, unsigned int alphaAbs, const unsigned long long *chunk_offset,
     const unsigned long long *valid_count, const double *coeffs,
-    const unsigned int *exponents) {
+    const unsigned int *exponents, double cOuter) {
 
     double lambda = 1.; // parameter that decides the weight of each sum
 
@@ -390,7 +394,7 @@ static double complex sum_real_harmonic_large_exp(
     bool nearOrigin = true;
     double complex summand = summand_real_harmonic_large_exp(
         nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
-        valid_count, coeffs, exponents, nearOrigin, 0.);
+        valid_count, coeffs, exponents, nearOrigin, cOuter, 0.);
     kahan_add_c(&sum, &epsilon, summand);
     mass += abs1(summand);
 
@@ -404,10 +408,10 @@ static double complex sum_real_harmonic_large_exp(
         double tol = tolFactor * mass;
         double complex summand = summand_real_harmonic_large_exp(
             nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
-            valid_count, coeffs, exponents, nearOrigin, tol);
+            valid_count, coeffs, exponents, nearOrigin, cOuter, tol);
         double complex summandReci = summand_real_harmonic_large_exp(
             nu, kIndex, dim, lambda, lvReci, x, y, zArgBound, alphaAbs, chunk_offset,
-            valid_count, coeffs, exponents, nearOrigin, tol);
+            valid_count, coeffs, exponents, nearOrigin, cOuter, tol);
         kahan_add_c(&sum, &epsilon, summand + summandReci);
         mass += abs1(summand) + abs1(summandReci);
         lattice_vector_increment_norm(dim, cutoffs, zv, &zv_1_norm);
@@ -459,8 +463,9 @@ static inline double complex summand_real_harmonic_large_exp_singularity_sum(
             continue;
         }
 
-        double h = harmonic_h(k, dim, lv, alphaAbs, chunk_offset, valid_count,
-                              coeffs, exponents, 0.);
+        double h =
+            harmonic_h(k, dim, lv, alphaAbs, chunk_offset, valid_count, coeffs,
+                       exponents, coeffs_c_outer(alphaAbs, k, dim), 0.);
 
         if (h && lvSquared > EPS_ZERO_Y) {
             double summand = h * real_int_pow(lvSquared, k);
@@ -619,6 +624,7 @@ static double complex sum_fourier(double nu, unsigned int dim, double lambda,
  * @param[in] valid_count: number of valid gamma entries for each k.
  * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
  * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
+ * @param[in] cOuter: c_{|α|,kIndex}, see coeffs_c_outer.
  * @param[in] tol: absolute tolerance on ∑|terms| times the Crandall factor.
  * @return h₍α,kIndex₎(y + k) G_{dim - nu + 2 * |α| - 4 * kIndex}(k + y) *
  * exp(-2 * PI * I * x * (k + y))
@@ -627,7 +633,7 @@ static inline double complex summand_fourier_harmonic(
     double nu, unsigned int kIndex, unsigned int dim, double lambda, double lv[],
     const double *x, const double *y, double zArgBound, unsigned int alphaAbs,
     const unsigned long long *chunk_offset, const unsigned long long *valid_count,
-    const double *coeffs, const unsigned int *exponents, double tol) {
+    const double *coeffs, const unsigned int *exponents, double cOuter, double tol) {
     for (int i = 0; i < dim; i++) {
         lv[i] += y[i];
     }
@@ -638,7 +644,7 @@ static inline double complex summand_fourier_harmonic(
         return 0.;
     }
     double h = harmonic_h(kIndex, dim, lv, alphaAbs, chunk_offset, valid_count,
-                          coeffs, exponents, tol / crandallAbs);
+                          coeffs, exponents, cOuter, tol / crandallAbs);
     return rot * h * crandall;
 }
 
@@ -660,6 +666,7 @@ static inline double complex summand_fourier_harmonic(
  * @param[in] valid_count: number of valid gamma entries for each k.
  * @param[in] coeffs: precomputed inner harmonic sums h_inner(α,γ,k).
  * @param[in] exponents: precomputed exponents (2γ-α), stride dim per entry.
+ * @param[in] cOuter: c_{|α|,kIndex}, see coeffs_c_outer.
  * @param[in] mass: modulus of the zero summand.
  * @return helper function for the second sum in crandalls formula. Calculates
  * sum_{k in m_invt whole_numbers ** dim without zero} h₍α,kIndex₎(y + k) *
@@ -670,7 +677,7 @@ static double complex sum_fourier_harmonic(
     const double *x, const double *y, const int cutoffs[], double zArgBound,
     bool diag, unsigned int alphaAbs, const unsigned long long *chunk_offset,
     const unsigned long long *valid_count, const double *coeffs,
-    const unsigned int *exponents, double mass) {
+    const unsigned int *exponents, double cOuter, double mass) {
     double lambda = 1.; // parameter that decides the weight of each sum
 
     int zv[dim];        // counting vector in Z^dim
@@ -700,10 +707,10 @@ static double complex sum_fourier_harmonic(
         double tol = tolFactor * mass;
         double complex summand = summand_fourier_harmonic(
             nu, kIndex, dim, lambda, lv, x, y, zArgBound, alphaAbs, chunk_offset,
-            valid_count, coeffs, exponents, tol);
+            valid_count, coeffs, exponents, cOuter, tol);
         double complex summandReci = summand_fourier_harmonic(
             nu, kIndex, dim, lambda, lvReci, x, y, zArgBound, alphaAbs, chunk_offset,
-            valid_count, coeffs, exponents, tol);
+            valid_count, coeffs, exponents, cOuter, tol);
         kahan_add_c(&sum, &epsilon, summand + summandReci);
         mass += abs1(summand) + abs1(summandReci);
         lattice_vector_increment(dim, cutoffs, zv);
@@ -826,6 +833,7 @@ static double complex summation_harmonic_reg(
 
         double nuIt = nu - (2 * k);
         double zArgBoundIt = assignzArgBoundHarmonic(nuIt, dim, alphaAbs, k);
+        double cOuter = coeffs_c_outer(alphaAbs, k, dim);
 
         // skip iterartions where nuIt is a negative even integer, as
         // 1/gamma(nIt) = 0
@@ -842,7 +850,7 @@ static double complex summation_harmonic_reg(
             if (dot(dim, x_t2, x_t2) < EPS_ZERO_Y && allEvenAlpha &&
                 2 * k == alphaAbs) {
                 resIt = -harmonic_h(k, dim, x_t2, alphaAbs, chunk_offset,
-                                    valid_count, coeffs, exponents, 0.);
+                                    valid_count, coeffs, exponents, cOuter, 0.);
             }
         } else {
 
@@ -856,7 +864,7 @@ static double complex summation_harmonic_reg(
 
             // skip zero summand if harmonic polynomial vanishes
             double h = harmonic_h(k, dim, y_t1, alphaAbs, chunk_offset, valid_count,
-                                  coeffs, exponents, 0.);
+                                  coeffs, exponents, cOuter, 0.);
 
             // guards 0 * inf where correct value is h(y) g(y) -> 0 for y -> 0
             // note that h(0) = 0 exactly without cancellation
@@ -868,16 +876,16 @@ static double complex summation_harmonic_reg(
             s2 = sum_fourier_harmonic(nuReci, k, dim, m_fourier, x_t1, y_t2,
                                       cutoffsFourier, zArgBoundReci, diag, alphaAbs,
                                       chunk_offset, valid_count, coeffs, exponents,
-                                      abs1(nc));
+                                      cOuter, abs1(nc));
 
             // correct wrong zero summand in regularized fourier sum.
             if (!equals(dim, y_t1, y_t2)) {
                 s2 += harmonic_h(k, dim, y_t2, alphaAbs, chunk_offset, valid_count,
-                                 coeffs, exponents, 0.) *
+                                 coeffs, exponents, cOuter, 0.) *
                       crandall_g(dim, dim - nuReci, y_t2, lambda, zArgBoundReci) *
                       cexp(-2 * M_PI * I * dot(dim, x_t1, y_t2));
                 s2 -= harmonic_h(k, dim, y_t1, alphaAbs, chunk_offset, valid_count,
-                                 coeffs, exponents, 0.) *
+                                 coeffs, exponents, cOuter, 0.) *
                       crandall_g(dim, dim - nuReci, y_t1, lambda, zArgBoundReci) *
                       cexp(-2 * M_PI * I * dot(dim, x_t1, y_t1));
             }
@@ -889,12 +897,12 @@ static double complex summation_harmonic_reg(
                 s1 = sum_real_harmonic_large_exp(nuIt, k, dim, m_real, x_t2, y_t2,
                                                  cutoffsReal, zArgBoundIt, diag,
                                                  alphaAbs, chunk_offset, valid_count,
-                                                 coeffs, exponents) *
+                                                 coeffs, exponents, cOuter) *
                      rot * xfactor;
             } else {
                 s1 = sum_real_harmonic(nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal,
                                        zArgBoundIt, diag, alphaAbs, chunk_offset,
-                                       valid_count, coeffs, exponents) *
+                                       valid_count, coeffs, exponents, cOuter) *
                      rot * xfactor;
             }
 
@@ -974,6 +982,7 @@ static double complex summation_harmonic(
 
         double nuIt = nu - (2 * k);
         double zArgBoundIt = assignzArgBoundHarmonic(nuIt, dim, alphaAbs, k);
+        double cOuter = coeffs_c_outer(alphaAbs, k, dim);
 
         // skip iterartions where nuIt is a negative even integer, as
         // 1/gamma(nIt) = 0
@@ -989,7 +998,8 @@ static double complex summation_harmonic(
             if (dot(dim, x_t2, x_t2) < EPS_ZERO_Y && allEvenAlpha &&
                 2 * k == alphaAbs) {
                 resIt = -xfactor * harmonic_h(k, dim, x_t2, alphaAbs, chunk_offset,
-                                              valid_count, coeffs, exponents, 0.);
+                                              valid_count, coeffs, exponents, cOuter,
+                                              0.);
             }
         } else {
 
@@ -1003,7 +1013,7 @@ static double complex summation_harmonic(
 
             // skip zero summand if harmonic polynomial vanishes
             double h = harmonic_h(k, dim, y_t2, alphaAbs, chunk_offset, valid_count,
-                                  coeffs, exponents, 0.);
+                                  coeffs, exponents, cOuter, 0.);
 
             // guards 0 * inf where correct value is h(y) g(y) -> 0 for y -> 0
             // note that h(0) = 0 exactly without cancellation
@@ -1016,7 +1026,7 @@ static double complex summation_harmonic(
             s2 = sum_fourier_harmonic(nuReci, k, dim, m_fourier, x_t1, y_t2,
                                       cutoffsFourier, zArgBoundReci, diag, alphaAbs,
                                       chunk_offset, valid_count, coeffs, exponents,
-                                      abs1(nc));
+                                      cOuter, abs1(nc));
             s2 = negative_one_pow(k) * inverse_imaginary_int_pow(alphaAbs) *
                  (s2 + nc);
 
@@ -1024,12 +1034,12 @@ static double complex summation_harmonic(
                 s1 = sum_real_harmonic_large_exp(nuIt, k, dim, m_real, x_t2, y_t2,
                                                  cutoffsReal, zArgBoundIt, diag,
                                                  alphaAbs, chunk_offset, valid_count,
-                                                 coeffs, exponents) *
+                                                 coeffs, exponents, cOuter) *
                      xfactor;
             } else {
                 s1 = sum_real_harmonic(nuIt, k, dim, m_real, x_t2, y_t2, cutoffsReal,
                                        zArgBoundIt, diag, alphaAbs, chunk_offset,
-                                       valid_count, coeffs, exponents) *
+                                       valid_count, coeffs, exponents, cOuter) *
                      xfactor;
             }
 

@@ -10,6 +10,8 @@
 #ifndef EPSTEIN_HPDYAD
 #define EPSTEIN_HPDYAD
 
+#include <stdbool.h>
+
 /** @brief Maximum number of 32-bit limbs in fixed-size representation (1024 bits
  * total).
  * */
@@ -108,5 +110,47 @@ void hpdyad_add(hpdyad_t *out, const hpdyad_t *a, const hpdyad_t *b);
  * @return closest double representation; ±DBL_MAX on overflow
  */
 double hpdyad_to_double(const hpdyad_t *a);
+
+/** @brief Exact product of non-negative integers as hpdyad: factors are collected
+ * in 64 bits while the product fits and flushed into the hpdyad otherwise. */
+typedef struct {
+    hpdyad_t prod;          // flushed part of the product
+    unsigned long long acc; // pending part of the product
+    bool started;           // true once prod holds a value
+} hpdyad_prod_t;
+
+/** @brief Initializes an exact integer product to the empty product 1.
+ * @param[out] p: product.
+ */
+void hpdyad_prod_init(hpdyad_prod_t *p);
+
+/** @brief Moves the pending 64-bit part of an exact integer product into its hpdyad.
+ * @param[in,out] p: product.
+ */
+void hpdyad_prod_flush(hpdyad_prod_t *p);
+
+/** @brief Returns an exact integer product as normalized hpdyad.
+ * @param[in,out] p: product, flushed.
+ * @param[out] out: the product.
+ */
+void hpdyad_prod_result(hpdyad_prod_t *p, hpdyad_t *out);
+
+/** @brief Multiplies an exact integer product by a factor.
+ * @param[in,out] p: product.
+ * @param[in] f: factor.
+ */
+static inline void hpdyad_prod_mul(hpdyad_prod_t *p, unsigned long long f) {
+    // acc, f < 2^32 keeps acc * f below 2^64
+    if ((f >> 32) != 0) {
+        hpdyad_prod_flush(p);
+        p->acc = f;
+        hpdyad_prod_flush(p);
+        return;
+    }
+    if ((p->acc >> 32) != 0) {
+        hpdyad_prod_flush(p);
+    }
+    p->acc *= f;
+}
 
 #endif
