@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 #include "hpdyad.h"
+#include "stdbool.h"
 #include <float.h>
 #include <math.h>
 
@@ -704,4 +705,37 @@ double hpdyad_to_double(const hpdyad_t *a) {
     }
 
     return (a->sign > 0) ? result : -result;
+}
+
+/** @brief Initializes an exact integer product to the empty product 1.
+ * @param[out] p: product.
+ */
+void hpdyad_prod_init(hpdyad_prod_t *p) {
+    p->acc = 1;
+    p->started = false;
+}
+
+/** @brief Moves the pending 64-bit part of an exact integer product into its hpdyad.
+ * @param[in,out] p: product.
+ */
+void hpdyad_prod_flush(hpdyad_prod_t *p) {
+    if (!p->started) {
+        hpdyad_set_ull(&p->prod, p->acc, 1);
+        p->started = true;
+    } else if (p->acc != 1) {
+        hpdyad_t tmp;
+        hpdyad_set_ull(&tmp, p->acc, 1);
+        hpdyad_mul(&p->prod, &p->prod, &tmp);
+    }
+    p->acc = 1;
+}
+
+/** @brief Returns an exact integer product as normalized hpdyad.
+ * @param[in,out] p: product, flushed.
+ * @param[out] out: the product.
+ */
+void hpdyad_prod_result(hpdyad_prod_t *p, hpdyad_t *out) {
+    hpdyad_prod_flush(p);
+    *out = p->prod;
+    hpdyad_normalize(out);
 }
