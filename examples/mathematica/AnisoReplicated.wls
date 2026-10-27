@@ -37,6 +37,22 @@ ParallelEvaluate[Quiet[<<"EpsteinZeta.wl"]];
 
 
 (* ::Text:: *)
+(*Set 0\:2070 = 1 in every kernel.*)
+
+
+Unprotect[Power];
+Power[0|0.|0*I|0.*I,0|0.|0*I|0.*I]:=1;
+Power[z_,0]/;Abs[z]==0:=1;
+Protect[Power];
+ParallelEvaluate[
+	Unprotect[Power];
+	Power[0|0.|0*I|0.*I,0|0.|0*I|0.*I]:=1;
+	Power[z_,0]/;Abs[z]==0:=1;
+	Protect[Power];
+];
+
+
+(* ::Text:: *)
 (*Install MaTeX for LaTeX figure annotations. If MaTeX is not already installed, un-comment the ResourceFunction line to install it.*)
 
 
@@ -53,22 +69,33 @@ SetOptions[MaTeX,"Preamble"->{"\\usepackage{xcolor}","\\usepackage{bm}"}];
 SetOptions[MaTeX,FontSize->18];
 
 
+(* ::Text:: *)
+(*Darken Blue.*)
+
+
+Unprotect[Blue];
+Blue=RGBColor[0.365248, 0.427802, 0.758297];
+Protect[Blue];
+
+
 (* ::Subsection::Closed:: *)
-(*Auxiliary Functions*)
+(*Auxiliary Functions and Constants*)
 
 
 (* ::Text:: *)
 (*Minimum of absolute and relative error.*)
 
 
-Error[true_,est_]:=Module[{errAbs,errRel}
-	,errAbs=Abs[true-SetPrecision[est,100]]
+Options[Error]={InputPrecision->200,OutputPrecision->MachinePrecision};
+Error[true_,est_,OptionsPattern[]]:=Module[{errAbs,errRel}
+	,errAbs=Abs[true-SetPrecision[est,OptionValue[InputPrecision]]]
 	;errRel=If[PossibleZeroQ[true]
 	,If[PossibleZeroQ[est],0,Infinity]
 	,errAbs/Abs[true]
 	]
-	;Min[errAbs,errRel]
+	;SetPrecision[Min[errAbs,errRel],OptionValue[OutputPrecision]]
 ]
+SetAttributes[Error,Listable]
 
 
 (* ::Text:: *)
@@ -76,6 +103,59 @@ Error[true_,est_]:=Module[{errAbs,errRel}
 
 
 ArgColor[arg_]=Hue[(arg+Pi)/(2 Pi)];
+
+
+(* ::Text:: *)
+(*Hexagonal lattice matrix.*)
+
+
+AHex={{1,1/2},{0,Sqrt@3/2}};
+
+
+(* ::Subsection::Closed:: *)
+(*Compiled Direct Sum Representation*)
+
+
+(* ::Text:: *)
+(*Define the reference function in terms of a compiled direct sum representation.*)
+
+
+Sum2DCompiled=Compile[{
+		{\[Nu],_Real},{a11,_Real},{a12,_Real},{a21,_Real},{a22,_Real},{x1,_Real},{x2,_Real},{y1,_Real},{y2,_Real},{\[Alpha]1,_Integer},{\[Alpha]2,_Integer},{lim,_Integer}
+	},Module[
+		{res=0.+I*0.,c=0.+I*0.,y=0.+I*0.,t=0.+I*0.,term,diff1,diff2,l1,l2}
+		,Do[
+			l1=a11*z1+a12*z2
+			;l2=a21*z1+a22*z2
+			;diff1=l1-x1
+			;diff2=l2-x2
+			;term=Piecewise[{
+				{0.,diff1==0&&diff2==0}
+				,{Piecewise[{{1,\[Alpha]1==0},{(diff1)^\[Alpha]1,True}}]Piecewise[{{1,\[Alpha]2==0},{(diff2)^\[Alpha]2,True}}]Exp[-2*Pi*I(y1*l1+y2*l2)]/(diff1^2+diff2^2)^(\[Nu]/2),True}
+			}]
+			(*Kahan summation step*)
+			;y=term-c ;t=res+y ;c=(t-res)-y ;res=t
+			,{z1,-lim,lim}
+			,{z2,-lim,lim}
+		]
+		;res
+	]
+];
+
+
+(* ::Text:: *)
+(*Access the direct sum.*)
+
+
+Options[EpsteinZetaAnisoDirect]={SumLim->1000};
+EpsteinZetaAnisoDirect[
+	\[Nu]_
+	,a_/;Dimensions[a]=={2,2}
+	,x_/;Length[x]==2
+	,y_/;Length[y]==2
+	,\[Alpha]_/;Element[\[Alpha],NonNegativeIntegers]&&Length[\[Alpha]]==2
+	,OptionsPattern[]
+]:=Sum2DCompiled[N[\[Nu]],N[a[[1,1]]],N[a[[1,2]]],N[a[[2,1]]],N[a[[2,2]]],N[x[[1]]],N[x[[2]]],N[y[[1]]],N[y[[2]]],\[Alpha][[1]],\[Alpha][[2]],OptionValue[SumLim]];
 
 
 (* ::Section:: *)
@@ -354,7 +434,7 @@ plt=ListLogPlot[
 	,PlotTheme->"Scientific"
 	,PlotLabel->MaTeX["Z_{\\mathbb Z^8,\\nu,\\bm 1}(-\\bm 1/2,\\bm 1/2)"]
 	,FrameLabel->{MaTeX["\\nu"],MaTeX["E"]}
-	,PlotStyle->{PointSize[0.015],RGBColor[0.365248, 0.427802, 0.758297]}
+	,PlotStyle->{PointSize[0.015],Blue}
 	,PlotRange->{{-11-1/3,11+1/3},{2 10^(-20),5 10^(-13)}}
 	,GridLines->{Range[-10,10,5],10^Range[-21,-12,2]}
 	,AspectRatio->.5
@@ -374,16 +454,156 @@ plt
 
 
 (* ::Section:: *)
-(*Figure X*)
+(*Figure 3*)
+
+
+(* ::Subsection::Closed:: *)
+(*Prepare*)
+
+
+(* ::Text:: *)
+(*Set test arguments.*)
+
+
+lim0=1000;
+a0={IdentityMatrix[2],IdentityMatrix[2],IdentityMatrix[2],AHex,AHex,AHex};
+x0={{0,0},{0,1/2},{0,1/3},{0,0},{0,1/2},{0,1/3}};
+y0={{0,0},{1/3,1/4},{1/5,1/6},{0,0},{1/3,1/4},{1/5,1/6}};
+\[Alpha]0={{2,0},{1,1},{0,2},{2,0},{1,1},{0,2}};
+
+
+(* ::Text:: *)
+(*Generate test values.*)
+
+
+stepsize = 1/4; (* set to 1/50 to match the resolution of the manuscript *)
+errs=Table[
+	ParallelTable[
+		{\[Nu]
+		,Error[
+			EpsteinZetaAnisoDirect[\[Nu],a0[[i]],x0[[i]],y0[[i]],\[Alpha]0[[i]]]
+			,EpsteinZetaAniso[\[Nu],a0[[i]],x0[[i]],y0[[i]],\[Alpha]0[[i]]]
+		]
+		}
+		,{\[Nu],9-1/10,13+1/10,stepsize}
+	],{i,6}
+]
+
+
+(* ::Subsection::Closed:: *)
+(*Compose*)
+
+
+plt=GraphicsGrid[
+	ArrayReshape[
+		Table[
+			ListLogPlot[
+			{First@#,Last@#}&/@errs[[i]]
+			,PlotTheme->"Scientific"
+			,PlotLabel->MaTeX[{
+				"Z_{\\mathbb{Z}^2,\\nu,(2,0)}(\\bm 0,\\bm 0)"
+				,"Z_{\\mathbb{Z}^2,\\nu,(1,1)}((0,{\\textstyle\\frac{1}{2}}),({\\textstyle\\frac{1}{3}},{\\textstyle\\frac{1}{4}}))"
+				,"Z_{\\mathbb{Z}^2,\\nu,(0,2)}((0,{\\textstyle\\frac{1}{3}}),({\\textstyle\\frac{1}{5}},{\\textstyle\\frac{1}{6}}))"
+				,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(2,0)}(\\bm 0,\\bm 0)"
+				,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(1,1)}((0,{\\textstyle\\frac{1}{2}}),({\\textstyle\\frac{1}{3}},{\\textstyle\\frac{1}{4}}))"
+				,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(0,2)}((0,{\\textstyle\\frac{1}{3}}),({\\textstyle\\frac{1}{5}},{\\textstyle\\frac{1}{6}}))"
+			}[[i]]]
+			,FrameLabel->{MaTeX@"\\nu",MaTeX@"E"}
+			,PlotStyle->{PointSize[0.025],Blue}
+			,ImageSize->240
+			]
+			,{i,6}
+		]
+		,{2,3}
+	]
+	,ImageSize->1000
+]
+
+
+(* ::Subsection:: *)
+(*Display*)
+
+
+(* ::Text:: *)
+(*Error for low-order anisotropic Epstein zeta functions for large \[Nu], where direct summation gives accurate reference values.*)
+
+
+plt
+
+
+(* ::Section:: *)
+(*Figure 4*)
 
 
 (* ::Subsection:: *)
 (*Prepare*)
 
 
-(* ::Subsection:: *)
+(* ::Text:: *)
+(*Set test arguments.*)
+
+
+lim0=1000;
+a0={IdentityMatrix[2],IdentityMatrix[2],IdentityMatrix[2],AHex,AHex,AHex};
+x0={{0,0},{0,1/2},{0,1/3},{0,0},{0,1/2},{0,1/3}};
+y0={{0,0},{1/3,1/4},{1/5,1/6},{0,0},{1/3,1/4},{1/5,1/6}};
+\[Alpha]0={{8,10},{9,10},{10,9},{8,10},{9,10},{10,9}};
+
+
+(* ::Text:: *)
+(*Generate test values.*)
+
+
+stepsize = 1/4; (* set to 1/50 to match the resolution of the manuscript *)
+errs=Table[
+	ParallelTable[
+		{\[Nu]
+		,Error[
+			EpsteinZetaAnisoDirect[\[Nu],a0[[i]],x0[[i]],y0[[i]],\[Alpha]0[[i]]]
+			,EpsteinZetaAniso[\[Nu],a0[[i]],x0[[i]],y0[[i]],\[Alpha]0[[i]]]
+		]
+		}
+		,{\[Nu],25-1/10,29+1/10,stepsize}
+	],{i,6}
+]
+
+
+(* ::Subsection::Closed:: *)
 (*Compose*)
+
+
+plt=GraphicsGrid[
+	ArrayReshape[
+		Table[
+			ListLogPlot[
+			{First@#,Last@#}&/@errs[[i]]
+			,PlotTheme->"Scientific"
+			,PlotLabel->MaTeX[{
+				"Z_{\\mathbb{Z}^2,\\nu,(8,10)}(\\bm 0,\\bm 0)"
+				,"Z_{\\mathbb{Z}^2,\\nu,(9,10)}((0,{\\textstyle\\frac{1}{2}}),({\\textstyle\\frac{1}{3}},{\\textstyle\\frac{1}{4}}))"
+				,"Z_{\\mathbb{Z}^2,\\nu,(10,9)}((0,{\\textstyle\\frac{1}{3}}),({\\textstyle\\frac{1}{5}},{\\textstyle\\frac{1}{6}}))"
+				,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(8,10)}(\\bm 0,\\bm 0)"
+				,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(9,10)}((0,{\\textstyle\\frac{1}{2}}),({\\textstyle\\frac{1}{3}},{\\textstyle\\frac{1}{4}}))"
+				,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(10,9)}((0,{\\textstyle\\frac{1}{3}}),({\\textstyle\\frac{1}{5}},{\\textstyle\\frac{1}{6}}))"
+			}[[i]]]
+			,FrameLabel->{MaTeX@"\\nu",MaTeX@"E"}
+			,PlotStyle->{PointSize[0.025],Blue}
+			,ImageSize->240
+			]
+			,{i,6}
+		]
+		,{2,3}
+	]
+	,ImageSize->1000
+]
 
 
 (* ::Subsection:: *)
 (*Display*)
+
+
+(* ::Text:: *)
+(*Error for high-order anisotropic Epstein zeta functions for large \[Nu], where direct summation gives accurate reference values.*)
+
+
+plt
