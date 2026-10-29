@@ -31,12 +31,9 @@
 (*Load the Mathematica wrapper of the Epstein zeta function, so that it can be used in parallel on all kernels.*)
 
 
-(*SetDirectory[NotebookDirectory[]<>"../../mathematica"];
+SetDirectory[NotebookDirectory[]<>"../../mathematica"];
 ParallelEvaluate[Quiet[<<"EpsteinZeta.wl"]];
-<<"EpsteinZeta.wl";*)
-(* TODO: remove before upload *)
-<<"EpsteinZeta.wl"
-ParallelEvaluate[Quiet[<<"EpsteinZeta.wl"]];
+<<"EpsteinZeta.wl";
 
 
 (* ::Text:: *)
@@ -102,18 +99,10 @@ SetAttributes[Error,Listable]
 
 
 (* ::Text:: *)
-(*Colors for phases of complex values.*)
-
-
-ArgColor[arg_]=Hue[(arg+Pi)/(2 Pi)];
-
-
-(* ::Text:: *)
-(*Hexagonal and fcc lattice matrices.*)
+(*Hexagonal lattice matrix.*)
 
 
 AHex={{1,1/2},{0,Sqrt[3]/2}};
-AFcc={{1/Sqrt[2],1/Sqrt[2],0},{1/Sqrt[2],0,1/Sqrt[2]},{0,1/Sqrt[2],1/Sqrt[2]}};
 
 
 (* ::Text:: *)
@@ -174,7 +163,7 @@ EpsteinZetaAnisoDirect[
 
 
 (* ::Text:: *)
-(*Define harmonic polynomials, such that Total@hTab = h_{k,\[Alpha]}(y)*)
+(*Define harmonic polynomials, so that Total@hTab = h_{k,\[Alpha]}(y).*)
 
 
 q[k_,n_,m_,d_]:=Product[2n+d-2-4k-2j,{j,m+1,Floor[n/2]-k}]
@@ -210,7 +199,14 @@ hErr[dat_]:=Module[{d=dat[[1]],tab,hExact,hAbs,hN}
 
 
 (* ::Subsection::Closed:: *)
-(*Prepare*)
+(*Definitions*)
+
+
+(* ::Text:: *)
+(*Colors for phases of complex values.*)
+
+
+ArgColor[arg_]=Hue[(arg+Pi)/(2 Pi)];
 
 
 (* ::Text:: *)
@@ -221,19 +217,23 @@ zfunc[y1_,y2_]:=EpsteinZetaAniso[3.5,IdentityMatrix@2,{1,1}/3,{y1,y2},{0,2}]
 zfuncreg[y1_,y2_]:=EpsteinZetaAnisoReg[3.5,IdentityMatrix@2,{1,1}/3,{y1,y2},{0,2}]
 
 
+(* ::Subsection::Closed:: *)
+(*Computation*)
+
+
 (* ::Text:: *)
 (*Generate anisotropic Epstein zeta and regularized anisotropic Epstein zeta values for fixed \[Nu], identity a, all-even \[alpha], all-equal x, and y in a 2D grid [-0.7, 0.7] x [-0.7, 0.7].*)
 
 
-offset=0.01;xmin =- 0.7-offset;xmax = 0.7+offset; ymin = -0.7-offset; ymax = 0.7+offset;
-stepsize = 0.07; (* set to 0.007 to match the resolution of the manuscript *)
-zanitab = Flatten[ParallelTable[{x,y,Abs[zfunc[x,y]]},{x,xmin,xmax, stepsize},{y,ymin,ymax,stepsize}],1];
-stepsize = 0.07; (* the regularized function is smooth, so the coarse stepsize suffices *)
-zaniregtab = Flatten[ParallelTable[{x,y,Abs[zfuncreg[x,y]]},{x,xmin,xmax, stepsize},{y,ymin,ymax,stepsize}],1];
+offset=0.01; xmin=-0.7-offset; xmax=0.7+offset; ymin=-0.7-offset; ymax=0.7+offset;
+stepsize=0.07; (* set to 0.007 to match the resolution of the manuscript *)
+zanitab=Flatten[ParallelTable[{x,y,Abs[zfunc[x,y]]},{x,xmin,xmax,stepsize},{y,ymin,ymax,stepsize}],1];
+stepsize=0.07; (* the regularized function is smooth, so the coarse stepsize suffices *)
+zaniregtab=Flatten[ParallelTable[{x,y,Abs[zfuncreg[x,y]]},{x,xmin,xmax,stepsize},{y,ymin,ymax,stepsize}],1];
 
 
 (* ::Subsection::Closed:: *)
-(*Compose*)
+(*Visualization*)
 
 
 plt=GraphicsRow[{
@@ -274,12 +274,8 @@ plt=GraphicsRow[{
 ]
 
 
-(* ::Text:: *)
-(**)
-
-
 (* ::Subsection:: *)
-(*Display*)
+(*Result*)
 
 
 (* ::Text:: *)
@@ -294,7 +290,7 @@ plt
 
 
 (* ::Subsection::Closed:: *)
-(*Prepare*)
+(*Definitions*)
 
 
 (* ::Text:: *)
@@ -314,11 +310,15 @@ EpsteinZetaAnisoPolyLaplace[\[Nu]_,a_,x_,y_,n_]:=n!Total@Table[
 ]
 
 
+(* ::Subsection::Closed:: *)
+(*Computation*)
+
+
 (* ::Text:: *)
 (*Generate test values.*)
 
 
-vectorStepSize[d_]:=ConstantArray[1/2,d] (* set to ConstantArray[1/5,d] to replicate the result from the manuscript *)
+vectorStepSize[d_]:=ConstantArray[1/2,d] (* set to ConstantArray[1/5,d] to match the resolution of the manuscript *)
 errs=Table[
 	Table[
 		Max@Flatten[ParallelTable[
@@ -341,7 +341,7 @@ errs=Table[
 
 
 (* ::Subsection::Closed:: *)
-(*Compose*)
+(*Visualization*)
 
 
 tbl=TableForm[
@@ -354,7 +354,7 @@ tbl=TableForm[
 
 
 (* ::Subsection:: *)
-(*Display*)
+(*Result*)
 
 
 (* ::Text:: *)
@@ -369,7 +369,7 @@ tbl
 
 
 (* ::Subsection::Closed:: *)
-(*Prepare*)
+(*Definitions*)
 
 
 (* ::Text:: *)
@@ -383,6 +383,10 @@ EpsteinZetaAnisoAnalytic[
 	,y_/;PossibleZeroQ[Norm[y-ConstantArray[First[y],Length[y]]]]
 	,\[Alpha]_/;AllTrue[\[Alpha],EvenQ]&&PossibleZeroQ[2-Total[\[Alpha]]]
 ]:=EpsteinZeta[\[Nu]-Total[\[Alpha]],a,x,y]/Length[a]
+
+
+(* ::Subsection::Closed:: *)
+(*Computation*)
 
 
 (* ::Text:: *)
@@ -408,7 +412,7 @@ errs=Table[
 
 
 (* ::Subsection::Closed:: *)
-(*Compose*)
+(*Visualization*)
 
 
 tbl=TableForm[
@@ -421,7 +425,7 @@ tbl=TableForm[
 
 
 (* ::Subsection:: *)
-(*Display*)
+(*Result*)
 
 
 (* ::Text:: *)
@@ -436,7 +440,7 @@ tbl
 
 
 (* ::Subsection::Closed:: *)
-(*Prepare*)
+(*Definitions*)
 
 
 (* ::Text:: *)
@@ -453,6 +457,10 @@ EpsteinZetaAnisoAnalytic[
 	,0
 	,2^(-\[Nu]/2) RamanujanTauL[\[Nu]/2]
 ];
+
+
+(* ::Subsection::Closed:: *)
+(*Computation*)
 
 
 (* ::Text:: *)
@@ -473,7 +481,7 @@ errs=ParallelTable[
 
 
 (* ::Subsection::Closed:: *)
-(*Compose*)
+(*Visualization*)
 
 
 plt=ListLogPlot[
@@ -490,11 +498,11 @@ plt=ListLogPlot[
 
 
 (* ::Subsection:: *)
-(*Display*)
+(*Result*)
 
 
 (* ::Text:: *)
-(*Error for a special case of the eight-dimensional anisotropic Epstein zeta function for the square lattice and all-one anisotropy in which case it is given by the Ramanujan tau L-function.*)
+(*Error for a special case of the eight-dimensional anisotropic Epstein zeta function for the square lattice and all-one anisotropy, in which case it is given by the Ramanujan tau L-function.*)
 
 
 plt
@@ -505,11 +513,11 @@ plt
 
 
 (* ::Subsection::Closed:: *)
-(*Prepare*)
+(*Definitions*)
 
 
 (* ::Text:: *)
-(*Set test arguments.*)
+(*Set test parameters.*)
 
 
 lim0=1000;
@@ -517,6 +525,10 @@ a0={IdentityMatrix[2],IdentityMatrix[2],IdentityMatrix[2],AHex,AHex,AHex};
 x0={{0,0},{0,1/2},{0,1/3},{0,0},{0,1/2},{0,1/3}};
 y0={{0,0},{1/3,1/4},{1/5,1/6},{0,0},{1/3,1/4},{1/5,1/6}};
 \[Alpha]0={{2,0},{1,1},{0,2},{2,0},{1,1},{0,2}};
+
+
+(* ::Subsection::Closed:: *)
+(*Computation*)
 
 
 (* ::Text:: *)
@@ -538,7 +550,7 @@ errs=Table[
 
 
 (* ::Subsection::Closed:: *)
-(*Compose*)
+(*Visualization*)
 
 
 (* ::Text:: *)
@@ -553,10 +565,6 @@ labels={
 	,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(1,1)}((0,{\\textstyle\\frac{1}{2}}),({\\textstyle\\frac{1}{3}},{\\textstyle\\frac{1}{4}}))"
 	,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(0,2)}((0,{\\textstyle\\frac{1}{3}}),({\\textstyle\\frac{1}{5}},{\\textstyle\\frac{1}{6}}))"
 }
-
-
-(* ::Text:: *)
-(*Generate visualization.*)
 
 
 plt=GraphicsGrid[
@@ -579,7 +587,7 @@ plt=GraphicsGrid[
 
 
 (* ::Subsection:: *)
-(*Display*)
+(*Result*)
 
 
 (* ::Text:: *)
@@ -594,11 +602,11 @@ plt
 
 
 (* ::Subsection::Closed:: *)
-(*Prepare*)
+(*Definitions*)
 
 
 (* ::Text:: *)
-(*Set test arguments.*)
+(*Set test parameters.*)
 
 
 lim0=1000;
@@ -606,6 +614,10 @@ a0={IdentityMatrix[2],IdentityMatrix[2],IdentityMatrix[2],AHex,AHex,AHex};
 x0={{0,0},{0,1/2},{0,1/3},{0,0},{0,1/2},{0,1/3}};
 y0={{0,0},{1/3,1/4},{1/5,1/6},{0,0},{1/3,1/4},{1/5,1/6}};
 \[Alpha]0={{8,10},{9,10},{10,9},{8,10},{9,10},{10,9}};
+
+
+(* ::Subsection::Closed:: *)
+(*Computation*)
 
 
 (* ::Text:: *)
@@ -627,7 +639,7 @@ errs=Table[
 
 
 (* ::Subsection::Closed:: *)
-(*Compose*)
+(*Visualization*)
 
 
 (* ::Text:: *)
@@ -642,10 +654,6 @@ labels={
 	,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(9,10)}((0,{\\textstyle\\frac{1}{2}}),({\\textstyle\\frac{1}{3}},{\\textstyle\\frac{1}{4}}))"
 	,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(10,9)}((0,{\\textstyle\\frac{1}{3}}),({\\textstyle\\frac{1}{5}},{\\textstyle\\frac{1}{6}}))"
 };
-
-
-(* ::Text:: *)
-(*Generate visualization.*)
 
 
 plt=GraphicsGrid[
@@ -668,7 +676,7 @@ plt=GraphicsGrid[
 
 
 (* ::Subsection:: *)
-(*Display*)
+(*Result*)
 
 
 (* ::Text:: *)
@@ -683,11 +691,11 @@ plt
 
 
 (* ::Subsection::Closed:: *)
-(*Prepare*)
+(*Definitions*)
 
 
 (* ::Text:: *)
-(*Define (derivatives) of upper Crandall functions.*)
+(*Define the (derivatives of the) upper Crandall functions.*)
 
 
 GUpper[\[Nu]_,y_]=Piecewise[{
@@ -757,12 +765,16 @@ epsteinZetaAniso[\[Nu]Ext_?NumericQ,AExt_/;MatrixQ[AExt,NumericQ],xExt_/;VectorQ
 
 
 (* ::Text:: *)
-(*Setup up test parameters.*)
+(*Set test parameters.*)
 
 
 \[Nu]0=5/2;
 x0:={ConstantArray[0,dim],UnitVector[dim,1]/2,UnitVector[dim,1]/2};
 y0:={ConstantArray[0,dim],ConstantArray[0,dim],UnitVector[dim,1]/3};
+
+
+(* ::Subsection::Closed:: *)
+(*Computation*)
 
 
 (* ::Text:: *)
@@ -805,7 +817,7 @@ Do[
 
 
 (* ::Text:: *)
-(*Prepare fits on the derivative Crandall prototype errors.*)
+(*Prepare fits of the derivative Crandall prototype errors.*)
 
 
 fitStab=Table[
@@ -816,7 +828,7 @@ fitStab=Table[
 
 
 (* ::Subsection::Closed:: *)
-(*Compose*)
+(*Visualization*)
 
 
 (* ::Text:: *)
@@ -835,10 +847,6 @@ labels={
 
 
 legend=PointLegend[ColorData[97]/@Range[3],Table[MaTeX["d="<>ToString[d]],{d,3}]];
-
-
-(* ::Text:: *)
-(*Generate visualization.*)
 
 
 plt=GraphicsGrid[{
@@ -889,7 +897,7 @@ plt=GraphicsGrid[{
 
 
 (* ::Subsection:: *)
-(*Display*)
+(*Result*)
 
 
 (* ::Text:: *)
@@ -904,7 +912,7 @@ plt
 
 
 (* ::Subsection::Closed:: *)
-(*Prepare*)
+(*Definitions*)
 
 
 (* ::Text:: *)
@@ -914,6 +922,10 @@ plt
 \[Nu]0=1/2;
 taylorNMax=12; (* set to 61 to match the resolution of the manuscript *)
 stepsize=1/4; (* set to 1/20 to match the resolution of the manuscript *)
+
+
+(* ::Subsection::Closed:: *)
+(*Computation*)
 
 
 (* ::Text:: *)
@@ -949,7 +961,7 @@ errs=Table[
 
 
 (* ::Subsection::Closed:: *)
-(*Compose*)
+(*Visualization*)
 
 
 plt=ListLogPlot[
@@ -964,7 +976,7 @@ plt=ListLogPlot[
 
 
 (* ::Subsection:: *)
-(*Display*)
+(*Result*)
 
 
 (* ::Text:: *)
@@ -979,14 +991,14 @@ plt
 
 
 (* ::Subsection::Closed:: *)
-(*Prepare*)
+(*Computation*)
 
 
 (* ::Text:: *)
 (*Import the benchmark data for \[Alpha]=(n,2n), where the C routine forces double arithmetic.*)
 
 
-dataStab=Table[
+dataStab=Table[(* remove the dummy YINCSTAB2D (1. / 4) line in benchmark_harmonics.c to match the resolution of the manuscript *)
 	Import[NotebookDirectory[]<>"../../tests/csv/benchmark_harmonic_stab_"<>ToString[n]<>"_"<>ToString[2n]<>"_2D.csv"]
 	,{n,0,10}
 ];
@@ -1000,7 +1012,7 @@ errsStab=Table[ParallelTable[hErr[dat],{dat,dataStab[[j]]}],{j,11}];
 
 
 (* ::Subsection::Closed:: *)
-(*Compose*)
+(*Visualization*)
 
 
 tbl=TableForm[
@@ -1022,7 +1034,7 @@ tbl=TableForm[
 
 
 (* ::Subsection:: *)
-(*Display*)
+(*Result*)
 
 
 (* ::Text:: *)
@@ -1037,14 +1049,14 @@ tbl
 
 
 (* ::Subsection::Closed:: *)
-(*Prepare*)
+(*Computation*)
 
 
 (* ::Text:: *)
 (*Import the benchmark data for all-equal \[Alpha] with |\[Alpha]|=24 precomputed by the adaptive algorithm.*)
 
 
-dataHigh=Table[
+dataHigh=Table[(* remove the dummy YINC[DIM_MAX] line in benchmark_harmonics.c to match the resolution of the manuscript *)
 	Import[NotebookDirectory[]<>"../../tests/csv/benchmark_harmonic_"<>ToString[d]<>"D.csv"]
 	,{d,4}
 ];
@@ -1054,11 +1066,16 @@ dataHigh=Table[
 (*Generate test values.*)
 
 
+sampleStep=10; (* set to 1 to match the resolution of the manuscript *)
+dataHigh=Table[
+	Import[NotebookDirectory[]<>"../../tests/csv/benchmark_harmonic_"<>ToString[d]<>"D.csv"][[;;;;sampleStep]]
+	,{d,4}
+];
 errsHigh=Table[ParallelTable[hErr[dat],{dat,dataHigh[[d]]}],{d,4}];
 
 
 (* ::Subsection::Closed:: *)
-(*Compose*)
+(*Visualization*)
 
 
 tbl=TableForm[
@@ -1080,7 +1097,7 @@ tbl=TableForm[
 
 
 (* ::Subsection:: *)
-(*Display*)
+(*Result*)
 
 
 (* ::Text:: *)
@@ -1095,11 +1112,11 @@ tbl
 
 
 (* ::Subsection::Closed:: *)
-(*Prepare*)
+(*Computation*)
 
 
 (* ::Text:: *)
-(*Import runtimes of anisotropic Epstein zeta functions in EpsteinLib.*)
+(*Import the runtimes of anisotropic Epstein zeta functions in EpsteinLib.*)
 
 
 timing=Table[
@@ -1117,7 +1134,7 @@ fitTime=Table[Fit[relTiming[[d,1;;If[d>1,11,21]]],{1,n},n],{d,3}];
 
 
 (* ::Subsection::Closed:: *)
-(*Compose*)
+(*Visualization*)
 
 
 plt=GraphicsRow[{
@@ -1156,7 +1173,7 @@ plt=GraphicsRow[{
 
 
 (* ::Subsection:: *)
-(*Display*)
+(*Result*)
 
 
 (* ::Text:: *)
@@ -1171,7 +1188,14 @@ plt
 
 
 (* ::Subsection::Closed:: *)
-(*Prepare*)
+(*Definitions*)
+
+
+(* ::Text:: *)
+(*fcc lattice matrix.*)
+
+
+AFcc={{1/Sqrt[2],1/Sqrt[2],0},{1/Sqrt[2],0,1/Sqrt[2]},{0,1/Sqrt[2],1/Sqrt[2]}};
 
 
 (* ::Text:: *)
@@ -1198,7 +1222,7 @@ GaussianDerivatives3D[y_,\[Sigma]_,\[Alpha]_]:=Gaussian3D[y,\[Sigma]]Total[Table
 
 
 (* ::Text:: *)
-(*Define reference direct sum.*)
+(*Define the reference direct sum.*)
 
 
 Sum3D[\[Nu]_,a_,x_,\[Sigma]_,lim_]:=Module[{pts,d2,g}
@@ -1223,6 +1247,10 @@ SEM3D[\[Nu]_,a_,x_,\[Sigma]_,\[ScriptL]_]:=Integral3D[\[Nu],a,x,\[Sigma]]+Total[
 ]]
 
 
+(* ::Subsection::Closed:: *)
+(*Computation*)
+
+
 (* ::Text:: *)
 (*Generate test values.*)
 
@@ -1237,7 +1265,7 @@ errs=Table[
 
 
 (* ::Subsection::Closed:: *)
-(*Compose*)
+(*Visualization*)
 
 
 plt=GraphicsRow[{
@@ -1277,11 +1305,11 @@ plt=GraphicsRow[{
 
 
 (* ::Subsection:: *)
-(*Display*)
+(*Result*)
 
 
 (* ::Text:: *)
-(*Singular Euler-Maclaurin expansion for the Gaussian and the fcc lattice (left) and its error for different order (right).*)
+(*Singular Euler-Maclaurin expansion for the Gaussian and the fcc lattice (left) and its error for different orders (right).*)
 
 
 plt
