@@ -31,9 +31,12 @@
 (*Load the Mathematica wrapper of the Epstein zeta function, so that it can be used in parallel on all kernels.*)
 
 
-SetDirectory[NotebookDirectory[]<>"../../mathematica"];
+(*SetDirectory[NotebookDirectory[]<>"../../mathematica"];
 ParallelEvaluate[Quiet[<<"EpsteinZeta.wl"]];
-<<"EpsteinZeta.wl";
+<<"EpsteinZeta.wl";*)
+(* TODO: remove before upload *)
+<<"EpsteinZeta.wl"
+ParallelEvaluate[Quiet[<<"EpsteinZeta.wl"]];
 
 
 (* ::Text:: *)
@@ -106,10 +109,18 @@ ArgColor[arg_]=Hue[(arg+Pi)/(2 Pi)];
 
 
 (* ::Text:: *)
-(*Hexagonal lattice matrix.*)
+(*Hexagonal and fcc lattice matrices.*)
 
 
-AHex={{1,1/2},{0,Sqrt@3/2}};
+AHex={{1,1/2},{0,Sqrt[3]/2}};
+AFcc={{1/Sqrt[2],1/Sqrt[2],0},{1/Sqrt[2],0,1/Sqrt[2]},{0,1/Sqrt[2],1/Sqrt[2]}};
+
+
+(* ::Text:: *)
+(*Polynomial for upper Crandall derivatives.*)
+
+
+polyp[y_,\[Alpha]_,\[Beta]_]:=Apply[Times,(-\[Pi])^(\[Alpha]-\[Beta])Binomial[\[Alpha],\[Beta]](\[Alpha]-\[Beta])!/(\[Alpha]-2\[Beta])!(2y)^(\[Alpha]-2\[Beta])]
 
 
 (* ::Subsection::Closed:: *)
@@ -156,6 +167,42 @@ EpsteinZetaAnisoDirect[
 	,\[Alpha]_/;Element[\[Alpha],NonNegativeIntegers]&&Length[\[Alpha]]==2
 	,OptionsPattern[]
 ]:=Sum2DCompiled[N[\[Nu]],N[a[[1,1]]],N[a[[1,2]]],N[a[[2,1]]],N[a[[2,2]]],N[x[[1]]],N[x[[2]]],N[y[[1]]],N[y[[2]]],\[Alpha][[1]],\[Alpha][[2]],OptionValue[SumLim]];
+
+
+(* ::Subsection::Closed:: *)
+(*Harmonic Polynomials*)
+
+
+(* ::Text:: *)
+(*Define harmonic polynomials, such that Total@hTab = h_{k,\[Alpha]}(y)*)
+
+
+q[k_,n_,m_,d_]:=Product[2n+d-2-4k-2j,{j,m+1,Floor[n/2]-k}]
+\[Omega][k_,n_,d_]:=2^(-k)/q[k,n,0,d]/Product[2n+d-2k-2j,{j,1,k}]
+c[k_,\[Alpha]_,\[Gamma]_,d_]:=Total@Table[
+	(-2)^(-Total[\[Beta]])Total[\[Beta]]! Binomial[Total[\[Beta]]+k,k]q[k,Total[\[Alpha]],Total[\[Beta]],d]Apply[Times,FactorialPower[\[Gamma]-\[Beta],\[Alpha]+\[Beta]-\[Gamma]]/\[Beta]!Binomial[\[Alpha],\[Alpha]+\[Beta]-\[Gamma]]]
+	,{\[Beta],Tuples[Range[MapThread[Max,{0\[Alpha],\[Gamma]-\[Alpha]}],\[Gamma]-\[Alpha]/2]]}
+]
+hTab[k_,\[Alpha]_][y_]:=\[Omega][k,Total[\[Alpha]],Length[\[Alpha]]]Table[
+	c[k,\[Alpha],\[Gamma],Length[\[Alpha]]]Apply[Times,y^(2\[Gamma]-\[Alpha])]
+	,{\[Gamma],Select[Tuples[Range[Ceiling[\[Alpha]/2],0\[Alpha]+Total[\[Alpha]]-k]],Total[#]==Total[\[Alpha]]-k&]}
+]
+
+
+(* ::Text:: *)
+(*Relative backward error, condition number and relative error of one benchmark row {d,k,y,\[Alpha],...,hN,tpre,teval}. Rows where both the exact and the computed values vanish are dropped.*)
+
+
+hErr[dat_]:=Module[{d=dat[[1]],tab,hExact,hAbs,hN}
+	,tab=hTab[dat[[2]],dat[[3+d;;2+2d]]][Rationalize[dat[[3;;2+d]],0]]
+	;hExact=Total@tab
+	;hAbs=Total@Abs@tab
+	;hN=SetPrecision[dat[[-3]],100]
+	;If[PossibleZeroQ@hExact
+		,If[PossibleZeroQ@hN,Nothing,{Infinity,Infinity,Infinity}]
+		,N@{Abs[hN-hExact]/hAbs,hAbs/Abs[hExact],Abs[hN-hExact]/Abs[hExact]}
+	]
+]
 
 
 (* ::Section:: *)
@@ -494,20 +541,31 @@ errs=Table[
 (*Compose*)
 
 
+(* ::Text:: *)
+(*Set labels depicting the test values.*)
+
+
+labels={
+	"Z_{\\mathbb{Z}^2,\\nu,(2,0)}(\\bm 0,\\bm 0)"
+	,"Z_{\\mathbb{Z}^2,\\nu,(1,1)}((0,{\\textstyle\\frac{1}{2}}),({\\textstyle\\frac{1}{3}},{\\textstyle\\frac{1}{4}}))"
+	,"Z_{\\mathbb{Z}^2,\\nu,(0,2)}((0,{\\textstyle\\frac{1}{3}}),({\\textstyle\\frac{1}{5}},{\\textstyle\\frac{1}{6}}))"
+	,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(2,0)}(\\bm 0,\\bm 0)"
+	,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(1,1)}((0,{\\textstyle\\frac{1}{2}}),({\\textstyle\\frac{1}{3}},{\\textstyle\\frac{1}{4}}))"
+	,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(0,2)}((0,{\\textstyle\\frac{1}{3}}),({\\textstyle\\frac{1}{5}},{\\textstyle\\frac{1}{6}}))"
+}
+
+
+(* ::Text:: *)
+(*Generate visualization.*)
+
+
 plt=GraphicsGrid[
 	ArrayReshape[
 		Table[
 			ListLogPlot[
 			{First@#,Last@#}&/@errs[[i]]
 			,PlotTheme->"Scientific"
-			,PlotLabel->MaTeX[{
-				"Z_{\\mathbb{Z}^2,\\nu,(2,0)}(\\bm 0,\\bm 0)"
-				,"Z_{\\mathbb{Z}^2,\\nu,(1,1)}((0,{\\textstyle\\frac{1}{2}}),({\\textstyle\\frac{1}{3}},{\\textstyle\\frac{1}{4}}))"
-				,"Z_{\\mathbb{Z}^2,\\nu,(0,2)}((0,{\\textstyle\\frac{1}{3}}),({\\textstyle\\frac{1}{5}},{\\textstyle\\frac{1}{6}}))"
-				,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(2,0)}(\\bm 0,\\bm 0)"
-				,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(1,1)}((0,{\\textstyle\\frac{1}{2}}),({\\textstyle\\frac{1}{3}},{\\textstyle\\frac{1}{4}}))"
-				,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(0,2)}((0,{\\textstyle\\frac{1}{3}}),({\\textstyle\\frac{1}{5}},{\\textstyle\\frac{1}{6}}))"
-			}[[i]]]
+			,PlotLabel->MaTeX[labels[[i]]]
 			,FrameLabel->{MaTeX@"\\nu",MaTeX@"E"}
 			,PlotStyle->{PointSize[0.025],Blue}
 			,ImageSize->240
@@ -535,7 +593,7 @@ plt
 (*Figure 4*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*Prepare*)
 
 
@@ -572,20 +630,31 @@ errs=Table[
 (*Compose*)
 
 
+(* ::Text:: *)
+(*Set labels depicting the test values.*)
+
+
+labels={
+	"Z_{\\mathbb{Z}^2,\\nu,(8,10)}(\\bm 0,\\bm 0)"
+	,"Z_{\\mathbb{Z}^2,\\nu,(9,10)}((0,{\\textstyle\\frac{1}{2}}),({\\textstyle\\frac{1}{3}},{\\textstyle\\frac{1}{4}}))"
+	,"Z_{\\mathbb{Z}^2,\\nu,(10,9)}((0,{\\textstyle\\frac{1}{3}}),({\\textstyle\\frac{1}{5}},{\\textstyle\\frac{1}{6}}))"
+	,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(8,10)}(\\bm 0,\\bm 0)"
+	,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(9,10)}((0,{\\textstyle\\frac{1}{2}}),({\\textstyle\\frac{1}{3}},{\\textstyle\\frac{1}{4}}))"
+	,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(10,9)}((0,{\\textstyle\\frac{1}{3}}),({\\textstyle\\frac{1}{5}},{\\textstyle\\frac{1}{6}}))"
+};
+
+
+(* ::Text:: *)
+(*Generate visualization.*)
+
+
 plt=GraphicsGrid[
 	ArrayReshape[
 		Table[
 			ListLogPlot[
 			{First@#,Last@#}&/@errs[[i]]
 			,PlotTheme->"Scientific"
-			,PlotLabel->MaTeX[{
-				"Z_{\\mathbb{Z}^2,\\nu,(8,10)}(\\bm 0,\\bm 0)"
-				,"Z_{\\mathbb{Z}^2,\\nu,(9,10)}((0,{\\textstyle\\frac{1}{2}}),({\\textstyle\\frac{1}{3}},{\\textstyle\\frac{1}{4}}))"
-				,"Z_{\\mathbb{Z}^2,\\nu,(10,9)}((0,{\\textstyle\\frac{1}{3}}),({\\textstyle\\frac{1}{5}},{\\textstyle\\frac{1}{6}}))"
-				,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(8,10)}(\\bm 0,\\bm 0)"
-				,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(9,10)}((0,{\\textstyle\\frac{1}{2}}),({\\textstyle\\frac{1}{3}},{\\textstyle\\frac{1}{4}}))"
-				,"Z_{\\Lambda_{\\mathrm{hex}},\\nu,(10,9)}((0,{\\textstyle\\frac{1}{3}}),({\\textstyle\\frac{1}{5}},{\\textstyle\\frac{1}{6}}))"
-			}[[i]]]
+			,PlotLabel->MaTeX[labels[[i]]]
 			,FrameLabel->{MaTeX@"\\nu",MaTeX@"E"}
 			,PlotStyle->{PointSize[0.025],Blue}
 			,ImageSize->240
@@ -604,6 +673,615 @@ plt=GraphicsGrid[
 
 (* ::Text:: *)
 (*Error for high-order anisotropic Epstein zeta functions for large \[Nu], where direct summation gives accurate reference values.*)
+
+
+plt
+
+
+(* ::Section:: *)
+(*Figure 5*)
+
+
+(* ::Subsection::Closed:: *)
+(*Prepare*)
+
+
+(* ::Text:: *)
+(*Define (derivatives) of upper Crandall functions.*)
+
+
+GUpper[\[Nu]_,y_]=Piecewise[{
+	{-2/\[Nu],Norm[y]<10^(-64)}
+	,{ExpIntegralE[1-\[Nu]/2,Pi y . y],Norm[y]<6}
+	},0
+];
+GUpperDer[\[Nu]_,y_,\[Alpha]_]:=Total[Flatten[Table[
+	Module[
+		{pol}
+		,pol=polyp[y,\[Alpha],\[Beta]]
+		;If[Abs[pol]<10^-60
+			,0
+			,pol GUpper[\[Nu]+2Total[\[Alpha]-\[Beta]],y]
+		]
+	]
+	,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}
+]]]
+
+
+(* ::Text:: *)
+(*Define sums of the derivative Crandall formula in real and reciprocal space.*)
+
+
+SumRealDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[
+	Apply[Times, z^\[Alpha]]GUpper[\[Nu],z]Exp[-2Pi I y . (z+x)]
+	,{z,(A . #-x)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}
+]
+SumFourierDer[\[Nu]_,A_,x_,y_,\[Alpha]_,sumLim_]:=Total@Table[
+	GUpperDer[Length[\[Alpha]]-\[Nu],k,\[Alpha]]Exp[-2Pi I x . k]
+	,{k,(Inverse[Transpose[A]] . #+y)&/@Tuples[Range[-sumLim,sumLim],Length[A]]}
+]
+
+
+(* ::Text:: *)
+(*Prototype of the anisotropic Epstein zeta function based on the Crandall derivative representation.*)
+
+
+Options[epsteinZetaAniso]={InputPrecision->100,SumLim->6};
+epsteinZetaAniso[\[Nu]Ext_?NumericQ,AExt_/;MatrixQ[AExt,NumericQ],xExt_/;VectorQ[xExt,NumericQ],yExt_/;VectorQ[yExt,NumericQ],\[Alpha]_/;VectorQ[\[Alpha],IntegerQ],OptionsPattern[]]:=Module[
+	{EPS,prec,sumLim,\[Nu]N,d,AN,xN,yN,\[Mu],sumReal,sumReci,res}
+	,EPS=10^-50
+	;prec=OptionValue[InputPrecision]
+	;sumLim=OptionValue[SumLim]
+	;d=Length[\[Alpha]]
+	;\[Nu]N=N[\[Nu]Ext,prec]
+	;AN=N[AExt,prec]
+	;\[Mu]=Abs[Det[AN]]^(1/Length[AN])
+	;AN=1/\[Mu] AN
+	;xN=1/\[Mu] N[xExt,prec]
+	;yN=\[Mu] N[yExt,prec]
+	;Do[
+		If[
+			AExt==IdentityMatrix[d]&&OddQ[\[Alpha][[i]]]&&(PossibleZeroQ[xN[[i]]]&&PossibleZeroQ[yN[[i]]])
+			,Return[0]
+		]
+		,{i,Length[\[Alpha]]}
+	]
+	;If[Abs[\[Nu]N]<EPS&&Total[\[Alpha]]>0
+		,res = 0
+		,sumReal=SetPrecision[SumRealDer[\[Nu]N,AN,xN,yN,\[Alpha],sumLim],prec]
+		;sumReci=SetPrecision[SumFourierDer[\[Nu]N,AN,xN,yN,\[Alpha],sumLim],prec]
+		;res=SetPrecision[\[Mu]^(Total[\[Alpha]]-\[Nu]N)\[Pi]^(\[Nu]N/2)/Gamma[\[Nu]N/2](sumReal+N[-2 Pi I]^(-Total[\[Alpha]])/Abs[Det[AN]]sumReci),prec]
+	]
+	;Return[res]
+]
+
+
+(* ::Text:: *)
+(*Setup up test parameters.*)
+
+
+\[Nu]0=5/2;
+x0:={ConstantArray[0,dim],UnitVector[dim,1]/2,UnitVector[dim,1]/2};
+y0:={ConstantArray[0,dim],ConstantArray[0,dim],UnitVector[dim,1]/3};
+
+
+(* ::Text:: *)
+(*Generate test values.*)
+
+
+stabnrange=Range[0,30,3]; (* set to Range[0,61,1] to match the resolution of the manuscript *)
+errs=Table[
+	ParallelTable[
+		Module[{\[Nu],a,x,y,ref}
+			,\[Nu]=5/2
+			;a=IdentityMatrix[d]
+			;x={
+				ConstantArray[0,d]
+				,UnitVector[d,1]/2
+				,UnitVector[d,1]/2
+			}[[i]]
+			;y={
+				ConstantArray[0,d]
+				,ConstantArray[0,d]
+				,UnitVector[d,1]/3
+			}[[i]]
+			;\[Alpha]=n UnitVector[d,1]
+			;ref=epsteinZetaAniso[\[Nu],a,x,y,\[Alpha],InputPrecision->100]
+			;{
+				Error[ref,EpsteinZetaAniso[\[Nu],a,x,y,\[Alpha]]]
+				,Error[ref,epsteinZetaAniso[\[Nu],a,x,y,\[Alpha],InputPrecision->MachinePrecision]]
+			}
+		]
+		,{n,stabnrange}
+	]
+	,{i,3}
+	,{d,3}
+];
+Do[
+	stabTabC[i]=Transpose@{stabnrange,#}&/@errs[[i,All,All,1]]
+	;stabTabM[i]=Transpose@{stabnrange,#}&/@errs[[i,All,All,2]]
+	,{i,3}
+]
+
+
+(* ::Text:: *)
+(*Prepare fits on the derivative Crandall prototype errors.*)
+
+
+fitStab=Table[
+	Fit[{#[[1]],Log[#[[2]]]}&/@Select[stabTabM[i][[d]],#[[2]]>0&],{1,n},n]
+	,{i,3}
+	,{d,3}
+];
+
+
+(* ::Subsection::Closed:: *)
+(*Compose*)
+
+
+(* ::Text:: *)
+(*Set labels depicting the test values.*)
+
+
+labels={
+	"Z_{\\mathbb Z^d,5/2,n\\bm e_1}(\\bm 0,\\bm 0)"
+	,"Z_{\\mathbb Z^d,5/2,n\\bm e_1}({\\textstyle\\frac{1}{2}}\\bm e_1,\\bm 0)"
+	,"Z_{\\mathbb Z^d,5/2,n\\bm e_1}({\\textstyle\\frac{1}{2}}\\bm e_1,{\\textstyle\\frac{1}{3}}\\bm e_1)"
+};
+
+
+(* ::Text:: *)
+(*Set legend depicting the colors of the dimensions.*)
+
+
+legend=PointLegend[ColorData[97]/@Range[3],Table[MaTeX["d="<>ToString[d]],{d,3}]];
+
+
+(* ::Text:: *)
+(*Generate visualization.*)
+
+
+plt=GraphicsGrid[{
+	Append[
+		Table[Show[
+				ListLogPlot[
+					stabTabM[i]
+					,PlotTheme->"Scientific"
+					,PlotStyle->ColorData[97]/@Range[3]
+					,PlotLabel->MaTeX[labels[[i]]]
+					,FrameLabel->{MaTeX@"n",MaTeX@"E"}
+					,PlotRange->All
+					,Epilog->Inset[
+						Column[Table[MaTeX["\\rho_{d="<>ToString[d]<>"}="<>ToString@NumberForm[Exp@Coefficient[fitStab[[i,d]],n],{10,2}]],{d,3}]]
+						,Scaled[{0.05,0.95}]
+						,{Left,Top}
+					]
+					,ImageSize->240
+				]
+				,LogPlot[
+					Evaluate@Exp@fitStab[[i]]
+					,{n,0,61}
+					,PlotStyle->(Directive[Opacity[0.5],ColorData[97][#]]&/@Range[3])
+				]
+			]
+			,{i,3}
+		]
+		,legend
+	]
+	,Append[
+		Table[
+			ListLogPlot[
+				Map[{#[[1]],Max[10^-17,#[[2]]]}&,stabTabC[i],{2}]
+				,PlotTheme->"Scientific"
+				,PlotStyle->ColorData[97]/@Range[3]
+				,PlotLabel->MaTeX[labels[[i]]]
+				,FrameLabel->{MaTeX@"n",MaTeX@"E"}
+				,PlotRange->All
+				,ImageSize->240
+			]
+			,{i,3}
+		]
+		,legend
+	]
+	}
+	,ImageSize->1200
+]
+
+
+(* ::Subsection:: *)
+(*Display*)
+
+
+(* ::Text:: *)
+(*Error of a prototype of the derivative Crandall representation for the anisotropic Epstein zeta function (first row) and of the stable harmonic-decomposition Crandall representation implemented in EpsteinLib (second row).*)
+
+
+plt
+
+
+(* ::Section:: *)
+(*Figure 6*)
+
+
+(* ::Subsection::Closed:: *)
+(*Prepare*)
+
+
+(* ::Text:: *)
+(*Set test parameters.*)
+
+
+\[Nu]0=1/2;
+taylorNMax=12; (* set to 61 to match the resolution of the manuscript *)
+stepsize=1/4; (* set to 1/20 to match the resolution of the manuscript *)
+
+
+(* ::Text:: *)
+(*Generate test values where, for each n, the Taylor coefficients of all-even \[Alpha] with |\[Alpha]|=n are added to the partial sum.*)
+
+
+errs=Table[
+	With[{a=IdentityMatrix[d],x=ConstantArray[0,d]}
+		,With[{coeffs=Table[
+				ParallelTable[
+					{\[Alpha],(-2Pi I)^n/Apply[Times,\[Alpha]!]EpsteinZetaAniso[\[Nu]0,a,x,ConstantArray[0,d],\[Alpha]]}
+					,{\[Alpha],Select[Tuples[Range[0,n,2],d],Total[#]==n&]}
+				]
+				,{n,0,taylorNMax}
+			]}
+			,Transpose@{
+				Range[0,taylorNMax]
+				,Max/@Transpose@ParallelTable[
+					Module[{ref=EpsteinZetaReg[\[Nu]0,a,x,y],acc=0}
+						,Table[
+							acc+=Total[Last[#]Apply[Times,y^First[#]]&/@coeffs[[n+1]]]
+							;Error[ref,acc]
+							,{n,0,taylorNMax}
+						]
+					]
+					,{y,N@Select[Tuples[Range[-1/2,1/2,stepsize],d],Norm[#]<=1/2&]}
+				]
+			}
+		]
+	]
+	,{d,3}
+];
+
+
+(* ::Subsection::Closed:: *)
+(*Compose*)
+
+
+plt=ListLogPlot[
+	errs
+	,PlotTheme->"Scientific"
+	,PlotLabel->MaTeX["Z^{\\rm reg}_{\\mathbb Z^d,1/2}(\\bm 0,\\bm y)"]
+	,FrameLabel->{MaTeX@"n",MaTeX["E^{\\rm max}"]}
+	,PlotLegends->Table[MaTeX["d="<>ToString[d]],{d,3}]
+	,PlotRange->All
+	,ImageSize->400
+]
+
+
+(* ::Subsection:: *)
+(*Display*)
+
+
+(* ::Text:: *)
+(*Maximum error of the reconstruction of the regularized Epstein zeta function through its Taylor series, whose coefficients are given in terms of anisotropic Epstein zeta functions, of order n around y = 0.*)
+
+
+plt
+
+
+(* ::Section:: *)
+(*Table 3*)
+
+
+(* ::Subsection::Closed:: *)
+(*Prepare*)
+
+
+(* ::Text:: *)
+(*Import the benchmark data for \[Alpha]=(n,2n), where the C routine forces double arithmetic.*)
+
+
+dataStab=Table[
+	Import[NotebookDirectory[]<>"../../tests/csv/benchmark_harmonic_stab_"<>ToString[n]<>"_"<>ToString[2n]<>"_2D.csv"]
+	,{n,0,10}
+];
+
+
+(* ::Text:: *)
+(*Generate test values.*)
+
+
+errsStab=Table[ParallelTable[hErr[dat],{dat,dataStab[[j]]}],{j,11}];
+
+
+(* ::Subsection::Closed:: *)
+(*Compose*)
+
+
+tbl=TableForm[
+	Map[ScientificForm[N@#,2]&
+		,Table[{
+			Max@dataStab[[j,All,-2]]
+			,Max@dataStab[[j,All,-1]]
+			,Median@errsStab[[j,All,2]]
+			,Max@errsStab[[j,All,2]]
+			,Max@errsStab[[j,All,1]]
+		},{j,11}]
+		,{2}
+	]
+	,TableHeadings->{
+		MaTeX["\\bm\\alpha=("<>ToString[#]<>","<>ToString[2#]<>")"]&/@Range[0,10]
+		,MaTeX/@{"t_{\\rm pre}","t_{\\rm eval}^{\\rm max}","\\kappa_{\\rm med}","\\kappa_{\\rm max}","E_{\\rm bwd}^{\\rm max}"}
+	}
+];
+
+
+(* ::Subsection:: *)
+(*Display*)
+
+
+(* ::Text:: *)
+(*Evaluation times, condition numbers and backward errors of the double algorithm for two-dimensional harmonic polynomials compared with an exact implementation over a grid of values.*)
+
+
+tbl
+
+
+(* ::Section:: *)
+(*Table 4*)
+
+
+(* ::Subsection::Closed:: *)
+(*Prepare*)
+
+
+(* ::Text:: *)
+(*Import the benchmark data for all-equal \[Alpha] with |\[Alpha]|=24 precomputed by the adaptive algorithm.*)
+
+
+dataHigh=Table[
+	Import[NotebookDirectory[]<>"../../tests/csv/benchmark_harmonic_"<>ToString[d]<>"D.csv"]
+	,{d,4}
+];
+
+
+(* ::Text:: *)
+(*Generate test values.*)
+
+
+errsHigh=Table[ParallelTable[hErr[dat],{dat,dataHigh[[d]]}],{d,4}];
+
+
+(* ::Subsection::Closed:: *)
+(*Compose*)
+
+
+tbl=TableForm[
+	Map[ScientificForm[N@#,2]&
+		,Table[{
+			Max@dataHigh[[d,All,-2]]
+			,Max@dataHigh[[d,All,-1]]
+			,100Count[errsHigh[[d,All,2]],_?(#>8&)]/Length[errsHigh[[d]]]
+			,Max@errsHigh[[d,All,2]]
+			,Max@errsHigh[[d,All,3]]
+		},{d,4}]
+		,{2}
+	]
+	,TableHeadings->{
+		MaTeX["d="<>ToString[#]]&/@Range[4]
+		,MaTeX/@{"t_{\\rm pre}","t_{\\rm eval}^{\\rm max}","\\%(\\kappa_h>8)","\\kappa_{\\rm max}","E_{\\rm rel}^{\\rm max}"}
+	}
+];
+
+
+(* ::Subsection:: *)
+(*Display*)
+
+
+(* ::Text:: *)
+(*Evaluation times, condition numbers and relative errors of the adaptive algorithm for one- to four-dimensional harmonic polynomials compared with an exact implementation over a grid of values.*)
+
+
+tbl
+
+
+(* ::Section:: *)
+(*Figure 7*)
+
+
+(* ::Subsection::Closed:: *)
+(*Prepare*)
+
+
+(* ::Text:: *)
+(*Import runtimes of anisotropic Epstein zeta functions in EpsteinLib.*)
+
+
+timing=Table[
+	Import[NotebookDirectory[]<>"../../tests/csv/epsteinZetaAniso_timing_"<>ToString[d]<>"D.csv"]
+	,{d,6}
+];
+
+
+(* ::Text:: *)
+(*Set relative runtimes and obtain their fits.*)
+
+
+relTiming=Table[{#[[1]],#[[2]]/timing[[d,1,2]]}&/@timing[[d,1;;21]],{d,3}];
+fitTime=Table[Fit[relTiming[[d,1;;If[d>1,11,21]]],{1,n},n],{d,3}];
+
+
+(* ::Subsection::Closed:: *)
+(*Compose*)
+
+
+plt=GraphicsRow[{
+	ListLogPlot[
+		timing
+		,PlotTheme->"Scientific"
+		,PlotStyle->ColorData[97]/@Range[6]
+		,FrameLabel->{MaTeX["|\\bm\\alpha|"],MaTeX["\\text{runtime }[s]"]}
+		,PlotRange->{{-0.5,10.5},Automatic}
+		,ImageSize->300
+	]
+	,Show[
+		ListPlot[
+			relTiming
+			,PlotTheme->"Scientific"
+			,PlotStyle->ColorData[97]/@Range[3]
+			,FrameLabel->{MaTeX["|\\bm\\alpha|"],MaTeX["\\text{relative runtime}"]}
+			,PlotRange->All
+			,Epilog->Inset[
+				Column[Table[MaTeX["a_{d="<>ToString[d]<>"}\\approx "<>ToString@NumberForm[Coefficient[fitTime[[d]],n],{10,2}]],{d,3}]]
+				,Scaled[{0.05,0.95}]
+				,{Left,Top}
+			]
+			,ImageSize->300
+		]
+		,Plot[
+			Evaluate@fitTime
+			,{n,0,20}
+			,PlotStyle->(Directive[Opacity[0.5],ColorData[97][#]]&/@Range[3])
+		]
+	]
+	,PointLegend[ColorData[97]/@Range[6],Table[MaTeX["d="<>ToString[d]],{d,6}]]
+	}
+	,ImageSize->800
+]
+
+
+(* ::Subsection:: *)
+(*Display*)
+
+
+(* ::Text:: *)
+(*Evaluation times (left) and relative evaluation times (right) of anisotropic Epstein zeta functions as a function of the order of the anisotropy.*)
+
+
+plt
+
+
+(* ::Section:: *)
+(*Figure 8*)
+
+
+(* ::Subsection::Closed:: *)
+(*Prepare*)
+
+
+(* ::Text:: *)
+(*Set test parameters.*)
+
+
+\[Nu]0=5/2;
+\[Sigma]0=10;
+a0=AFcc;
+lim0=35;
+stepsize=1/2; (* set to 1/10 to match the resolution of the manuscript *)
+x0range=Range[-1/10,10+1/10,stepsize];
+
+
+(* ::Text:: *)
+(*Define the (derivatives of the) Gaussian.*)
+
+
+Gaussian3D[y_,\[Sigma]_]:=Exp[-Pi y . y/\[Sigma]^2];
+GaussianDerivatives3D[y_,\[Sigma]_,\[Alpha]_]:=Gaussian3D[y,\[Sigma]]Total[Table[
+	(1/\[Sigma]^2)^Total[\[Alpha]-\[Beta]]polyp[y,\[Alpha],\[Beta]]
+	,{\[Beta],Tuples[Range[ConstantArray[0,Length[\[Alpha]]],\[Alpha]/2]]}
+]]
+
+
+(* ::Text:: *)
+(*Define reference direct sum.*)
+
+
+Sum3D[\[Nu]_,a_,x_,\[Sigma]_,lim_]:=Module[{pts,d2,g}
+	,pts=Transpose[N[Tuples[Range[-lim,lim],3]] . Transpose[N[a]]]
+	;d2=Total[(pts-N[x])^2]
+	;g=Exp[-Pi Total[pts^2]/\[Sigma]^2]
+	;Total[g Unitize[d2]/(d2+1-Unitize[d2])^(\[Nu]/2),Method->"CompensatedSummation"]
+]
+
+
+(* ::Text:: *)
+(*Integral and SEM for the singular Euler-Maclaurin expansion.*)
+
+
+Integral3D[\[Nu]_,a_,x_,\[Sigma]_]:=2\[Pi]^((\[Nu]-1)/2)\[Sigma]^(3-\[Nu])Gamma[(3-\[Nu])/2]Hypergeometric1F1[\[Nu]/2,3/2,-\[Pi] x . x/\[Sigma]^2]/Abs[Det[a]]
+SEM3D[\[Nu]_,a_,x_,\[Sigma]_,\[ScriptL]_]:=Integral3D[\[Nu],a,x,\[Sigma]]+Total[Table[
+	If[PossibleZeroQ@Norm@x&&AnyTrue[\[Beta],OddQ]
+		,0
+		,Re@EpsteinZetaAniso[\[Nu],a,x,ConstantArray[0,3],\[Beta]]GaussianDerivatives3D[x,\[Sigma],\[Beta]]/Apply[Times,\[Beta]!]
+	]
+	,{\[Beta],Select[Tuples[Range[0,2\[ScriptL]],3],Total[#]<=2\[ScriptL]&]}
+]]
+
+
+(* ::Text:: *)
+(*Generate test values.*)
+
+
+Sum3DTab=ParallelTable[{x,Sum3D[\[Nu]0,a0,{x,0,1/2},\[Sigma]0,lim0]},{x,x0range}];
+Int3DTab=Table[{x,Integral3D[\[Nu]0,a0,{x,0,1/2},\[Sigma]0]},{x,First@x0range-1,Last@x0range+1,1/10}];
+SEM3DTab=ParallelTable[{x,SEM3D[\[Nu]0,a0,{x,0,1/2},\[Sigma]0,0]},{x,First@x0range-1,Last@x0range+1,1/20}];
+errs=Table[
+	Transpose@{x0range,Error[Sum3DTab[[All,2]],ParallelTable[SEM3D[\[Nu]0,a0,{x,0,1/2},\[Sigma]0,\[ScriptL]],{x,x0range}]]}
+	,{\[ScriptL],0,6}
+];
+
+
+(* ::Subsection::Closed:: *)
+(*Compose*)
+
+
+plt=GraphicsRow[{
+	Show[
+		ListLinePlot[
+			{SEM3DTab,Int3DTab}
+			,PlotTheme->"Scientific"
+			,PlotLegends->Placed[{
+				MaTeX["\\mathcal D^{(0)}_{\\Lambda_{\\rm fcc}}g(\\bm x)+\\textstyle\\frac{1}{V_{\\Lambda_{\\rm fcc}}}\\int f_{\\bm x}"]
+				,MaTeX["\\textstyle\\frac{1}{V_{\\Lambda_{\\rm fcc}}}\\int f_{\\bm x}"]
+				},{0.7,0.8}
+			]
+			,PlotLabel->MaTeX["\\bm x=(x,0,1/2)"]
+			,PlotRange->{{-.35,10.35},{-5,105}}
+			,PlotStyle->{Black,Blue}
+			,FrameLabel->{MaTeX@"x",MaTeX@"f_{\\bm x}(\\bm z)=\\frac{e^{-\\pi|\\bm z|^2/100}}{|\\bm z-\\bm x|^{5/2}}"}
+			,ImageSize->360
+		]
+		,ListPlot[
+			Sum3DTab
+			,PlotStyle->Red
+			,PlotLegends->Placed[{MaTeX["\\textstyle\\sum_{\\Lambda_{\\rm fcc}}f_{\\bm x}"]},{0.2,0.2}]
+		]
+	]
+	,ListLogPlot[
+		errs
+		,PlotTheme->"Scientific"
+		,PlotLabel->MaTeX["\\mathcal D^{(\\ell)}_{\\Lambda_{\\rm fcc}}g(x,0,1/2)"]
+		,FrameLabel->{MaTeX@"x",MaTeX@"E"}
+		,PlotLegends->Table[MaTeX["\\ell="<>ToString[\[ScriptL]]],{\[ScriptL],0,6}]
+		,PlotRange->All
+		,ImageSize->400
+	]
+	}
+	,ImageSize->1000
+]
+
+
+(* ::Subsection:: *)
+(*Display*)
+
+
+(* ::Text:: *)
+(*Singular Euler-Maclaurin expansion for the Gaussian and the fcc lattice (left) and its error for different order (right).*)
 
 
 plt
