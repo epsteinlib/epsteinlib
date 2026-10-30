@@ -374,6 +374,7 @@ In the `examples/mathematica/` folder, you can find two more mathematica example
 
 1. `SingularEulerMcLaurinExpansion2D.wls`: This script showcases the multidimensional Singular Euler-Maclaurin (SEM) expansion [5] for a Gaussian function in 2D.
 2. `IMAFigures.wls`: This script  reproduces every figure in [8].
+3. `AnisoReplicated`: This script reproduces all numerical results in [9].
 
 ## Development environment
 We provide a nix devshell to have a reproducible development environment with the same dependencies across different operating systems. Once you have installed and configured nix, starting developing is as easy as running `nix develop`.
@@ -461,3 +462,5 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 [7] Andreas A. Buchheit, Torsten Keßler, and Kirill Serkh. "On the computation of lattice sums without translational invariance". Mathematics of Computation 94 (2025), pp. 2533-2574.
 
 [8] Andreas A. Buchheit, Jonathan K. Busse, and Ruben Gutendorf. "Computation and properties of the Epstein zeta function with applications to quantum systems". IMA Journal of Numerical Analysis (2026), drag057.
+
+[9] Andreas A. Buchheit and Jonathan K. Hartlaub. "Computation of anisotropic singular sums from high-order derivatives of Epstein zeta functions". arXiv preprint arXiv:2609.28282, 2026.
